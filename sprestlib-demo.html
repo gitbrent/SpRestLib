@@ -129,7 +129,7 @@
 					Active_x003f_: true
 				},
 				onDone: function(data){ alert('insert done! new id = '+data.id); },
-				onFail: function(msg){ console.error('ERROR: '+msg); }
+				onFail: function(mesg){ console.error('ERROR: '+mesg); }
 			});
 		}
 
@@ -137,7 +137,7 @@
 			sprLib.model('Employees').syncItem({
 				id      : $('#itemId').val(),
 				jsonData: sprLib.model('Employees').parseForm('formUpdate').jsonSpData,
-				onFail  : function(msg){ console.error('doUpdateTest: '+msg); },
+				onFail  : function(mesg){ console.error('doUpdateTest: '+mesg); },
 				onDone  : function(data){ console.log('doUpdateTest done'); }
 			});
 		}
@@ -185,7 +185,7 @@
 				},
 				queryLimit: "10",
 				onExec: function(){ console.log('Employees onExec...'); },
-				onDone: function(data){ console.log('Employees onDone!'); }
+				onDone: function(data){ console.log('Employees onDone! Data length:'+data.length); }
 				//,onFail: function(msg){ console.error('ERROR:'+msg); }
 				// TEST: ^^^ no onFail callback provided ^^^
 			});

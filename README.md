@@ -1,12 +1,11 @@
 [![Open Source Love](https://badges.frapsoft.com/os/v1/open-source.svg?v=103)](https://github.com/ellerbrock/open-source-badge/) [![MIT Licence](https://badges.frapsoft.com/os/mit/mit.svg?v=103)](https://opensource.org/licenses/mit-license.php)
 # SpRestLib
-JavaScript SharePoint REST Library: A lightweight, powerful library for SharePoint developers.
+###JavaScript SharePoint REST Library
 
-Stop cutting-and-pasting the same REST code!
+jQuery library for SharePoint web services
 
-Features:
 * Does the grunt work for you.  E.g.: Gets the current user in one line of code
-* Perform CRUD operations with a few lines of code
+* Perform ad-hoc List/Library CRUD operations with a few lines of code
 * Fills, parses and provides one-way data binding to SP Lists
 
 Supported Environments:
@@ -21,11 +20,11 @@ Features:
 * Standards-compliant:
  * Uses vanilla JavaScript for AJAX/REST calls (no JSOM or CSOM code is used)
 * Robust:
- * Reads List column metadata from SharePoint so you don't spend time managing metadata
+ * Reads List column metadata from SharePoint so you don't spend time defining/maintaining fields
  * Automatically retries failed requests
- * Detects expired sessions and will automatically request a new token asynchronously
+ * Detects expired form digest/session tokens, requests a new token asynchronously, then continues the original operation.
 * Built for SharePoint:
- * SharePoint-specific error handling
+ * Built to detect and handle common SharePoint-specific authentication errors
 
 **************************************************************************************************
 # Installation
@@ -41,16 +40,39 @@ SpRestLib requires only one additional JavaScript library to function.
 Get the current user (Id, Name and Email)
 NOTE: Uses the basic SP User service, not the Enterprise-licensed User Profile, so the Library can be used in any environment.
 
+## Current User / Current User Groups
 ```javascript
 sprLib.getCurrUser({
-	onDone: function(data){
-		console.log(data.Id +"/"+ data.Title +"/"+ data.Email);
-	}
+	onDone: function(data){ console.log(data.Id +" - "+ data.Title +" - "+ data.Email); }
 });
 ```
 
+## Ad-hoc CRUD
+```javascript
+sprLib.insertItem({
+	objName: 'Employees',
+	jsonData: {
+		__metadata: { type:"SP.Data."+ 'Employees' +"ListItem" },
+		Name: 'Mr. SP REST Library',
+		Badge_x0020_Number: 123,
+		Hire_x0020_Date: new Date(),
+		Salary: 12345.49,
+		Active_x003f_: true
+	},
+	onDone: function(data){ alert('insert done! new id = '+data.id); },
+	onFail: function(mesg){ console.error('ERROR: '+mesg); }
+});
+```
 
-
+## Form Population
+Populate a &lt;select&gt; form element with "name"/"id" (option text/value) of all items in the `Employees` List:
+```html
+<select id="selEmployees" data-bind='{"foreach":{"model":"Employees", "text":"name", "value":"id"}}'></select>
+```
+```html
+<input type="text" data-bind='{"col":"name"}'>
+<input type="text" data-bind='{"text":{"model":"Employees", "cols":["badgeNum"]}}'>
+```
 
 
 
@@ -59,6 +81,11 @@ sprLib.getCurrUser({
 # Bugs & Issues
 
 When reporting bugs or issues, if you could include a link to a simple jsbin or similar demonstrating the issue, that'd be really helpful.
+
+**************************************************************************************************
+# License
+
+Built in the spirit of SPServices by [Marc D Anderson](http://sympmarc.com/).
 
 **************************************************************************************************
 # License

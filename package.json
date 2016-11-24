@@ -1,0 +1,31 @@
+{
+    "name": "sprestlib",
+    "version": "0.9.0",
+    "description": "JavaScript SharePoint REST Library",
+    "main": "sprestlib.js",
+    "directories": {
+        "example": "examples"
+    },
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/gitbrent/SpRestLib.git"
+    },
+    "keywords": [
+        "sharepoint",
+		"rest",
+        "sp2013",
+        "sp2016"
+    ],
+    "author": "gitbrent",
+    "license": "MIT",
+    "bugs": {
+        "url": "https://github.com/gitbrent/SpRestLib/issues"
+    },
+    "homepage": "http://gitbrent.github.io/SpRestLib/",
+    "dependencies": {
+        "jquery": "^3.1.0"
+    }
+}
