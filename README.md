@@ -4,29 +4,20 @@
 ## SpRestLib is a jQuery library for SharePoint web services
 
 ### Main Features:
-#### REST Easy
-* Perform SharePoint List/Library CRUD operations with a single function call using a simple object
-
-#### SP One-Liners
-* Reduces common web service calls to a single line (e.g.: Get Current User)
-* Stop using the same 20 lines of code for trivial tasks like getting the current user or populating a select element!
-
-#### Form Binding
-* Populates, parses and provides one-way data-binding on form input elements
+* **REST Easy:** Perform SharePoint List/Library CRUD operations with a single function call using a simple object
+* **SP One-Liners:** Reduces common web service calls to a single line (e.g.: Get Current User)
+* **Form Binding:** Populates, parses and provides one-way data-binding on form input elements
 
 ### Library Design:
-* Modern:
- * Uses the newest SharePoint 2013 APIs (not those old 2010 ListData.svc web services)
-* Lightweight:
- * Small (27kb minified), but feature-rich
- * List interfaces are described using simple javascript objects
-* Standards-compliant:
- * Pure JavaScript REST calls: No JSOM or CSOM library code is used
+* Modern: Uses the newest SharePoint 2013 APIs
+* Lightweight: Small (27kb minified), but feature-rich
+* Standards-Compliant: Pure JavaScript REST calls: No JSOM or CSOM library code is used
 * Robust:
  * Reads List column metadata from SharePoint so you don't spend time defining/maintaining fields
  * Automatically retries failed requests
  * Detects expired form digest/session tokens, requests a new token asynchronously, then continues the original operation.
 * Built for SharePoint:
+ * List interfaces are described using simple javascript objects
  * Built to detect and handle common SharePoint-specific authentication errors
 
 ### Additional Features:
