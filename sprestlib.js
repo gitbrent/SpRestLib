@@ -57,7 +57,7 @@ sprLib.model('Res').add({
 	var DEBUG = false;
 	// APP VERSION/BUILD
 	var APP_VER = "0.9.0";
-	var APP_BLD = "20161028";
+	var APP_BLD = "20161124";
 	// APP FUNCTIONALITY
 	var APP_FILTEROPS = {
 		"eq" : "==",
@@ -683,7 +683,7 @@ sprLib.model('Res').add({
 		var jsonAjaxData = inObj.jsonData;
 
 		// FIRST: REALITY-CHECK
-		if (DEBUG) { console.log('doSyncListItem:'); console.log(inModel); console.table(inObj); }
+		if (DEBUG) { console.log('doSyncListItem:'); console.log(inModel); console.log(inObj); }
 		if ( !Object.keys(inModel.spObjData).length || !Object.keys(inModel.spObjMeta).length ) {
 			var strErr = "ERROR: Model has not been initialied yet (it's data/meta are empty).";
 			( inObj.onFail ) ? inObj.onFail(strErr) : console.error(strErr);

@@ -1,30 +1,39 @@
 [![Open Source Love](https://badges.frapsoft.com/os/v1/open-source.svg?v=103)](https://github.com/ellerbrock/open-source-badge/) [![MIT Licence](https://badges.frapsoft.com/os/mit/mit.svg?v=103)](https://opensource.org/licenses/mit-license.php)
-# SpRestLib
-###JavaScript SharePoint REST Library
+# Introduction
 
-jQuery library for SharePoint web services
+## SpRestLib is a jQuery library for SharePoint web services
 
-* Does the grunt work for you.  E.g.: Gets the current user in one line of code
-* Perform ad-hoc List/Library CRUD operations with a few lines of code
-* Fills, parses and provides one-way data binding to SP Lists
+### Main Features:
+* #### REST Easy
+ * Perform SharePoint List/Library CRUD operations with a single function call using a simple object
+* #### SP One-Liners
+ * Reduces common web service calls to a single line (e.g.: Get Current User)
+ * Stop using the same 20 lines of code for trivial tasks like getting the current user or populating a select element!
+* #### Form Binding
+ * Populates, parses and provides one-way data-binding on form input elements
 
-Supported Environments:
-* SharePoint 2013-2016 on-prem and O365-hosted (SP2013 and SP2016)
-
-Features:
+### Library Design:
 * Modern:
- * Uses the newest REST API calls (not the old SP2010 web services)
+ * Uses the newest SharePoint 2013 APIs (not those old 2010 ListData.svc web services)
 * Lightweight:
- * Small, but feature-rich
+ * Small (27kb minified), but feature-rich
  * List interfaces are described using simple javascript objects
 * Standards-compliant:
- * Uses vanilla JavaScript for AJAX/REST calls (no JSOM or CSOM code is used)
+ * Pure JavaScript REST calls: No JSOM or CSOM library code is used
 * Robust:
  * Reads List column metadata from SharePoint so you don't spend time defining/maintaining fields
  * Automatically retries failed requests
  * Detects expired form digest/session tokens, requests a new token asynchronously, then continues the original operation.
 * Built for SharePoint:
  * Built to detect and handle common SharePoint-specific authentication errors
+
+### Additional Features:
+* Bind form elements to your SharePoint DataModel using data-bind declarative binding
+* Populate form elements using data-bind declarative binding system like Knockout (or AngluarJS)
+
+### Supported Environments:
+* SharePoint 2013 and 2016 (SP2013-SP2016): On-prem and O365-hosted
+* Enterprise-license not required
 
 **************************************************************************************************
 # Installation
@@ -47,6 +56,11 @@ sprLib.getCurrUser({
 });
 ```
 
+## HTML Form Functions:
+```javascript
+doParseFormFieldsIntoJson(inModel,inEleId);
+```
+
 ## Ad-hoc CRUD
 ```javascript
 sprLib.insertItem({
@@ -62,6 +76,11 @@ sprLib.insertItem({
 	onDone: function(data){ alert('insert done! new id = '+data.id); },
 	onFail: function(mesg){ console.error('ERROR: '+mesg); }
 });
+```
+
+## One-Way Data Binding
+```javascript
+doSyncListItem(inModel, inObj);
 ```
 
 ## Form Population
@@ -83,7 +102,7 @@ Populate a &lt;select&gt; form element with "name"/"id" (option text/value) of a
 When reporting bugs or issues, if you could include a link to a simple jsbin or similar demonstrating the issue, that'd be really helpful.
 
 **************************************************************************************************
-# License
+# Special Thanks
 
 Built in the spirit of SPServices by [Marc D Anderson](http://sympmarc.com/).
 
