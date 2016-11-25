@@ -12,12 +12,10 @@
 * Modern: Uses the newest SharePoint 2013 APIs
 * Lightweight: Small (27kb minified), but feature-rich
 * Standards-Compliant: Pure JavaScript REST calls: No JSOM or CSOM library code is used
-* Robust:
- * Reads List column metadata from SharePoint so you don't spend time defining/maintaining fields
- * Automatically retries failed requests
- * Detects expired form digest/session tokens, requests a new token asynchronously, then continues the original operation.
+* Robust: Automatically retries failed requests and handles expired form digest/session tokens
 * Built for SharePoint:
  * List interfaces are described using simple javascript objects
+ * Reads List column metadata from SharePoint so you don't spend time defining/maintaining fields
  * Built to detect and handle common SharePoint-specific authentication errors
 
 ### Additional Features:
@@ -30,24 +28,36 @@
 
 **************************************************************************************************
 # Installation
-SpRestLib requires only one additional JavaScript library to function.
+SpRestLib requires only one additional JavaScript library to function:
 ```javascript
-<script lang="javascript" src="js/SpRestLib/jquery.min.js"></script>
-<script lang="javascript" src="js/SpRestLib/sprestlib.js"></script>
+<script lang="javascript" src="SpRestLib/libs/jquery.min.js"></script>
+<script lang="javascript" src="SpRestLib/sprestlib.js"></script>
 ```
 
 **************************************************************************************************
 # Functionality
 
-Get the current user (Id, Name and Email)
-NOTE: Uses the basic SP User service, not the Enterprise-licensed User Profile, so the Library can be used in any environment.
-
-## Current User / Current User Groups
+### Current User
+Get the current user Id, Name and Email
+NOTE: Uses the basic SP User service - not the Enterprise-licensed User Profile service).
 ```javascript
 sprLib.getCurrUser({
-	onDone: function(data){ console.log(data.Id +" - "+ data.Title +" - "+ data.Email); }
+	onDone: function(data){ console.log("Id:" + data.Id +", Title:"+ data.Title +", Email:"+ data.Email); }
 });
+
+Id:7, Title:Brent Ely, Email:brente@mysite.onmicrosoft.com
 ```
+
+### Current User Groups
+```javascript
+sprLib.getCurrUserGroups({
+	onDone: function(data){ console.log("Current User Groups: " + data.toString()); }
+});
+
+Current User Groups: Dev Site Owners, Site Owners
+```
+
+
 
 ## HTML Form Functions:
 ```javascript
