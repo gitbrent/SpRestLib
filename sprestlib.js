@@ -40,13 +40,14 @@ FUTURE:
 */
 
 /*
-SYNTAX:
+EX: Form Binding:
 <table data-bind='{ "foreach": {"model":"Reqs", "filter":{"col":"completed", "op":"eq", "val":false}}, "options":{"showBusySpinner":true} }'>
 
-EX:
+EX: Ad-hoc API calls
+EX: API calls using CAML
 sprLib.model('Res').add({
-	ajaxType: 'post',
 	ajaxAuth: true,
+	ajaxType: 'post',
 	objName: '_api/web/Lists/GetByTitle(\'All Resources\')/GetItems(query=@v1)?@v1={"ViewXml":"<View><Query><Where><IsNull><FieldRef Name=\'Status\' /></IsNull></Where></Query></View>"}',
 	[...]
 });
@@ -57,7 +58,7 @@ sprLib.model('Res').add({
 	var DEBUG = false;
 	// APP VERSION/BUILD
 	var APP_VER = "0.9.0";
-	var APP_BLD = "20161124";
+	var APP_BLD = "20161129";
 	// APP FUNCTIONALITY
 	var APP_FILTEROPS = {
 		"eq" : "==",
@@ -250,6 +251,9 @@ sprLib.model('Res').add({
 			// D: Add filter (if any)
 			if ( inSyncObj && inSyncObj.id ) strAjaxUrl += '&$filter=Id%20eq%20' + inSyncObj.id;
 			else if ( inModel.ajaxFilter ) strAjaxUrl += '&$filter=' + ( inModel.ajaxFilter.indexOf('%') == -1 ? encodeURI(inModel.ajaxFilter) : inModel.ajaxFilter );
+
+			// E: Add orderby (if any)
+			if ( inModel.ajaxOrderby ) strAjaxUrl += '&$orderby=' + inModel.ajaxOrderby;
 		}
 
 		// STEP 4: Fetch data from SP
@@ -427,8 +431,6 @@ sprLib.model('Res').add({
 						// A:
 						if ( !bindJSON[bindOper].text || !bindJSON[bindOper].value ) { var strErr = '<select> foreach requires both "text" and "value" fields!'; console.error(strErr); return; }
 						// B:
-						$(tag).empty();
-						// C:
 						$.each(inModel.spObjData, function(i,row){ $(tag).append('<option value="'+ row[bindJSON[bindOper].value] +'">'+ row[bindJSON[bindOper].text] +'</option>'); });
 					}
 					else if ( $(tag).is('table') || $(tag).is('tbody') ) {
