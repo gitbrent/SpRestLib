@@ -37,6 +37,8 @@ SpRestLib requires only one additional JavaScript library to function:
 **************************************************************************************************
 # Functionality
 
+## Users / Groups
+
 ### Current User
 Get the current user Id, Name and Email
 NOTE: Uses the basic SP User service - not the Enterprise-licensed User Profile service).
@@ -44,8 +46,7 @@ NOTE: Uses the basic SP User service - not the Enterprise-licensed User Profile 
 sprLib.getCurrUser({
 	onDone: function(data){ console.log("Id:" + data.Id +", Title:"+ data.Title +", Email:"+ data.Email); }
 });
-
-Id:7, Title:Brent Ely, Email:brente@mysite.onmicrosoft.com
+RESULT: Id:7, Title:Brent Ely, Email:brent@site.onmicrosoft.com
 ```
 
 ### Current User Groups
@@ -53,8 +54,16 @@ Id:7, Title:Brent Ely, Email:brente@mysite.onmicrosoft.com
 sprLib.getCurrUserGroups({
 	onDone: function(data){ console.log("Current User Groups: " + data.toString()); }
 });
+RESULT: Current User Groups: Dev Site Owners, Site Owners
+```
 
-Current User Groups: Dev Site Owners, Site Owners
+### User Info (by ID)
+```javascript
+sprLib.getUserInfo({
+	userId: 9,
+	onDone: function(data){ console.log("Title:" + data.Title + ", Email:"+ data.Email); }
+});
+RESULT: Title:Brent Ely, Email:brent@site.onmicrosoft.com
 ```
 
 
@@ -99,8 +108,30 @@ Populate a &lt;select&gt; form element with "name"/"id" (option text/value) of a
 
 
 
+
 **************************************************************************************************
-# Bugs & Issues
+# Tips &amp; Tricks
+
+You can chain asynchronous calls by placing subsequent SpRestLib calls inside the parent done function.
+
+Example:
+```javascript
+sprLib.getCurrUser({
+	onDone: function(data){
+		sprLib.getUserInfo({
+			userId: data.Id,
+			onDone: function(data){
+				console.log("Silly example, but it shows how to solve the async wait issue!");
+			}
+		});
+	}
+});
+```
+
+**************************************************************************************************
+# Issues / Suggestions
+
+Please file issues or suggestions on the [issues page on github](https://github.com/gitbrent/SpRestLib/issues/new), or even better, [submit a pull request](https://github.com/gitbrent/SpRestLib/pulls)!
 
 When reporting bugs or issues, if you could include a link to a simple jsbin or similar demonstrating the issue, that'd be really helpful.
 
@@ -112,12 +143,6 @@ Built in the spirit of SPServices by [Marc D Anderson](http://sympmarc.com/).
 **************************************************************************************************
 # License
 
-[MIT License](http://opensource.org/licenses/MIT)
+Copyright &copy; 2016-2017 [Brent Ely](https://github.com/gitbrent/SpRestLib)
 
-Copyright (c) 2015-2016 Brent Ely, [https://github.com/GitBrent/SpRestLib](https://github.com/GitBrent/SpRestLib)
-
-Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+[MIT](https://github.com/gitbrent/SpRestLib/blob/master/LICENSE)

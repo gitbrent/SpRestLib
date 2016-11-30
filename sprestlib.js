@@ -54,7 +54,7 @@ sprLib.model('Res').add({
 */
 
 (function(){
-	// DEBUG (aka:verbose mode - lots of console logs/tables)
+	// DEBUG (aka:verbose mode - lots of logging)
 	var DEBUG = false;
 	// APP VERSION/BUILD
 	var APP_VER = "0.9.0";
@@ -1048,8 +1048,12 @@ sprLib.model('Res').add({
 	}
 
 	/**
-	* Get user data for a given ID
-	sprLib.getUserInfo({ userId:1001, onDone: function(data){ console.log(data.Title +" / "+ data.Email); } });
+	* Get user info (by ID)
+	* EX:
+		sprLib.getUserInfo({
+			userId: 1001,
+			onDone: function(data){ console.log(data.Title +" / "+ data.Email); }
+		});
 	*/
 	sprLib.getUserInfo = function getUserInfo(inObj) {
 		doGetUserInfo(inObj);
