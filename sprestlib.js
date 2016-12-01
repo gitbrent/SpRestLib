@@ -58,7 +58,7 @@ sprLib.model('Res').add({
 	var DEBUG = false;
 	// APP VERSION/BUILD
 	var APP_VER = "0.9.0";
-	var APP_BLD = "20161129";
+	var APP_BLD = "20161130";
 	// APP FUNCTIONALITY
 	var APP_FILTEROPS = {
 		"eq" : "==",
@@ -312,17 +312,14 @@ sprLib.model('Res').add({
 		// TODO: doLoadListAppendText()
 		// TODO-DONE: capture LIST GUID duyring metadata for use with AppendText -- DONE!!! its in __metadata (id:"65528d90-8295-4491-adad-09f7c0a9f652") .replace(/\-/g, '%2D')
 		/*
-		var strAjaxUrl = "/sites/gts/_vti_bin/owssvr.dll?Cmd=Display&List=" + "%7B"+"A7ABA02E%2DFAB6%2D4925%2D820C%2D833A32BC231E"+"%7D" + "&XMLDATA=TRUE&IncludeVersions=TRUE"
-						+ '&Query=ID'+'%20'+'Start_x0020_Date'+'%20'+ "&SortField=Modified&SortDir=ASC";
-
+		var strAjaxUrl = "/sites/dev/_vti_bin/owssvr.dll?Cmd=Display&List="
+			+ "%7B"+"LUID"+"%7D" + "&XMLDATA=TRUE&IncludeVersions=TRUE"
+			+ '&Query=ID'+'%20'+'Start_x0020_Date'+'%20'+ "&SortField=Modified&SortDir=ASC";
 		// STEP 1: Query SP
 		$.ajax({ url:strAjaxUrl })
-		.done(function(data,textStatus) {
+		.done(function(data,textStatus){
 			$(data).find("z\\:row, row").each(function(){
-				if ( $(this).attr('ows_Critical_x0020_Issues') ) objCurr.CritIssues    = bdeLib.htmlToText( $(this).attr("ows_Critical_x0020_Issues") );
-
-				console.log($('<p>test</p>').text());
-				// ^^^ use this to string HTML!!!!!
+				objCurr.StartDate = ( $(this).attr("ows_Critical_x0020_Issues") || '');
 			)};
 		)};
 		*/
