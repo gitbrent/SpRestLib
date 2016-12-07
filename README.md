@@ -1,30 +1,30 @@
 [![Open Source Love](https://badges.frapsoft.com/os/v1/open-source.svg?v=103)](https://github.com/ellerbrock/open-source-badge/) [![MIT Licence](https://badges.frapsoft.com/os/mit/mit.svg?v=103)](https://opensource.org/licenses/mit-license.php)
 # Introduction
 
-## SpRestLib is a jQuery library for SharePoint web services
+## SpRestLib is a client-side jQuery JavaScript library for SharePoint web services
 
 ### Main Features:
 * **REST Easy:** Perform SharePoint List/Library CRUD operations with a single function call using a simple object
 * **SP One-Liners:** Reduces common web service calls to a single line (e.g.: Get Current User)
 * **Form Binding:** Populates, parses and provides one-way data-binding on form input elements
 
-### Library Design:
-* Modern: Uses the newest SharePoint 2013 APIs
-* Lightweight: Small (27kb minified), but feature-rich
-* Standards-Compliant: Pure JavaScript REST calls: No JSOM or CSOM library code is used
-* Robust: Automatically retries failed requests and handles expired form digest/session tokens
-* Built for SharePoint:
- * List interfaces are described using simple javascript objects
- * Reads List column metadata from SharePoint so you don't spend time defining/maintaining fields
- * Built to detect and handle common SharePoint-specific authentication errors
-
 ### Additional Features:
 * Bind form elements to your SharePoint DataModel using data-bind declarative binding
-* Populate form elements using data-bind declarative binding system like Knockout (or AngluarJS)
+* Populate form elements using data-bind declarative binding system like Knockout or AngluarJS
+
+### Library Design:
+* Modern: Built for [SharePoint 2013 API](https://msdn.microsoft.com/en-us/library/office/jj860569.aspx) / [OData v3](http://www.odata.org/documentation/odata-version-3-0/)
+* Lightweight: Small but feature-rich (~30kb minified)
+* Simple: Pure JavaScript REST calls (no JSOM or CSOM)
+* Robust: Handles network issues by retrying failed requests and handles expired form digest/session tokens
+* Built for SharePoint:
+ * List CRUD interfaces are described using simple javascript objects
+ * List column metadata (datatype lookup expansion, etc.) is read automatically from SharePoint and managed for you
+ * Built to detect and handle common SharePoint-specific authentication, expiration and other errors
 
 ### Supported Environments:
-* SharePoint 2013 and 2016 (SP2013-SP2016): On-prem and O365-hosted
-* Enterprise-license not required
+* SharePoint Online (O365), SharePoint 2013 (SP2013), SharePoint 2016 (SP2016)
+* Note: Enterprise license not required
 
 **************************************************************************************************
 # Installation

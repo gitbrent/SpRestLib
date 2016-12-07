@@ -58,7 +58,7 @@ sprLib.model('Res').add({
 	var DEBUG = false;
 	// APP VERSION/BUILD
 	var APP_VER = "0.9.0";
-	var APP_BLD = "20161130";
+	var APP_BLD = "20161206";
 	// APP FUNCTIONALITY
 	var APP_FILTEROPS = {
 		"eq" : "==",
@@ -127,15 +127,13 @@ sprLib.model('Res').add({
 		return APP_OPTS.currencyChar + s + (j ? i.substr(0, j) + t : "") + i.substr(j).replace(/(\d{3})(?=\d)/g, "$1" + t) + (c ? d + Math.abs(n - i).toFixed(c).slice(2) : "");
 	}
 
-	function formatDate(inStrDate, inType) {
+	function formatDate(inDate, inType) {
 		var MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 
 		// REALITY-CHECK:
-		if ( inStrDate == null ) return '';
+		if ( !inDate ) return '';
 
-		var dtcomps = inStrDate.replace(/\D/g," ").split(" ");
-		dtcomps[1]--;
-		var dateLocal = new Date(Date.UTC(dtcomps[0],dtcomps[1],dtcomps[2],dtcomps[3],dtcomps[4],dtcomps[5]));
+		var dateLocal = new Date(inDate);
 		dateMM = dateLocal.getMonth() + 1; dateDD = dateLocal.getDate(); dateYY = dateLocal.getFullYear();
 		h = dateLocal.getHours(); m = dateLocal.getMinutes(); s = dateLocal.getSeconds();
 		//
@@ -191,7 +189,8 @@ sprLib.model('Res').add({
 			$.each(data.d.Fields.results, function(i,result){
 				// TODO-1.0: handle 'Account/Title' etc.
 				$.each(inModel.objCols, function(key,col){
-					if ( col.dataName.split('/')[0] == result.InternalName ) {
+					// DESIGN: col.dataName is *optional*
+					if ( col.dataName && col.dataName.split('/')[0] == result.InternalName ) {
 						inModel.objCols[key].dataType = result.TypeAsString;
 						inModel.objCols[key].dispName = ( inModel.objCols[key].dispName || result.Title );
 						inModel.objCols[key].isAppend = ( result.AppendOnly || false );
@@ -263,6 +262,7 @@ sprLib.model('Res').add({
 			cache: false,
 			headers: { "Accept":"application/json; odata=verbose" }
 		};
+		// TODO: QUESTION: Shouldnt we always include auth??? (20161205)
 		if ( inModel.ajaxAuth ) objAjax.headers["X-RequestDigest"] = $("#__REQUESTDIGEST").val();
 		$.ajax(objAjax)
 		.done(function(data,textStatus){
@@ -277,12 +277,22 @@ sprLib.model('Res').add({
 					$.each(inModel.objCols, function(key,col){
 						var arrCol = col.dataName.replace(/\//gi,'.').split('.');
 						var colVal = ( arrCol.length > 1 ? result[arrCol[0]][arrCol[1]] : result[arrCol[0]] );
+						// DESIGN: Not all values can be taken at return value - things like dates have to be turned into actual Date objects
+						if ( col.dataType == 'DateTime' ) {
+							objRow[key] = new Date(colVal);
+						}
+						else if ( col.isNumPct ) {
+							objRow[key] = (colVal * 100);
+						}
+						else {
+							objRow[key] = ( APP_OPTS.cleanColHtml && col.listDataType == 'string' ? colVal.replace(/<div(.|\n)*?>/gi,'').replace(/<\/div>/gi,'') : colVal );
+						}
 						// TODO-1.0: ^^ results like 'Account/Title' will be created above (!)
-						objRow[key] = ( APP_OPTS.cleanColHtml && col.listDataType == 'string' ? colVal.replace(/<div(.|\n)*?>/gi,'').replace(/<\/div>/gi,'') : colVal );
 					});
 				}
 
 				// B: Store result JSON data and metadata
+				inModel.spArrData.push( objRow );
 				if ( result.Id ) {
 					inModel.spObjData[result.Id] = objRow;
 					inModel.spObjMeta[result.Id] = ( result.__metadata || {} );
@@ -466,7 +476,7 @@ sprLib.model('Res').add({
 
 							// B: Add cells to new row
 							$.each(row, function(key,val){
-								// TODO: HELP: how do use these "op" lookups in an actual if? (eval?)
+								// TODO: HELP: howto use these "op" lookups in an actual if? (eval?)
 								// FIX: Filtering
 								// "filter": {"col":"active", "op":"eq", "val":false}} }
 
@@ -528,8 +538,13 @@ sprLib.model('Res').add({
 			}
 		});
 
-		// LAST: Callback function
-		if ( inModel.onDone ) inModel.onDone(inModel.spObjData);
+		// LAST: Done!
+		doDoneCallback(inModel);
+	}
+
+	// STEP 5: Fire onDone callback to return {data}
+	function doDoneCallback(inModel) {
+		if ( inModel.onDone ) inModel.onDone( inModel.data() );
 	}
 
 	// ==================================================================================================================
@@ -877,6 +892,19 @@ sprLib.model('Res').add({
 	this.sprLib = {};
 
 	// OPTIONS
+
+	/**
+	* Getter/Setter for the app option APP_OPTS.baseUrl (our _api call base)
+	*
+	* @example
+	* // Set baseUrl
+	* sprLib.baseUrl('/sites/devtest');
+	* // Get baseUrl - returns '/sites/devtest'
+	* sprLib.baseUrl();
+	*
+	* @param {string} inStrDate - URL to use as the root of API calls
+	* @return {string} Return value of APP_OPTS.baseUrl
+	*/
 	sprLib.baseUrl = function setBaseUrl(inStr) {
 		// CASE 1: Act as a GETTER when no value passed
 		if ( typeof inStr !== 'string' || inStr == '' || !inStr ) return APP_OPTS.baseUrl;
@@ -886,8 +914,10 @@ sprLib.model('Res').add({
 		if (DEBUG) console.log('APP_OPTS.baseUrl set to: '+inStr);
 	}
 
+	// MAIN INIT METHOD
+
 	/**
-	* Data-Model and assciated functions
+	* Data-Model and associated functions
 	*/
 	sprLib.model = function model(inName) {
 		// FIRST: REALITY-CHECK:
@@ -899,8 +929,9 @@ sprLib.model('Res').add({
 			var objNew = {
 				modelName: inName,
 				retryCnt : 0,
-				spObjData: {},
-				spObjMeta: {}
+				spObjMeta: {},
+				spArrData: [],
+				spObjData: {}
 			};
 
 			// B: Attach Model methods
@@ -918,11 +949,14 @@ sprLib.model('Res').add({
 				// B: Gather/Populate data
 				doLoadListMetadata( objNew );
 			};
-			objNew.data = function data(){
-				return APP_MODELS[inName].spObjData;
+			objNew.data = function data(inStrType){
+				if      ( inStrType == 'a' || inStrType == 'arr' || inStrType == 'array'  ) return $.extend(true, [], APP_MODELS[inName].spArrData);
+				else if ( inStrType == 'o' || inStrType == 'obj' || inStrType == 'object' ) return $.extend(true, {}, APP_MODELS[inName].spObjData);
+
+				return $.extend(true, [], APP_MODELS[inName].spArrData);
 			}
 			objNew.meta = function meta(){
-				return APP_MODELS[inName].spObjMeta;
+				return $.extend(true, {}, APP_MODELS[inName].spObjMeta);
 			}
 			objNew.parseForm = function parseForm(inEleName){
 				return doParseFormFieldsIntoJson( objNew, inEleName );
@@ -959,19 +993,33 @@ sprLib.model('Res').add({
 		return APP_MODELS[inName];
 	};
 
+	// LIST CRUD METHODS
+
 	/**
-	* Insert a new item into SP List/Library
-		sprLib.insertItem({
-			objName: "Employees",
-			jsonData: {
-				__metadata: { type:"SP.Data.EmployeesListItem" },
-				Name      : 'Marty McFly',
-				HireDate  : new Date()
-			},
-			onDone: function(data){ alert('insert done! new id = ' + data.Id); },
-			onFail: function(mesg){ console.error(mesg); }
-		});
- 	*/
+    * Insert a new item into SP List/Library
+	*
+	* @example
+	* sprLib.insertItem({
+	*   objName: "Employees",
+	*   jsonData: {
+	* 	  __metadata: { type:"SP.Data.EmployeesListItem" },
+	* 	  Full_x0020_Name: 'Marty McFly',
+	* 	  Hire_x0020_Date: new Date()
+	*   },
+	*   onExec: function(){ console.log('Here we go...'); },
+	*   onDone: function(data){ alert('insert done! new id = ' + data.Id); },
+	*   onFail: function(mesg){ console.error(mesg); }
+	* });
+	*
+	* @param {object} inObj - The item to insert, in regular SharePoint JSON format
+	*                 Parameters:
+	*                 @param objName {string} (required)
+	*                 @param jsonData {object} (required) - col name/value key pairs
+	*                 @param onExec {function} - callback function for start of operation
+	*                 @param onDone {function} - callback function for completion of operation (returns data)
+	*                 @param onFail {function} - callback function for operation failure (returns parsed error message)
+	* @return {object} Return newly created item in JSON format (return the data result from SharePoint).
+	*/
 	sprLib.insertItem = function insertItem(inObj) {
 		// STEP 1: REALITY-CHECK:
 		if ( !inObj.objName || !inObj.jsonData ) {
@@ -988,19 +1036,24 @@ sprLib.model('Res').add({
 	};
 
 	/**
-	* Update an item in a SP List/Library
-		sprLib.updateItem({
-			objName: "Employees",
-			jsonData: {
-				__metadata: { type:"SP.Data.EmployeesListItem", etag:1 },
-				Id      : 99,
-				Name    : 'Marty McFly',
-				FireDate: new Date()
-			},
-			onFail: function(mesg){ console.error(mesg); },
-			onDone: function(data){ alert('update done for Id: ' + data.Id); }
-		});
- 	*/
+	* Update an existing item in a SP List/Library
+	*
+	* @example
+	* sprLib.updateItem({
+	* 	objName: "Employees",
+	* 	jsonData: {
+	* 		__metadata: { type:"SP.Data.EmployeesListItem", etag:1 },
+	* 		Id: 1001,
+	* 		Full_x0020_Name: 'Marty McFly',
+	* 		Hire_x0020_Date: new Date()
+	* 	},
+	* 	onDone: function(data){ alert('insert done! new id = ' + data.Id); },
+	* 	onFail: function(mesg){ console.error(mesg); }
+	* });
+	*
+	* @param {object} inObj - The item to update, in regular SharePoint JSON format
+	* @return {object} Return newly created item in JSON format (return the data result from SharePoint).
+	*/
 	sprLib.updateItem = function updateItem(inObj) {
 		inObj.retryCnt = 0;
 		doUpdateListItem( inObj );
@@ -1024,6 +1077,14 @@ sprLib.model('Res').add({
 		//doDeleteListItem( inObj );
 		// TODO:
 	};
+
+	// LIST API METHODS
+
+	// TODO: function that returns all the keys that SP provides for:
+	// ../_api/web/GetByTitle
+	// https://www.sharepoint.com/sites/dev/_api/web/lists/getbytitle('Employees')/
+
+	// USER/GROUP METHODS
 
 	/**
 	* Get current user data
@@ -1055,6 +1116,8 @@ sprLib.model('Res').add({
 	sprLib.getUserInfo = function getUserInfo(inObj) {
 		doGetUserInfo(inObj);
 	}
+
+	// MISC METHODS
 
 	/**
 	* Gets the version of this library
