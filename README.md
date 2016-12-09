@@ -66,14 +66,30 @@ sprLib.getUserInfo({
 RESULT: Title:Brent Ely, Email:brent@site.onmicrosoft.com
 ```
 
+## List/Library CRUD Operations
 
-
-## HTML Form Functions:
+### Read Data
 ```javascript
-doParseFormFieldsIntoJson(inModel,inEleId);
+sprLib.model('Employees').add({
+	objName: 'Employees',
+	objCols: {
+		name:     { dataName:'Name'                                                           },
+		badgeNum: { dataName:'Badge_x0020_Number'                                             },
+		hireDate: { dataName:'Hire_x0020_Date',       dispName:'Hire Date', dataFormat:'INTL' },
+		utilPct:  { dataName:'Utilization_x0020_Pct', dispName:'Util %'                       },
+		profile:  { dataName:'Job_x0020_Profile'                                              },
+		comments: { dataName:'Comments'                                                       }
+	},
+	ajaxFilter: "Job_x0020_Profile eq 'Manager'",
+	ajaxMaxItems: "10",
+	ajaxOrderby: "Name",
+	onExec: function(){ console.log('Employees onExec...'); },
+	onDone: function(data){ console.log('Employees onDone! Data length:'+data.length); },
+	onFail: function(mssg){ console.error('ERROR:'+mesg); }
+});
 ```
 
-## Ad-hoc CRUD
+### Insert Data
 ```javascript
 sprLib.insertItem({
 	objName: 'Employees',
@@ -90,7 +106,26 @@ sprLib.insertItem({
 });
 ```
 
-## One-Way Data Binding
+### Updatye Data
+```javascript
+sprLib.updateItem({
+	onFail: function(mesg){ console.error('ERROR: '+mesg); }
+});
+```
+
+### Delete Data
+```javascript
+sprLib.deleteItem({
+	onFail: function(mesg){ console.error('ERROR: '+mesg); }
+});
+```
+
+## HTML Form Functions: (WIP)
+```javascript
+doParseFormFieldsIntoJson(inModel,inEleId);
+```
+
+## One-Way Data Binding (WIP)
 ```javascript
 doSyncListItem(inModel, inObj);
 ```
@@ -104,9 +139,15 @@ Populate a &lt;select&gt; form element with "name"/"id" (option text/value) of a
 <input type="text" data-bind='{"col":"name"}'>
 <input type="text" data-bind='{"text":{"model":"Employees", "cols":["badgeNum"]}}'>
 ```
+(WIP)
 
-
-
+# Model Methods (WIP)
+add
+data
+meta
+parseForm
+sync
+syncItem
 
 
 **************************************************************************************************

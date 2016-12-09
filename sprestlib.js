@@ -1,7 +1,7 @@
 /*\
 |*|  :: SpRestLib.js ::
 |*|
-|*|  A JavaScript REST Library for SharePoint 2013-2016.
+|*|  JavaScript library for SharePoint web serices
 |*|  https://github.com/gitbrent/SpRestLib
 |*|
 |*|  This library is released under the MIT Public License (MIT)
@@ -29,28 +29,30 @@
 
 /*
 DEVLIST:
-	1) Add AppendText/Versions support (auto-query and populate most recent text when isAppend is TRUE)
-	*) Add logic we learned the hard way where FILTER cant have true/false but uses 0/1 due to MS bug
-	1) More filter functionality (only works with FOREACH+<table> for now)
-	2) add inline query/loop:
+	* Add AppendText/Versions support (auto-query and populate most recent text when isAppend is TRUE)
+	* Add logic we learned the hard way where FILTER cant have true/false but uses 0/1 due to MS bug
+	* More filter functionality (only works with FOREACH+<table> for now)
+	* add inline query/loop:
 		* EX: <li data-bind:"foreach: {select:Hire_x0020_Date | filter:OwnerId eq 99 | expand: | orderBy: }">
-	3) Add support for using LIST-GUID (not just nmam)
+	* Add support for using LIST-GUID (in addition to list name/objName)
 FUTURE:
-	*) Support for turning LOOKUP values into a "text; text"-type output
+	* Support for turning LOOKUP values into a "text; text"-type output
 */
 
 /*
+CODE SAMPLE DUMPING GROUND (WIP):
+---------------------------------
 EX: Form Binding:
-<table data-bind='{ "foreach": {"model":"Reqs", "filter":{"col":"completed", "op":"eq", "val":false}}, "options":{"showBusySpinner":true} }'>
-
+	<table data-bind='{ "foreach": {"model":"Reqs", "filter":{"col":"completed", "op":"eq", "val":false}}, "options":{"showBusySpinner":true} }'>
 EX: Ad-hoc API calls
+	?
 EX: API calls using CAML
-sprLib.model('Res').add({
-	ajaxAuth: true,
-	ajaxType: 'post',
-	objName: '_api/web/Lists/GetByTitle(\'All Resources\')/GetItems(query=@v1)?@v1={"ViewXml":"<View><Query><Where><IsNull><FieldRef Name=\'Status\' /></IsNull></Where></Query></View>"}',
-	[...]
-});
+	sprLib.model('Res').add({
+		ajaxAuth: true,
+		ajaxType: 'post',
+		objName: '_api/web/Lists/GetByTitle(\'All Resources\')/GetItems(query=@v1)?@v1={"ViewXml":"<View><Query><Where><IsNull><FieldRef Name=\'Status\' /></IsNull></Where></Query></View>"}',
+		[...]
+	});
 */
 
 (function(){
@@ -58,7 +60,7 @@ sprLib.model('Res').add({
 	var DEBUG = false;
 	// APP VERSION/BUILD
 	var APP_VER = "0.9.0";
-	var APP_BLD = "20161206";
+	var APP_BLD = "20161207";
 	// APP FUNCTIONALITY
 	var APP_FILTEROPS = {
 		"eq" : "==",
@@ -174,8 +176,12 @@ sprLib.model('Res').add({
 		// STEP 1: Run onExec callback
 		if ( inModel.onExec ) inModel.onExec();
 
-		// STEP 2: Support both list name and core _api calls (aka: Allow query on '_/api/webs' etc.)
-		if ( inModel.objName.indexOf('_api') == 0 || inModel.objName.indexOf('/') == 0 || inModel.objName.indexOf('http') == 0 ) { doLoadListData( inModel ); return; }
+		// STEP 2: Support both list name and core API calls (aka: Allow query on '_/api/webs' etc.)
+		// No metadata is needed for core API, so skip to next Step
+		if ( inModel.objName.indexOf('_api') == 0 || inModel.objName.indexOf('/') == 0 || inModel.objName.indexOf('http') == 0 ) {
+			doLoadListData( inModel );
+			return;
+		}
 
 		// STEP 3: Exec SharePoint REST Query
 		$.ajax({
@@ -192,7 +198,7 @@ sprLib.model('Res').add({
 					// DESIGN: col.dataName is *optional*
 					if ( col.dataName && col.dataName.split('/')[0] == result.InternalName ) {
 						inModel.objCols[key].dataType = result.TypeAsString;
-						inModel.objCols[key].dispName = ( inModel.objCols[key].dispName || result.Title );
+						inModel.objCols[key].dispName = ( inModel.objCols[key].dispName || result.Title ); // Fallback to SP.Title ("Display Name"]
 						inModel.objCols[key].isAppend = ( result.AppendOnly || false );
 						inModel.objCols[key].isNumPct = ( result.SchemaXml.toLowerCase().indexOf('percentage="true"') > -1 );
 					}
@@ -260,10 +266,10 @@ sprLib.model('Res').add({
 			url: strAjaxUrl,
 			type: (inModel.ajaxType || "GET"),
 			cache: false,
-			headers: { "Accept":"application/json; odata=verbose" }
+			headers: { "Accept":"application/json; odata=verbose", "X-RequestDigest":$("#__REQUESTDIGEST").val() }
 		};
 		// TODO: QUESTION: Shouldnt we always include auth??? (20161205)
-		if ( inModel.ajaxAuth ) objAjax.headers["X-RequestDigest"] = $("#__REQUESTDIGEST").val();
+		// DONE ^^^ if ( inModel.ajaxAuth ) objAjax.headers["X-RequestDigest"] = $("#__REQUESTDIGEST").val();
 		$.ajax(objAjax)
 		.done(function(data,textStatus){
 			// A: Clear model data (if needed)
@@ -737,7 +743,7 @@ sprLib.model('Res').add({
 
 	// ==================================================================================================================
 
-	function doGetCurrUser(inObj) {
+	function doGetCurrentUser(inObj) {
 		var jsonData = {};
 
 		// STEP 1: Run onExec callback
@@ -763,7 +769,7 @@ sprLib.model('Res').add({
 		});
 	}
 
-	function doGetCurrUserGroups(inObj) {
+	function doGetCurrentUserGroups(inObj) {
 		var arrGroups = [];
 
 		// STEP 1: Run onExec callback
@@ -917,7 +923,25 @@ sprLib.model('Res').add({
 	// MAIN INIT METHOD
 
 	/**
-	* Data-Model and associated functions
+	* MAIN FUNC: Creates dataModel object and associated methods
+	*
+	* APP_MODELS.dataModel.objCols
+	* @example:
+	* objCols: {
+	*   name:  { dataName:'Name'               },
+	*   badge: { dataName:'Badge_x0020_Number' }
+	* }
+	* | property     | type    | reqd  | description       | example/allowed vals |
+	* |--------------|---------|-------|-------------------|----------------------|
+	* | `dataName`   | string  | no    | SP.InternalName   | 'Hire_x0020_Date'    |
+	* | `dispName`   | string  | no    | display name      | 'Hire Date'          |
+	* | `dataFormat` | string  | no    | date format       | `INTL`, `INTLTIME` TODO |
+	* | `dataType`   | string  | (app) | SP.FieldType      | `Integer`, `Text, `Note, `DateTime`, `Choice`, `Lookup`, `Boolean`, `Currency` et al. |
+	* | `isAppend`   | boolean | (app) | Append Text Field | `true` or `false`    |
+	* | `isNumPct`   | boolean | (app) | "Show as Percent" | `true` or `false`    |
+	*
+	* @see: Field Ref: https://msdn.microsoft.com/en-us/library/office/dn600182.aspx
+	* @see: FieldTypes: https://msdn.microsoft.com/en-us/library/office/microsoft.sharepoint.client.fieldtype.aspx
 	*/
 	sprLib.model = function model(inName) {
 		// FIRST: REALITY-CHECK:
@@ -1080,28 +1104,30 @@ sprLib.model('Res').add({
 
 	// LIST API METHODS
 
-	// TODO: function that returns all the keys that SP provides for:
-	// ../_api/web/GetByTitle
-	// https://www.sharepoint.com/sites/dev/_api/web/lists/getbytitle('Employees')/
+	// TODO: function that returns all the keys that SP provides via:  ../_api/web/GetByTitle
+	// EX: https://www.sharepoint.com/sites/dev/_api/web/lists/getbytitle('Employees')/
+	// super useful for writing our own objCols objects!
+	// have this method return {dataName: dataType: isNumPct etc! }
+	// sprLib.getListColumnMeta = function getListColumnMeta(inObj) {}
 
 	// USER/GROUP METHODS
 
 	/**
 	* Get current user data
-	sprLib.getCurrUser({ onDone: function(data){ console.log(data.Id +"/"+ data.Title +"/"+ data.Email); } });
+	sprLib.getCurrentUser({ onDone: function(data){ console.log(data.Id +"/"+ data.Title +"/"+ data.Email); } });
 	*/
-	sprLib.getCurrUser = function getCurrUser(inObj) {
-		doGetCurrUser(inObj);
+	sprLib.getCurrentUser = function getCurrentUser(inObj) {
+		dogetCurrentUser(inObj);
 	}
 
 	/**
 	* Get current user's Group titles
 	* EX:
-		sprLib.getCurrUserGroups({
+		sprLib.getCurrentUserGroups({
 			onDone: function(data){ if ( $.inArray('Leadership', data) > -1 ) gBoolHasPriv = true; }
 		});
 	*/
-	sprLib.getCurrUserGroups = function getCurrUserGroups(inObj) {
+	sprLib.getCurrentUserGroups = function getCurrentUserGroups(inObj) {
 		doGetCurrUserGroups(inObj);
 	}
 

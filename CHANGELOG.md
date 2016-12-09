@@ -1,8 +1,5 @@
-Change Log
-==========
-All notable changes to the project will be documented in this file.
-This project adheres to [Semantic Versioning](http://semver.org/).
+# Change Log
 
-[1.0.0] - 2016-12-XX
----------------------
-Initial release.
+## [v1.0.0](https://github.com/gitbrent/sprestlib/tree/v1.0.0) (2016-12-31)
+
+**Initial Release**

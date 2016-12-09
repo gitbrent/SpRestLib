@@ -128,8 +128,8 @@
 					//Debug_x0020_FieldWillFail: true,
 					Active_x003f_: true
 				},
-				onDone: function(data){ alert('insert done! new id = '+data.id); },
-				onFail: function(mesg){ console.error('ERROR: '+mesg); }
+				onDone: function(newObj){ alert('insert done! new id = '+newObj.id); },
+				onFail: function(errMsg){ console.error('ERROR: '+errMsg); }
 			});
 		}
 
@@ -156,7 +156,7 @@
 			});
 
 			$('#tst1').html('<code><pre>'
-				+ 'sprLib.getCurrUser({'+'<br>'
+				+ 'sprLib.getCurrentUser({'+'<br>'
 				+ "    onDone: function(data){ "+'<br>'
 				+ "        $.each(data,function(i,res){ "+'<br>'
 				+ "            if (typeof res !== 'object') $('#res1').append('&lt;span&gt;'+ i +':&lt;br&gt;*&nbsp;'+ res +'&lt;/span&gt;');"+'<br>'
@@ -165,7 +165,7 @@
 				+ '});</pre></code>'
 			);
 			$('#tst2').html('<code><pre>'
-				+ 'sprLib.getCurrUserGroups({'+'<br>'
+				+ 'sprLib.getCurrentUserGroups({'+'<br>'
 				+ "    onDone: function(data){ $.each(data,function(i,res){ $('#res2').append('&lt;span&gt;'+ res +'&lt;/span&gt;'); }); }"+'<br>'
 				+ '});</pre></code>'
 			);
@@ -190,11 +190,11 @@
 				// TEST: ^^^ no onFail callback provided ^^^
 			});
 
-			sprLib.getCurrUser({
+			sprLib.getCurrentUser({
 				onDone: function(data){ $('#currUserName').text( data.Title ); }
 			});
 
-			sprLib.getCurrUser({
+			sprLib.getCurrentUser({
 				onDone: function(data){
 					$('#currUserId').text( data.Id );
 					$('#currUserName').text( data.Title );
@@ -202,7 +202,7 @@
 				}
 			});
 
-			sprLib.getCurrUserGroups({
+			sprLib.getCurrentUserGroups({
 				onDone: function(data){ $('#currUserGroups').text( data.toString() ); }
 			});
 
