@@ -312,7 +312,7 @@ EX: Form Binding:
 		// D: Add filter (if any)
 		if ( inSyncObj && inSyncObj.id ) strAjaxUrl += (strAjaxUrl.indexOf('?$') > -1 ? '&':'?') + '$filter=Id%20eq%20' + inSyncObj.id;
 		else if ( inModel.queryFilter ) {
-			strAjaxUrl += (strAjaxUrl.indexOf('?$') > -1 ? '&':'?') + '$filter' + ( inModel.queryFilter.indexOf('%') == -1 ? encodeURI(inModel.queryFilter) : inModel.queryFilter );
+			strAjaxUrl += (strAjaxUrl.indexOf('?$') > -1 ? '&':'?') + '$filter=' + ( inModel.queryFilter.indexOf('%') == -1 ? encodeURI(inModel.queryFilter) : inModel.queryFilter );
 		}
 
 		// E: Add orderby (if any)
@@ -331,8 +331,13 @@ EX: Form Binding:
 
 			// B: Iterate over results
 			$.each( (data.d.results || data), function(i,result){
-				// A: Create row object JSON
+				// B1: Create row object JSON
 				var objRow = {};
+
+				// B2: Add __metadata (if it exists)
+				if ( result.__metadata ) objRow['__metadata'] = result.__metadata;
+
+				// B3: Add columns specified -OR- add everything we got back (mirror SP behavior)
 				if ( inModel.listCols ) {
 					$.each(inModel.listCols, function(key,col){
 						var arrCol = col.dataName.replace(/\//gi,'.').split('.');
@@ -353,7 +358,7 @@ EX: Form Binding:
 					});
 				}
 
-				// B: Store result JSON data and metadata
+				// B4: Store result JSON data and metadata
 				inModel.spArrData.push( objRow );
 				if ( result.Id ) {
 					inModel.spObjData[result.Id] = objRow;
