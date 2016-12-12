@@ -169,6 +169,12 @@ sprLib.getCurrUser({
 });
 ```
 
+
+**************************************************************************************************
+# Configurable!
+var APP_OPTS and APP_CSS can be edited to set base URL, max rows returned, etc easily
+
+
 **************************************************************************************************
 # Issues / Suggestions
 

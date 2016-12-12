@@ -115,7 +115,7 @@
 
 		function doInsertTest() {
 			sprLib.insertItem({
-				objName: 'Employees',
+				listName: 'Employees',
 				jsonData: {
 					__metadata: { type:"SP.Data."+ 'Employees' +"ListItem" },
 					Name: 'Mr. SP REST Library',
@@ -146,7 +146,7 @@
 
 		function doPageLoad() {
 			// STEP 1: HTML Setup
-			document.title = "SpRestLib: JavaScript SharePoint REST Library";
+			document.title = "SpRestLib - JavaScript Library for SharePoint web services";
 
 			// STEP 2:
 			$('.testGroup > div > div:first-child span').each(function(i,tab){ $(this).text(i+1); });
@@ -157,23 +157,23 @@
 
 			$('#tst1').html('<code><pre>'
 				+ 'sprLib.getCurrentUser({'+'<br>'
-				+ "    onDone: function(data){ "+'<br>'
-				+ "        $.each(data,function(i,res){ "+'<br>'
-				+ "            if (typeof res !== 'object') $('#res1').append('&lt;span&gt;'+ i +':&lt;br&gt;*&nbsp;'+ res +'&lt;/span&gt;');"+'<br>'
+				+ "    onDone: function(objUser){ "+'<br>'
+				+ "        $.each(objUser,function(key,val){ "+'<br>'
+				+ "            if (typeof val !== 'object') $('#res1').append('&lt;span&gt;'+ key +':&lt;br&gt;*&nbsp;'+ val +'&lt;/span&gt;');"+'<br>'
 				+ "        });"+'<br>'
 				+ "    }"+'<br>'
 				+ '});</pre></code>'
 			);
 			$('#tst2').html('<code><pre>'
 				+ 'sprLib.getCurrentUserGroups({'+'<br>'
-				+ "    onDone: function(data){ $.each(data,function(i,res){ $('#res2').append('&lt;span&gt;'+ res +'&lt;/span&gt;'); }); }"+'<br>'
+				+ "    onDone: function(arrGroups){ $.each(arrGroups,function(idx,group){ $('#res2').append('&lt;span&gt;'+ group +'&lt;/span&gt;'); }); }"+'<br>'
 				+ '});</pre></code>'
 			);
 
 			// STEP 3: SPRLIB Setup
 			sprLib.model('Employees').add({
-				objName: 'Employees',
-				objCols: {
+				listName: 'Employees',
+				listCols: {
 					id:       { dataName:'ID' },
 					name:     { dataName:'Name' },
 					badgeNum: { dataName:'Badge_x0020_Number' },
@@ -183,7 +183,7 @@
 					utilPct:  { dataName:'Utilization_x0020_Pct', dispName:'Util %' },
 					comments: { dataName:'Comments' }
 				},
-				queryLimit: "10",
+				queryMaxItems: "10",
 				onExec: function(){ console.log('Employees onExec...'); },
 				onDone: function(data){ console.log('Employees onDone! Data length:'+data.length); }
 				//,onFail: function(msg){ console.error('ERROR:'+msg); }
@@ -191,19 +191,19 @@
 			});
 
 			sprLib.getCurrentUser({
-				onDone: function(data){ $('#currUserName').text( data.Title ); }
+				onDone: function(objUser){ $('#currUserName').text( objUser.Title ); }
 			});
 
 			sprLib.getCurrentUser({
-				onDone: function(data){
-					$('#currUserId').text( data.Id );
-					$('#currUserName').text( data.Title );
-					$('#currUserEmail').text( data.Email );
+				onDone: function(objUser){
+					$('#currUserId').text( objUser.Id );
+					$('#currUserName').text( objUser.Title );
+					$('#currUserEmail').text( objUser.Email );
 				}
 			});
 
 			sprLib.getCurrentUserGroups({
-				onDone: function(data){ $('#currUserGroups').text( data.toString() ); }
+				onDone: function(arrGroups){ $('#currUserGroups').text( arrGroups.toString() ); }
 			});
 
 			// STEP 4: Execute code

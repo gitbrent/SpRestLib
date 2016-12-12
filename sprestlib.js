@@ -34,7 +34,7 @@ DEVLIST:
 	* More filter functionality (only works with FOREACH+<table> for now)
 	* add inline query/loop:
 		* EX: <li data-bind:"foreach: {select:Hire_x0020_Date | filter:OwnerId eq 99 | expand: | orderBy: }">
-	* Add support for using LIST-GUID (in addition to list name/objName)
+	* Add support for using LIST-GUID (in addition to .listName) - `.listGUID`
 FUTURE:
 	* Support for turning LOOKUP values into a "text; text"-type output
 */
@@ -44,23 +44,13 @@ CODE SAMPLE DUMPING GROUND (WIP):
 ---------------------------------
 EX: Form Binding:
 	<table data-bind='{ "foreach": {"model":"Reqs", "filter":{"col":"completed", "op":"eq", "val":false}}, "options":{"showBusySpinner":true} }'>
-EX: Ad-hoc API calls
-	?
-EX: API calls using CAML
-	sprLib.model('Res').add({
-		ajaxAuth: true,
-		ajaxType: 'post',
-		objName: '_api/web/Lists/GetByTitle(\'All Resources\')/GetItems(query=@v1)?@v1={"ViewXml":"<View><Query><Where><IsNull><FieldRef Name=\'Status\' /></IsNull></Where></Query></View>"}',
-		[...]
-	});
 */
 
 (function(){
-	// DEBUG (aka:verbose mode - lots of logging)
-	var DEBUG = false;
 	// APP VERSION/BUILD
 	var APP_VER = "0.9.0";
-	var APP_BLD = "20161207";
+	var APP_BLD = "20161212";
+	var DEBUG = false; // (verbose mode; lots of logging)
 	// APP FUNCTIONALITY
 	var APP_FILTEROPS = {
 		"eq" : "==",
@@ -70,26 +60,9 @@ EX: API calls using CAML
 		"lt" : "<",
 		"lte": "<="
 	};
-	// APP DATA MODELS (class variable)
+	// APP DATA MODEL OBJECTS
 	var APP_MODELS = {};
-
-	// USER-CONFIGURABLE > UI OPTIONS:
-	var APP_CSS = {
-		updatingBeg: { 'background-color':'#e2e9ec' },
-		updatingErr: { 'background-color':'#e2999c', 'color':'#fff' },
-		updatingEnd: { 'background-color':'', 'color':'' }
-	};
-	var APP_OPTS = {
-		baseUrl:         '..',
-		busySpinnerHtml: '<div class="sprlib-spinner"><div class="sprlib-bounce1"></div><div class="sprlib-bounce2"></div><div class="sprlib-bounce3"></div></div>',
-		cleanColHtml:    true,
-		currencyChar:    '$',
-		language:        'en',
-		maxRetries:      5,
-		maxRows:         1000,
-		retryAfter:      1000
-	};
-	// USER-CONFIGURABLE > STRINGS/MESSAGES (i18n Internationalization goes here)
+	// APP MESSAGE STRINGS (i18n Internationalization)
 	var APP_STRINGS = {
 		de: {
 			"false" : "Nein",
@@ -110,14 +83,45 @@ EX: API calls using CAML
 			"false" : "Non",
 			"noRows": "(Aucune ligne)",
 			"true"  : "Oui"
+		},
+		in: {
+			"false" : "नहीं",
+			"noRows": "(कोई पंक्तियाँ)",
+			"true"  : "हाँ"
 		}
 	};
 
-	//
-    // ==================================================================================================================
-    // HELPER METHODS
-    // ==================================================================================================================
-    //
+	// -----------------------------
+	// USER-CONFIGURABLE: UI OPTIONS
+	// -----------------------------
+	var APP_OPTS = {
+		baseUrl:         '..',
+		busySpinnerHtml: '<div class="sprlib-spinner"><div class="sprlib-bounce1"></div><div class="sprlib-bounce2"></div><div class="sprlib-bounce3"></div></div>',
+		cleanColHtml:    true,
+		currencyChar:    '$',
+		language:        'en',
+		maxRetries:      5,
+		maxRows:         1000,
+		retryAfter:      1000
+	};
+	var APP_CSS = {
+		updatingBeg: { 'background-color':'#e2e9ec' },
+		updatingErr: { 'background-color':'#e2999c', 'color':'#fff' },
+		updatingEnd: { 'background-color':'', 'color':'' }
+	};
+
+	/* ===============================================================================================
+	|
+	#     #
+	#     #  ######  #       #####   ######  #####    ####
+	#     #  #       #       #    #  #       #    #  #
+	#######  #####   #       #    #  #####   #    #   ####
+	#     #  #       #       #####   #       #####        #
+	#     #  #       #       #       #       #   #   #    #
+	#     #  ######  ######  #       ######  #    #   ####
+	|
+	==================================================================================================
+	*/
 
 	function formatCurrency(n, c, d, t) {
 		var c = isNaN(c = Math.abs(c)) ? 2 : c,
@@ -165,27 +169,84 @@ EX: API calls using CAML
 		return strFinalDate;
 	}
 
-	//
-	// ==================================================================================================================
-	// LIST METHODS
-	// ==================================================================================================================
-	//
+	/* ===============================================================================================
+	|
+	#                         #     #
+	#       #  ####  #####    ##   ## ###### ##### #    #  ####  #####   ####
+	#       # #        #      # # # # #        #   #    # #    # #    # #
+	#       #  ####    #      #  #  # #####    #   ###### #    # #    #  ####
+	#       #      #   #      #     # #        #   #    # #    # #    #      #
+	#       # #    #   #      #     # #        #   #    # #    # #    # #    #
+	####### #  ####    #      #     # ######   #   #    #  ####  #####   ####
+	|
+	==================================================================================================
+	*/
+
+	function univFailCallback(jqXHR, textStatus, errorThrown, funcCaller, inModel) {
+		var strErrCode = jqXHR.status.toString();
+		var strErrText = "("+ jqXHR.status +") "+ textStatus +": "+ errorThrown;
+		var strSpeCode = "";
+
+		// STEP 1: Increment retry counter
+		inModel.retryCnt++;
+
+		// STEP 2: Parse out SharePoint/IIS error code and message
+		try {
+			strSpeCode = $.parseJSON(jqXHR.responseText).error['code'].split(',')[0];
+			strErrText = "(" + jqXHR.status + ") " + $.parseJSON(jqXHR.responseText).error['message'].value;
+		} catch (ex) { console.log('FYI: Unable to parse SP jqXHR response:\n'+jqXHR.responseText); }
+
+		// STEP 3: Handle fail conditions
+		// REF: https://msdn.microsoft.com/en-us/library/dd963640(v=office.12).aspx
+		if ( inModel.retryCnt <= APP_OPTS.maxRetries ) {
+			// CASE '401': "Unauthorized"
+			if ( strErrCode == '401' ) {
+				inModel.retryCnt = 0;
+				( inModel.onFail ) ? inModel.onFail(strErrText) : console.error(strErrText);
+			}
+			// CASE '403': SP2013-2016 Expired Token error: Microsoft.SharePoint.SPException (-2130575252): "X-RequestDigest expired form digest"
+			else if ( strErrCode == '403' && strSpeCode == '-2130575252' ) {
+				if ( UpdateFormDigest ) {
+					// Use SP.js UpdateFormDigest function if available (if we're in a Content-Editor-WebPart or on an aspx page)
+					UpdateFormDigest(_spPageContextInfo.webServerRelativeUrl, _spFormDigestRefreshInterval);
+					setTimeout(funcCaller, APP_OPTS.retryAfter, inModel);
+				}
+				else {
+					// Otherwise, there's nothing else to do - no REST will be accepted without new token, so just fail out
+					objCurr.retryCnt = 0;
+					objCurr.onFail('The page security token has expired (its been over 30 minutes since you submitted/refreshed)\nRefresh the page to continue.\n\n'+strErrText);
+				}
+			}
+			// CASE '403': "Auth error (not expired token)"
+			else if ( strErrCode == '403' ) {
+				// '403' that is not an expired token is an Auth error, so dont bother retrying
+				inModel.retryCnt = 0;
+				( inModel.onFail ) ? inModel.onFail(strErrText) : console.error(strErrText);
+			}
+			// CASE '412': "Concurrency"
+			else if ( strErrCode == '412' ) {
+				// TODO: add option for "force etag/concurrency handling"
+				inModel.spObjMeta[0].__metadata.etag = '"'+ (Number(inModel.spObjMeta.__metadata.etag.replace(/\"/gi,''))+1) +'"'; // Replace double quotes or Number/parseInt will fail (Eg: Number('"2"') == NaN)
+				setTimeout( doSyncListData, 1000, inModel );
+			}
+			else {
+				setTimeout(funcCaller, APP_OPTS.retryAfter, inModel);
+			}
+		}
+		else {
+			inModel.retryCnt = 0;
+			( inModel.onFail ) ? inModel.onFail(strErrText) : console.error(strErrText);
+		}
+	}
 
 	// STEP 1: Gather Metadata
 	function doLoadListMetadata(inModel) {
 		// STEP 1: Run onExec callback
 		if ( inModel.onExec ) inModel.onExec();
 
-		// STEP 2: Support both list name and core API calls (aka: Allow query on '_/api/webs' etc.)
-		// No metadata is needed for core API, so skip to next Step
-		if ( inModel.objName.indexOf('_api') == 0 || inModel.objName.indexOf('/') == 0 || inModel.objName.indexOf('http') == 0 ) {
-			doLoadListData( inModel );
-			return;
-		}
-
-		// STEP 3: Exec SharePoint REST Query
+		// STEP 2: Exec SharePoint REST Query
 		$.ajax({
-			url: APP_OPTS.baseUrl+"/_api/lists/getbytitle('"+ inModel.objName.replace(/\s/gi,'%20') +"')?$select=Fields/Title,Fields/InternalName,Fields/CanBeDeleted,Fields/TypeAsString,Fields/SchemaXml,Fields/AppendOnly&$expand=Fields",
+			url: APP_OPTS.baseUrl+"/_api/lists/getbytitle('"+ inModel.listName.replace(/\s/gi,'%20') +"')?$select=Fields/Title,Fields/InternalName,Fields/CanBeDeleted,Fields/TypeAsString,Fields/SchemaXml,Fields/AppendOnly&$expand=Fields",
 			type: "GET",
 			cache: false,
 			headers: {"Accept":"application/json; odata=verbose"}
@@ -194,17 +255,17 @@ EX: API calls using CAML
 			// A: Gather metadata
 			$.each(data.d.Fields.results, function(i,result){
 				// TODO-1.0: handle 'Account/Title' etc.
-				$.each(inModel.objCols, function(key,col){
+				$.each(inModel.listCols, function(key,col){
 					// DESIGN: col.dataName is *optional*
 					if ( col.dataName && col.dataName.split('/')[0] == result.InternalName ) {
-						inModel.objCols[key].dataType = result.TypeAsString;
-						inModel.objCols[key].dispName = ( inModel.objCols[key].dispName || result.Title ); // Fallback to SP.Title ("Display Name"]
-						inModel.objCols[key].isAppend = ( result.AppendOnly || false );
-						inModel.objCols[key].isNumPct = ( result.SchemaXml.toLowerCase().indexOf('percentage="true"') > -1 );
+						inModel.listCols[key].dataType = result.TypeAsString;
+						inModel.listCols[key].dispName = ( inModel.listCols[key].dispName || result.Title ); // Fallback to SP.Title ("Display Name"]
+						inModel.listCols[key].isAppend = ( result.AppendOnly || false );
+						inModel.listCols[key].isNumPct = ( result.SchemaXml.toLowerCase().indexOf('percentage="true"') > -1 );
 					}
 				});
 			});
-			if (DEBUG) console.table( inModel.objCols );
+			if (DEBUG) console.table( inModel.listCols );
 
 			// B: Reset vars
 			inModel.retryCnt = 0;
@@ -226,51 +287,44 @@ EX: API calls using CAML
 		// STEP 1: Var/UI updates
 		inModel.retryCnt++;
 
-		// STEP 2: Start bulding AJAX URL (Support both 'list name', core _api calls (aka: Allow query on '_/api/webs' etc.) and http full URLs)
-		if      ( inModel.objName.indexOf('/_api') == 0 )						strAjaxUrl = APP_OPTS.baseUrl + inModel.objName;
-		else if ( inModel.objName.indexOf('_api')  == 0 )						strAjaxUrl = APP_OPTS.baseUrl + "/" + inModel.objName;
-		else if ( inModel.objName.indexOf('/')     == 0 &&  inModel.objCols )	strAjaxUrl = inModel.objName + "?$select=";
-		else if ( inModel.objName.indexOf('/')     == 0 && !inModel.objCols )	strAjaxUrl = inModel.objName;
-		else if ( inModel.objName.indexOf('http')  == 0 &&  inModel.objCols )	strAjaxUrl = inModel.objName + "?$select=";
-		else if ( inModel.objName.indexOf('http')  == 0 && !inModel.objCols )	strAjaxUrl = inModel.objName;
-		else																	strAjaxUrl = APP_OPTS.baseUrl + "/_api/lists/getbytitle('"+ inModel.objName.replace(/\s/gi,'%20') +"')/items?$select=Id,"
+		// STEP 2: Start bulding AJAX URL
+		strAjaxUrl = APP_OPTS.baseUrl + "/_api/lists/getbytitle('"+ inModel.listName.replace(/\s/gi,'%20') +"')/items";
+		// If columsn were provided, ensure we select `Id` for use in building our data model SP-array/object
+		if ( inModel.listCols ) strAjaxUrl = strAjaxUrl+"?$select=Id,";
 
-		// STEP 3: Continue building query (only for non-api calls)
-		if ( inModel.objName.indexOf('_api') == -1 ) {
-			// A: Add columns
-			$.each(inModel.objCols, function(key,col){
-				if ( !col.dataName ) { console.error('ERROR: cannot read ["dataName"] on '); console.error(col); return false; }
-				// A:
-				if ( strAjaxUrl.substring(strAjaxUrl.length-1) == '=' ) strAjaxUrl += col.dataName;
-				else strAjaxUrl += ( strAjaxUrl.lastIndexOf(',') == strAjaxUrl.length-1 ? col.dataName : ','+col.dataName );
-				// B:
-				if ( col.dataName.indexOf('/') > -1 ) strExpands += ( strExpands == '' ? col.dataName.substring(0,col.dataName.indexOf('/')) : ','+col.dataName.substring(0,col.dataName.indexOf('/')) );
-			});
+		// STEP 3: Continue building query
+		// A: Add columns
+		$.each(inModel.listCols, function(key,col){
+			if ( !col.dataName ) { console.error('ERROR: cannot read ["dataName"] on '); console.error(col); return false; }
+			// A:
+			if ( strAjaxUrl.substring(strAjaxUrl.length-1) == '=' ) strAjaxUrl += col.dataName;
+			else strAjaxUrl += ( strAjaxUrl.lastIndexOf(',') == strAjaxUrl.length-1 ? col.dataName : ','+col.dataName );
+			// B:
+			if ( col.dataName.indexOf('/') > -1 ) strExpands += (strExpands == '' ? '' : ',') + col.dataName.substring(0,col.dataName.indexOf('/'));
+		});
 
-			// B: Add maxrows as default in SP2013 is a paltry 100 rows
-			strAjaxUrl += '&$top=' + ( inModel.ajaxMaxItems ? inModel.ajaxMaxItems : APP_OPTS.maxRows );
+		// B: Add maxrows as default in SP2013 is a paltry 100 rows
+		strAjaxUrl += (strAjaxUrl.indexOf('?$') > -1 ? '&':'?') + '$top=' + ( inModel.ajaxMaxItems ? inModel.ajaxMaxItems : APP_OPTS.maxRows );
 
-			// C: Add expand (if any)
-			if ( strExpands ) strAjaxUrl += '&$expand=' + strExpands;
+		// C: Add expand (if any)
+		if ( strExpands ) strAjaxUrl += (strAjaxUrl.indexOf('?$') > -1 ? '&':'?') + '$expand=' + strExpands;
 
-			// D: Add filter (if any)
-			if ( inSyncObj && inSyncObj.id ) strAjaxUrl += '&$filter=Id%20eq%20' + inSyncObj.id;
-			else if ( inModel.ajaxFilter ) strAjaxUrl += '&$filter=' + ( inModel.ajaxFilter.indexOf('%') == -1 ? encodeURI(inModel.ajaxFilter) : inModel.ajaxFilter );
-
-			// E: Add orderby (if any)
-			if ( inModel.ajaxOrderby ) strAjaxUrl += '&$orderby=' + inModel.ajaxOrderby;
+		// D: Add filter (if any)
+		if ( inSyncObj && inSyncObj.id ) strAjaxUrl += (strAjaxUrl.indexOf('?$') > -1 ? '&':'?') + '$filter=Id%20eq%20' + inSyncObj.id;
+		else if ( inModel.ajaxFilter ) {
+			strAjaxUrl += (strAjaxUrl.indexOf('?$') > -1 ? '&':'?') + '$filter' + ( inModel.ajaxFilter.indexOf('%') == -1 ? encodeURI(inModel.ajaxFilter) : inModel.ajaxFilter );
 		}
 
+		// E: Add orderby (if any)
+		if ( inModel.ajaxOrderby ) strAjaxUrl += (strAjaxUrl.indexOf('?$') > -1 ? '&':'?') + '$orderby=' + inModel.ajaxOrderby;
+
 		// STEP 4: Fetch data from SP
-		objAjax = {
+		$.ajax({
 			url: strAjaxUrl,
 			type: (inModel.ajaxType || "GET"),
 			cache: false,
 			headers: { "Accept":"application/json; odata=verbose", "X-RequestDigest":$("#__REQUESTDIGEST").val() }
-		};
-		// TODO: QUESTION: Shouldnt we always include auth??? (20161205)
-		// DONE ^^^ if ( inModel.ajaxAuth ) objAjax.headers["X-RequestDigest"] = $("#__REQUESTDIGEST").val();
-		$.ajax(objAjax)
+		})
 		.done(function(data,textStatus){
 			// A: Clear model data (if needed)
 			if ( !inSyncObj ) inModel.spObjData = ( strAjaxUrl.indexOf('=Id') > -1 || strAjaxUrl.indexOf(',Id,') > -1 ? {} : [] );
@@ -279,21 +333,23 @@ EX: API calls using CAML
 			$.each( (data.d.results || data), function(i,result){
 				// A: Create row object JSON
 				var objRow = {};
-				if ( inModel.objCols ) {
-					$.each(inModel.objCols, function(key,col){
+				if ( inModel.listCols ) {
+					$.each(inModel.listCols, function(key,col){
 						var arrCol = col.dataName.replace(/\//gi,'.').split('.');
 						var colVal = ( arrCol.length > 1 ? result[arrCol[0]][arrCol[1]] : result[arrCol[0]] );
 						// DESIGN: Not all values can be taken at return value - things like dates have to be turned into actual Date objects
 						if ( col.dataType == 'DateTime' ) {
 							objRow[key] = new Date(colVal);
 						}
-						else if ( col.isNumPct ) {
-							objRow[key] = (colVal * 100);
-						}
 						else {
 							objRow[key] = ( APP_OPTS.cleanColHtml && col.listDataType == 'string' ? colVal.replace(/<div(.|\n)*?>/gi,'').replace(/<\/div>/gi,'') : colVal );
 						}
 						// TODO-1.0: ^^ results like 'Account/Title' will be created above (!)
+					});
+				}
+				else {
+					$.each(result, function(key,val){
+						if ( typeof val !== 'object' ) objRow[key] = val;
 					});
 				}
 
@@ -307,7 +363,7 @@ EX: API calls using CAML
 					inModel.spObjData.push( objRow );
 				}
 			});
-			if (DEBUG && inModel.objCols) console.log( inModel.objCols );
+			if (DEBUG && inModel.listCols) console.log( inModel.listCols );
 
 			// C: Reset vars
 			inModel.retryCnt = 0;
@@ -422,7 +478,7 @@ EX: API calls using CAML
 				// TODO: apply css to object other than tables with FOREACH!
 				if ( bindOper == 'text' ) {
 					// A: Parsing error checking
-					if ( !inModel.objCols[bindCol1] ) {
+					if ( !inModel.listCols[bindCol1] ) {
 						var strTemp = 'ERROR: Unknown column: "'+ bindCol1 +'"\n\nSRC:\n' + $(tag)['context'].outerHTML.replace(/\&quot\;/gi,'"');
 						if ( inModel.onFail ) inModel.onFail(strTemp);
 						console.error(strTemp);
@@ -432,11 +488,11 @@ EX: API calls using CAML
 					// B: (NOTE: There may be more than one row of data, but if use bound a single text field, what else can we do - so we use [0]/first row)
 					if ( $(tag).is('input[type="text"]') ) {
 						( Object.keys(inModel.spObjData).length ) ? $(tag).val(inModel.spObjData[Object.keys(inModel.spObjData)[0]][bindCol1]) : $(tag).val('');
-						inModel.objCols[bindCol1].htmlEle = $(tag);
+						inModel.listCols[bindCol1].htmlEle = $(tag);
 					}
 					else if ( $(tag).not('input') ) {
 						( Object.keys(inModel.spObjData).length ) ? $(tag).text(inModel.spObjData[Object.keys(inModel.spObjData)[0]][bindCol1]) : $(tag).text('');
-						inModel.objCols[bindCol1].htmlEle = $(tag);
+						inModel.listCols[bindCol1].htmlEle = $(tag);
 					}
 				}
 				else if ( bindOper == 'foreach' ) {
@@ -456,7 +512,7 @@ EX: API calls using CAML
 							// A: Add/Populate <thead>
 							( $(tag).find('> thead').length == 0 ) ? $(tag).prepend('<thead/>') : $(tag).find('> thead').empty();
 							var $row = $('<tr/>');
-							$.each(inModel.objCols, function(key,col){ if (!col.hidden) $row.append('<th>'+ col.dispName +'</th>'); });
+							$.each(inModel.listCols, function(key,col){ if (!col.hidden) $row.append('<th>'+ col.dispName +'</th>'); });
 							$(tag).find('> thead').append( $row );
 
 							// B: Add <tbody> (if necc)
@@ -490,7 +546,7 @@ EX: API calls using CAML
 								if ( !objFilter.col || ( objFilter.col == key && objFilter.op == "eq" && objFilter.val == val ) ) isFilterPassed = true;
 
 								// B: Add row cells
-								if ( !inModel.objCols[key].hidden ) {
+								if ( !inModel.listCols[key].hidden ) {
 									// Handle cases where tag contains {cols): only show the cols that user specified
 									if ( bindJSON[bindOper].cols && $.inArray(key,bindJSON[bindOper].cols) == -1 ) return;
 
@@ -499,21 +555,21 @@ EX: API calls using CAML
 
 									// B: Create cell
 									var $cell = $('<td/>');
-									if      ( val && inModel.objCols[key].isNumPct && !isNaN(val) )               $cell.text( Math.round(val*100)+'%' );
-									else if ( val && inModel.objCols[key].dataType == 'Currency' && !isNaN(val) ) $cell.text( formatCurrency(val) );
-									else if ( val && inModel.objCols[key].dataType == 'DateTime' )                $cell.text( formatDate(val, (inModel.objCols[key].dataFormat||'INTL')) );
-									else                                                                          $cell.text( (val || '') );
+									if      ( val && inModel.listCols[key].isNumPct && !isNaN(val) )               $cell.text( Math.round(val*100)+'%' );
+									else if ( val && inModel.listCols[key].dataType == 'Currency' && !isNaN(val) ) $cell.text( formatCurrency(val) );
+									else if ( val && inModel.listCols[key].dataType == 'DateTime' )                $cell.text( formatDate(val, (inModel.listCols[key].dataFormat||'INTL')) );
+									else                                                                           $cell.text( (val || '') );
 
 									// C: Add CSS dispStyle and/or dispClass (if any)
-									if ( inModel.objCols[key].dispClass ) { $cell.addClass( inModel.objCols[key].dispClass ); }
-									if ( inModel.objCols[key].dispStyle ) {
+									if ( inModel.listCols[key].dispClass ) { $cell.addClass( inModel.listCols[key].dispClass ); }
+									if ( inModel.listCols[key].dispStyle ) {
 										try {
-											if ( typeof JSON.parse(inModel.objCols[key].dispStyle) === 'object' ) $cell.css( JSON.parse(inModel.objCols[key].dispStyle) );
+											if ( typeof JSON.parse(inModel.listCols[key].dispStyle) === 'object' ) $cell.css( JSON.parse(inModel.listCols[key].dispStyle) );
 										}
 										catch(ex) {
 											var strTemp = 'PARSE ERROR:\n'
 												+ 'Unable to parse [JSON.parse] and/or set the css dispStyle for data model: '+ bindJSON[bindOper].model +'\n\n'
-												+ '* model dispStyle value:\n'+ inModel.objCols[key].dispStyle +'\n'
+												+ '* model dispStyle value:\n'+ inModel.listCols[key].dispStyle +'\n'
 												+ '* correct syntax ex:\n{"width":"1%", "white-space":"nowrap"}\n\n'
 												+ ex;
 											console.warn(strTemp);
@@ -553,66 +609,18 @@ EX: API calls using CAML
 		if ( inModel.onDone ) inModel.onDone( inModel.data() );
 	}
 
-	// ==================================================================================================================
-
-	function univFailCallback(jqXHR, textStatus, errorThrown, funcCaller, inModel) {
-		var strErrCode = jqXHR.status.toString();
-		var strErrText = "("+ jqXHR.status +") "+ textStatus +": "+ errorThrown;
-		var strSpeCode = "";
-
-		// STEP 1: Increment retry counter
-		inModel.retryCnt++;
-
-		// STEP 2: Parse out SharePoint/IIS error code and message
-		try {
-			strSpeCode = $.parseJSON(jqXHR.responseText).error['code'].split(',')[0];
-			strErrText = "(" + jqXHR.status + ") " + $.parseJSON(jqXHR.responseText).error['message'].value;
-		} catch (ex) { console.log('FYI: Unable to parse SP jqXHR response:\n'+jqXHR.responseText); }
-
-		// STEP 3: Handle fail conditions
-		// REF: https://msdn.microsoft.com/en-us/library/dd963640(v=office.12).aspx
-		if ( inModel.retryCnt <= APP_OPTS.maxRetries ) {
-			// CASE '401': "Unauthorized"
-			if ( strErrCode == '401' ) {
-				inModel.retryCnt = 0;
-				( inModel.onFail ) ? inModel.onFail(strErrText) : console.error(strErrText);
-			}
-			// CASE '403': SP2013-2016 Expired Token error: Microsoft.SharePoint.SPException (-2130575252): "X-RequestDigest expired form digest"
-			else if ( strErrCode == '403' && strSpeCode == '-2130575252' ) {
-				if ( UpdateFormDigest ) {
-					// Use SP.js UpdateFormDigest function if available (if we're in a Content-Editor-WebPart or on an aspx page)
-					UpdateFormDigest(_spPageContextInfo.webServerRelativeUrl, _spFormDigestRefreshInterval);
-					setTimeout(funcCaller, APP_OPTS.retryAfter, inModel);
-				}
-				else {
-					// Otherwise, there's nothing else to do - no REST will be accepted without new token, so just fail out
-					objCurr.retryCnt = 0;
-					objCurr.onFail('The page security token has expired (its been over 30 minutes since you submitted/refreshed)\nRefresh the page to continue.\n\n'+strErrText);
-				}
-			}
-			// CASE '403': "Auth error (not expired token)"
-			else if ( strErrCode == '403' ) {
-				// '403' that is not an expired token is an Auth error, so dont bother retrying
-				inModel.retryCnt = 0;
-				( inModel.onFail ) ? inModel.onFail(strErrText) : console.error(strErrText);
-			}
-			// CASE '412': "Concurrency"
-			else if ( strErrCode == '412' ) {
-				// TODO: add option for "force etag/concurrency handling"
-				inModel.spObjMeta[0].__metadata.etag = '"'+ (Number(inModel.spObjMeta.__metadata.etag.replace(/\"/gi,''))+1) +'"'; // Replace double quotes or Number/parseInt will fail (Eg: Number('"2"') == NaN)
-				setTimeout( doSyncListData, 1000, inModel );
-			}
-			else {
-				setTimeout(funcCaller, APP_OPTS.retryAfter, inModel);
-			}
-		}
-		else {
-			inModel.retryCnt = 0;
-			( inModel.onFail ) ? inModel.onFail(strErrText) : console.error(strErrText);
-		}
-	}
-
-	// ==================================================================================================================
+	/* ===============================================================================================
+	|
+	######                                        # #######
+	#     # # #    # #####  # #    #  ####       #  #        ####  #####  #    #  ####
+	#     # # ##   # #    # # ##   # #    #     #   #       #    # #    # ##  ## #
+	######  # # #  # #    # # # #  # #         #    #####   #    # #    # # ## #  ####
+	#     # # #  # # #    # # #  # # #  ###   #     #       #    # #####  #    #      #
+	#     # # #   ## #    # # #   ## #    #  #      #       #    # #   #  #    # #    #
+	######  # #    # #####  # #    #  ####  #       #        ####  #    # #    #  ####
+	|
+	==================================================================================================
+	*/
 
 	function doParseFormFieldsIntoJson(inModel, inEleId) {
 		var objReturn = {
@@ -641,7 +649,7 @@ EX: API calls using CAML
 			else return;
 
 			// B: Handle fields not in Model (user may want some additional info inserted, etc.)
-			var dataName = ( inModel.objCols[strCol] ? inModel.objCols[strCol].dataName : strCol );
+			var dataName = ( inModel.listCols[strCol] ? inModel.listCols[strCol].dataName : strCol );
 
 			// C: Handle various element types
 			// TODO: add new HTML5 tags
@@ -654,7 +662,7 @@ EX: API calls using CAML
 			// CASE: <jquery-ui datepicker>
 			else if ( $(this).val() && $(this).hasClass('hasDatepicker') ) {
 				objReturn.jsonSpData[dataName] = $(this).datepicker('getDate').toISOString();
-				objReturn.jsonFormat[strCol] = ( inModel.objCols[strCol].dataFormat ? bdeLib.localDateStrFromSP(null,$(this).datepicker('getDate'),inModel.objCols[strCol].dataFormat) : $(this).datepicker('getDate').toISOString() );
+				objReturn.jsonFormat[strCol] = ( inModel.listCols[strCol].dataFormat ? bdeLib.localDateStrFromSP(null,$(this).datepicker('getDate'),inModel.listCols[strCol].dataFormat) : $(this).datepicker('getDate').toISOString() );
 			}
 			// CASE: <select:single>
 			else if ( $(this).val() && $(this).prop('type') == 'select-one' ) {
@@ -690,7 +698,7 @@ EX: API calls using CAML
 			}
 
 			// D: Special Cases:
-			if ( $(this).val() && inModel.objCols[strCol] && inModel.objCols[strCol].isNumPct ) {
+			if ( $(this).val() && inModel.listCols[strCol] && inModel.listCols[strCol].isNumPct ) {
 				objReturn.jsonFormat[strCol] = ( Number( $(this).val() ) * 100 ) + '%';
 			}
 		});
@@ -719,7 +727,7 @@ EX: API calls using CAML
 		// STEP 3: Update item
 		$.ajax({
 			type       : "POST",
-			url        : APP_OPTS.baseUrl+"/_api/lists/getbytitle('"+ inModel.objName +"')/items("+ inObj.id +")",
+			url        : APP_OPTS.baseUrl+"/_api/lists/getbytitle('"+ inModel.listName +"')/items("+ inObj.id +")",
 			data       : JSON.stringify(jsonAjaxData),
 			contentType: "application/json;odata=verbose",
 			headers    : {
@@ -741,7 +749,18 @@ EX: API calls using CAML
 		});
 	}
 
-	// ==================================================================================================================
+	/* ===============================================================================================
+	|
+	#     #                                   #  #####
+	#     #  ####  ###### #####   ####       #  #     # #####   ####  #    # #####   ####
+	#     # #      #      #    # #          #   #       #    # #    # #    # #    # #
+	#     #  ####  #####  #    #  ####     #    #  #### #    # #    # #    # #    #  ####
+	#     #      # #      #####       #   #     #     # #####  #    # #    # #####       #
+	#     # #    # #      #   #  #    #  #      #     # #   #  #    # #    # #      #    #
+	 #####   ####  ###### #    #  ####  #        #####  #    #  ####   ####  #       ####
+	|
+	==================================================================================================
+	*/
 
 	function doGetCurrentUser(inObj) {
 		var jsonData = {};
@@ -765,13 +784,11 @@ EX: API calls using CAML
 			if ( inObj.onDone ) inObj.onDone( jsonData );
 		})
 		.fail(function(jqXHR,textStatus,errorThrown){
-			univFailCallback(jqXHR, textStatus, errorThrown, doGetCurrUser, inObj);
+			univFailCallback(jqXHR, textStatus, errorThrown, doGetCurrentUser, inObj);
 		});
 	}
 
 	function doGetCurrentUserGroups(inObj) {
-		var arrGroups = [];
-
 		// STEP 1: Run onExec callback
 		if ( inObj.onExec ) inObj.onExec();
 
@@ -784,18 +801,19 @@ EX: API calls using CAML
 			headers: {"Accept":"application/json; odata=verbose"}
 		})
 		.done(function(data,textStatus){
-			// A: Gather User Groups
-			$.each(data.d.Groups.results, function(i,result){ arrGroups.push(result.Title); });
+			// STEP 1: Gather groups
+			var arrGroups = [];
+			$.each(data.d.Groups.results, function(idx,group){ arrGroups.push({ Id:group.Id, Title:group.Title }); });
 
-			// LAST:
+			// LAST: Call onDone
 			if ( inObj.onDone ) inObj.onDone( arrGroups );
 		})
 		.fail(function(jqXHR,textStatus,errorThrown){
-			univFailCallback(jqXHR, textStatus, errorThrown, doGetCurrUser, inObj);
+			univFailCallback(jqXHR, textStatus, errorThrown, doGetCurrentUser, inObj);
 		});
 	}
 
-	function doGetUserInfo(inObj) {
+	function doGetUserById(inObj) {
 		var jsonData = {};
 
 		// FIRST: Reqd Field Check
@@ -820,15 +838,107 @@ EX: API calls using CAML
 			if ( inObj.onDone ) inObj.onDone( jsonData );
 		})
 		.fail(function(jqXHR,textStatus,errorThrown){
-			univFailCallback(jqXHR, textStatus, errorThrown, doGetCurrUser, inObj);
+			univFailCallback(jqXHR, textStatus, errorThrown, doGetUserById, inObj);
 		});
 	}
 
-	//
-	// ==================================================================================================================
-	// STAND-ALONE METHODS: (Not tied to a Model)
-	// ==================================================================================================================
-	//
+	/* ===============================================================================================
+	|
+	#     #                     #     #                                ######  #######  #####  #######
+	##    #  ####  #    #       ##   ##  ####  #####  ###### #         #     # #       #     #    #
+	# #   # #    # ##   #       # # # # #    # #    # #      #         #     # #       #          #
+	#  #  # #    # # #  # ##### #  #  # #    # #    # #####  #         ######  #####    #####     #
+	#   # # #    # #  # #       #     # #    # #    # #      #         #   #   #             #    #
+	#    ## #    # #   ##       #     # #    # #    # #      #         #    #  #       #     #    #
+	#     #  ####  #    #       #     #  ####  #####  ###### ######    #     # #######  #####     #
+	|
+	==================================================================================================
+	// STAND-ALONE, AD-HOC METHODS: (Not tied to a DataModel)
+	*/
+
+	function doRestCall(inRestObj) {
+		var objAjax = {};
+		var strAjaxUrl = "", strExpands = "";
+
+		// STEP 1: Var/UI updates
+		inRestObj.spArrData = [];
+		inRestObj.retryCnt++;
+
+		// STEP 2: Start bulding URL
+		if      ( inRestObj.restUrl.indexOf('/_api') == 0 )							strAjaxUrl = APP_OPTS.baseUrl + inRestObj.restUrl;
+		else if ( inRestObj.restUrl.indexOf('_api')  == 0 )							strAjaxUrl = APP_OPTS.baseUrl + "/" + inRestObj.restUrl;
+		else if ( inRestObj.restUrl.indexOf('/')     == 0 &&  inRestObj.queryCols )	strAjaxUrl = inRestObj.restUrl + "?$select=";
+		else if ( inRestObj.restUrl.indexOf('/')     == 0 && !inRestObj.queryCols )	strAjaxUrl = inRestObj.restUrl;
+		else if ( inRestObj.restUrl.indexOf('http')  == 0 &&  inRestObj.queryCols )	strAjaxUrl = inRestObj.restUrl + "?$select=";
+		else if ( inRestObj.restUrl.indexOf('http')  == 0 && !inRestObj.queryCols )	strAjaxUrl = inRestObj.restUrl;
+		//else																		strAjaxUrl = APP_OPTS.baseUrl + "/_api/lists/getbytitle('"+ inRestObj.restUrl.replace(/\s/gi,'%20') +"')/items?$select=Id,"
+		// TODO: ^^^ what about an else?
+
+		// STEP 3: Continue building URL when selecting columns
+		if ( strAjaxUrl.indexOf('$select') > -1 ) {
+			// A: Add columns
+			$.each(inRestObj.queryCols, function(key,col){
+				if ( !col.dataName ) return; // Skip columns without a 'dataName' key
+				// A:
+				if ( strAjaxUrl.substring(strAjaxUrl.length-1) == '=' ) strAjaxUrl += col.dataName;
+				else strAjaxUrl += ( strAjaxUrl.lastIndexOf(',') == strAjaxUrl.length-1 ? col.dataName : ','+col.dataName );
+				// B:
+				if ( col.dataName.indexOf('/') > -1 ) strExpands += ( strExpands == '' ? col.dataName.substring(0,col.dataName.indexOf('/')) : ','+col.dataName.substring(0,col.dataName.indexOf('/')) );
+			});
+
+			// B: Add maxrows as default in SP2013 is a paltry 100 rows
+			strAjaxUrl += '&$top=' + ( inRestObj.queryMaxItems ? inRestObj.queryMaxItems : APP_OPTS.maxRows );
+
+			// C: Add expand (if any)
+			if ( strExpands ) strAjaxUrl += '&$expand=' + strExpands;
+
+			// D: Add filter (if any)
+			else if ( inRestObj.queryFilter ) strAjaxUrl += '&$filter=' + ( inRestObj.queryFilter.indexOf('%') == -1 ? encodeURI(inRestObj.queryFilter) : inRestObj.queryFilter );
+
+			// E: Add orderby (if any)
+			if ( inRestObj.queryOrderby ) strAjaxUrl += '&$orderby=' + inRestObj.queryOrderby;
+		}
+
+		// STEP 4: Fetch data from SP
+		$.ajax({
+			url: strAjaxUrl,
+			type: (inRestObj.ajaxType || "GET"),
+			cache: false,
+			headers: { "Accept":"application/json; odata=verbose", "X-RequestDigest":$("#__REQUESTDIGEST").val() }
+		})
+		.done(function(data,textStatus){
+			// A: Gather results
+			$.each( (data.d.results || data), function(i,result){
+				var objRow = {};
+				if ( inRestObj.queryCols ) {
+					$.each(inRestObj.queryCols, function(key,col){
+						var arrCol = col.dataName.replace(/\//gi,'.').split('.');
+						var colVal = ( arrCol.length > 1 ? result[arrCol[0]][arrCol[1]] : result[arrCol[0]] );
+						// DESIGN: Not all values can be taken at return value - things like dates have to be turned into actual Date objects
+						if ( col.dataType == 'DateTime' ) objRow[key] = new Date(colVal);
+						else objRow[key] = ( APP_OPTS.cleanColHtml && col.listDataType == 'string' ? colVal.replace(/<div(.|\n)*?>/gi,'').replace(/<\/div>/gi,'') : colVal );
+						// TODO-1.0: ^^ results like 'Account/Title' will be created above (!)
+					});
+				}
+				else {
+					$.each(result, function(key,val){
+						objRow[key] = val;
+					});
+				}
+				inRestObj.spArrData.push( objRow );
+			});
+			if (DEBUG && inRestObj.queryCols) console.log( inRestObj.queryCols );
+
+			// B: Reset vars
+			inRestObj.retryCnt = 0;
+
+			// LAST: Call the inSyncObj.onDone (if any)
+			if ( inRestObj.onDone ) inRestObj.onDone( inRestObj.spArrData );
+		})
+		.fail(function(jqXHR,textStatus,errorThrown){
+			univFailCallback(jqXHR, textStatus, errorThrown, doRestCall, inRestObj);
+		});
+	}
 
 	function doInsertListItem(inObj) {
 		// STEP 1: Var/UI updates
@@ -838,7 +948,7 @@ EX: API calls using CAML
 		$.ajax({
 			type       : "POST",
 			contentType: "application/json;odata=verbose",
-			url        : APP_OPTS.baseUrl+"/_api/lists/getbytitle('"+ inObj.objName +"')/items",
+			url        : APP_OPTS.baseUrl+"/_api/lists/getbytitle('"+ inObj.listName +"')/items",
 			headers    : { "Accept":"application/json; odata=verbose", "X-RequestDigest":$("#__REQUESTDIGEST").val() },
 			data       : JSON.stringify(inObj.jsonData)
 		})
@@ -858,7 +968,7 @@ EX: API calls using CAML
 		var strErrText = "";
 
 		// STEP 1: Validation
-		if      ( !inObj.objName ) strErrText = "ERROR: objName is required!";
+		if      ( !inObj.listName ) strErrText = "ERROR: listName is required!";
 		else if ( !inObj.jsonData ) strErrText = "ERROR: jsonData is required!";
 		else if ( !inObj.jsonData.Id ) strErrText = "ERROR: jsonData must have an 'Id' key/val pair!";
 		else if ( !inObj.jsonData.__metadata ) strErrText = "ERROR: jsonData must have an '__metadata' key/val pair!";
@@ -871,7 +981,7 @@ EX: API calls using CAML
 
 		// STEP 3: Do Update
 		$.ajax({
-			url        : APP_OPTS.baseUrl+"/_api/lists/getbytitle('"+ inObj.objName +"')/items("+ inObj.jsonData.Id +")",
+			url        : APP_OPTS.baseUrl+"/_api/lists/getbytitle('"+ inObj.listName +"')/items("+ inObj.jsonData.Id +")",
 			type       : "POST",
 			data       : JSON.stringify(inObj.jsonData),
 			contentType: "application/json;odata=verbose",
@@ -889,45 +999,74 @@ EX: API calls using CAML
 		});
 	}
 
-	//
-	// ==================================================================================================================
-	// PUBLIC API
-	// ==================================================================================================================
-	//
+	// TODO: function doDeleteListItem(inObj){}
+	function doDeleteListItem(inObj) {
+		var strErrText = "";
+
+		// STEP 1: Validation
+		if      ( !inObj.listName ) strErrText = "ERROR: listName is required!";
+		else if ( !inObj.jsonData ) strErrText = "ERROR: jsonData is required!";
+		else if ( !inObj.jsonData.Id ) strErrText = "ERROR: jsonData must have an 'Id' key/val pair!";
+		else if ( !inObj.jsonData.__metadata ) strErrText = "ERROR: jsonData must have an '__metadata' key/val pair!";
+		else if ( !inObj.jsonData.__metadata.etag ) strErrText = "ERROR: jsonData.__metadata must have an 'etag' key/val pair!";
+		//
+		if ( strErrText ) { ( inObj.onFail ) ? inObj.onFail(strErrText) : console.error(strErrText); return null; }
+
+		// STEP 2: Var/UI updates
+		inObj.retryCnt++;
+
+		// STEP 3: Do Update
+		$.ajax({
+			url        : APP_OPTS.baseUrl+"/_api/lists/getbytitle('"+ inObj.listName +"')/items("+ inObj.jsonData.Id +")",
+			type       : "DELETE",
+			contentType: "application/json;odata=verbose",
+			headers    : { "Accept":"application/json; odata=verbose", "X-RequestDigest":$("#__REQUESTDIGEST").val(), "X-HTTP-Method":"MERGE", "IF-MATCH":inObj.jsonData.__metadata.etag }
+		})
+		.done(function(data,textStatus){
+			// A: Reset vars
+			inObj.retryCnt = 0;
+
+			// LAST: Done callback
+			if ( inObj.onDone ) inObj.onDone();
+		})
+		.fail(function(jqXHR,textStatus,errorThrown){
+			univFailCallback(jqXHR, textStatus, errorThrown, doDeleteListItem, inObj);
+		});
+	}
+
+	/* ===============================================================================================
+	|
+	######                                             #     ######   ###
+	#     #  #    #  #####   #       #   ####         # #    #     #   #
+	#     #  #    #  #    #  #       #  #    #       #   #   #     #   #
+	######   #    #  #####   #       #  #           #     #  ######    #
+	#        #    #  #    #  #       #  #           #######  #         #
+	#        #    #  #    #  #       #  #    #      #     #  #         #
+	#         ####   #####   ######  #   ####       #     #  #        ###
+	|
+	==================================================================================================
+	*/
 
 	this.sprLib = {};
 
-	// OPTIONS
-
-	/**
-	* Getter/Setter for the app option APP_OPTS.baseUrl (our _api call base)
-	*
-	* @example
-	* // Set baseUrl
-	* sprLib.baseUrl('/sites/devtest');
-	* // Get baseUrl - returns '/sites/devtest'
-	* sprLib.baseUrl();
-	*
-	* @param {string} inStrDate - URL to use as the root of API calls
-	* @return {string} Return value of APP_OPTS.baseUrl
-	*/
-	sprLib.baseUrl = function setBaseUrl(inStr) {
-		// CASE 1: Act as a GETTER when no value passed
-		if ( typeof inStr !== 'string' || inStr == '' || !inStr ) return APP_OPTS.baseUrl;
-
-		// CASE 2: Act as a SETTER
-		APP_OPTS.baseUrl = inStr;
-		if (DEBUG) console.log('APP_OPTS.baseUrl set to: '+inStr);
-	}
-
 	// MAIN INIT METHOD
-
 	/**
 	* MAIN FUNC: Creates dataModel object and associated methods
 	*
-	* APP_MODELS.dataModel.objCols
+	* APP_MODELS.dataModel.listCols
 	* @example:
-	* objCols: {
+	* listName: 'ListName'
+	* listCols: { [[see below]] }
+	* queryFilter: "",
+	* queryOrderby: "",
+	* queryLimit: "10",
+	* onExec: function(){ console.log('FYI: onExec...'); },
+	* onDone: function(arrData){ console.log('Got data! Array length:'+arrData.length); },
+	* onFail: function(errMesg){ console.error('ERROR:'+errMesg); }
+	*
+	* APP_MODELS.dataModel.listCols
+	* @example:
+	* listCols: {
 	*   name:  { dataName:'Name'               },
 	*   badge: { dataName:'Badge_x0020_Number' }
 	* }
@@ -960,11 +1099,11 @@ EX: API calls using CAML
 
 			// B: Attach Model methods
 			objNew.add = function add(inObj){
-				// Overloading: Cols can be obejcts or a plain array or strings (field names)
-				if ( $.isArray(inObj.objCols) ) {
-					var objCols = {};
-					$.each(inObj.objCols, function(i,colStr){ objCols[colStr] = { dataName:colStr }; });
-					inObj.objCols = objCols;
+				// Overloading: Cols can be objects or a plain array or strings (field names)
+				if ( $.isArray(inObj.listCols) ) {
+					var listCols = {};
+					$.each(inObj.listCols, function(i,colStr){ listCols[colStr] = { dataName:colStr }; });
+					inObj.listCols = listCols;
 				}
 
 				// A: Add all key/val from passed object
@@ -1020,11 +1159,43 @@ EX: API calls using CAML
 	// LIST CRUD METHODS
 
 	/**
+	* TODO:
+	*/
+	sprLib.getListItems = function getListItems(inObj) {
+		// STEP 1: REALITY-CHECK
+
+		// STEP 2: Create internal object
+		var objNew = {
+			retryCnt : 0,
+			spObjMeta: {},
+			spArrData: [],
+			spObjData: {}
+		};
+
+		objNew.data = function data(inStrType){
+			return $.extend(true, [], objNew.spArrData);
+		}
+
+		// STEP 3: Setup columns
+		// A: Overloading: Cols can be objects or a plain array or strings (field names)
+		if ( $.isArray(inObj.listCols) ) {
+			var listCols = {};
+			$.each(inObj.listCols, function(i,colStr){ listCols[colStr] = { dataName:colStr }; });
+			inObj.listCols = listCols;
+		}
+		// B: Add all key/val from passed object
+		$.each(inObj, function(key,val){ objNew[key] = val });
+
+		// STEP 4: Gather/Populate data
+		doLoadListMetadata( objNew );
+	}
+
+	/**
     * Insert a new item into SP List/Library
 	*
 	* @example
 	* sprLib.insertItem({
-	*   objName: "Employees",
+	*   listName: "Employees",
 	*   jsonData: {
 	* 	  __metadata: { type:"SP.Data.EmployeesListItem" },
 	* 	  Full_x0020_Name: 'Marty McFly',
@@ -1037,7 +1208,7 @@ EX: API calls using CAML
 	*
 	* @param {object} inObj - The item to insert, in regular SharePoint JSON format
 	*                 Parameters:
-	*                 @param objName {string} (required)
+	*                 @param listName {string} (required)
 	*                 @param jsonData {object} (required) - col name/value key pairs
 	*                 @param onExec {function} - callback function for start of operation
 	*                 @param onDone {function} - callback function for completion of operation (returns data)
@@ -1045,17 +1216,17 @@ EX: API calls using CAML
 	* @return {object} Return newly created item in JSON format (return the data result from SharePoint).
 	*/
 	sprLib.insertItem = function insertItem(inObj) {
-		// STEP 1: REALITY-CHECK:
-		if ( !inObj.objName || !inObj.jsonData ) {
-			var strTemp = 'insertItem ERROR:\n\n'+ inEleId +'object parameter must contain: objName and jsonData!';
+		// STEP 1: REALITY-CHECK
+		if ( !inObj.listName || !inObj.jsonData ) {
+			var strTemp = 'insertItem ERROR:\n\n'+ inEleId +'object parameter must contain: listName and jsonData!';
 			( inObj.onFail ) ? inObj.onFail(strTemp) : console.error(strTemp);
 			return null;
 		}
 
-		// STEP 2: Set internal object values
+		// STEP 2: Add internal variables/methods
 		inObj.retryCnt = 0;
 
-		// STEP 3: Insert item/row
+		// STEP 3: Insert item
 		doInsertListItem(inObj);
 	};
 
@@ -1064,7 +1235,7 @@ EX: API calls using CAML
 	*
 	* @example
 	* sprLib.updateItem({
-	* 	objName: "Employees",
+	* 	listName: "Employees",
 	* 	jsonData: {
 	* 		__metadata: { type:"SP.Data.EmployeesListItem", etag:1 },
 	* 		Id: 1001,
@@ -1079,36 +1250,85 @@ EX: API calls using CAML
 	* @return {object} Return newly created item in JSON format (return the data result from SharePoint).
 	*/
 	sprLib.updateItem = function updateItem(inObj) {
+		// STEP 1: REALITY-CHECK
+		if ( !inObj.listName || !inObj.jsonData || !inObj.jsonData.Id ) {
+			var strTemp = 'updateItem ERROR:\n\n object parameter must contain: listName, jsonData, jsonData.Id!';
+			( inObj.onFail ) ? inObj.onFail(strTemp) : console.error(strTemp);
+			return null;
+		}
+
+		// STEP 2: Add internal variables/methods
 		inObj.retryCnt = 0;
+
+		// STEP 3: Update item
 		doUpdateListItem( inObj );
 	};
 
 	/**
 	* Delete an item from a SP List/Library
 		sprLib.deleteItem({
-			objName: "Employees",
+			listName: "Employees",
 			jsonData: {
 				__metadata: { type:"SP.Data.EmployeesListItem" },
 				Id        : 99
 			},
-			onDone: function(data){ alert('Done!); },
-			onFail: function(msg){ console.error(msg); }
+			onDone: function(){ alert('Done!); },
+			onFail: function(mesg){ console.error(mesg); }
 		});
 
  	*/
 	sprLib.deleteItem = function deleteItem(inObj) {
+		// STEP 1: REALITY-CHECK
+		if ( !inObj.listName || !inObj.jsonData || !inObj.jsonData.Id ) {
+			var strTemp = 'updateItem ERROR:\n\nobject parameter must contain: listName, jsonData, jsonData.Id!';
+			( inObj.onFail ) ? inObj.onFail(strTemp) : console.error(strTemp);
+			return null;
+		}
+
+		// STEP 2: Add internal variables/methods
 		inObj.retryCnt = 0;
-		//doDeleteListItem( inObj );
-		// TODO:
+
+		// STEP 3: Insert item
+		doDeleteListItem( inObj );
 	};
 
 	// LIST API METHODS
 
 	// TODO: function that returns all the keys that SP provides via:  ../_api/web/GetByTitle
-	// EX: https://www.sharepoint.com/sites/dev/_api/web/lists/getbytitle('Employees')/
-	// super useful for writing our own objCols objects!
+	// super useful for writing our own listCols objects!
 	// have this method return {dataName: dataType: isNumPct etc! }
-	// sprLib.getListColumnMeta = function getListColumnMeta(inObj) {}
+	/*
+	sprLib.restCall({
+		restUrl: '/sites/dev/_api/web/sitegroups',
+		restType: ["GET" | "POST"],
+		queryCols: {
+			title: { dataName:'Title' },
+			loginName: { dataName:'LoginName' },
+			editAllowed: { dataName:'AllowMembersEditMembership' }
+		},
+		queryFilter:   "AllowMembersEditMembership eq 1",
+		queryOrderby:  "Title",
+		queryMaxItems: 10,
+		onDone: function(arrayResults){ console.table(arrayResults) }
+	});
+	*/
+	// EX: https://gitbrent.sharepoint.com/sites/dev/_api/web/lists/getbytitle('Employees')/
+	// EX: https://gitbrent.sharepoint.com/sites/dev/_api/web/sitegroups
+	sprLib.restCall = function restCall(inObj) {
+		// STEP 1: REALITY-CHECK
+		if ( !inObj.restUrl ) {
+			var strTemp = 'restQuery ERROR:\n\n object parameter must contain: restUrl';
+			( inObj.onFail ) ? inObj.onFail(strTemp) : console.error(strTemp);
+			return null;
+		}
+
+		// STEP 2: Add internal vars/methods
+		inObj.retryCnt = 0;
+
+		// STEP 3: Exec query
+		doRestCall(inObj);
+	}
+
 
 	// USER/GROUP METHODS
 
@@ -1117,7 +1337,7 @@ EX: API calls using CAML
 	sprLib.getCurrentUser({ onDone: function(data){ console.log(data.Id +"/"+ data.Title +"/"+ data.Email); } });
 	*/
 	sprLib.getCurrentUser = function getCurrentUser(inObj) {
-		dogetCurrentUser(inObj);
+		doGetCurrentUser(inObj);
 	}
 
 	/**
@@ -1128,19 +1348,44 @@ EX: API calls using CAML
 		});
 	*/
 	sprLib.getCurrentUserGroups = function getCurrentUserGroups(inObj) {
-		doGetCurrUserGroups(inObj);
+		doGetCurrentUserGroups(inObj);
 	}
 
 	/**
-	* Get user info (by ID)
+	* Get user info by Id
 	* EX:
-		sprLib.getUserInfo({
+		sprLib.getUserById({
 			userId: 1001,
-			onDone: function(data){ console.log(data.Title +" / "+ data.Email); }
+			onDone: function(objUser){ console.log(objUser.Title +" / "+ objUser.Email); }
 		});
 	*/
-	sprLib.getUserInfo = function getUserInfo(inObj) {
-		doGetUserInfo(inObj);
+	sprLib.getUserById = function getUserById(inObj) { doGetUserById(inObj); }
+	// TODO: sprLib.getUserGroupsById = function getUserGroupsById(inObj) { doGetUserGroupsById(inObj); }
+
+	// SITE METHODS
+	// TODO: Get Site Groups, Usage etc. - some good common methods here
+
+	// OPTIONS
+
+	/**
+	* Getter/Setter for the app option APP_OPTS.baseUrl (our _api call base)
+	*
+	* @example
+	* // Set baseUrl
+	* sprLib.baseUrl('/sites/devtest');
+	* // Get baseUrl - returns '/sites/devtest'
+	* sprLib.baseUrl();
+	*
+	* @param {string} inStrDate - URL to use as the root of API calls
+	* @return {string} Return value of APP_OPTS.baseUrl
+	*/
+	sprLib.baseUrl = function setBaseUrl(inStr) {
+		// CASE 1: Act as a GETTER when no value passed
+		if ( typeof inStr !== 'string' || inStr == '' || !inStr ) return APP_OPTS.baseUrl;
+
+		// CASE 2: Act as a SETTER
+		APP_OPTS.baseUrl = inStr;
+		if (DEBUG) console.log('APP_OPTS.baseUrl set to: '+inStr);
 	}
 
 	// MISC METHODS
