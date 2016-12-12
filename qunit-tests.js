@@ -31,6 +31,8 @@ QUnit.test("getCurrentUserGroups", function(assert){
 	sprLib.getCurrentUserGroups({
 		onDone: function(arrayGroups){
 			assert.ok( $.isArray(arrayGroups), "onDone result is an array" );
+			assert.ok( arrayResults.length > 0, "arrayResults.length > 0" );
+			assert.ok( (arrayGroups[0].Id && arrayGroups[0].Title ), "arrayResults[0] is valid -> Id: "+arrayGroups[0].Id+" / Title: "+arrayGroups[0].Title );
 			var arrGroups = [];
 			$.each(arrayGroups, function(idx,group){ arrGroups.push(group.Title) });
 			assert.equal( arrGroups.toString(), "Dev Site Owners", "UsersGroups = 'Dev Site Owners'" );
@@ -118,7 +120,8 @@ QUnit.test("sprLib.getListItems() - with listCols", function(assert){
 		onDone: function(arrayResults){
 			assert.ok( $.isArray(arrayResults), "onDone result is an array" );
 			assert.ok( arrayResults.length > 0, "arrayResults.length > 0" );
-			assert.ok( (arrayResults[0].id && typeof arrayResults[0].name !== 'undefined'), "arrayResults[0] is valid - Id: "+arrayResults[0].id+" / Title: "+arrayResults[0].name );
+			assert.ok( (arrayResults[0].__metadata && typeof arrayResults[0].__metadata !== 'undefined'), "arrayResults[0] is valid -> __metadata: "+ arrayResults[0].__metadata );
+			assert.ok( (arrayResults[0].id         && typeof arrayResults[0].name       !== 'undefined'), "arrayResults[0] is valid -> Id: "+arrayResults[0].id+" / Title: "+arrayResults[0].name );
 			// TODO: Move to the (as yet undone) MODEL TEST section
 			/*
 			QUnit.test("sprLib.model('Emp').data() method", function(assert){

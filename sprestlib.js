@@ -800,7 +800,7 @@ EX: Form Binding:
 		// STEP 2: Exec SharePoint REST Query
 		// NOTE: Use CurrentUser service as it is included in SP-Foundation and will work for everyone (Users will need SP-Enterprise for UserProfiles service to work)
 		$.ajax({
-			url: APP_OPTS.baseUrl+"/_api/Web/CurrentUser?$select=Groups/Title&$expand=Groups",
+			url: APP_OPTS.baseUrl+"/_api/Web/CurrentUser?$select=Groups/Id,Groups/Title&$expand=Groups",
 			type: "GET",
 			cache: false,
 			headers: {"Accept":"application/json; odata=verbose"}
