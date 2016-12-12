@@ -28,7 +28,7 @@
 
 **************************************************************************************************
 # Installation
-SpRestLib requires only one additional JavaScript library to function:
+SpRestLib only requires that the jQuery library be included:
 ```javascript
 <script lang="javascript" src="SpRestLib/libs/jquery.min.js"></script>
 <script lang="javascript" src="SpRestLib/sprestlib.js"></script>
@@ -43,7 +43,7 @@ SpRestLib requires only one additional JavaScript library to function:
 Get the current user Id, Name and Email
 NOTE: Uses the basic SP User service - not the Enterprise-licensed User Profile service).
 ```javascript
-sprLib.getCurrUser({
+sprLib.getCurrentUser({
 	onDone: function(data){ console.log("Id:" + data.Id +", Title:"+ data.Title +", Email:"+ data.Email); }
 });
 RESULT: Id:7, Title:Brent Ely, Email:brent@site.onmicrosoft.com
@@ -51,7 +51,7 @@ RESULT: Id:7, Title:Brent Ely, Email:brent@site.onmicrosoft.com
 
 ### Current User Groups
 ```javascript
-sprLib.getCurrUserGroups({
+sprLib.getCurrentUserGroups({
 	onDone: function(data){ console.log("Current User Groups: " + data.toString()); }
 });
 RESULT: Current User Groups: Dev Site Owners, Site Owners
@@ -59,7 +59,7 @@ RESULT: Current User Groups: Dev Site Owners, Site Owners
 
 ### User Info (by ID)
 ```javascript
-sprLib.getUserInfo({
+sprLib.getUserById({
 	userId: 9,
 	onDone: function(data){ console.log("Title:" + data.Title + ", Email:"+ data.Email); }
 });
@@ -70,9 +70,9 @@ RESULT: Title:Brent Ely, Email:brent@site.onmicrosoft.com
 
 ### Read Data
 ```javascript
-sprLib.model('Employees').add({
-	objName: 'Employees',
-	objCols: {
+sprLib.getListItems({
+	listName: 'Employees',
+	listCols: {
 		name:     { dataName:'Name'                                                           },
 		badgeNum: { dataName:'Badge_x0020_Number'                                             },
 		hireDate: { dataName:'Hire_x0020_Date',       dispName:'Hire Date', dataFormat:'INTL' },
@@ -80,9 +80,9 @@ sprLib.model('Employees').add({
 		profile:  { dataName:'Job_x0020_Profile'                                              },
 		comments: { dataName:'Comments'                                                       }
 	},
-	ajaxFilter: "Job_x0020_Profile eq 'Manager'",
-	ajaxMaxItems: "10",
-	ajaxOrderby: "Name",
+	queryFilter: "Job_x0020_Profile eq 'Manager'",
+	queryMaxItems: "10",
+	queryOrderby: "Name",
 	onExec: function(){ console.log('Employees onExec...'); },
 	onDone: function(data){ console.log('Employees onDone! Data length:'+data.length); },
 	onFail: function(mssg){ console.error('ERROR:'+mesg); }
@@ -92,7 +92,7 @@ sprLib.model('Employees').add({
 ### Insert Data
 ```javascript
 sprLib.insertItem({
-	objName: 'Employees',
+	listName: 'Employees',
 	jsonData: {
 		__metadata: { type:"SP.Data."+ 'Employees' +"ListItem" },
 		Name: 'Mr. SP REST Library',
@@ -106,26 +106,26 @@ sprLib.insertItem({
 });
 ```
 
-### Updatye Data
+### Update Data (**WIP**)
 ```javascript
 sprLib.updateItem({
 	onFail: function(mesg){ console.error('ERROR: '+mesg); }
 });
 ```
 
-### Delete Data
+### Delete Data (**WIP**)
 ```javascript
 sprLib.deleteItem({
 	onFail: function(mesg){ console.error('ERROR: '+mesg); }
 });
 ```
 
-## HTML Form Functions: (WIP)
+## HTML Form Functions: (**WIP**)
 ```javascript
 doParseFormFieldsIntoJson(inModel,inEleId);
 ```
 
-## One-Way Data Binding (WIP)
+## One-Way Data Binding (**WIP**)
 ```javascript
 doSyncListItem(inModel, inObj);
 ```

@@ -1295,9 +1295,13 @@ EX: Form Binding:
 	// LIST API METHODS
 
 	// TODO: function that returns all the keys that SP provides via:  ../_api/web/GetByTitle
-	// super useful for writing our own listCols objects!
-	// have this method return {dataName: dataType: isNumPct etc! }
-	/*
+	// super useful for writing our own listCols objects and/or seeing all List cols/types!
+	// This method will return a metadata-like object: {dataName: dataType: isNumPct etc! }
+
+	/**
+	* Execute an ad-hoc REST API query to one of many endpoints
+	*
+	* @example
 	sprLib.restCall({
 		restUrl: '/sites/dev/_api/web/sitegroups',
 		restType: ["GET" | "POST"],
