@@ -304,19 +304,19 @@ EX: Form Binding:
 		});
 
 		// B: Add maxrows as default in SP2013 is a paltry 100 rows
-		strAjaxUrl += (strAjaxUrl.indexOf('?$') > -1 ? '&':'?') + '$top=' + ( inModel.ajaxMaxItems ? inModel.ajaxMaxItems : APP_OPTS.maxRows );
+		strAjaxUrl += (strAjaxUrl.indexOf('?$') > -1 ? '&':'?') + '$top=' + ( inModel.queryMaxItems ? inModel.queryMaxItems : APP_OPTS.maxRows );
 
 		// C: Add expand (if any)
 		if ( strExpands ) strAjaxUrl += (strAjaxUrl.indexOf('?$') > -1 ? '&':'?') + '$expand=' + strExpands;
 
 		// D: Add filter (if any)
 		if ( inSyncObj && inSyncObj.id ) strAjaxUrl += (strAjaxUrl.indexOf('?$') > -1 ? '&':'?') + '$filter=Id%20eq%20' + inSyncObj.id;
-		else if ( inModel.ajaxFilter ) {
-			strAjaxUrl += (strAjaxUrl.indexOf('?$') > -1 ? '&':'?') + '$filter' + ( inModel.ajaxFilter.indexOf('%') == -1 ? encodeURI(inModel.ajaxFilter) : inModel.ajaxFilter );
+		else if ( inModel.queryFilter ) {
+			strAjaxUrl += (strAjaxUrl.indexOf('?$') > -1 ? '&':'?') + '$filter' + ( inModel.queryFilter.indexOf('%') == -1 ? encodeURI(inModel.queryFilter) : inModel.queryFilter );
 		}
 
 		// E: Add orderby (if any)
-		if ( inModel.ajaxOrderby ) strAjaxUrl += (strAjaxUrl.indexOf('?$') > -1 ? '&':'?') + '$orderby=' + inModel.ajaxOrderby;
+		if ( inModel.queryOrderby ) strAjaxUrl += (strAjaxUrl.indexOf('?$') > -1 ? '&':'?') + '$orderby=' + inModel.queryOrderby;
 
 		// STEP 4: Fetch data from SP
 		$.ajax({
