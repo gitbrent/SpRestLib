@@ -287,38 +287,41 @@ EX: Form Binding:
 		// STEP 1: Var/UI updates
 		inModel.retryCnt++;
 
-		// STEP 2: Start bulding AJAX URL
+		// STEP 2: Start building REST URL
 		strAjaxUrl = APP_OPTS.baseUrl + "/_api/lists/getbytitle('"+ inModel.listName.replace(/\s/gi,'%20') +"')/items";
-		// If columsn were provided, ensure we select `Id` for use in building our data model SP-array/object
+		// If columns were provided, ensure we select `Id` for use in building our data model SP-array/object
 		if ( inModel.listCols ) strAjaxUrl = strAjaxUrl+"?$select=Id,";
+		// TODO: Just get the Id from __metadata instead! (20161212)
 
-		// STEP 3: Continue building query
-		// A: Add columns
-		$.each(inModel.listCols, function(key,col){
-			if ( !col.dataName ) { console.error('ERROR: cannot read ["dataName"] on '); console.error(col); return false; }
-			// A:
-			if ( strAjaxUrl.substring(strAjaxUrl.length-1) == '=' ) strAjaxUrl += col.dataName;
-			else strAjaxUrl += ( strAjaxUrl.lastIndexOf(',') == strAjaxUrl.length-1 ? col.dataName : ','+col.dataName );
-			// B:
-			if ( col.dataName.indexOf('/') > -1 ) strExpands += (strExpands == '' ? '' : ',') + col.dataName.substring(0,col.dataName.indexOf('/'));
-		});
+		// STEP 3: Continue building REST URL
+		{
+			// A: Add columns
+			$.each(inModel.listCols, function(key,col){
+				if ( !col.dataName ) return; // Skip columns without a 'dataName' key
+				// 1:
+				if ( strAjaxUrl.substring(strAjaxUrl.length-1) == '=' ) strAjaxUrl += col.dataName;
+				else strAjaxUrl += ( strAjaxUrl.lastIndexOf(',') == strAjaxUrl.length-1 ? col.dataName : ','+col.dataName );
+				// 2:
+				if ( col.dataName.indexOf('/') > -1 ) strExpands += (strExpands == '' ? '' : ',') + col.dataName.substring(0,col.dataName.indexOf('/'));
+			});
 
-		// B: Add maxrows as default in SP2013 is a paltry 100 rows
-		strAjaxUrl += (strAjaxUrl.indexOf('?$') > -1 ? '&':'?') + '$top=' + ( inModel.queryMaxItems ? inModel.queryMaxItems : APP_OPTS.maxRows );
+			// B: Add maxrows as default in SP2013 is a paltry 100 rows
+			strAjaxUrl += (strAjaxUrl.indexOf('?$') > -1 ? '&':'?') + '$top=' + ( inModel.queryMaxItems ? inModel.queryMaxItems : APP_OPTS.maxRows );
 
-		// C: Add expand (if any)
-		if ( strExpands ) strAjaxUrl += (strAjaxUrl.indexOf('?$') > -1 ? '&':'?') + '$expand=' + strExpands;
+			// C: Add expand (if any)
+			if ( strExpands ) strAjaxUrl += (strAjaxUrl.indexOf('?$') > -1 ? '&':'?') + '$expand=' + strExpands;
 
-		// D: Add filter (if any)
-		if ( inSyncObj && inSyncObj.id ) strAjaxUrl += (strAjaxUrl.indexOf('?$') > -1 ? '&':'?') + '$filter=Id%20eq%20' + inSyncObj.id;
-		else if ( inModel.queryFilter ) {
-			strAjaxUrl += (strAjaxUrl.indexOf('?$') > -1 ? '&':'?') + '$filter=' + ( inModel.queryFilter.indexOf('%') == -1 ? encodeURI(inModel.queryFilter) : inModel.queryFilter );
+			// D: Add filter (if any)
+			if ( inSyncObj && inSyncObj.id ) strAjaxUrl += (strAjaxUrl.indexOf('?$') > -1 ? '&':'?') + '$filter=Id%20eq%20' + inSyncObj.id;
+			else if ( inModel.queryFilter ) {
+				strAjaxUrl += (strAjaxUrl.indexOf('?$') > -1 ? '&':'?') + '$filter=' + ( inModel.queryFilter.indexOf('%') == -1 ? encodeURI(inModel.queryFilter) : inModel.queryFilter );
+			}
+
+			// E: Add orderby (if any)
+			if ( inModel.queryOrderby ) strAjaxUrl += (strAjaxUrl.indexOf('?$') > -1 ? '&':'?') + '$orderby=' + inModel.queryOrderby;
 		}
 
-		// E: Add orderby (if any)
-		if ( inModel.queryOrderby ) strAjaxUrl += (strAjaxUrl.indexOf('?$') > -1 ? '&':'?') + '$orderby=' + inModel.queryOrderby;
-
-		// STEP 4: Fetch data from SP
+		// STEP 4: Send AJAX REST query
 		$.ajax({
 			url: strAjaxUrl,
 			type: (inModel.ajaxType || "GET"),
@@ -340,16 +343,24 @@ EX: Form Binding:
 				// B3: Add columns specified -OR- add everything we got back (mirror SP behavior)
 				if ( inModel.listCols ) {
 					$.each(inModel.listCols, function(key,col){
-						var arrCol = col.dataName.replace(/\//gi,'.').split('.');
-						var colVal = ( arrCol.length > 1 ? result[arrCol[0]][arrCol[1]] : result[arrCol[0]] );
-						// DESIGN: Not all values can be taken at return value - things like dates have to be turned into actual Date objects
-						if ( col.dataType == 'DateTime' ) {
-							objRow[key] = new Date(colVal);
+						var arrCol = [];
+						var colVal = "";
+
+						if ( col.dataName ) {
+							arrCol = col.dataName.replace(/\//gi,'.').split('.');
+							colVal = ( arrCol.length > 1 ? result[arrCol[0]][arrCol[1]] : result[arrCol[0]] );
+							// TODO: ^^^ results like 'Account/Title' will be created above (!)
+							// TODO: is above still true?? (20161212)
 						}
+						else if ( col.dataFunc ) {
+							colVal = col.dataFunc(result);
+						}
+
+						// Convert: Not all values can be taken at return value (dates have to be turned into actual Date objects, etc.)
+						if ( col.dataType == 'DateTime' ) { objRow[key] = new Date(colVal); }
 						else {
 							objRow[key] = ( APP_OPTS.cleanColHtml && col.listDataType == 'string' ? colVal.replace(/<div(.|\n)*?>/gi,'').replace(/<\/div>/gi,'') : colVal );
 						}
-						// TODO-1.0: ^^ results like 'Account/Title' will be created above (!)
 					});
 				}
 				else {

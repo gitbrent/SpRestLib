@@ -5,12 +5,8 @@
 
 ### Main Features:
 * **REST Easy:** Perform SharePoint List/Library CRUD operations with a single function call using a simple object
-* **SP One-Liners:** Reduces common web service calls to a single line (e.g.: Get Current User)
-* **Form Binding:** Populates, parses and provides one-way data-binding on form input elements
-
-### Additional Features:
-* Bind form elements to your SharePoint DataModel using data-bind declarative binding
-* Populate form elements using data-bind declarative binding system like Knockout or AngluarJS
+* **Common Tasks:** Reduces common web service calls to a single line (e.g.: Get Current User)
+* **Form Population:** Populate form elements using data-bind declarative binding system like Knockout or AngluarJS
 
 ### Library Design:
 * Modern: Built for [SharePoint 2013 API](https://msdn.microsoft.com/en-us/library/office/jj860569.aspx) / [OData v3](http://www.odata.org/documentation/odata-version-3-0/)
@@ -44,7 +40,7 @@ Get the current user Id, Name and Email
 NOTE: Uses the basic SP User service - not the Enterprise-licensed User Profile service).
 ```javascript
 sprLib.getCurrentUser({
-	onDone: function(data){ console.log("Id:" + data.Id +", Title:"+ data.Title +", Email:"+ data.Email); }
+	onDone: function(objUser){ console.log("Id:" + objUser.Id +", Title:"+ objUser.Title +", Email:"+ objUser.Email); }
 });
 RESULT: Id:7, Title:Brent Ely, Email:brent@site.onmicrosoft.com
 ```
@@ -52,16 +48,16 @@ RESULT: Id:7, Title:Brent Ely, Email:brent@site.onmicrosoft.com
 ### Current User Groups
 ```javascript
 sprLib.getCurrentUserGroups({
-	onDone: function(data){ console.log("Current User Groups: " + data.toString()); }
+	onDone: function(arrGroups){ console.log("Current User Groups count = " + arrGroups.length); }
 });
-RESULT: Current User Groups: Dev Site Owners, Site Owners
+RESULT: Current User Groups count: 2
 ```
 
 ### User Info (by ID)
 ```javascript
 sprLib.getUserById({
 	userId: 9,
-	onDone: function(data){ console.log("Title:" + data.Title + ", Email:"+ data.Email); }
+	onDone: function(objUser){ console.log("Title:" + objUser.Title + ", Email:"+ objUser.Email); }
 });
 RESULT: Title:Brent Ely, Email:brent@site.onmicrosoft.com
 ```
@@ -120,17 +116,7 @@ sprLib.deleteItem({
 });
 ```
 
-## HTML Form Functions: (**WIP**)
-```javascript
-doParseFormFieldsIntoJson(inModel,inEleId);
-```
-
-## One-Way Data Binding (**WIP**)
-```javascript
-doSyncListItem(inModel, inObj);
-```
-
-## Form Population
+# Form Population (**WIP**)
 Populate a &lt;select&gt; form element with "name"/"id" (option text/value) of all items in the `Employees` List:
 ```html
 <select id="selEmployees" data-bind='{"foreach":{"model":"Employees", "text":"name", "value":"id"}}'></select>
@@ -171,16 +157,15 @@ sprLib.getCurrUser({
 
 
 **************************************************************************************************
-# Configurable!
+# Configurable! (WIP)
 var APP_OPTS and APP_CSS can be edited to set base URL, max rows returned, etc easily
-
 
 **************************************************************************************************
 # Issues / Suggestions
 
-Please file issues or suggestions on the [issues page on github](https://github.com/gitbrent/SpRestLib/issues/new), or even better, [submit a pull request](https://github.com/gitbrent/SpRestLib/pulls)!
+Please file issues or suggestions on the [issues page on github](https://github.com/gitbrent/SpRestLib/issues/new), or even better, [submit a pull request](https://github.com/gitbrent/SpRestLib/pulls). Feedback is always welcome!
 
-When reporting bugs or issues, if you could include a link to a simple jsbin or similar demonstrating the issue, that'd be really helpful.
+When reporting issues, please include a code snippet or a link demonstrating the problem.
 
 **************************************************************************************************
 # Special Thanks

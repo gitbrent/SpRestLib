@@ -31,8 +31,8 @@ QUnit.test("getCurrentUserGroups", function(assert){
 	sprLib.getCurrentUserGroups({
 		onDone: function(arrayGroups){
 			assert.ok( $.isArray(arrayGroups), "onDone result is an array" );
-			assert.ok( arrayResults.length > 0, "arrayResults.length > 0" );
-			assert.ok( (arrayGroups[0].Id && arrayGroups[0].Title ), "arrayResults[0] is valid -> Id: "+arrayGroups[0].Id+" / Title: "+arrayGroups[0].Title );
+			assert.ok( arrayGroups.length > 0, "arrayGroups.length > 0" );
+			assert.ok( (arrayGroups[0].Id && arrayGroups[0].Title ), "arrayGroups[0] is valid -> Id: "+arrayGroups[0].Id+" / Title: "+arrayGroups[0].Title );
 			var arrGroups = [];
 			$.each(arrayGroups, function(idx,group){ arrGroups.push(group.Title) });
 			assert.equal( arrGroups.toString(), "Dev Site Owners", "UsersGroups = 'Dev Site Owners'" );
@@ -45,7 +45,7 @@ QUnit.test("getCurrentUserGroups", function(assert){
 QUnit.module( "sprLib.restCall" );
 // ================================================================================================
 
-QUnit.test("sprLib.restCall /_api/web/sitegroups", function(assert){
+QUnit.test("sprLib.restCall - /_api/web/sitegroups", function(assert){
 	var done = assert.async();
 	sprLib.restCall({
 		restUrl: '/sites/dev/_api/web/sitegroups',
@@ -65,7 +65,7 @@ QUnit.test("sprLib.restCall /_api/web/sitegroups", function(assert){
 	});
 });
 
-QUnit.test("sprLib.restCall /_api/web/lists", function(assert){
+QUnit.test("sprLib.restCall - /_api/web/lists", function(assert){
 	var done = assert.async();
 	sprLib.restCall({
 		restUrl: '/sites/dev/_api/web/lists/',
@@ -79,7 +79,7 @@ QUnit.test("sprLib.restCall /_api/web/lists", function(assert){
 });
 
 // ================================================================================================
-QUnit.module( "sprLib.model" );
+QUnit.module( "sprLib.getListItems" );
 // ================================================================================================
 
 QUnit.test("sprLib.getListItems() - onExec", function(assert){
@@ -149,6 +149,26 @@ QUnit.test("sprLib.getListItems() - w/o listCols", function(assert){
 				assert.ok( $.isArray(sprLib.model('Employees').data('array')), "sprLib.model().add().data('array') is an array" );
 				assert.ok( (typeof sprLib.model('Employees').data('object') === 'object'), "sprLib.model().add().data('object') is an object" );
 			});
+			done();
+		}
+	});
+});
+
+QUnit.test("sprLib.getListItems() - dataFunc listCols", function(assert){
+	var done = assert.async();
+	sprLib.getListItems({
+		listName: 'Employees',
+		listCols: {
+			name:     { dataName:'Name' },
+			badgeNum: { dataName:'Badge_x0020_Number' },
+			funcTest: { dataFunc:function(objItem){ return objItem.Name +' ('+ objItem.Badge_x0020_Number+')' } }
+		},
+		queryMaxItems: 10,
+		onDone: function(arrayResults){
+			assert.ok( $.isArray(arrayResults), "onDone result is an array" );
+			assert.ok( arrayResults.length > 0, "arrayResults.length > 0" );
+			assert.ok( ( arrayResults[0].badgeNum ), "arrayResults[0] is valid - badgeNum: " + arrayResults[0].badgeNum );
+			assert.ok( ( arrayResults[0].funcTest ), "arrayResults[0] is valid - funcTest: " + arrayResults[0].funcTest );
 			done();
 		}
 	});
