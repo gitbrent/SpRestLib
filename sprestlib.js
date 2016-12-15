@@ -573,7 +573,7 @@ EX: Form Binding:
 									var $cell = $('<td/>');
 									if      ( val && inModel.listCols[key].isNumPct && !isNaN(val) )               $cell.text( Math.round(val*100)+'%' );
 									else if ( val && inModel.listCols[key].dataType == 'Currency' && !isNaN(val) ) $cell.text( formatCurrency(val) );
-									else if ( val && inModel.listCols[key].dataType == 'DateTime' )                $cell.text( formatDate(val, (inModel.listCols[key].dataFormat||'INTL')) );
+									else if ( val && inModel.listCols[key].dataType == 'DateTime' )                $cell.text( formatDate(val, (inModel.listCols[key].dateFormat||'INTL')) );
 									else                                                                           $cell.text( (val || '') );
 
 									// C: Add CSS dispStyle and/or dispClass (if any)
@@ -678,7 +678,7 @@ EX: Form Binding:
 			// CASE: <jquery-ui datepicker>
 			else if ( $(this).val() && $(this).hasClass('hasDatepicker') ) {
 				objReturn.jsonSpData[dataName] = $(this).datepicker('getDate').toISOString();
-				objReturn.jsonFormat[strCol] = ( inModel.listCols[strCol].dataFormat ? bdeLib.localDateStrFromSP(null,$(this).datepicker('getDate'),inModel.listCols[strCol].dataFormat) : $(this).datepicker('getDate').toISOString() );
+				objReturn.jsonFormat[strCol] = ( inModel.listCols[strCol].dateFormat ? bdeLib.localDateStrFromSP(null,$(this).datepicker('getDate'),inModel.listCols[strCol].dateFormat) : $(this).datepicker('getDate').toISOString() );
 			}
 			// CASE: <select:single>
 			else if ( $(this).val() && $(this).prop('type') == 'select-one' ) {
@@ -1090,7 +1090,7 @@ EX: Form Binding:
 	* |--------------|---------|-------|-------------------|----------------------|
 	* | `dataName`   | string  | no    | SP.InternalName   | 'Hire_x0020_Date'    |
 	* | `dispName`   | string  | no    | display name      | 'Hire Date'          |
-	* | `dataFormat` | string  | no    | date format       | `INTL`, `INTLTIME` TODO |
+	* | `dateFormat` | string  | no    | date format       | `INTL`, `INTLTIME` TODO |
 	* | `dataType`   | string  | (app) | SP.FieldType      | `Integer`, `Text, `Note, `DateTime`, `Choice`, `Lookup`, `Boolean`, `Currency` et al. |
 	* | `isAppend`   | boolean | (app) | Append Text Field | `true` or `false`    |
 	* | `isNumPct`   | boolean | (app) | "Show as Percent" | `true` or `false`    |

@@ -36,13 +36,13 @@ SpRestLib only requires that the jQuery library be included:
 ## Users / Groups
 
 ### Get Current User
-* Returns information about the current user.
-* NOTE: Uses the basic SP User service - not the Enterprise-licensed User Profile service).
+* Returns information about the current user
+* NOTE: Uses the basic SP User service (not the Enterprise licensed User Profile service)
 
 #### Options
-| Option       | Type     | Default   | Description         | Returns                             |
+| Option       | Type     | Required? | Description         | Returns                             |
 | :----------- | :------- | :-------- | :------------------ | :---------------------------------- |
-| `onDone`     | function |           | success callback    | the user object: { Id:[int], Title:[string], Email:[string] } |
+| `onDone`     | function | yes       | success callback    | the user object: { Id:(*int*), Title:(*string*), Email:(*string*) } |
 | `onExec`     | function |           | execute callback    |                                     |
 | `onFail`     | function |           | fail callback       | error message [string] |
 
@@ -61,9 +61,9 @@ Id:7 - Title:Brent Ely - Email:brent@site.onmicrosoft.com
 * Returns the current user's permission groups.
 
 #### Options
-| Option       | Type     | Default   | Description         | Returns                             |
+| Option       | Type     | Required? | Description         | Returns                             |
 | :----------- | :------- | :-------- | :------------------ | :---------------------------------- |
-| `onDone`     | function |           | success callback    | array of Group objects: [{ Id:[int], Title:[string] }] |
+| `onDone`     | function | yes       | success callback    | array of Group objects: [{ Id:(*int*), Title:(*string*) }] |
 | `onExec`     | function |           | execute callback    |                        |
 | `onFail`     | function |           | fail callback       | error message [string] |
 
@@ -83,13 +83,13 @@ Group[0] info: 9 - Dev Site Owners
 ```
 
 ### Get User By ID
-* Returns the given user's information.
+* Returns the given user's information
 
 #### Options
-| Option       | Type     | Default   | Description         | Returns                             |
+| Option       | Type     | Required? | Description         | Returns                             |
 | :----------- | :------- | :-------- | :------------------ | :---------------------------------- |
-| `userId`     | number   |           | user's ID           |                        |
-| `onDone`     | function |           | success callback    | array of Group objects: [{ Id:[int], Title:[string] }] |
+| `userId`     | number   | yes       | user's ID           |                        |
+| `onDone`     | function | yes       | success callback    | the user object: { Id:(*int*), Title:(*string*), Email:(*string*) } |
 | `onExec`     | function |           | execute callback    |                        |
 | `onFail`     | function |           | fail callback       | error message [string] |
 
@@ -102,33 +102,70 @@ sprLib.getUserById({
 ```
 #### Sample Result
 ```javascript
-Title: Brent Ely -  Email: brent@site.onmicrosoft.com
+Title: Brent Ely - Email: brent@site.onmicrosoft.com
 ```
 
 ## List/Library CRUD Operations
 
-### Read Data
+### Get List/Library Data
+* Returns List/Library column values
+* Omitting `listCols` will result in every column being returned (mimics SharePoint default behavior)
+
+#### Options
+| Option       | Type     | Required? | Description           | Possible Values / Returns           |
+| :----------- | :------- | :-------- | :-------------------- | :---------------------------------- |
+| `listName`   | string   | yes       | the List/Library name |     |
+| `listCols`   | array *OR* object |  | column names to be returned | array of column names *OR* object (see below) |
+| `queryFilter` | string   |          | query filter          | utilizes OData style [Query Operators](https://msdn.microsoft.com/en-us/library/office/fp142385.aspx#Anchor_7) |
+| `queryMaxItems` | string |          | max items to return   | 1-*N* |
+| `queryOrderby`  | string |          | column(s) to order by |  |
+| `onDone`     | function |           | success callback      | array of Group objects: [{ Id:[int], Title:[string] }] |
+| `onExec`     | function |           | execute callback      |                        |
+| `onFail`     | function |           | fail callback         | error message [string] |
+
+#### listCols Object
+| Option       | Type     | Required? | Description           | Possible Values / Return Values     |
+| :----------- | :------- | :-------- | :-------------------- | :---------------------------------- |
+| `dataName`   | string   |           | the column name       | the fixed, back-end REST column name (use descList() if unknown) |
+| `dataFunc`   | function |           | function to use for returning a result | use a custom function to transform the query result (see below) |
+| `dispName`   | string   |           | the name to use when displaying results in table headers, etc. |  |
+| `dateFormat` | string   |           | format to use when returning/displaying date | `INTL`, `INTLTIME`, `YYYYMMDD`, `ISO`, 'US' |
+
+#### listCols dataFunc
+There are many times where you'll need more than a simple column value.  For example, I often provide a link to the InfoPath
+form so users can edit the item directly.
+
+The `dataFunc` option allows you access to the entire result set and to return any type of value.  See sample below where
+editLink is created.
+
+#### Sample Code
 ```javascript
 sprLib.getListItems({
 	listName: 'Employees',
 	listCols: {
+		id:       { dataName:'Id'                                                             },
 		name:     { dataName:'Name'                                                           },
 		badgeNum: { dataName:'Badge_x0020_Number'                                             },
-		hireDate: { dataName:'Hire_x0020_Date',       dispName:'Hire Date', dataFormat:'INTL' },
+		hireDate: { dataName:'Hire_x0020_Date',       dispName:'Hire Date', dateFormat:'INTL' },
 		utilPct:  { dataName:'Utilization_x0020_Pct', dispName:'Util %'                       },
 		profile:  { dataName:'Job_x0020_Profile'                                              },
-		comments: { dataName:'Comments'                                                       }
+		comments: { dataName:'Comments',                                                      },
+		editLink: { dataFunc:function(result){ return '<a href="https://office.com/list/edit.aspx?Id=' + result.Id + '">Edit</a>' } }
 	},
-	queryFilter: "Job_x0020_Profile eq 'Manager'",
+	queryFilter:   "Job_x0020_Profile eq 'Manager'",
 	queryMaxItems: "10",
-	queryOrderby: "Name",
-	onExec: function(){ console.log('Employees onExec...'); },
+	queryOrderby:  "Name",
+	onExec: function()    { console.log('Employees onExec...'); },
 	onDone: function(data){ console.log('Employees onDone! Data length:'+data.length); },
 	onFail: function(mssg){ console.error('ERROR:'+mesg); }
 });
 ```
+#### Sample Result
+```javascript
+TODO
+```
 
-### Insert Data
+### Insert List/Library Data
 ```javascript
 sprLib.insertItem({
 	listName: 'Employees',
