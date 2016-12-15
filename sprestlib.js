@@ -49,7 +49,7 @@ EX: Form Binding:
 (function(){
 	// APP VERSION/BUILD
 	var APP_VER = "0.9.0";
-	var APP_BLD = "20161212";
+	var APP_BLD = "20161214";
 	var DEBUG = false; // (verbose mode; lots of logging)
 	// APP FUNCTIONALITY
 	var APP_FILTEROPS = {
@@ -988,7 +988,7 @@ EX: Form Binding:
 		else if ( !inObj.jsonData ) strErrText = "ERROR: jsonData is required!";
 		else if ( !inObj.jsonData.Id ) strErrText = "ERROR: jsonData must have an 'Id' key/val pair!";
 		else if ( !inObj.jsonData.__metadata ) strErrText = "ERROR: jsonData must have an '__metadata' key/val pair!";
-		else if ( !inObj.jsonData.__metadata.etag ) strErrText = "ERROR: jsonData.__metadata must have an 'etag' key/val pair!";
+		else if ( !inObj.jsonData.__metadata.etag ) strErrText = "ERROR: jsonData.__metadata must have an 'etag' key/val pair (or use force:true)!";
 		//
 		if ( strErrText ) { ( inObj.onFail ) ? inObj.onFail(strErrText) : console.error(strErrText); return null; }
 
@@ -1015,7 +1015,6 @@ EX: Form Binding:
 		});
 	}
 
-	// TODO: function doDeleteListItem(inObj){}
 	function doDeleteListItem(inObj) {
 		var strErrText = "";
 
@@ -1024,7 +1023,8 @@ EX: Form Binding:
 		else if ( !inObj.jsonData ) strErrText = "ERROR: jsonData is required!";
 		else if ( !inObj.jsonData.Id ) strErrText = "ERROR: jsonData must have an 'Id' key/val pair!";
 		else if ( !inObj.jsonData.__metadata ) strErrText = "ERROR: jsonData must have an '__metadata' key/val pair!";
-		else if ( !inObj.jsonData.__metadata.etag ) strErrText = "ERROR: jsonData.__metadata must have an 'etag' key/val pair!";
+		else if ( !inObj.jsonData.__metadata.etag ) strErrText = "ERROR: jsonData.__metadata must have an 'etag' key/val pair (or use force:true)!";
+		// TODO: ^^^ OR allow blank when (TODO:param doesn texist yet) force=true
 		//
 		if ( strErrText ) { ( inObj.onFail ) ? inObj.onFail(strErrText) : console.error(strErrText); return null; }
 
@@ -1275,6 +1275,7 @@ EX: Form Binding:
 
 		// STEP 2: Add internal variables/methods
 		inObj.retryCnt = 0;
+		if ( inObj.force ) inObj.jsonData.__metadata.etag = '*';
 
 		// STEP 3: Update item
 		doUpdateListItem( inObj );
@@ -1296,13 +1297,14 @@ EX: Form Binding:
 	sprLib.deleteItem = function deleteItem(inObj) {
 		// STEP 1: REALITY-CHECK
 		if ( !inObj.listName || !inObj.jsonData || !inObj.jsonData.Id ) {
-			var strTemp = 'updateItem ERROR:\n\nobject parameter must contain: listName, jsonData, jsonData.Id!';
+			var strTemp = 'deleteItem ERROR:\n\nobject parameter must contain: listName, jsonData, jsonData.Id!';
 			( inObj.onFail ) ? inObj.onFail(strTemp) : console.error(strTemp);
 			return null;
 		}
 
 		// STEP 2: Add internal variables/methods
 		inObj.retryCnt = 0;
+		if ( inObj.force ) inObj.jsonData.__metadata.etag = '*';
 
 		// STEP 3: Insert item
 		doDeleteListItem( inObj );
@@ -1349,7 +1351,6 @@ EX: Form Binding:
 		doRestCall(inObj);
 	}
 
-
 	// USER/GROUP METHODS
 
 	/**
@@ -1383,6 +1384,7 @@ EX: Form Binding:
 	// TODO: sprLib.getUserGroupsById = function getUserGroupsById(inObj) { doGetUserGroupsById(inObj); }
 
 	// SITE METHODS
+
 	// TODO: Get Site Groups, Usage etc. - some good common methods here
 
 	// OPTIONS

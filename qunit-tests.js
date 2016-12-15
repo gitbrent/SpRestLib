@@ -204,21 +204,55 @@ QUnit.test("sprLib.insertItem", function(assert){
 });
 
 // updateItem
-/*
 QUnit.test("sprLib.updateItem", function(assert){
 	var done = assert.async();
+	sprLib.updateItem({
+		listName: 'Employees',
+		jsonData: {
+			__metadata: { type:"SP.Data.EmployeesListItem", etag:'"2"' },
+			Id: gNewEmpItem,
+			Name: 'First update',
+			Active_x003f_: false
+		},
+		force: true,
+		onDone: function(newObj){
+			assert.ok( (typeof newObj === 'object'), "Update success: onDone result is an object" );
+			assert.ok( (newObj.Id), "onDone result valid - Id:" + newObj.Id );
+			done();
+		},
+		onFail: function(errMsg){ console.error('ERROR: '+errMsg); }
+	});
 });
-*/
+QUnit.test("sprLib.updateItem (w/o etag - using force:true)", function(assert){
+	var done = assert.async();
+	sprLib.updateItem({
+		listName: 'Employees',
+		jsonData: {
+			__metadata: { type:"SP.Data.EmployeesListItem" },
+			Id: gNewEmpItem,
+			Name: 'Second update'
+		},
+		force: true,
+		onDone: function(newObj){
+			assert.ok( (typeof newObj === 'object'), "Update success: onDone result is an object" );
+			assert.ok( (newObj.Id), "onDone result valid - Id:" + newObj.Id );
+			done();
+		},
+		onFail: function(errMsg){ console.error('ERROR: '+errMsg); }
+	});
+});
 
 // deleteItem
-QUnit.test("sprLib.deleteItem", function(assert){
+QUnit.test("sprLib.deleteItem (w/o etag - using force:true)", function(assert){
 	var done = assert.async();
 	sprLib.deleteItem({
 		listName: 'Employees',
 		jsonData: {
-			__metadata: { type:"SP.Data.EmployeesListItem", etag:"\"1\"" },
+			//__metadata: { type:"SP.Data.EmployeesListItem", etag:"\"4\"" },
+			__metadata: { type:"SP.Data.EmployeesListItem" },
 			Id: gNewEmpItem
 		},
+		force: true,
 		onDone: function(){
 			assert.ok( "Delete success!" );
 			done();
@@ -228,7 +262,7 @@ QUnit.test("sprLib.deleteItem", function(assert){
 });
 
 // ================================================================================================
-QUnit.module( "Binding / Forms" );
+//QUnit.module( "Binding / Forms" );
 // ================================================================================================
 // sprLib.model('Employees').syncItem()
 

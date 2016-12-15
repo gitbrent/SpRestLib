@@ -5,13 +5,13 @@
 
 ### Main Features:
 * **REST Easy:** Perform SharePoint List/Library CRUD operations with a single function call using a simple object
-* **Common Tasks:** Reduces common web service calls to a single line (e.g.: Get Current User)
+* **Common Tasks:** Reduces everyday app model web service calls to a simple
 * **Form Population:** Populate form elements using data-bind declarative binding system like Knockout or AngluarJS
 
 ### Library Design:
 * Modern: Built for [SharePoint 2013 API](https://msdn.microsoft.com/en-us/library/office/jj860569.aspx) / [OData v3](http://www.odata.org/documentation/odata-version-3-0/)
 * Lightweight: Small but feature-rich (~30kb minified)
-* Simple: Pure JavaScript REST calls (no JSOM or CSOM)
+* Simple: JavaScript and REST solution (no CSOM or any libraries required)
 * Robust: Handles network issues by retrying failed requests and handles expired form digest/session tokens
 * Built for SharePoint:
  * List CRUD interfaces are described using simple javascript objects
@@ -35,31 +35,74 @@ SpRestLib only requires that the jQuery library be included:
 
 ## Users / Groups
 
-### Current User
-Get the current user Id, Name and Email
-NOTE: Uses the basic SP User service - not the Enterprise-licensed User Profile service).
+### Get Current User
+* Returns information about the current user.
+* NOTE: Uses the basic SP User service - not the Enterprise-licensed User Profile service).
+
+#### Options
+| Option       | Type     | Default   | Description         | Returns                             |
+| :----------- | :------- | :-------- | :------------------ | :---------------------------------- |
+| `onDone`     | function |           | success callback    | the user object: { Id:[int], Title:[string], Email:[string] } |
+| `onExec`     | function |           | execute callback    |                                     |
+| `onFail`     | function |           | fail callback       | error message [string] |
+
+#### Sample Code
 ```javascript
 sprLib.getCurrentUser({
-	onDone: function(objUser){ console.log("Id:" + objUser.Id +", Title:"+ objUser.Title +", Email:"+ objUser.Email); }
+	onDone: function(objUser){ console.log("Id:" + objUser.Id +" - Title:"+ objUser.Title +" - Email:"+ objUser.Email); }
 });
-RESULT: Id:7, Title:Brent Ely, Email:brent@site.onmicrosoft.com
+```
+#### Sample Result
+```javascript
+Id:7 - Title:Brent Ely - Email:brent@site.onmicrosoft.com
 ```
 
-### Current User Groups
+### Get Current User Groups
+* Returns the current user's permission groups.
+
+#### Options
+| Option       | Type     | Default   | Description         | Returns                             |
+| :----------- | :------- | :-------- | :------------------ | :---------------------------------- |
+| `onDone`     | function |           | success callback    | array of Group objects: [{ Id:[int], Title:[string] }] |
+| `onExec`     | function |           | execute callback    |                        |
+| `onFail`     | function |           | fail callback       | error message [string] |
+
+#### Sample Code
 ```javascript
 sprLib.getCurrentUserGroups({
-	onDone: function(arrGroups){ console.log("Current User Groups count = " + arrGroups.length); }
+	onDone: function(arrGroups){
+		console.log("Current User Groups count = " + arrGroups.length);
+		console.log('Group[0] info: ' + arrGroups[0].Id + " - " + arrGroups[0].Title);
+	}
 });
-RESULT: Current User Groups count: 2
+```
+#### Sample Result
+```javascript
+Current User Groups count: 2
+Group[0] info: 9 - Dev Site Owners
 ```
 
-### User Info (by ID)
+### Get User By ID
+* Returns the given user's information.
+
+#### Options
+| Option       | Type     | Default   | Description         | Returns                             |
+| :----------- | :------- | :-------- | :------------------ | :---------------------------------- |
+| `userId`     | number   |           | user's ID           |                        |
+| `onDone`     | function |           | success callback    | array of Group objects: [{ Id:[int], Title:[string] }] |
+| `onExec`     | function |           | execute callback    |                        |
+| `onFail`     | function |           | fail callback       | error message [string] |
+
+#### Sample Code
 ```javascript
 sprLib.getUserById({
 	userId: 9,
-	onDone: function(objUser){ console.log("Title:" + objUser.Title + ", Email:"+ objUser.Email); }
+	onDone: function(objUser){ console.log("Title: " + objUser.Title + " - Email: "+ objUser.Email); }
 });
-RESULT: Title:Brent Ely, Email:brent@site.onmicrosoft.com
+```
+#### Sample Result
+```javascript
+Title: Brent Ely -  Email: brent@site.onmicrosoft.com
 ```
 
 ## List/Library CRUD Operations
