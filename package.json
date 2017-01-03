@@ -1,31 +1,38 @@
 {
     "name": "sprestlib",
+	"author": {
+		"name": "Brent Ely",
+		"url": "https://github.com/gitbrent/"
+	},
     "version": "0.9.0",
     "description": "JavaScript SharePoint REST Library",
+	"homepage": "http://gitbrent.github.io/SpRestLib/",
+	"license": "MIT",
+	"dependencies": {
+        "jquery": "^2.1.0",
+		"promise": "^6.1.0"
+    },
     "main": "sprestlib.js",
     "directories": {
-        "example": "examples"
-    },
-    "scripts": {
-        "test": "echo \"Error: no test specified\" && exit 1"
+		"example": "example",
+        "lib": "dist"
     },
     "repository": {
         "type": "git",
         "url": "git+https://github.com/gitbrent/SpRestLib.git"
     },
     "keywords": [
-        "sharepoint",
+		"sharepoint",
+		"sp2013",
+		"sp2016",
+		"javascript",
 		"rest",
-        "sp2013",
-        "sp2016"
+		"odata"
     ],
-    "author": "gitbrent",
-    "license": "MIT",
     "bugs": {
         "url": "https://github.com/gitbrent/SpRestLib/issues"
     },
-    "homepage": "http://gitbrent.github.io/SpRestLib/",
-    "dependencies": {
-        "jquery": "^3.1.0"
+	"scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1"
     }
 }

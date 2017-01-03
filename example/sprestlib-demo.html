@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en-us">
+<head>
+	<meta charset="utf-8">
+	<meta name="author"      content="https://github.com/gitbrent/">
+	<meta name="website"     content="https://github.com/gitbrent/SpRestLib/">
+	<meta name="keywords"    content="SpRestLib, JavaScript, Library, OData, REST, SharePoint 2013, SP2013, SharePoint 2016, SP2016, Office 365">
+	<meta name="description" content="Content Editor WebPart to showcase SpRestLib features and capabilities">
+	<meta name="revised"     content="Jan 02, 2017">
+
+	<link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Roboto:300">
+	<link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Roboto:700">
+	<link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Open+Sans:400">
+	<link rel="stylesheet" type="text/css" href="/sites/dev/SiteAssets/css/tablesorter.css">
+	<link rel="stylesheet" type="text/css" href="/sites/dev/SiteAssets/css/sprestlib.css">
+	<link rel="stylesheet" type="text/css" href="/sites/dev/SiteAssets/css/sprestlib-demo.css">
+
+	<script type="text/javascript" src="/sites/dev/SiteAssets/js/jquery.min.js"></script>
+	<script type="text/javascript" src="/sites/dev/SiteAssets/js/jquery.tablesorter.min.js"></script>
+	<script type="text/javascript" src="/sites/dev/SiteAssets/js/promise.min.js"></script> <!-- IE11 support -->
+	<script type="text/javascript" src="/sites/dev/SiteAssets/js/sprestlib.js"></script>
+
+	<script type="text/javascript">
+		// ==================================================================================================================
+
+		function doInsertTest() {
+			sprLib.list('Employees').insert({
+				jsonData: {
+					__metadata: { type:"SP.Data."+ 'Employees' +"ListItem" },
+					Name: 'Mr. SP REST Library',
+					Badge_x0020_Number: 123,
+					Hire_x0020_Date: new Date(),
+					Salary: 12345.49,
+					Utilization_x0020_Pct: 1.0,
+					Extension: 1234,
+					Comments: 'New employee created',
+					//Debug_x0020_FieldWillFail: true,
+					Active_x003f_: true
+				},
+				onDone: function(newObj){ alert('insert done! new id = '+newObj.id); },
+				onFail: function(errMsg){ console.error('ERROR: '+errMsg); }
+			});
+		}
+
+		function doUpdateTest() {
+			sprLib.model('Employees').syncItem({
+				id      : $('#itemId').val(),
+				jsonData: sprLib.model('Employees').parseForm('formUpdate').jsonSpData,
+				onFail  : function(mesg){ console.error('doUpdateTest: '+mesg); },
+				onDone  : function(data){ console.log('doUpdateTest done'); }
+			});
+		}
+
+		// ==================================================================================================================
+
+		function doPageLoad() {
+			// STEP 1: HTML Setup
+			document.title = "SpRestLib - JavaScript Library for SharePoint web services";
+
+			// TAB 1:
+			$('#tab1-tst1').html("<code><pre>"
+				+ "sprLib.list('Employees')\n"
+				+ ".getItems({\n"
+				+ "    listCols: ['Name', 'Badge_x0020_Number']\n"
+				+ "})\n"
+				+ ".then(function(data){ console.log(data);  })\n"
+				+ ".catch(function(err){ console.error(err); });\n"
+				+ "</pre></code>"
+			);
+
+			// STEP 2:
+			$('.testGroup > div > div:first-child span').each(function(i,tab){ $(this).text(i+1); });
+			$('.testGroup > div .divTableRows').each(function(i,tab){
+				$(tab).find('.tst').prop('id', 'tst'+(i+1));
+				$(tab).find('.res').prop('id', 'res'+(i+1));
+			});
+
+			$('#tst1').html('<code><pre>'
+				+ "sprLib.user().info()\n"
+				+ ".then(function(objUser){\n"
+				+ "    $.each(objUser,function(key,val){\n"
+				+ "        if (typeof val !== 'object') $('#res1').append('&lt;span&gt;'+ key +':&lt;br&gt;*&nbsp;'+ val +'&lt;/span&gt;');\n"
+				+ "    });\n"
+				+ '});</pre></code>'
+			);
+			$('#tst2').html('<code><pre>'
+				+ 'sprLib.user().groups() <br>'
+				+ '.then(function(arrGroups){ <br>'
+				+ "    $.each(arrGroups,function(idx,objGroup){ $('#res2').append('&lt;span&gt;'+ objGroup.Title +'&lt;/span&gt;') }); <br>"
+				+ '});</pre></code>'
+			);
+
+			// STEP 3: SPRLIB examples
+			sprLib.list('Employees').getItems({
+				listCols: {
+					id:       { dataName:'ID' },
+					name:     { dataName:'Name' },
+					badgeNum: { dataName:'Badge_x0020_Number' },
+					hireDate: { dataName:'Hire_x0020_Date', dispName:'Hire Date', dateFormat:'INTL' },
+					salary:   { dataName:'Salary' },
+					extn:     { dataName:'Extension' },
+					utilPct:  { dataName:'Utilization_x0020_Pct', dispName:'Util %' },
+					comments: { dataName:'Comments' }
+				},
+				queryMaxItems: "10"
+			})
+			.then(function(arrData){ console.log('Employees getItems done -> array length:'+arrData.length); })
+			.catch(function(errMsg){ console.error('ERROR:'+errMsg); });
+
+			sprLib.user().info().then(function(objUser){ $('#currUserName').text( objUser.Title ) });
+
+			sprLib.user().info().then(function(objUser){
+				$('#currUserId').text( objUser.Id );
+				$('#currUserName').text( objUser.Title );
+				$('#currUserEmail').text( objUser.Email );
+			});
+
+			sprLib.user().groups().then(function(arrGroups){ $('#currUserGroups').text( arrGroups.toString() ); });
+
+			// STEP 4: Execute code
+			$('#demoBody code').each(function(i,code){ eval( $(this).text() ); });
+		}
+
+		// ==================================================================================================================
+		$(document).ready(function(){ doPageLoad(); });
+	</script>
+</head>
+<body>
+	<div id="demoBody">
+		<div class="bigTitle">SpRestLib :: Feature Demos</div>
+
+		<div id="navTabs" class="modernTabs">
+			<ul>
+				<li class="active" onclick="$('#navTabs').find('div, li').removeClass('active'); $(this).addClass('active'); $('#tab1').addClass('active');">Feature: List CRUD</li><li onclick="$('#navTabs').find('div, li').removeClass('active'); $(this).addClass('active'); $('#tab2').addClass('active');">Feature: Users/Groups</li><li onclick="$('#navTabs').find('div, li').removeClass('active'); $(this).addClass('active'); $('#tab3').addClass('active');">Feature: Form Binding</li>
+			</ul>
+
+			<div id="tab1" class="active">
+				<div id="tab1-tst1"><!-- populated by doPageLoad --></div>
+				<button type="button" class="flatBtn flatBtn-blue" onclick="doSimpleTest()">SIMPLE TEST</button>
+				<!-- TODO: core API calls: eg: _/api/webs -->
+			</div>
+
+			<div id="tab2">
+				<div class="subTitle">User Methods</div>
+				<div id="tabUsersGroups" class="divTableRows testGroup" style="margin-top:0">
+					<div class="row">
+						<div>Current User<br>Info</div>
+						<div>
+							<div class="divTableRows">
+								<div class="row"><div>INPUT </div><div class="tst"></div></div>
+								<div class="row"><div>OUTPUT</div><div class="res"></div></div>
+							</div>
+						</div>
+					</div>
+					<div class="row">
+						<div>Current User<br>Groups</div>
+						<div>
+							<div class="divTableRows">
+								<div class="row"><div>INPUT </div><div class="tst"></div></div>
+								<div class="row"><div>OUTPUT</div><div class="res"></div></div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<div id="tab3">
+				<div class="subTitle">HTML Element Population</div>
+				<div id="tabHtmlElements" class="divTableRows testGroup">
+					<div>
+						<div class="subTitle">EX: Populate &lt;span&gt;</div>
+						Employee #1: <b><span data-sprlib='{ "list":"Employees", "value":"Name", "filter":{"col":"Name", "op":"eq", "val":"Brent Ely"} }'></span></b>
+					</div>
+					<div>
+						<div class="subTitle">EX: Populate &lt;select&gt;</div>
+						<select id="selTest1" data-sprlib='{ "list":"Employees", "value":"Id",   "text":"Name" }'></select>
+						<select id="selTest2" data-sprlib='{ "list":"Employees", "value":"Name", "text":"Name" }'></select>
+					</div>
+					<div>
+						<div class="subTitle">EX: Unknown Model</div>
+						<input type="text" data-sprlib='{ "list":"Departments", "value":"Title" }' placeholder="Departments.Title"></input>
+						<input type="text" data-TODO='{ "list":"ListDoesntExistTest", "value":"Name" }' placeholder="(Negative Test)"></input>
+					</div>
+				</div>
+
+				<div class="subTitle" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
+					<div class="arrow active"></div>EX: table-foreach
+				</div>
+				<div>
+					<table data-sprlib='{ "list":"Departments", "cols":["Id","Title"], "showBusy":true }'></table>
+				</div>
+
+				<div class="subTitle" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
+					<div class="arrow active"></div>EX: tbody-foreach
+				</div>
+				<div>
+					<table border="0" cellpadding="0" cellspacing="0">
+						<thead>
+							<tr><th>Employee Name</th><th>Utilization Pct</th></tr>
+						</thead>
+						<tbody data-sprlib='{ "list":"Employees", "cols":["Name","Utilization_x0020_Pct"] }'></tbody>
+					</table>
+				</div>
+			</div>
+		</div>
+	</div>
+</body>
+</html>
