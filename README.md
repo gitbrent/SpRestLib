@@ -39,20 +39,20 @@ npm install sprestlib
 **************************************************************************************************
 # Methods
 
-## List/Library: Get Items
-* `sprLib.list(listName).getItems(options)` - Returns the specified columns from a List/Library
-
-## List/Library: Create/Update/Delete (CRUD Operations)
+## Create, Update, Delete List Items (CRUD Operations)
 * `sprLib.list(listName).create(item)` - Add the new item to the List/Library
 * `sprLib.list(listName).update(item)` - Update the existing item using the data provided
 * `sprLib.list(listName).delete(item)` - Delete the item (placed into the Recycle Bin)
+
+## Get List Items
+* `sprLib.list(listName).getItems(options)` - Returns the specified columns from a List/Library
 
 ## REST Calls
 * `sprLib.rest(options)` - Returns the results of a given REST call to any [SharePoint REST API](https://msdn.microsoft.com/en-us/library/office/dn268594.aspx)
 
 ## Site
-* `sprLib.site().perms()` - Returns an array of List/Library Permissions ...
-* `sprLib.site().groups()` - Returns an array of Permission Groups ...
+* `sprLib.site().listPerms()` - Returns an array of all List/Library Permissions for the current/specified Site
+* `sprLib.site().permGroups()` - Returns an array of Permission Groups and their membership for the current/specified Site
 
 ## User
 * `sprLib.user().info()` - Returns information about the current [SPUser](https://msdn.microsoft.com/en-us/library/microsoft.sharepoint.spuser.aspx)
@@ -62,6 +62,7 @@ npm install sprestlib
 **************************************************************************************************
 # API Documentation
 
+(WIP)
 
 **************************************************************************************************
 # User
@@ -111,10 +112,10 @@ sprLib.user().info(123)
 ```
 
 
-## List/Library CRUD Operations
+## List CRUD Operations
 
 ### Get List/Library Data
-* Returns List/Library column values
+* Returns column values from List/Library using the query parameters provided
 * Omitting `listCols` will result in every column being returned (mimics SharePoint default behavior)
 
 #### Options
@@ -124,9 +125,9 @@ sprLib.user().info(123)
 | `listCols`   | array *OR* object |  | column names to be returned | array of column names *OR* object (see below) |
 | `queryFilter` | string   |          | query filter          | utilizes OData style [Query Operators](https://msdn.microsoft.com/en-us/library/office/fp142385.aspx#Anchor_7) |
 | `queryMaxItems` | string |          | max items to return   | 1-*N* |
-| `queryOrderby`  | string |          | column(s) to order by |  |
+| `queryOrderby`  | string |          | column(s) to order by | Ex:`queryOrderby:Name` |
 
-#### listCols Object
+#### `listCols` Object
 | Option       | Type     | Required? | Description           | Possible Values / Return Values     |
 | :----------- | :------- | :-------- | :-------------------- | :---------------------------------- |
 | `dataName`   | string   |           | the column name       | the fixed, back-end REST column name (use descList() if unknown) |
@@ -146,13 +147,45 @@ editLink is created.
 
 
 **************************************************************************************************
-# Tips &amp; Tricks
+# Tips &amp; Tricks (WIP)
 
-You can chain asynchronous calls by placing subsequent SpRestLib calls inside the parent done function.
+## Async Chaining
+You can easily chain asynchronous calls as SpRestLib methods always return Promises.
 
+Thanks to the features of new ES6 Promises, subsequent methods only execute once the previous has completed.
+So the following example will always work, regardless of how long a singl operation may take.
+
+```javascript
+/*
+Promise.resolve().then(currUserInfo).then(currUserGroups).then()
+.then(function(){
+	return sprLib.user();
+})
+.then(function(objUser){
+	return sprLib.user().groups();
+})
+.then(function(){
+	console.log( 'Hi '+objUser.Name );
+});
+*/
+```
+
+## Async Grouping
+When you merely need all your asynchronous requests to complete regardless of order, use `Promise.all()`
+
+Example
+```javascript
+Promise.all([ sprLib.user().info(), sprLib.user().groups() ])
+.then(function(arrResults){
+	// arrResults holds the return values of each SpRestLib method above, in the order they were provided
+	console.log( "Current User Info `Title`: " + arrResults[0].Title  );
+	console.log( "Current User Groups count: " + arrResults[1].length );
+});
+```
 
 **************************************************************************************************
 # Configurable! (WIP)
+
 var APP_OPTS and APP_CSS can be edited to set base URL, max rows returned, etc easily
 
 **************************************************************************************************
