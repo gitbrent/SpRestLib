@@ -3,25 +3,23 @@
 
 ## JavaScript Library for SharePoint Web Services
 
-### Main Features:
-* **List/Library Methods:** Read, create, update and delete items with a single line of code
-* **Common Tasks:** Reduces everyday app model web service calls to a simple
-* **Form Population:** Populate form elements using data-bind declarative binding system like Knockout or AngluarJS
+### Features:
+* Easy Async - Utilizes the new [ES6 Promise](http://www.datchley.name/es6-promises/) architecture to enable chaining of asynchronous operations
+* Modern API - Built for [SharePoint 2013 API](https://msdn.microsoft.com/en-us/library/office/jj860569.aspx) / [OData v3](http://www.odata.org/documentation/odata-version-3-0/)
+* Simple - JavaScript and REST solution (no CSOM or any libraries required)
+* Robust - Monitors the SharePoint authentication token and refreshes it after expiration
+* Lightweight - Small but feature-rich (~30kb minified)
 
-### Library Design:
-* Promises: Utilizes the new [ES6 Promise](http://www.datchley.name/es6-promises/) architecture to enable chaining of asynchronous operations
-* Modern: Built for [SharePoint 2013 API](https://msdn.microsoft.com/en-us/library/office/jj860569.aspx) / [OData v3](http://www.odata.org/documentation/odata-version-3-0/)
-* Lightweight: Small but feature-rich (~30kb minified)
-* Simple: JavaScript and REST solution (no CSOM or any libraries required)
-* Robust: Handles network issues by retrying failed requests and handles expired form digest/session tokens
-* Built for SharePoint:
- * List CRUD interfaces are described using simple javascript objects
- * List column metadata (datatype lookup expansion, etc.) is read automatically from SharePoint and managed for you
- * Monitors the SharePoint authentication token and refreshes it after expiration preventing nasty errors and "reload page" messages
+### Methods:
+* List Interface - Read, create, update and delete List/Library items with a single line of code
+* REST Interface - Run ad-hoc REST calls to any [SharePoint REST API](https://msdn.microsoft.com/en-us/library/office/dn268594.aspx)
+* Site Interface - Get information about the current site and security (permission groups and members)
+* User Interface - Get current or specified User information and Groups
+* Form Population - Populate form elements using data-bind declarative binding system like Knockout or AngluarJS
 
 ### Supported Environments:
 * SharePoint Online (O365), SharePoint 2013 (SP2013), SharePoint 2016 (SP2016)
-* Note: Enterprise license not required
+* *Enterprise license not required*
 
 **************************************************************************************************
 # Installation
@@ -50,15 +48,15 @@ npm install sprestlib
 * `sprLib.list(listName).delete(item)` - Delete the item (placed into the Recycle Bin)
 
 ## REST Calls
-* `sprLib.rest(options)` - Returns the results of a given REST call to any [SharePoint REST API](https://msdn.microsoft.com/en-us/library/office/dn268594.aspx) with parameters provided
+* `sprLib.rest(options)` - Returns the results of a given REST call to any [SharePoint REST API](https://msdn.microsoft.com/en-us/library/office/dn268594.aspx)
 
 ## Site
-* `sprLib.site().perms()` - Returns an array of SP. ...
-* `sprLib.site().groups()` - Returns an array of SP. ...
+* `sprLib.site().perms()` - Returns an array of List/Library Permissions ...
+* `sprLib.site().groups()` - Returns an array of Permission Groups ...
 
 ## User
-* `sprLib.user().info()` - Returns a SP.User object with information about the current user (Id, Name, Title, Email, etc.)
-* `sprLib.user().groups()` - Returns an of SP.Group objects with information about the current users Groups (Id, Title, etc.)
+* `sprLib.user().info()` - Returns information about the current [SPUser](https://msdn.microsoft.com/en-us/library/microsoft.sharepoint.spuser.aspx)
+* `sprLib.user().groups()` - Returns an of SPGroup objects with information about the current users Groups
 
 
 **************************************************************************************************
@@ -99,7 +97,7 @@ sprLib.user().groups()
 
 ## Get User By ID
 `sprLib.user(ID).info()`
-* Returns information about the current user
+* Returns information about a user with a given member ID
 * *Uses the basic SP User service (not the Enterprise licensed User Profile service)*
 
 ### Sample Code
