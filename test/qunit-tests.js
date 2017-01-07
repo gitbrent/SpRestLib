@@ -68,8 +68,7 @@ QUnit.module( "CRUD Methods" );
 	QUnit.test("sprLib.list().create()", function(assert){
 		var done = assert.async();
 		// TEST:
-		sprLib.list('Employees')
-		.create({
+		sprLib.list('Employees').create({
 			__metadata: { type:"SP.Data.EmployeesListItem" },
 			Name: 'Mr. SP REST Library',
 			Badge_x0020_Number: 123,
@@ -192,6 +191,24 @@ QUnit.module( "CRUD Methods" );
 				assert.ok( (true), "Deleted!" );
 				done();
 			});
+		})
+		.catch(function(err){
+			assert.ok( (false), err );
+			done();
+		});
+	});
+
+	QUnit.test("sprLib.list().create().update().delete() chain!", function(assert){
+		var done = assert.async();
+		//
+		var item = { Name:'Marty McFly', Hire_x0020_Date:new Date() };
+		Promise.resolve()
+		.then(function()    { return sprLib.list('Employees').create(item); })
+		.then(function(item){ return sprLib.list('Employees').update(item); })
+		.then(function(item){ return sprLib.list('Employees').delete(item); })
+		.then(function(item){
+			assert.ok( (true), "Success! An item navigated the entire CRUD chain!" );
+			done();
 		})
 		.catch(function(err){
 			assert.ok( (false), err );

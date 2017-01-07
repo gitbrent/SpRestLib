@@ -30,6 +30,7 @@ SpRestLib utilizes the jQuery library - include it before sprestlib.  That's it!
 <script lang="javascript" src="https://code.jquery.com/jquery-3.1.1.slim.min.js"></script>
 <script lang="javascript" src="https://yourhost.com/subsite/SiteAssets/js/sprestlib.js"></script>
 ```
+**NOTE** IE11 support requires you include a Promises polyfill as well (one is included in the `libs` folder)
 
 ## NPM
 ```javascript
@@ -111,6 +112,40 @@ sprLib.user().info(123)
 });
 ```
 
+# List Operations
+
+Example: Chaining operations is a breeze with SpRestLib and Promises
+
+```javascript
+var item = { Name:'Marty McFly', Hire_x0020_Date:new Date() };
+Promise.resolve()
+.then(function()    { return sprLib.list('Employees').create(item); })
+.then(function(item){ return sprLib.list('Employees').update(item); })
+.then(function(item){ return sprLib.list('Employees').delete(item); })
+.then(function(item){ console.log('Success! An item navigated the entire CRUD chain!'); });
+```
+
+## List Methods
+`sprLib.list(listName).cols()`
+
+### Returns
+* Array of column objects
+
+Column properties
+
+| Property       | Type     | Description                  |
+| :------------- | :------- | :--------------------------- |
+| `dispName`     | string   | display name                 |
+| `dataName`     | string   | internal name - used in REST queries and in `listCols` arguments |
+| `dataType`     | string   | column type - values: `Boolean`, `Calculated`, `Currency`, `DateTime`, `Note`, `Number`, `Text`  |
+| `isAppend`     | boolean  | is this an append text column? |
+| `isNumPct`     | boolean  | is this a percentage number column? |
+| `isReadOnly`   | boolean  | is this an read only column? |
+| `isUnique`     | boolean  | are unique values enforced on this column? |
+| `defaultValue` | boolean  | the default value (if any) |
+| `maxLength`    | boolean  | the maxlength of the column |
+
+
 
 ## List CRUD Operations
 
@@ -150,28 +185,49 @@ editLink is created.
 # Tips &amp; Tricks (WIP)
 
 ## Async Chaining
-You can easily chain asynchronous calls as SpRestLib methods always return Promises.
+You can easily chain asynchronous calls as SpRestLib methods will return a Promise.  The Promise method `then()`
+will in turn wait for the Promise to either resolve or reject.
 
-Thanks to the features of new ES6 Promises, subsequent methods only execute once the previous has completed.
-So the following example will always work, regardless of how long a singl operation may take.
+So thanks to the new ES6 Promise feature, we can now simply order asynchronous operations without a managing
+a queue or requiring callbacks.
 
 ```javascript
-/*
-Promise.resolve().then(currUserInfo).then(currUserGroups).then()
+Promise.resolve()
 .then(function(){
-	return sprLib.user();
+	// Clear User var
+	gObjCurrUser = {};
+	// sprLib methods return Promises, and .then() waits for promises to resolve/reject
+	return sprLib.user().info();
 })
-.then(function(objUser){
-	return sprLib.user().groups();
+.then(function(result){
+	// Capture User info
+	gObjCurrUser = result;
+	return sprLib.user(gObjCurrUser.Id).groups();
+})
+.then(function(result){
+	// Capture User Groups
+	gArrCurrGrps = result;
 })
 .then(function(){
-	console.log( 'Hi '+objUser.Name );
-});
-*/
+	// Now we have all of our data
+	console.log( "Current User Info `Title`: " + gObjCurrUser.Title    );
+	console.log( "Current User Groups count: " + gArrCurrGrps.length );
+})
+.catch(function(errMsg){ console.error(errMsg) });
+```
+
+```javascript
+Promise.resolve()
+.then(function()        { return sprLib.list('Departments').getItems({ listCols: ['Title'] }) })
+.then(function(arrData) { console.warn('WARN: Awesome code ahead!'); console.log(arrData); })
+.then(function()        { return sprLib.list('Employees').getItems({ listCols: ['Name','Badge_x0020_Number'] }) })
+.then(function(arrData) { console.warn('WARN: Awesome code ahead!'); console.log(arrData); })
+.catch(function(errMesg){ console.error(errMesg); });
 ```
 
 ## Async Grouping
-When you merely need all your asynchronous requests to complete regardless of order, use `Promise.all()`
+When you merely need all your REST requests to complete - regardless of order - add all the SpRestLib Promises
+as an array to `Promise.all()` and `then()` waits until all of them have completed.
 
 Example
 ```javascript

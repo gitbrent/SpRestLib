@@ -49,7 +49,7 @@ EX: Form Binding:
 (function(){
 	// APP VERSION/BUILD
 	var APP_VER = "0.9.0";
-	var APP_BLD = "20170104";
+	var APP_BLD = "20170105";
 	var DEBUG = false; // (verbose mode, lots of logging - w/b removed before v1.0.0)
 	// APP FUNCTIONALITY
 	var APP_FILTEROPS = {
@@ -612,18 +612,89 @@ EX: Form Binding:
 		if ( !inName || typeof inName !== 'string' ) { console.error("ERROR: listName [string] is required!"); return null; }
 
 		var newList = {};
-		var listName = inName;
+		var listName = inName.replace(/\s/gi,'%20');
+
+		/**
+		* Used internally when users send CRUD methods objects without `__metadata.type`
+		*/
+		function getMetaType() {
+			return new Promise(function(resolve, reject) {
+				sprLib.rest({ restUrl:"/sites/dev/_api/web/lists/getbytitle('Employees')?$select=ListItemEntityTypeFullName" })
+				.then(function(result){
+					if (result && Array.isArray(result) && result.length == 1) resolve( {"type":result[0].ListItemEntityTypeFullName } );
+					else reject('Invalid result!');
+				})
+				.catch(function(err){
+					reject(err)
+				});
+			});
+		}
 
 		// STEP 1: Add public methods
 
-		// TODO: .about
-		// https://msdn.microsoft.com/en-us/library/office/jj245826.aspx#properties
-		// 1: List+props - https://gitbrent.sharepoint.com/sites/dev/_api/web/lists/getbytitle('Employees')
-			// super useful for writing our own listCols objects and/or seeing all List cols/types!
-			// This method will return a metadata-like object: {dataName: dataType: isNumPct etc! }
-			// sprLib.listDesc = function listDesc() {}
+		/**
+		TEST: sprLib.list('Employees').cols().then(function(data){ $.each(data,function(i,obj){ console.log(obj) }) });
+		*/
+		newList.cols = function() {
+			// FieldTypeKind enumeration:
+			// https://msdn.microsoft.com/en-us/library/microsoft.sharepoint.client.fieldtype.aspx
+			// https://msdn.microsoft.com/en-us/library/office/jj245826.aspx#properties
+			return new Promise(function(resolve, reject) {
+				var arrColumns = [];
 
-		// GET-ITEMS
+				// STEP 1: Exec SharePoint REST Query
+				$.ajax({
+					url    : APP_OPTS.baseUrl+"/_api/lists/getbytitle('"+ listName +"')?$select=Fields&$expand=Fields",
+					type   : "GET",
+					cache  : false,
+					headers: {"Accept":"application/json;odata=verbose"}
+				})
+				.done(function(data,textStatus){
+					$.each(data.d.Fields.results, function(i,result){
+						// DESIGN: Only capture "user" columns (Type=17 are `Calculated` cols)
+						if ( (!result.Hidden && result.CanBeDeleted) || (!result.CanBeDeleted && result.FieldTypeKind == 17) ) {
+							arrColumns.push({
+								dispName:     result.Title,
+								dataName:     result.InternalName,
+								dataType:     result.TypeAsString,
+								isAppend:     ( result.AppendOnly || false ),
+								isNumPct:     ( result.SchemaXml.toLowerCase().indexOf('percentage="true"') > -1 ),
+								isReadOnly:   result.ReadOnlyField,
+								isUnique:     result.EnforceUniqueValues,
+								defaultValue: ( result.DefaultValue || null ),
+								maxLength:    ( result.MaxLength || null )
+							});
+						}
+					});
+
+					// STEP 2: Resolve Promise
+					resolve( arrColumns );
+				})
+				.fail(function(jqXHR,textStatus,errorThrown){
+					reject({ 'jqXHR':jqXHR, 'textStatus':textStatus, 'errorThrown':errorThrown });
+				});
+			});
+		}
+
+		newList.info = function() {
+			// REST:
+			// https://gitbrent.sharepoint.com/sites/dev/_api/web/lists/getbytitle('Employees')/
+
+			/*
+			AllowContentTypes,
+			BaseTemplate
+			Created
+			Description
+			EnableAttachments
+			ForceCheckout
+			Hidden
+			Id (GUID)
+			ItemCount
+			Title
+			*/
+		}
+
+		// GET-ITEMS ----------------------------------------------------------------
 
 		/**
 		* DESC: Get specified (or all) List/Library column values - optionally: filter, sort, limit
@@ -857,16 +928,8 @@ EX: Form Binding:
 				});
 			});
 		}
-		/* DEMO: (run in console on O365 sprestlib-demo page)
-		Promise.resolve()
-		.then( function()       { return sprLib.list('Departments').getItems({ listCols: {title:{dataName:'Title'}} }) })
-		.then( function(arrData){ console.warn('WARN: Awesome code ahead!'); console.log(arrData); })
-		.then( function()       { return sprLib.list('Employees').getItems({ listCols: ['Name','Badge_x0020_Number'] }) })
-		.then( function(arrData){ console.warn('WARN: Awesome code ahead!'); console.log(arrData); })
-		.catch(function(errMesg){ console.error(errMesg); });
-		*/
 
-		// CRUD
+		// CRUD ---------------------------------------------------------------------
 
 		/**
 	    * Create/Insert a new item into SP List/Library
@@ -884,37 +947,54 @@ EX: Form Binding:
 		*/
 		newList.create = function(jsonData) {
 			return new Promise(function(resolve, reject) {
-				// FIRST: Param check
+				// A: Param check
 				if ( !jsonData || typeof jsonData !== 'object' ) reject("{jsonData} expected");
 				try { test = JSON.stringify(jsonData) } catch(ex) { reject("JSON.stringify({jsonData}) failed") }
 
-				// TODO: for all CRUD ops: `__metadata` is *OPTIONAL* (if not incld, then get List Metadta (TODO: internal func for this))
-
-				// STEP 1: Do insert
-				$.ajax({
-					type       : "POST",
-					url        : APP_OPTS.baseUrl+"/_api/lists/getbytitle('"+ listName +"')/items",
-					data       : JSON.stringify(jsonData),
-					contentType: "application/json;odata=verbose",
-					headers    : { "Accept":"application/json; odata=verbose", "X-RequestDigest":$("#__REQUESTDIGEST").val() }
+				// B: Create item
+				Promise.resolve()
+				.then(function(){
+					// A: Keep going if we have a `type` value
+					if ( jsonData.__metadata && jsonData.__metadata.type ) return;
+					// B: Else, fetch metadata before continuing
+					return getMetaType();
 				})
-				.done(function(data, textStatus){
-					resolve( data.d );
-				})
-				.fail(function(jqXHR, textStatus, errorThrown){
-					// TODO: Is there way to do this without a retryCnt??, otherwise: add,increment,clear
-					/*
-					try {
-						var strErrCode = jqXHR.status.toString();
-						var strErrText = "("+ jqXHR.status +") "+ textStatus +": "+ errorThrown;
-						var strSpeCode = $.parseJSON(jqXHR.responseText).error['code'].split(',')[0];
+				.then(function(objMetadata){
+					// 1: Add __metadata if provided
+					if ( objMetadata && objMetadata.type ) jsonData.__metadata = objMetadata;
 
-						// CASE '403': SP2013-2016 Expired Token error: Microsoft.SharePoint.SPException (-2130575252): "X-RequestDigest expired form digest"
-						if ( strErrCode == '403' && strSpeCode == '-2130575252' ) doRenewDigestToken();
-					} catch(ex) {}
-					*/
-					reject( parseErrorMessage(jqXHR, textStatus, errorThrown) );
-				});
+					// 2: Do insert
+					$.ajax({
+						type       : "POST",
+						url        : APP_OPTS.baseUrl+"/_api/lists/getbytitle('"+ listName +"')/items",
+						data       : JSON.stringify(jsonData),
+						contentType: "application/json;odata=verbose",
+						headers    : { "Accept":"application/json; odata=verbose", "X-RequestDigest":$("#__REQUESTDIGEST").val() }
+					})
+					.done(function(data, textStatus){
+						// Remove any columns that have a value of `{__deferred:''}`
+						// They're empty anyway, plus future operations with this item would fail, eg: insert.
+						$.each(data.d, function(key,val){ if ( val && typeof val === 'object' && val.__deferred ) delete data.d[key] });
+
+						// LAST: Return new item
+						resolve( data.d );
+					})
+					.fail(function(jqXHR, textStatus, errorThrown){
+						// TODO: Is there way to do this without a retryCnt??, otherwise: add,increment,clear
+						/*
+							try {
+							var strErrCode = jqXHR.status.toString();
+							var strErrText = "("+ jqXHR.status +") "+ textStatus +": "+ errorThrown;
+							var strSpeCode = $.parseJSON(jqXHR.responseText).error['code'].split(',')[0];
+
+							// CASE '403': SP2013-2016 Expired Token error: Microsoft.SharePoint.SPException (-2130575252): "X-RequestDigest expired form digest"
+							if ( strErrCode == '403' && strSpeCode == '-2130575252' ) doRenewDigestToken();
+						} catch(ex) {}
+						*/
+						reject( parseErrorMessage(jqXHR, textStatus, errorThrown) );
+					});
+				})
+				.catch(function(err){ reject(err) });
 			});
 		};
 		/* TEST
@@ -942,7 +1022,7 @@ EX: Form Binding:
 		* @return {object} Return newly created item in JSON format (return the data result from SharePoint).
 		*/
 		newList.update = function(jsonData) {
-			return new Promise(function(resolve,reject) {
+			return new Promise(function(resolve, reject) {
 				// FIRST: Param checks
 				if ( !jsonData || typeof jsonData !== 'object' ) reject("{jsonData} expected");
 				if ( !jsonData['ID'] && !jsonData['Id'] && !jsonData['iD'] && !jsonData['id'] ) reject("{jsonData}['Id'] expected");
@@ -977,9 +1057,14 @@ EX: Form Binding:
 					headers    : objHeaders
 				})
 				.done(function(data, textStatus){
-					// SP doesnt return anything for Merge/Update, so return original jsonData object so users can chain, etc.
-					// Populate both 'Id' and 'ID' to mimic SP 2013+ behavior
+					// A: SP doesnt return anything for Merge/Update, so return original jsonData object so users can chain, etc.
+					// Populate both 'Id' and 'ID' to mimic SP2013
 					jsonData.ID = itemId; jsonData.Id = itemId;
+
+					// B: Increment etag (if one was provided, otherwise, we cant know what it is without querying for it!)
+					if ( jsonData.__metadata.etag ) jsonData.__metadata.etag = '"'+ (Number(jsonData.__metadata.etag.replace(/[\'\"]+/gi, ''))+1) +'"';
+
+					// LAST: Return item
 					resolve( jsonData );
 				})
 				.fail(function(jqXHR, textStatus, errorThrown){
