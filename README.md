@@ -40,15 +40,20 @@ npm install sprestlib
 **************************************************************************************************
 # Methods
 
-## Create, Update, Delete List Items (CRUD Operations)
+## List/Library
+
+#### Get Column Info
+* `sprLib.list(listName).cols()` - Returns an array of column objects with useful info (internal name, datatype, etc.)
+
+#### Get Items
+* `sprLib.list(listName).getItems(options)` - Returns an array of items from a List/Library
+
+#### Create, Update, Delete Items
 * `sprLib.list(listName).create(item)` - Add the new item to the List/Library
 * `sprLib.list(listName).update(item)` - Update the existing item using the data provided
 * `sprLib.list(listName).delete(item)` - Delete the item (placed into the Recycle Bin)
 
-## Get List Items
-* `sprLib.list(listName).getItems(options)` - Returns the specified columns from a List/Library
-
-## REST Calls
+## REST API Calls
 * `sprLib.rest(options)` - Returns the results of a given REST call to any [SharePoint REST API](https://msdn.microsoft.com/en-us/library/office/dn268594.aspx)
 
 ## Site
