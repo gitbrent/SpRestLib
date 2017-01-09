@@ -49,7 +49,7 @@ EX: Form Binding:
 (function(){
 	// APP VERSION/BUILD
 	var APP_VER = "0.9.0";
-	var APP_BLD = "20170105";
+	var APP_BLD = "20170108";
 	var DEBUG = false; // (verbose mode, lots of logging - w/b removed before v1.0.0)
 	// APP FUNCTIONALITY
 	var APP_FILTEROPS = {
@@ -633,7 +633,9 @@ EX: Form Binding:
 		// STEP 1: Add public methods
 
 		/**
-		TEST: sprLib.list('Employees').cols().then(function(data){ $.each(data,function(i,obj){ console.log(obj) }) });
+		* Return array of column objects with info about each (title, REST/internal name, type, etc.)
+		*
+		* @example: sprLib.list('Employees').cols().then(function(cols){ console.table(cols) });
 		*/
 		newList.cols = function() {
 			// FieldTypeKind enumeration:
@@ -642,7 +644,6 @@ EX: Form Binding:
 			return new Promise(function(resolve, reject) {
 				var arrColumns = [];
 
-				// STEP 1: Exec SharePoint REST Query
 				$.ajax({
 					url    : APP_OPTS.baseUrl+"/_api/lists/getbytitle('"+ listName +"')?$select=Fields&$expand=Fields",
 					type   : "GET",
@@ -650,9 +651,10 @@ EX: Form Binding:
 					headers: {"Accept":"application/json;odata=verbose"}
 				})
 				.done(function(data,textStatus){
+					// STEP 1: Gather fields
 					$.each(data.d.Fields.results, function(i,result){
 						// DESIGN: Only capture "user" columns (Type=17 are `Calculated` cols)
-						if ( (!result.Hidden && result.CanBeDeleted) || (!result.CanBeDeleted && result.FieldTypeKind == 17) ) {
+						if ( result.InternalName == 'ID' || (!result.Hidden && result.CanBeDeleted) || (!result.CanBeDeleted && result.FieldTypeKind == 17) ) {
 							arrColumns.push({
 								dispName:     result.Title,
 								dataName:     result.InternalName,
@@ -676,28 +678,30 @@ EX: Form Binding:
 			});
 		}
 
+		/**
+		* Return an object containing information about the current List/Library
+		*
+		* @example: sprLib.list('Employees').info().then(function(data){ console.table(data) });
+		*/
 		newList.info = function() {
-			// REST:
-			// https://gitbrent.sharepoint.com/sites/dev/_api/web/lists/getbytitle('Employees')/
+			return new Promise(function(resolve, reject) {
+				var strUrl = "/_api/web/lists/getbytitle('"+listName+"')?$select="
+					+ "AllowContentTypes,BaseTemplate,Created,Description,EnableAttachments,ForceCheckout,Hidden,Id,ItemCount,Title";
 
-			/*
-			AllowContentTypes,
-			BaseTemplate
-			Created
-			Description
-			EnableAttachments
-			ForceCheckout
-			Hidden
-			Id (GUID)
-			ItemCount
-			Title
-			*/
+				sprLib.rest({ restUrl:strUrl })
+				.then(function(data){
+					resolve(data);
+				})
+				.catch(function(err){
+					reject(err);
+				});
+			});
 		}
 
 		// GET-ITEMS ----------------------------------------------------------------
 
 		/**
-		* DESC: Get specified (or all) List/Library column values - optionally: filter, sort, limit
+		* Get specified or all List/Library column values - optionally: filter, sort, limit
 		*
 		* Options:
 		*
@@ -1270,9 +1274,12 @@ EX: Form Binding:
 	// API: SITE
 	sprLib.site = function site(inUrl) {
 		return new Promise(function(resolve, reject) {
-			// TODO: 20161230
-
-			// TODO: Get Site Groups, Usage etc. - some good common methods here
+			// TODO: POST-1.0:
+			/*
+			## Site
+			* `sprLib.site().listPerms()` - Returns an array of all List/Library Permissions for the current/specified Site
+			* `sprLib.site().permGroups()` - Returns an array of Permission Groups and their membership for the current/specified Site
+			*/
 			// 2: Get SITE info (logo, etc): https://gitbrent.sharepoint.com/sites/dev/_api/web/
 			// 3: Lists+props: https://gitbrent.sharepoint.com/sites/dev/_api/web/Lists/
 		});

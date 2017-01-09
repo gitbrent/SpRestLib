@@ -45,6 +45,9 @@ npm install sprestlib
 #### Get Column Info
 * `sprLib.list(listName).cols()` - Returns an array of column objects with useful info (internal name, datatype, etc.)
 
+#### Get List Info
+* `sprLib.list(listName).info()` - Returns information about the list (GUID, numberOfItems, etc.)
+
 #### Get Items
 * `sprLib.list(listName).getItems(options)` - Returns an array of items from a List/Library
 
@@ -55,10 +58,6 @@ npm install sprestlib
 
 ## REST API Calls
 * `sprLib.rest(options)` - Returns the results of a given REST call to any [SharePoint REST API](https://msdn.microsoft.com/en-us/library/office/dn268594.aspx)
-
-## Site
-* `sprLib.site().listPerms()` - Returns an array of all List/Library Permissions for the current/specified Site
-* `sprLib.site().permGroups()` - Returns an array of Permission Groups and their membership for the current/specified Site
 
 ## User
 * `sprLib.user().info()` - Returns information about the current [SPUser](https://msdn.microsoft.com/en-us/library/microsoft.sharepoint.spuser.aspx)
