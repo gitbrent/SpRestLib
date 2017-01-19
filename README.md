@@ -94,7 +94,8 @@ Promise.resolve()
 # Library Reference
 
 ## List/Library Operations (**`SPList`**)
-`sprLib.list(listName)`
+`sprLib.list(ListName)`
+`sprLib.list(ListGUID)`
 
 ### Create Item
 Syntax:
@@ -267,8 +268,12 @@ sprLib.user().info(123)
 });
 ```
 
+**************************************************************************************************
+# Form Binding
 
-
+```javascript
+<table data-sprlib='{ "foreach": {"listName":"Employees", "filter":{"col":"Badge_x0020_Number", "op":"eq", "val":1234}}, "options":{"showBusySpinner":true} }'>
+```
 
 **************************************************************************************************
 # Tips &amp; Tricks (WIP)

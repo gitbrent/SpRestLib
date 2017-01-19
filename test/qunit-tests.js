@@ -13,56 +13,44 @@ var gTestUserId = 9;
 var gUpdateItem = { Id:55 };
 
 // ================================================================================================
-QUnit.module( "USER Methods" );
+QUnit.module( "LIST > MISC Methods" );
 // ================================================================================================
 {
-	QUnit.test("sprLib.user().info()", function(assert){
-		var done = assert.async();
-		// TEST:
-		sprLib.user().info()
-		.then(function(objUser){
-			assert.equal( objUser.Id		,9 													,"Pass: Id - " + objUser.Id );
-			assert.equal( objUser.Email		,"admin@gitbrent.onmicrosoft.com"					,"Pass: Email - " + objUser.Email );
-			assert.equal( objUser.LoginName	,"i:0#.f|membership|admin@gitbrent.onmicrosoft.com"	,"Pass: LoginName - " + objUser.LoginName );
-			assert.equal( objUser.Title		,"Brent Ely"										,"Pass: Title - " + objUser.Title );
-			done();
+	['Departments', 'Employees', '8fda2798-dbbc-497d-9840-df87b08e09c1'].forEach(function(list,idx){
+		QUnit.test(`sprLib.list().cols() - using '${list}'`, function(assert){
+			var done = assert.async();
+			// TEST:
+			sprLib.list(list).cols()
+			.then(function(arrColObjs){
+				assert.ok( arrColObjs.length > 0		,"Pass: arrColObjs.length = " + arrColObjs.length );
+				assert.ok( Object.keys(arrColObjs[0])	,"Pass: Object.keys().... = " + Object.keys(arrColObjs[0]).toString() );
+				//
+				let table = new AsciiTable();
+				if (arrColObjs.length > 0) table.setHeading( Object.keys(arrColObjs[0]) );
+				$.each(arrColObjs,function(idx,obj){ let vals = []; $.each(obj, function(key,val){ vals.push(val) }); table.addRow(vals); });
+				assert.ok( table.toString(), `RESULTS:\n${table.toString()}`);
+				//
+				done();
+			});
 		});
-	});
-	QUnit.test("sprLib.user(#).info()", function(assert){
-		var done = assert.async();
-		// TEST:
-		sprLib.user(gTestUserId).info()
-		.then(function(objUser){
-			assert.equal( objUser.Id		,gTestUserId 										,"Pass: Id    - " + objUser.Id );
-			assert.equal( objUser.Email		,"admin@gitbrent.onmicrosoft.com"					,"Pass: Email - " + objUser.Email );
-			assert.equal( objUser.LoginName	,"i:0#.f|membership|admin@gitbrent.onmicrosoft.com"	,"Pass: Login - " + objUser.LoginName );
-			assert.equal( objUser.Title		,"Brent Ely"										,"Pass: Title - " + objUser.Title );
-			done();
-		});
-	});
 
-	QUnit.test("sprLib.user().groups()", function(assert){
-		var done = assert.async();
-		// TEST:
-		sprLib.user().groups()
-		.then(function(arrGroups){
-			assert.ok( arrGroups.length > 0, "arrGroups is an Array, and length > 0: "+ arrGroups.length );
-			done();
-		});
-	});
-	QUnit.test("sprLib.user(#).groups()", function(assert){
-		var done = assert.async();
-		// TEST:
-		sprLib.user(gTestUserId).groups()
-		.then(function(arrGroups){
-			assert.ok( arrGroups.length > 0, "arrGroups is an Array, and length > 0: "+ arrGroups.length );
-			done();
+		QUnit.test(`sprLib.list().info() - using '${list}'`, function(assert){
+			var done = assert.async();
+			// TEST:
+			sprLib.list(list).info()
+			.then(function(objInfo){
+				assert.ok( objInfo.Id		, "Pass: Id....... = " + objInfo.Id );
+				assert.ok( objInfo.Created	, "Pass: Created.. = " + objInfo.Created );
+				assert.ok( objInfo.ItemCount, "Pass: ItemCount = " + objInfo.ItemCount );
+				assert.ok( objInfo.Title	, "Pass: Title.... = " + objInfo.Title );
+				done();
+			});
 		});
 	});
 }
 
 // ================================================================================================
-QUnit.module( "CRUD Methods" );
+QUnit.module( "LIST > ITEM CRUD Methods" );
 // ================================================================================================
 {
 	QUnit.test("sprLib.list().create()", function(assert){
@@ -218,67 +206,7 @@ QUnit.module( "CRUD Methods" );
 }
 
 // ================================================================================================
-QUnit.module( "REST Methods" );
-// ================================================================================================
-{
-	// REST endpoints that return `data.d.results` [{}]
-	QUnit.test("sprLib.rest() ex: '/_api/web/sitegroups'", function(assert){
-		var done = assert.async();
-		// TEST:
-		sprLib.rest({
-			restUrl: RESTROOT+'/_api/web/sitegroups',
-			queryCols: {
-				title: { dataName:'Title' },
-				loginName: { dataName:'LoginName' },
-				editAllowed: { dataName:'AllowMembersEditMembership' }
-			}
-			//,queryFilter:   "AllowMembersEditMembership eq 1"
-			//,queryOrderby:  "Title"
-			//,queryLimit: 10
-		})
-		.then(function(arrayResults){
-			assert.ok( arrayResults.length > 0, "arrayResults is an Array and length > 0: "+ arrayResults.length );
-			done();
-		})
-		.catch(function(err){
-			assert.ok( (false), err );
-			done();
-		});
-	});
-	QUnit.test("sprLib.rest() ex: '/_api/web/lists'", function(assert){
-		var done = assert.async();
-		// TEST:
-		sprLib.rest({ restUrl:RESTROOT+'/_api/web/lists/' })
-		.then(function(arrayResults){
-			assert.ok( arrayResults.length > 0, "arrayResults is an Array and length > 0: "+ arrayResults.length );
-			assert.ok( (arrayResults[0].Id && arrayResults[0].Title), "arrayResults[0] is valid - Id: "+arrayResults[0].Id+" / Title: "+arrayResults[0].Title );
-			done();
-		})
-		.catch(function(err){
-			assert.ok( (false), err );
-			done();
-		});
-	});
-
-	// REST endpoints that return `data.d` {}
-	QUnit.test("sprLib.rest() ex: '/_api/web/lists/getbytitle(Employees)'", function(assert){
-		var done = assert.async();
-		// TEST:
-		sprLib.rest({ restUrl:RESTROOT+'/_api/web/lists/' })
-		.then(function(arrayResults){
-			assert.ok( arrayResults.length > 0, "arrayResults is an Array and length > 0: "+ arrayResults.length );
-			assert.ok( (arrayResults[0]), "arrayResults[0] is valid - Id: "+ arrayResults[0] );
-			done();
-		})
-		.catch(function(err){
-			assert.ok( (false), err );
-			done();
-		});
-	});
-}
-
-// ================================================================================================
-QUnit.module( "LIST GET Methods" );
+QUnit.module( "LIST > ITEM GET Methods" );
 // ================================================================================================
 {
 	QUnit.test("sprLib.getListItems() 1: no opts", function(assert){
@@ -289,6 +217,11 @@ QUnit.module( "LIST GET Methods" );
 		.then(function(arrayResults){
 			assert.ok( arrayResults.length > 0, "arrayResults is an Array and length > 0: "+ arrayResults.length );
 			assert.ok( (arrayResults[0].__metadata), "arrayResults[0].__metadata exists: \n"+ JSON.stringify(arrayResults[0].__metadata) );
+			//
+			let table = new AsciiTable().setHeading(Object.keys(arrayResults[0]));
+			$.each(arrayResults,function(idx,obj){ let vals = []; $.each(obj, function(key,val){ vals.push(val) }); table.addRow(vals); });
+			assert.ok( table.toString(), `RESULTS:\n${table.toString()}`);
+			//
 			done();
 		})
 		.catch(function(err){
@@ -315,6 +248,99 @@ QUnit.module( "LIST GET Methods" );
 		});
 	});
 }
+
+// ================================================================================================
+QUnit.module( "REST Methods" );
+// ================================================================================================
+{
+	// REST endpoints that return `data.d.results` [{}]
+	QUnit.test("sprLib.rest() ex: '/_api/web/sitegroups'", function(assert){
+		var done = assert.async();
+		// TEST:
+		sprLib.rest({
+			restUrl: RESTROOT+'/_api/web/sitegroups',
+			queryCols: {
+				title: { dataName:'Title' },
+				loginName: { dataName:'LoginName' },
+				editAllowed: { dataName:'AllowMembersEditMembership' }
+			}
+			//,queryFilter:   "AllowMembersEditMembership eq 1"
+			//,queryOrderby:  "Title"
+			//,queryLimit: 10
+		})
+		.then(function(arrayResults){
+			assert.ok( arrayResults.length > 0, "arrayResults is an Array and length > 0: "+ arrayResults.length );
+			//
+			let table = new AsciiTable();
+			if (arrGroups.length > 0) table.setHeading( Object.keys(arrGroups[0]) );
+			$.each(arrayResults,function(idx,obj){ let vals = []; $.each(obj, function(key,val){ vals.push(val) }); table.addRow(vals); });
+			assert.ok( table.toString(), `RESULTS:\n${table.toString()}`);
+			//
+			done();
+		})
+		.catch(function(err){
+			assert.ok( (false), err );
+			done();
+		});
+	});
+
+	// REST endpoints that return `data.d` {}
+	QUnit.test("sprLib.rest() ex: '/_api/web/lists'", function(assert){
+		var done = assert.async();
+		// TEST:
+		sprLib.rest({ restUrl:RESTROOT+'/_api/web/lists/' })
+		.then(function(arrayListObjs){
+			var table = new AsciiTable('Site Lists').setHeading(Object.keys(arrayListObjs[0]));
+			$.each(arrayListObjs,function(idx,obj){ let vals = []; $.each(obj, function(key,val){ vals.push(val) }); table.addRow(vals); });
+			//
+			assert.ok( arrayListObjs.length > 0, "arrayListObjs is an Array and length > 0: "+ arrayListObjs.length );
+			assert.ok( table.toString(), `table.toString():\n ${table.toString()}`);
+			done();
+		})
+		.catch(function(err){
+			assert.ok( (false), err );
+			done();
+		});
+	});
+}
+
+// ================================================================================================
+QUnit.module( "USER Methods" );
+// ================================================================================================
+{
+	[gTestUserId,''].forEach(function(userId,idx){
+		QUnit.test(`sprLib.user(${userId}).info()`, function(assert){
+			var done = assert.async();
+			// TEST:
+			sprLib.user(userId).info()
+			.then(function(objUser){
+				assert.ok( objUser.Id		,"Pass: Id....... - " + objUser.Id );
+				assert.ok( objUser.Title	,"Pass: Title.... - " + objUser.Title );
+				assert.ok( objUser.Email	,"Pass: Email.... - " + objUser.Email );
+				assert.ok( objUser.LoginName,"Pass: LoginName - " + objUser.LoginName );
+				done();
+			});
+		});
+
+		QUnit.test(`sprLib.user(${userId}).groups()`, function(assert){
+			var done = assert.async();
+			// TEST:
+			sprLib.user(userId).groups()
+			.then(function(arrGroups){
+				assert.ok( arrGroups.length > 0, "arrGroups is an Array, and length > 0: "+ arrGroups.length );
+				//
+				let table = new AsciiTable();
+				if (arrGroups.length > 0) table.setHeading( Object.keys(arrGroups[0]) );
+				$.each(arrGroups,function(idx,obj){ let vals = []; $.each(obj, function(key,val){ vals.push(val) }); table.addRow(vals); });
+				assert.ok( table.toString(), `RESULTS:\n${table.toString()}`);
+				//
+				done();
+			});
+		});
+	});
+}
+
+
 
 // NEGATIVE TSET:
 /*

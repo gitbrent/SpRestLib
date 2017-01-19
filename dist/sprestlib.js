@@ -1,12 +1,12 @@
 /*\
 |*|  :: SpRestLib.js ::
 |*|
-|*|  JavaScript library for SharePoint web serices
+|*|  JavaScript Library for SharePoint Web Serices
 |*|  https://github.com/gitbrent/SpRestLib
 |*|
 |*|  This library is released under the MIT Public License (MIT)
 |*|
-|*|  SpRestLib (C) 2016 Brent Ely -- https://github.com/gitbrent
+|*|  SpRestLib (C) 2016-2017 Brent Ely -- https://github.com/gitbrent
 |*|
 |*|  Permission is hereby granted, free of charge, to any person obtaining a copy
 |*|  of this software and associated documentation files (the "Software"), to deal
@@ -29,27 +29,18 @@
 
 /*
 DEVLIST:
+	* Add `Intl` (i18n) support (its supported in IE11!!) - Date and Currency formats are awesome (can we add Direction for our R->L users )
 	* Add AppendText/Versions support (auto-query and populate most recent text when isAppend is TRUE)
 	* Add logic we learned the hard way where FILTER cant have true/false but uses 0/1 due to MS bug
-	* More filter functionality (only works with FOREACH+<table> for now)
-	* add inline query/loop:
-		* EX: <li data-bind:"foreach: {select:Hire_x0020_Date | filter:OwnerId eq 99 | expand: | orderBy: }">
 	* Add support for using LIST-GUID (in addition to .listName) - `.listGUID`
 FUTURE:
 	* Support for turning LOOKUP values into a "text; text"-type output
 */
 
-/*
-CODE SAMPLE DUMPING GROUND (WIP):
----------------------------------
-EX: Form Binding:
-	<table data-bind='{ "foreach": {"model":"Reqs", "filter":{"col":"completed", "op":"eq", "val":false}}, "options":{"showBusySpinner":true} }'>
-*/
-
 (function(){
 	// APP VERSION/BUILD
 	var APP_VER = "0.9.0";
-	var APP_BLD = "20170108";
+	var APP_BLD = "20170109";
 	var DEBUG = false; // (verbose mode, lots of logging - w/b removed before v1.0.0)
 	// APP FUNCTIONALITY
 	var APP_FILTEROPS = {
@@ -607,19 +598,26 @@ EX: Form Binding:
 	}
 
 	// API: LIST (CRUD + getItems)
+
+	/**
+	* @param inName (string) - required - List Name or List GUID
+	*/
 	sprLib.list = function list(inName) {
 		// FIRST: Param check
-		if ( !inName || typeof inName !== 'string' ) { console.error("ERROR: listName [string] is required!"); return null; }
+		if ( !inName || typeof inName !== 'string' ) { console.error("ERROR: listName/listGUID [string] is required!"); return null; }
 
-		var newList = {};
-		var listName = inName.replace(/\s/gi,'%20');
+		var guidRegex = /^[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}$/i;
+		var _newList = {};
+		// DESIGN: Accept [List Name] or [List GUID]
+		var _urlBase = "/_api/lists" + APP_OPTS.baseUrl + ( guidRegex.test(inName) ? "(guid'"+ inName +"')" : "getbytitle('"+ inName.replace(/\s/gi,'%20') +"')" );
+		var _urlRest = "/_api/lists" + ( guidRegex.test(inName) ? "(guid'"+ inName +"')" : "/getbytitle('"+ inName.replace(/\s/gi,'%20') +"')" );
 
 		/**
 		* Used internally when users send CRUD methods objects without `__metadata.type`
 		*/
 		function getMetaType() {
 			return new Promise(function(resolve, reject) {
-				sprLib.rest({ restUrl:"/sites/dev/_api/web/lists/getbytitle('Employees')?$select=ListItemEntityTypeFullName" })
+				sprLib.rest({ restUrl:_urlRest+"?$select=ListItemEntityTypeFullName" })
 				.then(function(result){
 					if (result && Array.isArray(result) && result.length == 1) resolve( {"type":result[0].ListItemEntityTypeFullName } );
 					else reject('Invalid result!');
@@ -637,7 +635,7 @@ EX: Form Binding:
 		*
 		* @example: sprLib.list('Employees').cols().then(function(cols){ console.table(cols) });
 		*/
-		newList.cols = function() {
+		_newList.cols = function() {
 			// FieldTypeKind enumeration:
 			// https://msdn.microsoft.com/en-us/library/microsoft.sharepoint.client.fieldtype.aspx
 			// https://msdn.microsoft.com/en-us/library/office/jj245826.aspx#properties
@@ -645,7 +643,7 @@ EX: Form Binding:
 				var arrColumns = [];
 
 				$.ajax({
-					url    : APP_OPTS.baseUrl+"/_api/lists/getbytitle('"+ listName +"')?$select=Fields&$expand=Fields",
+					url    : _urlBase+"?$select=Fields&$expand=Fields",
 					type   : "GET",
 					cache  : false,
 					headers: {"Accept":"application/json;odata=verbose"}
@@ -681,16 +679,16 @@ EX: Form Binding:
 		/**
 		* Return an object containing information about the current List/Library
 		*
-		* @example: sprLib.list('Employees').info().then(function(data){ console.table(data) });
+		* @example: sprLib.list('Employees').info().then(function(objInfo){ console.table(objInfo) });
 		*/
-		newList.info = function() {
+		_newList.info = function() {
 			return new Promise(function(resolve, reject) {
-				var strUrl = "/_api/web/lists/getbytitle('"+listName+"')?$select="
-					+ "AllowContentTypes,BaseTemplate,Created,Description,EnableAttachments,ForceCheckout,Hidden,Id,ItemCount,Title";
+				var strUrl = _urlRest
+					+ "?$select=AllowContentTypes,BaseTemplate,Created,Description,EnableAttachments,ForceCheckout,Hidden,Id,ItemCount,Title";
 
 				sprLib.rest({ restUrl:strUrl })
 				.then(function(data){
-					resolve(data);
+					resolve(data[0]);
 				})
 				.catch(function(err){
 					reject(err);
@@ -756,14 +754,13 @@ EX: Form Binding:
 		* @see: Field Ref.: https://msdn.microsoft.com/en-us/library/office/dn600182.aspx
 		* @see: FieldTypes: https://msdn.microsoft.com/en-us/library/office/microsoft.sharepoint.client.fieldtype.aspx
 		*/
-		newList.getItems = function(inObj) {
+		_newList.getItems = function(inObj) {
 			return new Promise(function(resolve, reject) {
 				// FIRST: Param check
 				// N/A: getItems() does not req any opts/params.  We do need a valid inObj though, so create if needed
 				if ( !inObj || typeof inObj !== 'object' ) inObj = {};
 
 				// STEP 1: Attach the properties used next for meta/data queries
-				inObj.listName  = listName;
 				inObj.spObjMeta = {};
 				inObj.spArrData = [];
 
@@ -787,7 +784,7 @@ EX: Form Binding:
 					return new Promise(function(resolve, reject) {
 						// STEP 1: Exec SharePoint REST Query
 						$.ajax({
-							url: APP_OPTS.baseUrl+"/_api/lists/getbytitle('"+ inModel.listName.replace(/\s/gi,'%20') +"')?$select=Fields/Title,Fields/InternalName,Fields/CanBeDeleted,Fields/TypeAsString,Fields/SchemaXml,Fields/AppendOnly&$expand=Fields",
+							url: _urlBase+"?$select=Fields/Title,Fields/InternalName,Fields/CanBeDeleted,Fields/TypeAsString,Fields/SchemaXml,Fields/AppendOnly&$expand=Fields",
 							type: "GET",
 							cache: false,
 							headers: {"Accept":"application/json; odata=verbose"}
@@ -822,7 +819,7 @@ EX: Form Binding:
 						var strAjaxUrl = "", strExpands = "";
 
 						// STEP 1: Start building REST URL
-						strAjaxUrl = APP_OPTS.baseUrl + "/_api/lists/getbytitle('"+ inObj.listName.replace(/\s/gi,'%20') +"')/items";
+						strAjaxUrl = _urlBase+"/items";
 						// If columns were provided, ensure we select `Id` for use in building our data model SP-array/object
 						if ( inObj.listCols ) strAjaxUrl = strAjaxUrl+"?$select=Id,";
 						// TODO: Just get the Id from __metadata instead! (20161212)
@@ -949,7 +946,7 @@ EX: Form Binding:
 		*
 		* @return {Promise} - Return `Promise` containing newly created item in JSON format (return the data result from SharePoint).
 		*/
-		newList.create = function(jsonData) {
+		_newList.create = function(jsonData) {
 			return new Promise(function(resolve, reject) {
 				// A: Param check
 				if ( !jsonData || typeof jsonData !== 'object' ) reject("{jsonData} expected");
@@ -970,7 +967,7 @@ EX: Form Binding:
 					// 2: Do insert
 					$.ajax({
 						type       : "POST",
-						url        : APP_OPTS.baseUrl+"/_api/lists/getbytitle('"+ listName +"')/items",
+						url        : _urlBase+"/items",
 						data       : JSON.stringify(jsonData),
 						contentType: "application/json;odata=verbose",
 						headers    : { "Accept":"application/json; odata=verbose", "X-RequestDigest":$("#__REQUESTDIGEST").val() }
@@ -1025,7 +1022,7 @@ EX: Form Binding:
 		*
 		* @return {object} Return newly created item in JSON format (return the data result from SharePoint).
 		*/
-		newList.update = function(jsonData) {
+		_newList.update = function(jsonData) {
 			return new Promise(function(resolve, reject) {
 				// FIRST: Param checks
 				if ( !jsonData || typeof jsonData !== 'object' ) reject("{jsonData} expected");
@@ -1055,7 +1052,7 @@ EX: Form Binding:
 				// STEP 5: Update item
 				$.ajax({
 					type       : "POST",
-					url        : APP_OPTS.baseUrl+"/_api/lists/getbytitle('"+ listName +"')/items("+ itemId +")",
+					url        : _urlBase+"/items("+ itemId +")",
 					data       : JSON.stringify(jsonData),
 					contentType: "application/json;odata=verbose",
 					headers    : objHeaders
@@ -1099,7 +1096,7 @@ EX: Form Binding:
 		* .then(function(){ console.log('Deleted!') })
 		* .catch(function(strErr){ console.error(strErr)  });
 	 	*/
-		newList.delete = function(jsonData) {
+		_newList.delete = function(jsonData) {
 			return new Promise(function(resolve,reject) {
 				// FIRST: Param checks
 				if ( !jsonData || typeof jsonData !== 'object' ) reject("{jsonData} expected");
@@ -1126,7 +1123,7 @@ EX: Form Binding:
 				// STEP 4: Delete item
 				$.ajax({
 					type       : "DELETE",
-					url        : APP_OPTS.baseUrl+"/_api/lists/getbytitle('"+ listName +"')/items("+ itemId +")",
+					url        : _urlBase+"/items("+ itemId +")",
 					contentType: "application/json;odata=verbose",
 					headers    : objHeaders
 				})
@@ -1141,7 +1138,7 @@ EX: Form Binding:
 		};
 
 		// LAST: Return this new List
-		return newList;
+		return _newList;
 	};
 
 	// API: REST (raw, ad-hoc interface)
@@ -1189,8 +1186,6 @@ EX: Form Binding:
 			else if ( inOpt.restUrl.indexOf('/')     == 0 && !inOpt.queryCols )	strAjaxUrl = inOpt.restUrl;
 			else if ( inOpt.restUrl.indexOf('http')  == 0 &&  inOpt.queryCols )	strAjaxUrl = inOpt.restUrl + "?$select=";
 			else if ( inOpt.restUrl.indexOf('http')  == 0 && !inOpt.queryCols )	strAjaxUrl = inOpt.restUrl;
-			//else																strAjaxUrl = APP_OPTS.baseUrl + "/_api/lists/getbytitle('"+ inOpt.restUrl.replace(/\s/gi,'%20') +"')/items?$select=Id,"
-			// TODO: ^^^ what about an else?
 
 			// STEP 4: Continue building URL: Some REST API calls can contain select columns (`queryCols`)
 			if ( strAjaxUrl.indexOf('$select') > -1 ) {
@@ -1271,7 +1266,7 @@ EX: Form Binding:
 		});
 	}
 
-	// API: SITE
+	// API: SITE (TODO: FUTURE:)
 	sprLib.site = function site(inUrl) {
 		return new Promise(function(resolve, reject) {
 			// TODO: POST-1.0:
