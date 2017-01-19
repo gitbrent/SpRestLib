@@ -47,7 +47,7 @@ npm install sprestlib
 * `sprLib.list(listName).delete(item)` - Delete the item (placed into the Recycle Bin)
 
 ### Get List Columns
-* `sprLib.list(listName).cols()` - Returns an array of column objects with useful info (internal name, datatype, etc.)
+* `sprLib.list(listName).cols()` - Returns an array of column objects with useful info (name, datatype, etc.)
 
 ### Get List Info
 * `sprLib.list(listName).info()` - Returns information about the list (GUID, numberOfItems, etc.)
@@ -64,42 +64,19 @@ npm install sprestlib
 
 
 **************************************************************************************************
-# Async Operations: ES6 Promises vs Callbacks
+# API Reference
 
-All of the SpRestLib methods return JavaScript Promises, which provide two main benefits:
-* No more callback functions
-* No more managing async operations
+## Options
+`sprLib.baseUrl(url)`
 
-If you're unfamiliar with the new [ES6 Promise](http://www.datchley.name/es6-promises/) functionality, you may want to
-the a moment to read more about them.  They really are a game changer for those of us who deal with asynchronous
-operations.
 
-All major browsers (and Node.js) now fully support ES6 Promises, so keep reading to see them in action.
-
-## tl;dr
-Promises can be chained using `then()` or grouped using `Promise.all()` so callbacks and queue management
-are a thing of the past.
-
-## Example: Chaining async SharePoint REST operations is easy with Promises
-```javascript
-var item = { Name:'Marty McFly', Hire_x0020_Date:new Date() };
-Promise.resolve()
-.then(function()    { return sprLib.list('Employees').create(item); })
-.then(function(item){ return sprLib.list('Employees').update(item); })
-.then(function(item){ return sprLib.list('Employees').delete(item); })
-.then(function(item){ console.log('Success! An item navigated the entire CRUD chain!'); });
-```
-
-**************************************************************************************************
-# Library Reference
-
-## List/Library Operations (**`SPList`**)
-`sprLib.list(ListName)`
-`sprLib.list(ListGUID)`
+## List/Library Operations (`SPList`)
+Lists can be accessed by either their name or their GUID:  
+`sprLib.list(ListName)` or `sprLib.list(ListGUID)`
 
 ### Create Item
 Syntax:
-`sprLib.list(listName).create(itemObject)`
+`sprLib.list(listName|listGUID).create(itemObject)`
 
 Options:
 An object with internal name/value pairs to be inserted
@@ -114,7 +91,7 @@ sprLib.list('Employees')
 
 ### Update Item
 Syntax:
-`sprLib.list(listName).update(itemObject)`
+`sprLib.list(listName|listGUID).update(itemObject)`
 
 Options:
 * An object with internal name/value pairs to be inserted
@@ -130,7 +107,7 @@ sprLib.list('Employees')
 
 ### Delete Item
 Syntax:
-`sprLib.list(listName).delete(itemId)`
+`sprLib.list(listName|listGUID).delete(itemId)`
 
 Options:
 * if `__metadata.etag` is not provided, this is equivalent to force:true (`etag:'"*"'` is used)
@@ -143,12 +120,13 @@ sprLib.list('Employees')
 .catch(function(strErr){ console.error(strErr); });
 ```
 
-### Get Columns
-`sprLib.list(listName).cols()`
-* Returns: Array of column objects
+### Get List Column Properties
+Syntax:
+`sprLib.list(listName|listGUID).cols()`
 
-Column Properties
+Returns: Array of columns with name value pairs of property values
 
+#### Column Properties
 | Property       | Type     | Description                  |
 | :------------- | :------- | :--------------------------- |
 | `dispName`     | string   | display name                 |
@@ -161,15 +139,30 @@ Column Properties
 | `defaultValue` | boolean  | the default value (if any) |
 | `maxLength`    | boolean  | the maxlength of the column |
 
-### Get Info
-**Syntax**
-* `sprLib.list(listName).info()`
+#### Sample Code
+```javascript
+sprLib.list('Employees').cols().then(function(data){ console.table(data) });
 
-**Returns**
-* Array of list properties and their value
+// Result:
+/*
+.-------------------------------------------------------------------------------------------------------------------------------------.
+|      dispName      |         dataName         |  dataType  | isAppend | isNumPct | isReadOnly | isUnique | defaultValue | maxLength |
+|--------------------|--------------------------|------------|----------|----------|------------|----------|--------------|-----------|
+| Name               | Name                     | Text       | false    | false    | false      | false    |              |       255 |
+| Badge Number       | Badge_x0020_Number       | Number     | false    | false    | false      | false    |              |           |
+| Hire Date          | Hire_x0020_Date          | DateTime   | false    | false    | false      | false    |              |           |
+| ID                 | ID                       | Counter    | false    | false    | true       | false    |              |           |
+'-------------------------------------------------------------------------------------------------------------------------------------'
+*/
+```
 
-**List Properties**
+### Get List Info
+Syntax:
+`sprLib.list(listName|listGUID).info()`
 
+Returns: Array of list properties and their values
+
+#### List Properties
 | Property             | Type     | Description                  |
 | :------------------- | :------- | :--------------------------- |
 | `AllowContentTypes`  | boolean  | Whether `Allow management of content types?` is enabled |
@@ -183,14 +176,16 @@ Column Properties
 | `ItemCount`          | number   | The number of Items in the List |
 | `Title`              | string   | The Title of the List/Library |
 
-**Example**
+#### Sample Code
 ```javascript
 sprLib.list('Employees').info().then(function(data){ console.table(data) });
 ```
 
 ### Get Items
-* Returns values from List/Library using the query parameters provided
-* Omitting `listCols` will result in every column being returned (mimics SharePoint default behavior)
+Syntax:
+`sprLib.list(listName|listGUID).getItems()`
+
+Returns: Array of objects containing name/value pairs
 
 #### Options
 | Option       | Type     | Required? | Description           | Possible Values / Returns           |
@@ -199,6 +194,8 @@ sprLib.list('Employees').info().then(function(data){ console.table(data) });
 | `queryFilter` | string   |          | query filter          | utilizes OData style [Query Operators](https://msdn.microsoft.com/en-us/library/office/fp142385.aspx#Anchor_7) |
 | `queryMaxItems` | string |          | max items to return   | 1-*N* |
 | `queryOrderby`  | string |          | column(s) to order by | Ex:`queryOrderby:Name` |
+
+NOTE: Omitting `listCols` will result in every column being returned (mimics SharePoint default behavior)
 
 #### `listCols` Object
 | Option       | Type     | Required? | Description           | Possible Values / Return Values     |
@@ -216,22 +213,49 @@ The `dataFunc` option allows you access to the entire result set and to return a
 editLink is created.
 
 #### Sample Code
-(WIP)
+```javascript
+// Get all List items, order by Name
+sprLib.list('Employees').getItems({
+    listCols:     ['Name', 'Badge_x0020_Number', 'Hire_x0020_Date'],
+    queryOrderby: 'Name'
+})
+.then(function(arrData){ console.table(arrData) })
+.catch(function(errMsg){ console.error(errMsg) });
+```
 
-
-
-
+```javascript
+// Utilize listCols object to name our columns, use filtering options
+sprLib.list('Employees').getItems({
+    listCols: {
+		empName:  { dataName:'Name'               },
+        badgeNum: { dataName:'Badge_x0020_Number' },
+		hireDate: { dataName:'Hire_x0020_Date'    }
+    },
+    queryFilter:  'Salary gt 100000',
+    queryOrderby: 'Hire_x0020_Date',
+    queryLimit:   10
+})
+.then(function(arrData){ console.table(arrData) })
+.catch(function(errMsg){ console.error(errMsg) });
+```
 
 **************************************************************************************************
-# User
+# REST
+(WIP)
 
+**************************************************************************************************
+# User (SPUser)
 `sprLib.user()`
 
 ## Get Current User Information
+Syntax:
 `sprLib.user().info()`
-* Returns information about the current user
-* *Uses the basic SP User service (not the Enterprise licensed User Profile service)*
 
+Returns: Object with name/value pairs containing information about the user
+
+Note: *Uses the basic SP User service (not the Enterprise licensed User Profile service)*
+
+### Sample Code
 ```javascript
 sprLib.user().info()
 .then(function(objUser){
@@ -241,8 +265,10 @@ sprLib.user().info()
 ```
 
 ## Get Current User Groups
+Syntax:
 `sprLib.user().groups()`
-* Returns the current users SharePoint permission groups
+
+Returns: Array of objects containing the user's SharePoint groups [SPGroup](https://msdn.microsoft.com/en-us/library/microsoft.sharepoint.spgroup.aspx)
 
 ### Sample Code
 ```javascript
@@ -254,9 +280,10 @@ sprLib.user().groups()
 ```
 
 ## Get User By ID
+Syntax:
 `sprLib.user(ID).info()`
-* Returns information about a user with a given member ID
-* *Uses the basic SP User service (not the Enterprise licensed User Profile service)*
+
+Returns: information about a user with a given member ID
 
 ### Sample Code
 ```javascript
@@ -274,6 +301,7 @@ sprLib.user().info(123)
 ```javascript
 <table data-sprlib='{ "foreach": {"listName":"Employees", "filter":{"col":"Badge_x0020_Number", "op":"eq", "val":1234}}, "options":{"showBusySpinner":true} }'>
 ```
+(WIP)
 
 **************************************************************************************************
 # Tips &amp; Tricks (WIP)
@@ -331,6 +359,33 @@ Promise.all([ sprLib.user().info(), sprLib.user().groups() ])
 	console.log( "Current User Info `Title`: " + arrResults[0].Title  );
 	console.log( "Current User Groups count: " + arrResults[1].length );
 });
+```
+
+**************************************************************************************************
+# Lets Talk Async Operations: ES6 Promises vs Callbacks
+
+All of the SpRestLib methods return JavaScript Promises, which provide two main benefits:
+* No more callback functions
+* No more managing async operations
+
+If you're unfamiliar with the new [ES6 Promise](http://www.datchley.name/es6-promises/) functionality, you may want to
+the a moment to read more about them.  They really are a game changer for those of us who deal with asynchronous
+operations.
+
+All major browsers (and Node.js) now fully support ES6 Promises, so keep reading to see them in action.
+
+## tl;dr
+Promises can be chained using `then()` or grouped using `Promise.all()` so callbacks and queue management
+are a thing of the past.
+
+## Example: Chaining async SharePoint REST operations is easy with Promises
+```javascript
+var item = { Name:'Marty McFly', Hire_x0020_Date:new Date() };
+Promise.resolve()
+.then(function()    { return sprLib.list('Employees').create(item); })
+.then(function(item){ return sprLib.list('Employees').update(item); })
+.then(function(item){ return sprLib.list('Employees').delete(item); })
+.then(function(item){ console.log('Success! An item navigated the entire CRUD chain!'); });
 ```
 
 **************************************************************************************************

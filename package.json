@@ -9,8 +9,8 @@
 	"homepage": "http://gitbrent.github.io/SpRestLib/",
 	"license": "MIT",
 	"dependencies": {
-        "jquery": "^2.1.0",
-		"promise": "^6.1.0"
+        "jquery-node": ">=0.2.0",
+		"promise": ">=6.1.0"
     },
     "main": "sprestlib.js",
     "directories": {
@@ -23,6 +23,7 @@
     },
     "keywords": [
 		"sharepoint",
+		"sharepoint-web-services",
 		"sp2013",
 		"sp2016",
 		"javascript",

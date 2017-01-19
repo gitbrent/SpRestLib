@@ -40,7 +40,7 @@ FUTURE:
 (function(){
 	// APP VERSION/BUILD
 	var APP_VER = "0.9.0";
-	var APP_BLD = "20170109";
+	var APP_BLD = "20170118";
 	var DEBUG = false; // (verbose mode, lots of logging - w/b removed before v1.0.0)
 	// APP FUNCTIONALITY
 	var APP_FILTEROPS = {
@@ -1271,6 +1271,8 @@ FUTURE:
 		return new Promise(function(resolve, reject) {
 			// TODO: POST-1.0:
 			/*
+			https://msdn.microsoft.com/library/microsoft.sharepoint.spsite
+
 			## Site
 			* `sprLib.site().listPerms()` - Returns an array of all List/Library Permissions for the current/specified Site
 			* `sprLib.site().permGroups()` - Returns an array of Permission Groups and their membership for the current/specified Site
@@ -1379,3 +1381,13 @@ FUTURE:
 		doPopulateDataBinds();
 	});
 })();
+
+// [Node.js] support
+if ( typeof module !== 'undefined' && module.exports ) {
+	// A: Load 2 depdendencies
+	var $ = require("jquery-node");
+
+	// B: Export module
+	//module.exports = new ?(); // TODO: how do we do this with sprLib?
+	module.exports = sprLib;
+}
