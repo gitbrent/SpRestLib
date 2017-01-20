@@ -272,7 +272,7 @@ QUnit.module( "REST Methods" );
 			assert.ok( arrayResults.length > 0, "arrayResults is an Array and length > 0: "+ arrayResults.length );
 			//
 			let table = new AsciiTable();
-			if (arrGroups.length > 0) table.setHeading( Object.keys(arrGroups[0]) );
+			if (arrayResults.length > 0) table.setHeading( Object.keys(arrayResults[0]) );
 			$.each(arrayResults,function(idx,obj){ let vals = []; $.each(obj, function(key,val){ vals.push(val) }); table.addRow(vals); });
 			assert.ok( table.toString(), `RESULTS:\n${table.toString()}`);
 			//
@@ -354,7 +354,7 @@ QUnit.test("sprLib.getListItems() - onDone", function(assert){
 	sprLib.getListItems({
 		listName: 'Employees',
 		listCols: { id:{dataName:'ID'} },
-		queryMaxItems: 1,
+		queryLimit: 1,
 		onDone: function(){ assert.ok( true, "onDone fired!" ); done(); }
 	});
 });
@@ -373,7 +373,7 @@ QUnit.test("sprLib.getListItems() - with listCols", function(assert){
 			utilPct:  { dataName:'Utilization_x0020_Pct', dispName:'Util %' },
 			comments: { dataName:'Comments' }
 		},
-		queryMaxItems: 10,
+		queryLimit: 10,
 		onDone: function(arrayResults){
 			assert.ok( $.isArray(arrayResults), "onDone result is an array" );
 			assert.ok( arrayResults.length > 0, "arrayResults.length > 0" );
@@ -397,7 +397,7 @@ QUnit.test("sprLib.getListItems() - w/o listCols", function(assert){
 	var done = assert.async();
 	sprLib.getListItems({
 		listName: 'Employees',
-		queryMaxItems: 10,
+		queryLimit: 10,
 		onDone: function(arrayResults){
 			assert.ok( $.isArray(arrayResults), "onDone result is an array" );
 			assert.ok( arrayResults.length > 0, "arrayResults.length > 0" );
@@ -421,7 +421,7 @@ QUnit.test("sprLib.getListItems() - dataFunc listCols", function(assert){
 			badgeNum: { dataName:'Badge_x0020_Number' },
 			funcTest: { dataFunc:function(objItem){ return objItem.Name +' ('+ objItem.Badge_x0020_Number+')' } }
 		},
-		queryMaxItems: 10,
+		queryLimit: 10,
 		onDone: function(arrayResults){
 			assert.ok( $.isArray(arrayResults), "onDone result is an array" );
 			assert.ok( arrayResults.length > 0, "arrayResults.length > 0" );

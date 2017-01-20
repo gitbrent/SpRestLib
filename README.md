@@ -31,9 +31,11 @@ SpRestLib utilizes the jQuery library - include it before sprestlib.  That's it!
 ```
 **NOTE** IE11 support requires you include a Promises polyfill as well (one is included in the `libs` folder)
 
-## NPM
+## Node (4.x)
 ```javascript
 npm install sprestlib
+
+var sprLib = require("sprestlib");
 ```
 
 **************************************************************************************************
@@ -68,7 +70,6 @@ npm install sprestlib
 
 ## Options
 `sprLib.baseUrl(url)`
-
 
 ## List/Library Operations (`SPList`)
 Lists can be accessed by either their name or their GUID:  
@@ -192,7 +193,7 @@ Returns: Array of objects containing name/value pairs
 | :----------- | :------- | :-------- | :-------------------- | :---------------------------------- |
 | `listCols`   | array *OR* object |  | column names to be returned | array of column names *OR* object (see below) |
 | `queryFilter` | string   |          | query filter          | utilizes OData style [Query Operators](https://msdn.microsoft.com/en-us/library/office/fp142385.aspx#Anchor_7) |
-| `queryMaxItems` | string |          | max items to return   | 1-*N* |
+| `queryLimit` | string |          | max items to return   | 1-*N* |
 | `queryOrderby`  | string |          | column(s) to order by | Ex:`queryOrderby:Name` |
 
 NOTE: Omitting `listCols` will result in every column being returned (mimics SharePoint default behavior)
@@ -240,14 +241,57 @@ sprLib.list('Employees').getItems({
 ```
 
 **************************************************************************************************
-# REST
-(WIP)
+# REST Calls
+Returns the results of a given REST call to any [SharePoint REST API](https://msdn.microsoft.com/en-us/library/office/dn268594.aspx)
+
+While SpRestLib provides lots of common web service functionality, there are many times you will
+need to execute ad-hoc REST calls.  Using the `sprLib.rest()` interface, any of the REST API endpoints
+can be called in an easy way.
+
+Normally, calling the REST APIs can return results in different ways (some are `data.d` while others are `data.d.results`)
+whereas SpRestLib always returns consistent results will always be array of name/value objects.
+
+Syntax
+`sprLib.rest(options)`
+
+Returns: Array of objects containing name/value pairs
+
+## Options
+| Option        | Type    | Required? | Description           | Possible Values / Returns           |
+| :------------ | :------ | :-------- | :-------------------- | :---------------------------------- |
+| `restUrl`     | string  | yes       | REST API endpoint     | [SharePoint REST API](https://msdn.microsoft.com/en-us/library/office/dn268594.aspx) |
+| `restType`    | string  |           | rest type             | `get` or `post` (default is `get`)  |
+| `queryCols`   | string  |           | fields/columns to get | whatever fields tbe REST API provides |
+| `queryFilter` | string  |           | query filter          | utilizes OData style [Query Operators](https://msdn.microsoft.com/en-us/library/office/fp142385.aspx#Anchor_7) |
+| `queryLimit`  | string  |           | max items to return   | 1-*N* |
+| `queryOrderby`| string  |           | column(s) to order by | Ex:`queryOrderby:Name` |
+
+* url can be relative, / or http:
+
+## Examples
+```javascript
+sprLib.rest({
+	restUrl:      '/sites/dev/_api/web/sitegroups',
+	queryCols:    ['Title','LoginName','AllowMembersEditMembership'],
+	queryFilter:  'AllowMembersEditMembership eq false',
+	queryOrderby: 'Title',
+	queryLimit:   10
+})
+.then(function(arrayResults){ console.table(arrayResults) });
+
+sprLib.rest({ restUrl:"/sites/dev/_api/web/sitegroups" }).then(function(data){ console.table(data); }); //(data.d.results)
+
+sprLib.rest({ restUrl:"_api/web/lists/getbytitle('Employees')" }).then(function(data){ console.table(data); }); //(data.d)
+
+(TODO:) show example with post
+```
 
 **************************************************************************************************
-# User (SPUser)
-`sprLib.user()`
+# User Info/Groups
+Omitting the userID argument will return information about the current user, otherwise, the specified user is returned.  
+`sprLib.user()` or `sprLib.user(userID)`
 
-## Get Current User Information
+## Get Current User Information (`SPUser`)
 Syntax:
 `sprLib.user().info()`
 
@@ -264,7 +308,7 @@ sprLib.user().info()
 });
 ```
 
-## Get Current User Groups
+## Get Current User Groups (`SPGroup`)
 Syntax:
 `sprLib.user().groups()`
 
@@ -279,86 +323,14 @@ sprLib.user().groups()
 });
 ```
 
-## Get User By ID
-Syntax:
-`sprLib.user(ID).info()`
-
-Returns: information about a user with a given member ID
-
-### Sample Code
-```javascript
-// Get User object for User with `id` 123:
-sprLib.user().info(123)
-.then(function(objUser){
-	console.log("User Info:\n");
-	console.log("Id:" + objUser.Id +" - Title:"+ objUser.Title +" - Email:"+ objUser.Email); }
-});
-```
-
 **************************************************************************************************
 # Form Binding
 
+Many different HTML tags can be populated (WIP)
+
+Examples:
 ```javascript
 <table data-sprlib='{ "foreach": {"listName":"Employees", "filter":{"col":"Badge_x0020_Number", "op":"eq", "val":1234}}, "options":{"showBusySpinner":true} }'>
-```
-(WIP)
-
-**************************************************************************************************
-# Tips &amp; Tricks (WIP)
-
-## Async Chaining
-You can easily chain asynchronous calls as SpRestLib methods will return a Promise.  The Promise method `then()`
-will in turn wait for the Promise to either resolve or reject.
-
-So thanks to the new ES6 Promise feature, we can now simply order asynchronous operations without a managing
-a queue or requiring callbacks.
-
-```javascript
-Promise.resolve()
-.then(function(){
-	// Clear User var
-	gObjCurrUser = {};
-	// sprLib methods return Promises, and .then() waits for promises to resolve/reject
-	return sprLib.user().info();
-})
-.then(function(result){
-	// Capture User info
-	gObjCurrUser = result;
-	return sprLib.user(gObjCurrUser.Id).groups();
-})
-.then(function(result){
-	// Capture User Groups
-	gArrCurrGrps = result;
-})
-.then(function(){
-	// Now we have all of our data
-	console.log( "Current User Info `Title`: " + gObjCurrUser.Title    );
-	console.log( "Current User Groups count: " + gArrCurrGrps.length );
-})
-.catch(function(errMsg){ console.error(errMsg) });
-```
-
-```javascript
-Promise.resolve()
-.then(function()        { return sprLib.list('Departments').getItems({ listCols: ['Title'] }) })
-.then(function(arrData) { console.warn('WARN: Awesome code ahead!'); console.log(arrData); })
-.then(function()        { return sprLib.list('Employees').getItems({ listCols: ['Name','Badge_x0020_Number'] }) })
-.then(function(arrData) { console.warn('WARN: Awesome code ahead!'); console.log(arrData); })
-.catch(function(errMesg){ console.error(errMesg); });
-```
-
-## Async Grouping
-When you merely need all your REST requests to complete - regardless of order - add all the SpRestLib Promises
-as an array to `Promise.all()` and `then()` waits until all of them have completed.
-
-Example
-```javascript
-Promise.all([ sprLib.user().info(), sprLib.user().groups() ])
-.then(function(arrResults){
-	// arrResults holds the return values of each SpRestLib method above, in the order they were provided
-	console.log( "Current User Info `Title`: " + arrResults[0].Title  );
-	console.log( "Current User Groups count: " + arrResults[1].length );
-});
 ```
 
 **************************************************************************************************
@@ -375,10 +347,13 @@ operations.
 All major browsers (and Node.js) now fully support ES6 Promises, so keep reading to see them in action.
 
 ## tl;dr
-Promises can be chained using `then()` or grouped using `Promise.all()` so callbacks and queue management
-are a thing of the past.
+**Promises can be chained using `then()` or grouped using `Promise.all()` so callbacks and queue management
+are a thing of the past.**
 
-## Example: Chaining async SharePoint REST operations is easy with Promises
+## Async Chaining
+* Promises can be chained so they execute in the order shown only after the previous one has completed.
+
+Example
 ```javascript
 var item = { Name:'Marty McFly', Hire_x0020_Date:new Date() };
 Promise.resolve()
@@ -388,10 +363,19 @@ Promise.resolve()
 .then(function(item){ console.log('Success! An item navigated the entire CRUD chain!'); });
 ```
 
-**************************************************************************************************
-# Configurable! (WIP)
+## Async Grouping
+* Promises can be grouped so they have to complete before `then()` is executed.
 
-var APP_OPTS and APP_CSS can be edited to set base URL, max rows returned, etc easily
+Example
+```javascript
+Promise.all([ sprLib.user().info(), sprLib.user().groups() ])
+.then(function(arrResults){
+	// arrResults holds the return values of each SpRestLib method above, in the order they were provided
+	// so, arrResults[0] is info() and arrResults[1] is groups()
+	console.log( "Current User Info `Title`: " + arrResults[0].Title  );
+	console.log( "Current User Groups count: " + arrResults[1].length );
+});
+```
 
 **************************************************************************************************
 # Issues / Suggestions

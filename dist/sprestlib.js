@@ -37,10 +37,13 @@ FUTURE:
 	* Support for turning LOOKUP values into a "text; text"-type output
 */
 
+// Detect Node.js
+var NODEJS = ( typeof module !== 'undefined' && module.exports );
+
 (function(){
 	// APP VERSION/BUILD
 	var APP_VER = "0.9.0";
-	var APP_BLD = "20170118";
+	var APP_BLD = "20170119";
 	var DEBUG = false; // (verbose mode, lots of logging - w/b removed before v1.0.0)
 	// APP FUNCTIONALITY
 	var APP_FILTEROPS = {
@@ -598,7 +601,6 @@ FUTURE:
 	}
 
 	// API: LIST (CRUD + getItems)
-
 	/**
 	* @param inName (string) - required - List Name or List GUID
 	*/
@@ -608,8 +610,8 @@ FUTURE:
 
 		var guidRegex = /^[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}$/i;
 		var _newList = {};
-		// DESIGN: Accept [List Name] or [List GUID]
-		var _urlBase = "/_api/lists" + APP_OPTS.baseUrl + ( guidRegex.test(inName) ? "(guid'"+ inName +"')" : "getbytitle('"+ inName.replace(/\s/gi,'%20') +"')" );
+		// DESIGN: Accept [ListName] or [ListGUID]
+		var _urlBase = APP_OPTS.baseUrl + "/_api/lists" + ( guidRegex.test(inName) ? "(guid'"+ inName +"')" : "/getbytitle('"+ inName.replace(/\s/gi,'%20') +"')" );
 		var _urlRest = "/_api/lists" + ( guidRegex.test(inName) ? "(guid'"+ inName +"')" : "/getbytitle('"+ inName.replace(/\s/gi,'%20') +"')" );
 
 		/**
@@ -764,12 +766,10 @@ FUTURE:
 				inObj.spObjMeta = {};
 				inObj.spArrData = [];
 
-				// STEP 2: Convert listCols array into object format (if necessary)
-
-				// We dont code for it in our API, but we better handle case `listCols:"Name"` b/c you know it'll happen
+				// STEP 2: `listCols` can be: string, array of strings, or objects
+				// A: Convert single string column into an array for use below
 				if ( typeof inObj.listCols === 'string' ) inObj.listCols = [ inObj.listCols ];
-
-				// DESIGN: Overloading: Cols can be objects or a plain array or string field names - if array, build `listCols` object now
+				// B: Build query object
 				if ( inObj.listCols && $.isArray(inObj.listCols) ) {
 					var listCols = {};
 					$.each(inObj.listCols, function(i,colStr){ listCols[colStr] = { dataName:colStr } });
@@ -850,6 +850,7 @@ FUTURE:
 							// E: Add orderby (if any)
 							if ( inObj.queryOrderby ) strAjaxUrl += (strAjaxUrl.indexOf('?$') > -1 ? '&':'?') + '$orderby=' + inObj.queryOrderby;
 						}
+						strAjaxUrl = strAjaxUrl.replace(',&','&'); // FIXME: we wont this catch condition after we stop selecting "Id," above!
 
 						// STEP 3: Send AJAX REST query
 						$.ajax({
@@ -1189,7 +1190,18 @@ FUTURE:
 
 			// STEP 4: Continue building URL: Some REST API calls can contain select columns (`queryCols`)
 			if ( strAjaxUrl.indexOf('$select') > -1 ) {
-				// A: Add columns
+				// `listCols` can be: string, array of strings, or objects
+				// A: Convert single string column into an array for use below
+				if ( typeof inOpt.queryCols === 'string' ) inOpt.queryCols = [ inOpt.queryCols ];
+
+				// B: Build query object
+				if ( inOpt.queryCols && $.isArray(inOpt.queryCols) ) {
+					var listCols = {};
+					$.each(inOpt.queryCols, function(i,colStr){ listCols[colStr] = { dataName:colStr } });
+					inOpt.queryCols = listCols;
+				}
+
+				// C: Add columns
 				$.each(inOpt.queryCols, function(key,col){
 					if ( !col.dataName ) return; // Skip columns without a 'dataName' key
 					// A:
@@ -1199,16 +1211,16 @@ FUTURE:
 					if ( col.dataName.indexOf('/') > -1 ) strExpands += ( strExpands == '' ? col.dataName.substring(0,col.dataName.indexOf('/')) : ','+col.dataName.substring(0,col.dataName.indexOf('/')) );
 				});
 
-				// B: Add maxrows as default in SP2013 is a paltry 100 rows
+				// D: Add maxrows as default in SP2013 is a paltry 100 rows
 				strAjaxUrl += '&$top=' + ( inOpt.queryLimit ? inOpt.queryLimit : APP_OPTS.maxRows );
 
-				// C: Add expand (if any)
+				// E: Add expand (if any)
 				if ( strExpands ) strAjaxUrl += '&$expand=' + strExpands;
 
-				// D: Add filter (if any)
+				// F: Add filter (if any)
 				else if ( inOpt.queryFilter ) strAjaxUrl += '&$filter=' + ( inOpt.queryFilter.indexOf('%') == -1 ? encodeURI(inOpt.queryFilter) : inOpt.queryFilter );
 
-				// E: Add orderby (if any)
+				// G: Add orderby (if any)
 				if ( inOpt.queryOrderby ) strAjaxUrl += '&$orderby=' + inOpt.queryOrderby;
 			}
 
@@ -1376,18 +1388,19 @@ FUTURE:
 	==================================================================================================
 	*/
 
-	$(document).ready(function(){
-		doShowBusySpinners();
-		doPopulateDataBinds();
-	});
+	if ( !NODEJS ) {
+		$(document).ready(function(){
+			doShowBusySpinners();
+			doPopulateDataBinds();
+		});
+	}
 })();
 
 // [Node.js] support
-if ( typeof module !== 'undefined' && module.exports ) {
+if ( NODEJS ) {
 	// A: Load 2 depdendencies
 	var $ = require("jquery-node");
 
 	// B: Export module
-	//module.exports = new ?(); // TODO: how do we do this with sprLib?
 	module.exports = sprLib;
 }
