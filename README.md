@@ -1,14 +1,17 @@
-[![Open Source Love](https://badges.frapsoft.com/os/v1/open-source.svg?v=103)](https://github.com/ellerbrock/open-source-badge/) [![MIT Licence](https://badges.frapsoft.com/os/mit/mit.svg?v=103)](https://opensource.org/licenses/mit-license.php)
+[![Open Source Love](https://badges.frapsoft.com/os/v1/open-source.svg?v=103)](https://github.com/ellerbrock/open-source-badge/) [![MIT Licence](https://badges.frapsoft.com/os/mit/mit.svg?v=103)](https://opensource.org/licenses/mit-license.php) [![npm version](https://badge.fury.io/js/sprestlib.svg)](https://badge.fury.io/js/sprestlib)
+
 # SpRestLib
 
 ## JavaScript Library for SharePoint Web Services
+Reduces your SharePoint AJAX interaction to a few lines of code. Easily read items, perform CRUD operations, gather user information and populate form elements.
 
 ### Features:
+* Form Population - Fill a table with List items, populate a select, and much more
 * Easy Async - Utilizes the new [ES6 Promise](http://www.datchley.name/es6-promises/) architecture to enable chaining of asynchronous operations
 * Modern API - Built for [SharePoint 2013 API](https://msdn.microsoft.com/en-us/library/office/jj860569.aspx) / [OData v3](http://www.odata.org/documentation/odata-version-3-0/)
-* Simple - JavaScript and REST solution (no CSOM or any libraries required)
-* Robust - Monitors the SharePoint authentication token and refreshes it after expiration
-* Lightweight - Small but feature-rich (~30kb minified)
+* Simple - Most REST interaction can be done in 1-2 lines of code
+* Modern - Pure JavaScript solution (no other libraries are required)
+* Robust - Handles errors and monitors the SharePoint authentication token
 
 ### Methods:
 * List Interface - Read, create, update and delete List/Library items with a single line of code
@@ -29,7 +32,7 @@ SpRestLib utilizes the jQuery library - include it before sprestlib.  That's it!
 <script lang="javascript" src="https://code.jquery.com/jquery-3.1.1.slim.min.js"></script>
 <script lang="javascript" src="https://yourhost.com/subsite/SiteAssets/js/sprestlib.js"></script>
 ```
-**NOTE** IE11 support requires you include a Promises polyfill as well (one is included in the `libs` folder)
+**NOTE**: IE11 support requires you include a Promises polyfill as well (one is included in the `libs` folder)
 
 ## Node (4.x)
 ```javascript
@@ -42,28 +45,25 @@ var sprLib = require("sprestlib");
 # Methods
 
 ## List/Library
+* `sprLib.list(listName).getItems(options)` - Returns an array of item objects using a variety of possible options
 
-### Create, Update, Delete List Items
 * `sprLib.list(listName).create(item)` - Add the new item to the List/Library
 * `sprLib.list(listName).update(item)` - Update the existing item using the data provided
 * `sprLib.list(listName).delete(item)` - Delete the item (placed into the Recycle Bin)
 
-### Get List Columns
 * `sprLib.list(listName).cols()` - Returns an array of column objects with useful info (name, datatype, etc.)
 
-### Get List Info
 * `sprLib.list(listName).info()` - Returns information about the list (GUID, numberOfItems, etc.)
 
-### Get List Items
-* `sprLib.list(listName).getItems(options)` - Returns an array of item objects using a variety of possible options
-
-## REST API Interface
+## REST API
 * `sprLib.rest(options)` - Returns the results of a given REST call to any [SharePoint REST API](https://msdn.microsoft.com/en-us/library/office/dn268594.aspx)
 
-## User Info and Groups
+## User Info/Groups
 * `sprLib.user(id).info()` - Returns information about the current [SPUser](https://msdn.microsoft.com/en-us/library/microsoft.sharepoint.spuser.aspx)
 * `sprLib.user(id).groups()` - Returns an of SPGroup objects with information about the current users Groups
 
+## Form Population
+* `data-sprlib{options}` - Populates the parent tag using the options provided
 
 **************************************************************************************************
 # API Reference
@@ -326,11 +326,39 @@ sprLib.user().groups()
 **************************************************************************************************
 # Form Binding
 
-Many different HTML tags can be populated (WIP)
+Many different HTML tags can be populated by adding an `data-sprlib` property to many HTML element types.
 
-Examples:
+Syntax:
+`<tag data-sprlib='{ options }'>`
+
+## Data Binding Types
+
+The following HTML element tags can be populated:
+* select: populates 1+ options
+* static element (span, p, etc.): populates a single plain text value
+* table: a table or tbody can be populates with 1+ columns
+
+## Data Binding Options
+| Option        | Type    | Required? | Description           | Possible Values / Returns           |
+| :------------ | :------ | :-------- | :-------------------- | :---------------------------------- |
+| `list`        | string  | yes       | List or Library name  |  |
+| `cols`        | array   |           | columns to be populated |  |
+| `text`        | string  |           | text value to use     |  |
+| `value`       | string  |           | REST API endpoint     |  |
+| `filter`      | string  |           | REST API endpoint     |  |
+| `tablesorter` | string  |           | REST API endpoint     |  |
+| `options`     | string  |           | table/tbody options   | `showBusySpinner` |
+
+## Examples
 ```javascript
-<table data-sprlib='{ "foreach": {"listName":"Employees", "filter":{"col":"Badge_x0020_Number", "op":"eq", "val":1234}}, "options":{"showBusySpinner":true} }'>
+<select data-sprlib='{ "list":"Employees", "value":"Id", "text":"Name" }'></select>
+
+<input type="text" data-sprlib='{ "list":"Departments", "value":"Title" }' placeholder="Departments.Title"></input>
+
+<span data-sprlib='{ "list":"Employees", "value":"Name", "filter":{"col":"Name", "op":"eq", "val":"Brent Ely"} }'></span>
+
+<table data-sprlib='{ "foreach": {"list":"Employees", "filter":{"col":"Badge_x0020_Number", "op":"eq", "val":1234}}, "options":{"showBusySpinner":true} }'>
+<tbody data-sprlib='{ "foreach": {"list":"Employees", "cols":["Name","Utilization_x0020_Pct"] } }'></tbody>
 ```
 
 **************************************************************************************************
@@ -380,15 +408,16 @@ Promise.all([ sprLib.user().info(), sprLib.user().groups() ])
 **************************************************************************************************
 # Issues / Suggestions
 
-Please file issues or suggestions on the [issues page on github](https://github.com/gitbrent/SpRestLib/issues/new), or even better, [submit a pull request](https://github.com/gitbrent/SpRestLib/pulls). Feedback is always welcome!
+Please file issues or suggestions on the [issues page on GitHub](https://github.com/gitbrent/SpRestLib/issues/new), or even better, [submit a pull request](https://github.com/gitbrent/SpRestLib/pulls). Feedback is always welcome!
 
 When reporting issues, please include a code snippet or a link demonstrating the problem.
 
 **************************************************************************************************
 # Special Thanks
 
-* [Marc D Anderson](http://sympmarc.com/) - SpRestLib is built in the spirit of SPServices
+* [Marc D Anderson](http://sympmarc.com/) - SpRestLib is built in the spirit of the great `SPServices`
 * Microsoft - for the SharePoint.com developer account
+* Everyone who submitted an Issue or Pull Request
 
 **************************************************************************************************
 # License

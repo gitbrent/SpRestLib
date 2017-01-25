@@ -42,8 +42,8 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 
 (function(){
 	// APP VERSION/BUILD
-	var APP_VER = "0.9.0";
-	var APP_BLD = "20170119";
+	var APP_VER = "0.9.1";
+	var APP_BLD = "20170124";
 	var DEBUG = false; // (verbose mode, lots of logging - w/b removed before v1.0.0)
 	// APP FUNCTIONALITY
 	var APP_FILTEROPS = {
