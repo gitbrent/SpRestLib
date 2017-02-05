@@ -34,7 +34,7 @@ SpRestLib utilizes the jQuery library - include it before sprestlib.  That's it!
 ```
 **NOTE**: IE11 support requires you include a Promises polyfill as well (one is included in the `libs` folder)
 
-## Node (4.x)
+## Node
 ```javascript
 npm install sprestlib
 
@@ -189,14 +189,15 @@ Syntax:
 Returns: Array of objects containing name/value pairs
 
 #### Options
-| Option       | Type     | Required? | Description           | Possible Values / Returns           |
-| :----------- | :------- | :-------- | :-------------------- | :---------------------------------- |
-| `listCols`   | array *OR* object |  | column names to be returned | array of column names *OR* object (see below) |
-| `queryFilter` | string   |          | query filter          | utilizes OData style [Query Operators](https://msdn.microsoft.com/en-us/library/office/fp142385.aspx#Anchor_7) |
-| `queryLimit` | string |          | max items to return   | 1-*N* |
-| `queryOrderby`  | string |          | column(s) to order by | Ex:`queryOrderby:Name` |
+| Option        | Type     | Required? | Description           | Possible Values / Returns           |
+| :------------ | :------- | :-------- | :-------------------- | :---------------------------------- |
+| `listCols`    | array *OR* object |  | column names to be returned | array of column names *OR* object (see below) |
+| `queryFilter` | string   |           | query filter          | utilizes OData style [Query Operators](https://msdn.microsoft.com/en-us/library/office/fp142385.aspx#Anchor_7) |
+| `queryLimit`  | string   |           | max items to return   | 1-*N* |
+| `queryOrderby`| string   |           | column(s) to order by | Ex:`queryOrderby:Name` |
+| `fetchAppend` | boolean  |           | return append text    | `true` or `false` (default is `false`) |
 
-NOTE: Omitting `listCols` will result in every column being returned (mimics SharePoint default behavior)
+NOTE: Omitting `listCols` will result in all List columns being returned (mimics SharePoint default behavior)
 
 #### `listCols` Object
 | Option       | Type     | Required? | Description           | Possible Values / Return Values     |

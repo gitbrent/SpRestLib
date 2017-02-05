@@ -4,9 +4,9 @@
 	<meta charset="utf-8">
 	<meta name="author"      content="https://github.com/gitbrent/">
 	<meta name="website"     content="https://github.com/gitbrent/SpRestLib/">
-	<meta name="keywords"    content="SpRestLib, JavaScript, Library, OData, REST, SharePoint 2013, SP2013, SharePoint 2016, SP2016, Office 365">
+	<meta name="keywords"    content="SpRestLib, JavaScript, js-sharepoint, OData, REST, SharePoint 2013, SP2013, SharePoint 2016, SP2016, Office 365">
 	<meta name="description" content="Content Editor WebPart to showcase SpRestLib features and capabilities">
-	<meta name="revised"     content="Jan 02, 2017">
+	<meta name="revised"     content="Jan 26, 2017">
 
 	<link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Roboto:300">
 	<link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Roboto:700">
@@ -19,6 +19,7 @@
 	<script type="text/javascript" src="/sites/dev/SiteAssets/js/jquery.tablesorter.min.js"></script>
 	<script type="text/javascript" src="/sites/dev/SiteAssets/js/promise.min.js"></script> <!-- IE11 support -->
 	<script type="text/javascript" src="/sites/dev/SiteAssets/js/sprestlib.js"></script>
+	<script type="text/javascript" src="/sites/dev/SiteAssets/js/ascii-table.min.js"></script>
 
 	<script type="text/javascript">
 		// ==================================================================================================================
@@ -52,6 +53,24 @@
 		}
 
 		// ==================================================================================================================
+
+		function execSandboxCode() {
+			// A:
+			$('#sandboxResults').html('');
+
+			// B:
+			Promise.resolve()
+			.then(function(){ return eval( $('#sandboxCode').text() ) })
+			.then(function(arrItems){
+				console.log('execSandboxCode() => arrItems:'); console.log(arrItems); console.log('==============================\n');
+				let table = new AsciiTable();
+				if (arrItems.length > 0) table.setHeading( Object.keys(arrItems[0]) );
+				$.each(arrItems, function(idx,obj){ let vals = []; $.each(obj, function(key,val){ vals.push(val) }); table.addRow(vals); });
+				// Show
+				$('#sandboxResults').html( table.toString() );
+			})
+			.catch(function(strErr){ $('#sandboxResults').html('<h3>ERROR</h3>'+strErr) });
+		}
 
 		function doPageLoad() {
 			// STEP 1: HTML Setup
@@ -88,6 +107,17 @@
 				+ '.then(function(arrGroups){ <br>'
 				+ "    $.each(arrGroups,function(idx,objGroup){ $('#res2').append('&lt;span&gt;'+ objGroup.Title +'&lt;/span&gt;') }); <br>"
 				+ '});</pre></code>'
+			);
+
+			$('#sandboxCode').html(''
+				+ "sprLib.list('Employees')\n"
+				+ ".getItems({\n"
+				+ "  listCols:    ['Name','Hire_x0020_Date','Comments','Versioned_x0020_Comments'],\n"
+				+ "  //queryFilter: 'Id eq 66',\n"
+				+ "  fetchAppend: true\n"
+				+ "})\n"
+				+ ".then(function(arrData){ return arrData })\n"
+				+ ".catch(function(errStr){ throw new Error(errStr) });"
 			);
 
 			// STEP 3: SPRLIB examples
@@ -131,13 +161,23 @@
 
 		<div id="navTabs" class="modernTabs">
 			<ul>
-				<li class="active" onclick="$('#navTabs').find('div, li').removeClass('active'); $(this).addClass('active'); $('#tab1').addClass('active');">Feature: List CRUD</li><li onclick="$('#navTabs').find('div, li').removeClass('active'); $(this).addClass('active'); $('#tab2').addClass('active');">Feature: Users/Groups</li><li onclick="$('#navTabs').find('div, li').removeClass('active'); $(this).addClass('active'); $('#tab3').addClass('active');">Feature: Form Binding</li>
+				<li class="active" onclick="$('#navTabs').find('> div, li').removeClass('active'); $(this).addClass('active'); $('#tab1').addClass('active');">Feature: List CRUD</li><li onclick="$('#navTabs').find('> div, li').removeClass('active'); $(this).addClass('active'); $('#tab2').addClass('active');">Feature: Users/Groups</li><li onclick="$('#navTabs').find('> div, li').removeClass('active'); $(this).addClass('active'); $('#tab3').addClass('active');">Feature: Form Binding</li>
 			</ul>
 
 			<div id="tab1" class="active">
 				<div id="tab1-tst1"><!-- populated by doPageLoad --></div>
 				<button type="button" class="flatBtn flatBtn-blue" onclick="doSimpleTest()">SIMPLE TEST</button>
 				<!-- TODO: core API calls: eg: _/api/webs -->
+
+				<div style="margin:0 0 10px 0; padding:4px 8px; background:#fffccc; color:#9c9c9f; font-size:13px;">
+					Code below is editable (use shift-return to create a new line)
+				</div>
+				<div class="code" style="text-align:left; margin-bottom:15px">
+					<div id="sandboxCode" class="pre" contenteditable="true"></div>
+					<button type="button" class="flatBtn flatBtn-blue" onclick="execSandboxCode()">Exec Sandbox Code</button>
+				</div>
+
+				<div id="sandboxResults" class="pre"></div>
 			</div>
 
 			<div id="tab2">
@@ -165,10 +205,12 @@
 			</div>
 
 			<div id="tab3">
-				<div class="subTitle">HTML Element Population</div>
+				<div class="subTitle" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
+					<div class="arrow active"></div>HTML Form Binding/Population
+				</div>
 				<div id="tabHtmlElements" class="divTableRows testGroup">
 					<div>
-						<div class="subTitle">EX: Populate &lt;span&gt;</div>
+						<div class="subTitle">EX: Populate <kbd>&lt;span&gt;</kbd></div>
 						Employee #1: <b><span data-sprlib='{ "list":"Employees", "value":"Name", "filter":{"col":"Name", "op":"eq", "val":"Brent Ely"} }'></span></b>
 					</div>
 					<div>

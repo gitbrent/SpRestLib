@@ -43,8 +43,8 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 (function(){
 	// APP VERSION/BUILD
 	var APP_VER = "0.9.1";
-	var APP_BLD = "20170124";
-	var DEBUG = false; // (verbose mode, lots of logging - w/b removed before v1.0.0)
+	var APP_BLD = "20170205";
+	var DEBUG = false; // (verbose mode/lots of logging. FIXME:remove prior to v1.0.0)
 	// APP FUNCTIONALITY
 	var APP_FILTEROPS = {
 		"eq" : "==",
@@ -55,7 +55,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 		"lte": "<="
 	};
 	// APP DATA MODEL OBJECTS
-	var APP_LISTS = {};
+	var APP_LIST_COL_METAS = {};
 	// APP MESSAGE STRINGS (i18n Internationalization)
 	var APP_STRINGS = {
 		de: {
@@ -194,24 +194,6 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 			UpdateFormDigest(_spPageContextInfo.webServerRelativeUrl, _spFormDigestRefreshInterval);
 			resolve();
 		});
-	}
-
-	// TODO: Gather AppendText
-	function doLoadListAppendText(inModel) {
-		// TODO: doLoadListAppendText()
-		// TODO-DONE: capture LIST GUID duyring metadata for use with AppendText -- DONE!!! its in __metadata (id:"65528d90-8295-4491-adad-09f7c0a9f652") .replace(/\-/g, '%2D')
-		/*
-		var strAjaxUrl = "/sites/dev/_vti_bin/owssvr.dll?Cmd=Display&List="
-			+ "%7B"+"LUID"+"%7D" + "&XMLDATA=TRUE&IncludeVersions=TRUE"
-			+ '&Query=ID'+'%20'+'Start_x0020_Date'+'%20'+ "&SortField=Modified&SortDir=ASC";
-		// STEP 1: Query SP
-		$.ajax({ url:strAjaxUrl })
-		.done(function(data,textStatus){
-			$(data).find("z\\:row, row").each(function(){
-				objCurr.StartDate = ( $(this).attr("ows_Critical_x0020_Issues") || '');
-			)};
-		)};
-		*/
 	}
 
 	/* ===============================================================================================
@@ -615,6 +597,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 		var _urlRest = "/_api/lists" + ( guidRegex.test(inName) ? "(guid'"+ inName +"')" : "/getbytitle('"+ inName.replace(/\s/gi,'%20') +"')" );
 
 		/**
+		* Used after `.create()` if no {type} was provided (enables us to continue using the object in subsequnt operations)
 		* Used internally when users send CRUD methods objects without `__metadata.type`
 		*/
 		function getMetaType() {
@@ -625,7 +608,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 					else reject('Invalid result!');
 				})
 				.catch(function(err){
-					reject(err)
+					reject(err);
 				});
 			});
 		}
@@ -758,11 +741,14 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 		*/
 		_newList.getItems = function(inObj) {
 			return new Promise(function(resolve, reject) {
+				var listGUID = '';
+
 				// FIRST: Param check
-				// N/A: getItems() does not req any opts/params.  We do need a valid inObj though, so create if needed
+				// N/A for this Method: `getItems()` does not req any opts/params.  We do need a valid inObj though, so create if needed
 				if ( !inObj || typeof inObj !== 'object' ) inObj = {};
 
-				// STEP 1: Attach the properties used next for meta/data queries
+				// STEP 1: Attach/Init data properties to this query
+				inObj.spObjData = {};
 				inObj.spObjMeta = {};
 				inObj.spArrData = [];
 
@@ -772,17 +758,21 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 				// B: Build query object
 				if ( inObj.listCols && $.isArray(inObj.listCols) ) {
 					var listCols = {};
-					$.each(inObj.listCols, function(i,colStr){ listCols[colStr] = { dataName:colStr } });
+					$.each(inObj.listCols, function(i,colStr){
+						listCols[colStr] = { dataName:colStr }
+					});
 					inObj.listCols = listCols;
 				}
 
 				// STEP 3: Start data fetch Promise chain
 				Promise.resolve()
 				.then(function(){
-					/*
-					// TODO: 20161229: this is optional right? only used by Form Population, and even then cant we just rely on dataFormat tag and typechecking?
+					// PERF: Only query metadata when user requested append-text
+					if ( !inObj.fetchAppend ) return Promise.resolve();
+
+					// Fetch LIST metadata
 					return new Promise(function(resolve, reject) {
-						// STEP 1: Exec SharePoint REST Query
+						// STEP 1: Query SharePoint
 						$.ajax({
 							url: _urlBase+"?$select=Fields/Title,Fields/InternalName,Fields/CanBeDeleted,Fields/TypeAsString,Fields/SchemaXml,Fields/AppendOnly&$expand=Fields",
 							type: "GET",
@@ -790,28 +780,32 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 							headers: {"Accept":"application/json; odata=verbose"}
 						})
 						.done(function(data,textStatus){
+							// A: Get list GUID for use in XML query
+							listGUID = data.d.__metadata.id.split("guid'").pop().replace(/\'\)/g,'');
+
+							// B: Gather field metadata
 							$.each(data.d.Fields.results, function(i,result){
-								// TODO-1.0: handle 'Account/Title' etc.
-								$.each(inModel.listCols, function(key,col){
+								// TODO-1.0: FIXME: handle 'Account/Title' etc.
+								$.each(inObj.listCols, function(key,col){
 									// DESIGN: col.dataName is *NOT REQD*
 									if ( col.dataName && col.dataName.split('/')[0] == result.InternalName ) {
-										inModel.listCols[key].dataType = result.TypeAsString;
-										inModel.listCols[key].dispName = ( inModel.listCols[key].dispName || result.Title ); // Fallback to SP.Title ("Display Name"]
-										inModel.listCols[key].isAppend = ( result.AppendOnly || false );
-										inModel.listCols[key].isNumPct = ( result.SchemaXml.toLowerCase().indexOf('percentage="true"') > -1 );
+										inObj.listCols[key].dataType = result.TypeAsString;
+										inObj.listCols[key].dispName = ( inObj.listCols[key].dispName || result.Title ); // Fallback to SP.Title ("Display Name"]
+										inObj.listCols[key].isAppend = ( result.AppendOnly || false );
+										inObj.listCols[key].isNumPct = ( result.SchemaXml.toLowerCase().indexOf('percentage="true"') > -1 );
 									}
 								});
 							});
-							if (DEBUG) console.table( inModel.listCols );
+							if (DEBUG) console.table( inObj.listCols );
 
 							// STEP 2: Resolve Promise
+							APP_LIST_COL_METAS[inName] = inObj.listCols;
 							resolve();
 						})
 						.fail(function(jqXHR,textStatus,errorThrown){
 							reject({ 'jqXHR':jqXHR, 'textStatus':textStatus, 'errorThrown':errorThrown });
 						});
 					});
-					*/
 				})
 				.then(function(){
 					return new Promise(function(resolve, reject) {
@@ -821,8 +815,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 						// STEP 1: Start building REST URL
 						strAjaxUrl = _urlBase+"/items";
 						// If columns were provided, ensure we select `Id` for use in building our data model SP-array/object
-						if ( inObj.listCols ) strAjaxUrl = strAjaxUrl+"?$select=Id,";
-						// TODO: Just get the Id from __metadata instead! (20161212)
+						if ( inObj.listCols ) strAjaxUrl = strAjaxUrl+"?$select=";
 
 						// STEP 2: Continue building REST URL
 						{
@@ -860,18 +853,22 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 							headers: { "Accept":"application/json; odata=verbose", "X-RequestDigest":$("#__REQUESTDIGEST").val() }
 						})
 						.done(function(data,textStatus){
-							// A: Clear model data (if needed)
-							inObj.spObjData = ( strAjaxUrl.indexOf('=Id') > -1 || strAjaxUrl.indexOf(',Id,') > -1 ? {} : [] );
-
-							// B: Iterate over results
+							// A: Iterate over results
 							$.each( (data.d.results || data), function(i,result){
-								// B1: Create row object JSON
+								// A1: Create row object JSON
 								var objRow = {};
+								var objId = 0;
 
-								// B2: Add __metadata (if it exists)
-								if ( result.__metadata ) objRow['__metadata'] = result.__metadata;
+								// A2: Add {Id} and {__metadata} (if any returned)
+								if ( result.__metadata ) {
+									objRow['__metadata'] = result.__metadata;
 
-								// B3: Add columns specified -OR- add everything we got back (mirror SP behavior)
+									// Capture this item's `Id` by parsing metadata (so we dont add "Id," to the select etc)
+									if ( result.__metadata.uri && result.__metadata.uri.indexOf('/Items(') > -1 )
+										objId = Number(result.__metadata.uri.split('/Items(').pop().replace(')',''));
+								}
+
+								// A3: Add columns specified -OR- add everything we got back (mirror SP behavior)
 								if ( inObj.listCols && typeof inObj.listCols === 'object' ) {
 									$.each(inObj.listCols, function(key,col){
 										var arrCol = [];
@@ -900,15 +897,13 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 									});
 								}
 
-								// B4: Store result JSON data and metadata
+								// A4: Store data as array and as object (for lookups so we dont have to spArrData.filter) if Id exists
+								if ( objId ) {
+									inObj.spObjData[objId] = objRow;
+									inObj.spObjMeta[objId] = ( result.__metadata || {} );
+									objRow.Id = objId;
+								}
 								inObj.spArrData.push( objRow );
-								if ( result.Id ) {
-									inObj.spObjData[result.Id] = objRow;
-									inObj.spObjMeta[result.Id] = ( result.__metadata || {} );
-								}
-								else {
-									inObj.spObjData.push( objRow );
-								}
 							});
 
 							// LAST:
@@ -920,9 +915,44 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 					});
 				})
 				.then(function(){
-					// TODO: Check for append text, fetch if needed, else resolve()
-					// LAST: Return List data
-					resolve( inObj.spArrData );
+					var arrAppendColDatanames = [];
+
+					// STEP 1: Check for any append cols that need to be queried
+					// Append cols were captured by `fetchAppend:true` option
+					$.each(inObj.listCols, function(key,col){ if ( col.isAppend ) arrAppendColDatanames.push( col.dataName ); });
+
+					// STEP 2: Get data for nay found cols
+					if ( arrAppendColDatanames.length ) {
+						// STEP 1: Query SharePoint
+						// Convert our dataName array into a comma-delim string, then replace ',' with '%20' and our query string is constrcuted!
+						$.ajax({
+							url: APP_OPTS.baseUrl +"/_vti_bin/owssvr.dll?Cmd=Display&List="
+								+ "%7B"+ listGUID +"%7D"+"&XMLDATA=TRUE&IncludeVersions=TRUE"
+								+ '&Query=ID%20'+ arrAppendColDatanames.toString().replace(/\,/g,'%20') +'%20'
+								+ "&SortField=Modified&SortDir=ASC"
+						})
+						.done(function(result,textStatus){
+							// Query is order by oldest->newest, so always capture the result and the last one captured will always be the most recent
+							$(result).find("z\\:row, row").each(function(i,row){
+								arrAppendColDatanames.forEach(function(dataName,idx){
+									var itemId = $(row).attr("ows_ID");
+
+									if ( $(row).attr("ows_"+dataName) ) {
+										// A: Set array data
+										inObj.spArrData.filter(function(item){ return item.Id == itemId })[0][dataName] = $(row).attr("ows_"+dataName);
+										// B: Set object data
+										if ( inObj.spObjData[itemId] ) inObj.spObjData[itemId][dataName] = $(row).attr("ows_"+dataName);
+									}
+								});
+							});
+
+							// LAST: Return List data
+							resolve( inObj.spArrData );
+						})
+						.fail(function(jqXHR,textStatus,errorThrown){
+							reject({ 'jqXHR':jqXHR, 'textStatus':textStatus, 'errorThrown':errorThrown });
+						});
+					}
 				})
 				.catch(function(objErr){
 					reject( parseErrorMessage(objErr.jqXHR, objErr.textStatus, objErr.errorThrown) );

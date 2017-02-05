@@ -4,6 +4,18 @@
 .bigTitle { font-family:'Roboto'; font-size:36px; color:#0088cc; margin:25px 0 20px 0; }
 .subTitle { font-family:'Roboto'; font-size:18px; color:#0088cc; margin:25px 0 10px 0; }
 
+.pre {
+	font-family: Consolas, monospace;
+	white-space: pre;
+}
+#sandboxCode {
+	margin:0 !important;
+	width:auto;
+	padding:10px;
+	border-radius:0;
+	background: #f1f1f1;
+}
+
 .arrow {
 	display: inline-block;
 	height: 12px; width: 12px;
@@ -135,4 +147,21 @@ div.divTableRows > div > div { display: table-cell; padding: 5px 10px; }
 	background: #f2f9fc;
 	border-radius: 3px;
 	margin: 5px 10px 5px 0;
+}
+
+
+kbd, .key {
+	padding:0.1em 0.6em;
+	border:1px solid #ccc;
+	font-size:12px;
+	font-family:Arial,Helvetica,sans-serif;
+	background-color:#f7f7f7;
+	color:#696969;
+	text-shadow:0 1px 0 #fff;
+	box-shadow:0 1px 0px rgba(0, 0, 0, 0.2),0 0 0 2px #ffffff inset;
+	border-radius:3px;
+	display:inline-block;
+	margin:0 0.1em;
+	line-height:1.4;
+	white-space:nowrap;
 }
