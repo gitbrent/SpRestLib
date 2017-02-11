@@ -76,6 +76,7 @@ QUnit.module( "LIST > ITEM CRUD Methods" );
 
 	QUnit.test("sprLib.list().update() 1: with current etag   ", function(assert){
 		var done = assert.async();
+
 		// PREP:
 		sprLib.list('Employees')
 		.getItems({ listCols:'Id', queryOrderby:'Modified', queryLimit:1 })
@@ -85,7 +86,7 @@ QUnit.module( "LIST > ITEM CRUD Methods" );
 			sprLib.list('Employees')
 			.update({
 				__metadata: { type:"SP.Data.EmployeesListItem", etag:gUpdateItem.__metadata.etag },
-				id:         gUpdateItem.Id,
+				Id:         gUpdateItem.Id,
 				Name:       'updated by sprLib.list().update() with etag'
 			})
 			.then(function(objItem){

@@ -1,20 +1,13 @@
+
+.sprlib-spinner > div { width:32px; height:32px; }
+
 /*-*/
 #demoBody div { box-sizing: border-box; }
 #demoBody { font-family:'Open Sans',sans-serif; color:#696969; margin-top:-10px; }
 .bigTitle { font-family:'Roboto'; font-size:36px; color:#0088cc; margin:25px 0 20px 0; }
 .subTitle { font-family:'Roboto'; font-size:18px; color:#0088cc; margin:25px 0 10px 0; }
 
-.pre {
-	font-family: Consolas, monospace;
-	white-space: pre;
-}
-#sandboxCode {
-	margin:0 !important;
-	width:auto;
-	padding:10px;
-	border-radius:0;
-	background: #f1f1f1;
-}
+.pre { font-family: 'Roboto Mono', monospace; white-space: pre; }
 
 .arrow {
 	display: inline-block;
@@ -51,7 +44,7 @@
 	box-sizing: border-box;
 	cursor: pointer;
 	text-shadow: 2px 2px #efefef;
-	width: 33%;
+	width: 20%;
 	text-align: center;
 	display: inline-block; list-style-type:none;
 	padding: 15px;
@@ -87,6 +80,31 @@
 .modernTabs > div > .toolBar img { vertical-align:middle; margin:-3px 3px 0 0; }
 */
 /* */
+
+#tab5 .flatBtn { width:35%; }
+#sandboxCode {
+	margin:0 !important;
+	width: auto;
+	padding: 10px;
+	border-radius: 0;
+	background: #f9f9f9;
+}
+#sandboxMessage {
+	margin: 0 0 10px 0;
+	padding: 10px;
+	background: #fffccc;
+	color: #3a3a3a;
+	font-family: 'Open Sans',Helvetica,Arial,sans-serif;
+	font-size: 16px;
+	text-align: center;
+}
+#sandboxResults {
+	border: 1px solid #c7c7c7;
+	background: #f9f9f9;
+	padding: 10px;
+	font-family: 'Roboto Mono', monospace;
+	white-space: pre;
+}
 
 div.divTable { display: table; box-sizing: border-box; width: 100%; font-size: 12px; }
 div.divTable > div { display: table-cell; padding:10px; vertical-align: middle; background-color: #f6f9f9; border-right: 1px solid white; }
@@ -148,7 +166,6 @@ div.divTableRows > div > div { display: table-cell; padding: 5px 10px; }
 	border-radius: 3px;
 	margin: 5px 10px 5px 0;
 }
-
 
 kbd, .key {
 	padding:0.1em 0.6em;

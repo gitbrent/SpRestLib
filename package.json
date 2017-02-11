@@ -6,7 +6,7 @@
 	},
     "version": "0.9.0",
     "description": "JavaScript SharePoint REST Library",
-	"homepage": "http://gitbrent.github.io/SpRestLib/",
+	"homepage": "https://gitbrent.github.io/SpRestLib/",
 	"license": "MIT",
 	"dependencies": {
         "jquery-node": ">=0.2.0",

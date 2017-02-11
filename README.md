@@ -24,6 +24,61 @@ Reduces your SharePoint AJAX interaction to a few lines of code. Easily read ite
 * *Enterprise license not required*
 
 **************************************************************************************************
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+**Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
+
+- [SpRestLib](#sprestlib)
+  - [JavaScript Library for SharePoint Web Services](#javascript-library-for-sharepoint-web-services)
+    - [Features:](#features)
+    - [Methods:](#methods)
+    - [Supported Environments:](#supported-environments)
+- [Installation](#installation)
+  - [Client-Side](#client-side)
+  - [Node](#node)
+- [Methods](#methods)
+  - [List/Library](#listlibrary)
+  - [REST API](#rest-api)
+  - [User Info/Groups](#user-infogroups)
+  - [Form Population](#form-population)
+- [API Reference](#api-reference)
+  - [Options](#options)
+  - [List/Library Operations (`SPList`)](#listlibrary-operations-splist)
+    - [Create Item](#create-item)
+    - [Update Item](#update-item)
+    - [Delete Item](#delete-item)
+    - [Get List Column Properties](#get-list-column-properties)
+      - [Column Properties](#column-properties)
+      - [Sample Code](#sample-code)
+    - [Get List Info](#get-list-info)
+      - [List Properties](#list-properties)
+      - [Sample Code](#sample-code-1)
+    - [Get Items](#get-items)
+      - [Options](#options-1)
+      - [`listCols` Object](#listcols-object)
+      - [listCols `dataFunc`](#listcols-datafunc)
+      - [Sample Code](#sample-code-2)
+- [REST Calls](#rest-calls)
+  - [Options](#options-2)
+  - [Examples](#examples)
+- [User Info/Groups](#user-infogroups-1)
+  - [Get Current User Information (`SPUser`)](#get-current-user-information-spuser)
+    - [Sample Code](#sample-code-3)
+  - [Get Current User Groups (`SPGroup`)](#get-current-user-groups-spgroup)
+    - [Sample Code](#sample-code-4)
+- [Form Binding](#form-binding)
+  - [Data Binding Types](#data-binding-types)
+  - [Data Binding Options](#data-binding-options)
+  - [Examples](#examples-1)
+- [Lets Talk Async Operations: ES6 Promises vs Callbacks](#lets-talk-async-operations-es6-promises-vs-callbacks)
+  - [tl;dr](#tldr)
+  - [Async Chaining](#async-chaining)
+  - [Async Grouping](#async-grouping)
+- [Issues / Suggestions](#issues--suggestions)
+- [Special Thanks](#special-thanks)
+- [License](#license)
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
+**************************************************************************************************
 # Installation
 
 ## Client-Side

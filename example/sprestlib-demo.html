@@ -8,9 +8,11 @@
 	<meta name="description" content="Content Editor WebPart to showcase SpRestLib features and capabilities">
 	<meta name="revised"     content="Jan 26, 2017">
 
-	<link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Roboto:300">
-	<link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Roboto:700">
-	<link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Open+Sans:400">
+	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300">
+	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:700">
+	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto+Mono">
+	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:400">
+
 	<link rel="stylesheet" type="text/css" href="/sites/dev/SiteAssets/css/tablesorter.css">
 	<link rel="stylesheet" type="text/css" href="/sites/dev/SiteAssets/css/sprestlib.css">
 	<link rel="stylesheet" type="text/css" href="/sites/dev/SiteAssets/css/sprestlib-demo.css">
@@ -22,6 +24,8 @@
 	<script type="text/javascript" src="/sites/dev/SiteAssets/js/ascii-table.min.js"></script>
 
 	<script type="text/javascript">
+		var HTML_SPINNER = '<div class="sprlib-spinner"><div class="sprlib-bounce1"></div><div class="sprlib-bounce2"></div><div class="sprlib-bounce3"></div></div>';
+
 		// ==================================================================================================================
 
 		function doInsertTest() {
@@ -56,20 +60,30 @@
 
 		function execSandboxCode() {
 			// A:
-			$('#sandboxResults').html('');
+			$('#sandboxResults').html( HTML_SPINNER );
 
 			// B:
 			Promise.resolve()
 			.then(function(){ return eval( $('#sandboxCode').text() ) })
 			.then(function(arrItems){
-				console.log('execSandboxCode() => arrItems:'); console.log(arrItems); console.log('==============================\n');
-				let table = new AsciiTable();
+				var table = new AsciiTable();
+
+				// DEBUG
+				//console.log('execSandboxCode() => arrItems:'); console.table(arrItems); console.log('==============================\n');
+
 				if (arrItems.length > 0) table.setHeading( Object.keys(arrItems[0]) );
-				$.each(arrItems, function(idx,obj){ let vals = []; $.each(obj, function(key,val){ vals.push(val) }); table.addRow(vals); });
+				$.each(arrItems, function(idx,obj){
+					let vals = [];
+					$.each(obj, function(key,val){ vals.push(val || '') });
+					table.addRow(vals);
+				});
+
 				// Show
 				$('#sandboxResults').html( table.toString() );
 			})
-			.catch(function(strErr){ $('#sandboxResults').html('<h3>ERROR</h3>'+strErr) });
+			.catch(function(strErr){
+				$('#sandboxResults').html( '<h2 style="color:red">ERROR</h2>'+strErr );
+			});
 		}
 
 		function doPageLoad() {
@@ -161,26 +175,16 @@
 
 		<div id="navTabs" class="modernTabs">
 			<ul>
-				<li class="active" onclick="$('#navTabs').find('> div, li').removeClass('active'); $(this).addClass('active'); $('#tab1').addClass('active');">Feature: List CRUD</li><li onclick="$('#navTabs').find('> div, li').removeClass('active'); $(this).addClass('active'); $('#tab2').addClass('active');">Feature: Users/Groups</li><li onclick="$('#navTabs').find('> div, li').removeClass('active'); $(this).addClass('active'); $('#tab3').addClass('active');">Feature: Form Binding</li>
+				<li class="active" onclick="$('#navTabs').find('> div, li').removeClass('active'); $(this).addClass('active'); $('#tab1').addClass('active');">List Get / CRUD Ops</li><li onclick="$('#navTabs').find('> div, li').removeClass('active'); $(this).addClass('active'); $('#tab2').addClass('active');">User Info and Groups</li><li onclick="$('#navTabs').find('> div, li').removeClass('active'); $(this).addClass('active'); $('#tab3').addClass('active');">HTML Form Population</li><li onclick="$('#navTabs').find('> div, li').removeClass('active'); $(this).addClass('active'); $('#tab4').addClass('active');">REST API Calls</li><li onclick="$('#navTabs').find('> div, li').removeClass('active'); $(this).addClass('active'); $('#tab5').addClass('active');">Code Sandbox</li>
 			</ul>
 
-			<div id="tab1" class="active">
+			<div id="tab1" data-tab="List CRUD" class="active">
 				<div id="tab1-tst1"><!-- populated by doPageLoad --></div>
 				<button type="button" class="flatBtn flatBtn-blue" onclick="doSimpleTest()">SIMPLE TEST</button>
 				<!-- TODO: core API calls: eg: _/api/webs -->
-
-				<div style="margin:0 0 10px 0; padding:4px 8px; background:#fffccc; color:#9c9c9f; font-size:13px;">
-					Code below is editable (use shift-return to create a new line)
-				</div>
-				<div class="code" style="text-align:left; margin-bottom:15px">
-					<div id="sandboxCode" class="pre" contenteditable="true"></div>
-					<button type="button" class="flatBtn flatBtn-blue" onclick="execSandboxCode()">Exec Sandbox Code</button>
-				</div>
-
-				<div id="sandboxResults" class="pre"></div>
 			</div>
 
-			<div id="tab2">
+			<div id="tab2" data-tab="Users">
 				<div class="subTitle">User Methods</div>
 				<div id="tabUsersGroups" class="divTableRows testGroup" style="margin-top:0">
 					<div class="row">
@@ -204,7 +208,7 @@
 				</div>
 			</div>
 
-			<div id="tab3">
+			<div id="tab3" dats-tab="Data Binding">
 				<div class="subTitle" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
 					<div class="arrow active"></div>HTML Form Binding/Population
 				</div>
@@ -230,6 +234,8 @@
 				</div>
 				<div>
 					<table data-sprlib='{ "list":"Departments", "cols":["Id","Title"], "showBusy":true }'></table>
+					<!-- TODO: this second table doesnt even show on the page!! 20170207 -->
+					<table data-sprlib='{ "list":"Departments", "cols":["Id":{dataName:"Id"},"Title":{dataName:"Title"}], "showBusy":true }'></table>
 				</div>
 
 				<div class="subTitle" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
@@ -238,11 +244,27 @@
 				<div>
 					<table border="0" cellpadding="0" cellspacing="0">
 						<thead>
-							<tr><th>Employee Name</th><th>Utilization Pct</th></tr>
+							<tr><th>Emp ID</th><th>Employee Name</th><th>Badge #</th></tr>
 						</thead>
-						<tbody data-sprlib='{ "foreach": {"listName", "cols":["Name","Utilization_x0020_Pct"] }'></tbody>
+						<tbody data-sprlib='{ "list":"Employees", "cols":["Id","Name","Badge_x0020_Number"], "showBusy":true }'></tbody>
 					</table>
 				</div>
+			</div>
+
+			<div id="tab4" data-tab="RESR API">
+				<div class="subTitle" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
+					<div class="arrow active"></div>REST API Calls
+				</div>
+			</div>
+
+			<div id="tab5" data-tab="Code Sandbox">
+				<div id="sandboxMessage">Code below is editable</div>
+
+				<div id="sandboxCode" class="pre" contenteditable="true"></div>
+				<div style="text-align:center; padding:10px; margin:20px 0;">
+					<button type="button" class="flatBtn flatBtn-green" onclick="execSandboxCode()">Execute Sandbox Code</button>
+				</div>
+				<div id="sandboxResults"></div>
 			</div>
 		</div>
 	</div>
