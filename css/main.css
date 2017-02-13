@@ -665,6 +665,7 @@ a.fa-download:hover { color:white !important; }
   text-align: center;
 }
 
+#google_translate_element { float:right; margin-top:-20px }
 
 @media (max-width:767px) {
 	#main-slider { padding: 70px 0 60px 0; }
