@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta name="author" content="https://github.com/gitbrent/">
+    <meta name="description" content="JavaScript Library for SharePoint Web Services">
+    <title>SpRestLib | JavaScript Library for SharePoint Web Services</title>
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <link rel="stylesheet" href="css/font-awesome.min.css">
+    <link rel="stylesheet" href="css/prettyPhoto.css">
+    <link rel="stylesheet" href="css/main.css">
+    <!--[if lt IE 9]>
+    <script src="js/html5shiv.js"></script>
+    <script src="js/respond.min.js"></script>
+    <![endif]-->
+    <link rel="shortcut icon" href="images/ico/favicon.ico">
+    <link rel="apple-touch-icon-precomposed" sizes="144x144" href="images/ico/apple-touch-icon-144-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="images/ico/apple-touch-icon-114-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72"   href="images/ico/apple-touch-icon-72-precomposed.png">
+    <link rel="apple-touch-icon-precomposed"                 href="images/ico/apple-touch-icon-57-precomposed.png">
+
+	<script defer src="js/jquery.js"></script>
+	<script defer src="js/bootstrap.min.js"></script>
+	<script defer src="js/jquery.isotope.min.js"></script>
+	<script defer src="js/jquery.prettyPhoto.js"></script>
+	<script defer src="js/main.js"></script>
+
+	<script>
+		function handlePortfolioClick(inEle) {
+			// STEP 1: Hide all items, then show the type selected (or '' which is "All")
+			$('.portfolio-items a.btn').removeClass('active');
+			$('.portfolio-items > li').hide();
+			$('.portfolio-items > li'+ $(inEle).data('filter')).show();
+
+			// STEP 2: Set clicked item as active
+			$(inEle).addClass('active');
+		}
+	</script>
+
+	<!-- vvv ANALYTICS vvv -->
+	<!--
+	<script>
+		(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+		(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+		m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+		})(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+		ga('create', 'UA-75147115-3', 'auto');
+		ga('send', 'pageview');
+	</script>
+	-->
+	<!-- ^^^ ANALYTICS ^^^ -->
+</head>
+<body data-spy="scroll" data-target="#navbar" data-offset="0">
+    <header id="header" role="banner">
+        <div class="container">
+            <div id="navbar" class="navbar navbar-default">
+                <div class="navbar-header">
+                    <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                        <span class="sr-only">Toggle navigation</span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </button>
+                </div>
+                <div class="collapse navbar-collapse">
+                    <ul class="nav navbar-nav">
+                        <li class="active"><a href="#main-slider"><i class="fa fa-home fa-1g"></i></a></li>
+                        <li><a href="#features">Features</a></li>
+						<li><a href="#examples">Examples</a></li>
+                        <li><a href="#download">Download</a></li>
+						<li><a href="#contact">Docs / Sites</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <section id="main-slider" class="carousel">
+        <div class="carousel-inner">
+            <div class="item active">
+                <div class="container">
+                    <div class="carousel-content">
+                        <h1>SpRestLib</h1>
+                        <p class="lead">JavaScript Library for SharePoint Web Services</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="features">
+        <div class="container">
+            <div class="box first">
+				<div id="google_translate_element"></div><script type="text/javascript">
+				function googleTranslateElementInit() {
+				  new google.translate.TranslateElement({pageLanguage: 'en', layout: google.translate.TranslateElement.InlineLayout.SIMPLE, gaTrack: true, gaId: 'UA-75147115-3'}, 'google_translate_element');
+				}
+				</script><script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+				<p class="lead center">
+					Reduces your SharePoint AJAX interaction to a few lines of code.<br>
+					Easily read items, perform CRUD operations, gather user information and populate form elements
+				</p>
+				<div class="center">
+					<h2>Features</h2>
+				</div>
+                <div class="row">
+                    <div class="col-lg-4 col-md-6 col-sm-6">
+                        <div class="center">
+                            <i class="fa fa-bullseye fa-2x icon-md icon-color1"></i>
+							<h4>Modern API</h4>
+                            <p>
+								Implmements the current <a href="https://msdn.microsoft.com/en-us/library/office/jj860569.aspx">SharePoint 2013 API</a> /
+								<a href="http://www.odata.org/documentation/odata-version-3-0/">OData v3</a>
+							</p>
+                        </div>
+                    </div>
+                    <div class="col-lg-4 col-md-6 col-sm-6">
+                        <div class="center">
+                            <i class="fa fa-gears fa-2x icon-md icon-color2"></i>
+							<h4>Easy Async</h4>
+                            <p>Utilizes the new <a href="http://www.datchley.name/es6-promises/">ES6 Promise</a> architecture to enable chaining of asynchronous operations</p>
+                        </div>
+                    </div>
+                    <div class="col-lg-4 col-md-6 col-sm-6">
+                        <div class="center">
+                            <i class="fa fa-key fa-2x icon-md icon-color3"></i>
+                            <h4>Simple</h4>
+                            <p>Most REST interaction can be done in 1-2 lines of code</p>
+                        </div>
+                    </div>
+                    <div class="col-lg-4 col-md-6 col-sm-6">
+                        <div class="center">
+                            <i class="fa fa-html5 fa-2x icon-md icon-color4"></i>
+                            <h4>Form Population</h4>
+                            <p>Avoid code altogether and just use data binding syntax to populate form elements</p>
+                        </div>
+                    </div>
+                    <div class="col-lg-4 col-md-6 col-sm-6">
+                        <div class="center">
+                            <i class="fa fa-file-code-o fa-2x icon-md icon-color5"></i>
+                            <h4>Pure Javascript</h4>
+                            <p>SpRestLib only requires the jQuery Library and nothing else</p>
+                        </div>
+                    </div>
+                    <div class="col-lg-4 col-md-6 col-sm-6">
+                        <div class="center">
+                            <i class="fa fa-thumbs-up fa-2x icon-md icon-color6"></i>
+                            <h4>Robust</h4>
+                            <p>Handles errors and monitors the SharePoint authentication token</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="examples">
+        <div class="container">
+            <div class="box">
+                <div class="center gap">
+                    <h2>Examples</h2>
+                    <p class="lead">See what SpRestLib can do for you<br>Let the Library do all the heavy-lifting for you.</p>
+                </div>
+                <ul class="portfolio-filter">
+                    <li><a class="btn btn-primary active" href="javascript:void(0)" onclick="handlePortfolioClick(this)" data-filter="">All</a></li>
+                    <li><a class="btn btn-primary" href="javascript:void(0)" onclick="handlePortfolioClick(this)" data-filter=".list">List/Library</a></li>
+                    <li><a class="btn btn-primary" href="javascript:void(0)" onclick="handlePortfolioClick(this)" data-filter=".user">User Info</a></li>
+                    <li><a class="btn btn-primary" href="javascript:void(0)" onclick="handlePortfolioClick(this)" data-filter=".rest">REST API</a></li>
+					<li><a class="btn btn-primary" href="javascript:void(0)" onclick="handlePortfolioClick(this)" data-filter=".form">Form Binding</a></li>
+                </ul>
+
+				<ul class="portfolio-items col-4">
+                    <li class="portfolio-item list">
+                        <div class="item-inner">
+                            <div class="portfolio-image">
+                                <img src="images/portfolio/thumb/list1.png" alt="">
+                                <div class="overlay">
+                                    <a href="images/portfolio/full/list1.png" title="SPList and SPLibrary" class="preview btn btn-danger"><i class="fa fa-eye fa-3x"></i></a>
+                                </div>
+                            </div>
+                            <h5>List/Library Methods</h5>
+                        </div>
+                    </li>
+
+					<li class="portfolio-item user">
+                        <div class="item-inner">
+                            <div class="portfolio-image">
+                                <img src="images/portfolio/thumb/usergroup1.png" alt="">
+                                <div class="overlay">
+                                    <a href="images/portfolio/full/usergroup1.png" title="SPUser" class="preview btn btn-danger"><i class="fa fa-eye fa-3x"></i></a>
+                                </div>
+                            </div>
+                            <h5>User / Group Methods</h5>
+                        </div>
+                    </li>
+
+					<li class="portfolio-item rest">
+                        <div class="item-inner">
+                            <div class="portfolio-image">
+                                <img src="images/portfolio/thumb/rest1.png" alt="">
+                                <div class="overlay">
+                                    <a href="images/portfolio/full/rest1.png" title="SharePoint REST API" class="preview btn btn-danger"><i class="fa fa-eye fa-3x"></i></a>
+                                </div>
+                            </div>
+                            <h5>REST API Methods</h5>
+                        </div>
+                    </li>
+
+					<li class="portfolio-item form">
+                        <div class="item-inner">
+                            <div class="portfolio-image">
+                                <img src="images/portfolio/thumb/form1.png" alt="">
+                                <div class="overlay">
+                                    <a href="images/portfolio/full/form1.png" title="SharePoint Data Binding / Form Population" class="preview btn btn-danger"><i class="fa fa-eye fa-3x"></i></a>
+                                </div>
+                            </div>
+                            <h5>Data Population / Form Binging</h5>
+                        </div>
+                    </li>
+				</ul>
+
+				<!--
+                <ul class="portfolio-items col-4">
+                    <li class="portfolio-item apps">
+                        <div class="item-inner">
+                            <div class="portfolio-image">
+                                <img src="images/portfolio/thumb/item1.jpg" alt="">
+                                <div class="overlay">
+                                    <a class="preview btn btn-danger" title="Lorem ipsum dolor sit amet" href="images/portfolio/full/item1.jpg"><i class="icon-eye-open"></i></a>
+                                </div>
+                            </div>
+                            <h5>Lorem ipsum dolor sit amet</h5>
+                        </div>
+                    </li>
+                    <li class="portfolio-item joomla bootstrap">
+                        <div class="item-inner">
+                            <div class="portfolio-image">
+                                <img src="images/portfolio/thumb/item2.jpg" alt="">
+                                <div class="overlay">
+                                    <a class="preview btn btn-danger" title="Lorem ipsum dolor sit amet" href="images/portfolio/full/item2.jpg"><i class="icon-eye-open"></i></a>
+                                </div>
+                            </div>
+                            <h5>Lorem ipsum dolor sit amet</h5>
+                        </div>
+                    </li>
+                    <li class="portfolio-item bootstrap wordpress">
+                        <div class="item-inner">
+                            <div class="portfolio-image">
+                                <img src="images/portfolio/thumb/item3.jpg" alt="">
+                                <div class="overlay">
+                                    <a class="preview btn btn-danger" title="Lorem ipsum dolor sit amet" href="images/portfolio/full/item3.jpg"><i class="icon-eye-open"></i></a>
+                                </div>
+                            </div>
+                            <h5>Lorem ipsum dolor sit amet</h5>
+                        </div>
+                    </li>
+                    <li class="portfolio-item joomla wordpress apps">
+                        <div class="item-inner">
+                            <div class="portfolio-image">
+                                <img src="images/portfolio/thumb/item4.jpg" alt="">
+                                <div class="overlay">
+                                    <a class="preview btn btn-danger" title="Lorem ipsum dolor sit amet" href="images/portfolio/full/item4.jpg"><i class="icon-eye-open"></i></a>
+                                </div>
+                            </div>
+                            <h5>Lorem ipsum dolor sit amet</h5>
+                        </div>
+                    </li>
+                    <li class="portfolio-item joomla html">
+                        <div class="item-inner">
+                            <div class="portfolio-image">
+                                <img src="images/portfolio/thumb/item5.jpg" alt="">
+                                <div class="overlay">
+                                    <a class="preview btn btn-danger" title="Lorem ipsum dolor sit amet" href="images/portfolio/full/item5.jpg"><i class="icon-eye-open"></i></a>
+                                </div>
+                            </div>
+                            <h5>Lorem ipsum dolor sit amet</h5>
+                        </div>
+                    </li>
+                    <li class="portfolio-item wordpress html">
+                        <div class="item-inner">
+                            <div class="portfolio-image">
+                                <img src="images/portfolio/thumb/item6.jpg" alt="">
+                                <div class="overlay">
+                                    <a class="preview btn btn-danger" title="Lorem ipsum dolor sit amet" href="images/portfolio/full/item6.jpg"><i class="icon-eye-open"></i></a>
+                                </div>
+                            </div>
+                            <h5>Lorem ipsum dolor sit amet</h5>
+                        </div>
+                    </li>
+                    <li class="portfolio-item joomla html">
+                        <div class="item-inner">
+                            <div class="portfolio-image">
+                                <img src="images/portfolio/thumb/item5.jpg" alt="">
+                                <div class="overlay">
+                                    <a class="preview btn btn-danger" title="Lorem ipsum dolor sit amet" href="images/portfolio/full/item5.jpg"><i class="icon-eye-open"></i></a>
+                                </div>
+                            </div>
+                            <h5>Lorem ipsum dolor sit amet</h5>
+                        </div>
+                    </li>
+                    <li class="portfolio-item wordpress html">
+                        <div class="item-inner">
+                            <div class="portfolio-image">
+                                <img src="images/portfolio/thumb/item6.jpg" alt="">
+                                <div class="overlay">
+                                    <a class="preview btn btn-danger" title="Lorem ipsum dolor sit amet" href="images/portfolio/full/item6.jpg"><i class="icon-eye-open"></i></a>
+                                </div>
+                            </div>
+                            <h5>Lorem ipsum dolor sit amet</h5>
+                        </div>
+                    </li>
+				</ul>
+				-->
+            </div>
+        </div>
+    </section>
+
+	<section id="download">
+        <div class="container">
+			<div class="box">
+				<div class="center gap">
+                    <h2>Download</h2>
+					<p class="lead">The SpRestLib SharePoint library is open-source software - download and use it for free.</p>
+					<div class="row">
+	                    <div class="col-md-6 col-sm-6">
+	                        <div class="center">
+								<a href="https://github.com/gitbrent/SpRestLib/zipball/master" onclick="ga('send','event','Link','click','Download Zipball-Master')">
+									<i class="fa fa-download fa-3x icon-md icon-color2"></i>
+									<h4>Download Win/macOS (.zip)</h4>
+								</a>
+							</div>
+						</div>
+						<div class="col-md-6 col-sm-6">
+	                        <div class="center">
+								<a href="https://github.com/gitbrent/SpRestLib/tarball/master" onclick="ga('send','event','Link','click','Download Tarball-Master')">
+									<i class="fa fa-download fa-3x icon-md icon-color2"></i>
+									<h4>Download UNIX/Linux (.tar)</h4>
+								</a>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+    </section>
+
+    <section id="contact">
+        <div class="container">
+            <div class="box last">
+				<div class="center">
+                    <h2>SpRestLib Sites</h2>
+					<p class="lead">
+						Learn more about the SpRestLib SharePoint web services library, keep up with new features, come join the community
+						and help to determine our course going forward into the future of a solid SharePoint JavaScript library.
+					</p>
+				</div>
+                <div class="row">
+                    <div class="col-sm-6">
+                        <h2>GitHub Project</h2>
+						<div class="row">
+		                    <div class="col-md-6">
+								<ul class="social">
+                                    <li><a href="https://github.com/gitbrent/SpRestLib"><i class="fa fa-bookmark fa-lg icon-color2 icon-social"></i> Main Site</a></li>
+                                    <li><a href="https://github.com/gitbrent/SpRestLib/releases"><i class="fa fa-archive fa-lg icon-color3 icon-social"></i> Releases</a></li>
+								</ul>
+							</div>
+							<div class="col-md-6">
+								<ul class="social">
+									<li><a href="https://github.com/gitbrent/SpRestLib#sprestlib"><i class="fa fa-code fa-lg icon-color4 icon-social"></i> Documentation</a></li>
+                                    <li><a href="https://github.com/gitbrent/SpRestLib/issues"><i class="fa fa-hashtag fa-lg icon-color5 icon-social"></i> Issues</a></li>
+                                </ul>
+							</div>
+						</div>
+                    </div>
+                    <div class="col-sm-6">
+                        <h2>Social Media</h2>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <ul class="social">
+                                    <!--<li><a href="#"><i class="fa fa-facebook fa-lg icon-facebook icon-social"></i> Facebook</a></li>-->
+                                    <li><a href="https://plus.google.com/u/2/113247436909611337609"><i class="fa fa-google-plus icon-google-plus icon-social"></i> Google Plus</a></li>
+                                    <li><a href="https://www.pinterest.com/sprestlib/"><i class="fa fa-pinterest fa-lg icon-pinterest icon-social"></i> Pinterest</a></li>
+                                </ul>
+                            </div>
+                            <div class="col-md-6">
+                                <ul class="social">
+                                    <!--<li><a href="#"><i class="fa fa-linkedin fa-lg icon-linkedin icon-social"></i> Linkedin</a></li>-->
+                                    <li><a href="https://twitter.com/sprestlib"><i class="fa fa-twitter fa-lg icon-twitter icon-social"></i> Twitter</a></li>
+                                    <li><a href="https://www.youtube.com/channel/UCxZcCampOHn-47kvtcK_oVQ"><i class="fa fa-youtube fa-lg icon-youtube icon-social"></i> Youtube</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer id="footer">
+        <div class="container">
+            <div class="row">
+                <div class="col-sm-6">
+                    &copy; 2013 <a target="_blank" href="http://shapebootstrap.net/" title="Free Twitter Bootstrap WordPress Themes and HTML templates">ShapeBootstrap</a>. All Rights Reserved.
+                </div>
+                <div class="col-sm-6">
+                    <img class="pull-right" src="images/shapebootstrap.png" alt="ShapeBootstrap" title="ShapeBootstrap">
+                </div>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>
