@@ -43,7 +43,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 (function(){
 	// APP VERSION/BUILD
 	var APP_VER = "0.9.1";
-	var APP_BLD = "20170217";
+	var APP_BLD = "20170205";
 	var DEBUG = false; // (verbose mode/lots of logging. FIXME:remove prior to v1.0.0)
 	// APP FUNCTIONALITY
 	var APP_FILTEROPS = {
@@ -381,9 +381,11 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 								var $newRow = $('<tr/>');
 
 								// 2: Add cells to new row (add blank and populate instead of .append'ing them bc we need to guarantee order eg: col->col)
-								objTag.cols.forEach(function(idx,col){ $newRow.append('<td/>') });
+								for (var idx=0; idx<Object.keys(arrData).length; idx++) {
+									if ( Object.keys(arrData)[idx] != '__metadata' ) $newRow.append('<td/>');
+								}
 
-								// 3: Populate row cells
+								// 3: Populat row cells
 								$.each(arrData, function(key,val){
 									// TODO: HELP: howto use these "op" lookups in an actual if? (eval?)
 									// FIXME: Filtering: "filter": {"col":"active", "op":"eq", "val":false}} }
@@ -424,8 +426,8 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 										}
 
 										// D: Add cell to row
-										//$newRow.append( $cell );
-										// TODO: TEST Below!! where we use above works great
+//										$newRow.append( $cell );
+// TODO: TEST Below!! where we use above works great
 										$newRow.find('td:nth-child('+ (objTag.cols.indexOf(key)+1) +')').text( val );
 									}
 								});
@@ -820,10 +822,10 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 
 						// STEP 1: Start building REST URL
 						strAjaxUrl = _urlBase+"/items";
-						// If columns were provided, start a select query
+						// If columns were provided, ensure we select `Id` for use in building our data model SP-array/object
 						if ( inObj.listCols ) strAjaxUrl = strAjaxUrl+"?$select=";
 
-						// STEP 2: Continue building REST Endpoint URL
+						// STEP 2: Continue building REST URL
 						{
 							// A: Add columns
 							$.each(inObj.listCols, function(key,col){
@@ -927,7 +929,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 					// Append cols were captured by `fetchAppend:true` option
 					$.each(inObj.listCols, function(key,col){ if ( col.isAppend ) arrAppendColDatanames.push( col.dataName ); });
 
-					// STEP 2: Get data for any found cols
+					// STEP 2: Get data for nay found cols
 					if ( arrAppendColDatanames.length ) {
 						// STEP 1: Query SharePoint
 						// Convert our dataName array into a comma-delim string, then replace ',' with '%20' and our query string is constrcuted!

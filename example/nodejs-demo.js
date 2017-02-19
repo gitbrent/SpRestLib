@@ -20,6 +20,28 @@ sprLib.baseUrl('https://gitbrent.sharepoint.com/sites/dev/');
 // Node doesnt run in an authenticated webpage, so auth is needed...
 // https://msdn.microsoft.com/en-us/library/dn762763#AccessTokens
 
+var httpntlm = require('httpntlm');
+var credentials = {
+	username: '****@****.onmicrosoft.com',
+	password: '******',
+	domain: '****'
+};
+var webUrl = "https://****.sharepoint.com";
+var fileUrl = "/sites/dev/Shared Documents/AnimGif.pptx";
+
+httpntlm.get({
+    url: "https://****.sharepoint.com/sites/dev/_api/web/sitegroups",
+    username: credentials.username,
+    password: credentials.password,
+    domain: credentials.domain
+}, function (err, res) {
+	if (err) console.log(err);
+	console.log(res.body); //print data
+});
+
+
+
+
 
 // USER:
 // ============================================================================
