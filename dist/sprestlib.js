@@ -28,12 +28,10 @@
 \*/
 
 /*
-DEVLIST:
-	* Add `Intl` (i18n) support (its supported in IE11!!) - Date and Currency formats are awesome (can we add Direction for our R->L users )
-	* Add AppendText/Versions support (auto-query and populate most recent text when isAppend is TRUE)
+v1.0.0 DEVLIST:
+	* Add `Intl` (i18n) support (its supported in IE11!!) - Date and Currency formats are awesome (can we add Direction for our R->L users too?)
 	* Add logic we learned the hard way where FILTER cant have true/false but uses 0/1 due to MS bug
-	* Add support for using LIST-GUID (in addition to .listName) - `.listGUID`
-FUTURE:
+v.FUTURE:
 	* Support for turning LOOKUP values into a "text; text"-type output
 */
 
@@ -43,7 +41,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 (function(){
 	// APP VERSION/BUILD
 	var APP_VER = "0.9.1";
-	var APP_BLD = "20170217";
+	var APP_BLD = "20170222";
 	var DEBUG = false; // (verbose mode/lots of logging. FIXME:remove prior to v1.0.0)
 	// APP FUNCTIONALITY
 	var APP_FILTEROPS = {
@@ -54,31 +52,29 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 		"lt" : "<",
 		"lte": "<="
 	};
-	// APP DATA MODEL OBJECTS
-	var APP_LIST_COL_METAS = {};
 	// APP MESSAGE STRINGS (i18n Internationalization)
 	var APP_STRINGS = {
-		de: {
+		"de": {
 			"false" : "Nein",
 			"noRows": "(Keine zeilen)",
 			"true"  : "Ja"
 		},
-		en: {
+		"en": {
 			"false" : "No",
 			"noRows": "(No rows)",
 			"true"  : "Yes"
 		},
-		es: {
+		"es": {
 			"false" : "No",
 			"noRows": "(No hay filas)",
 			"true"  : "Sí"
 		},
-		fr: {
+		"fr": {
 			"false" : "Non",
 			"noRows": "(Aucune ligne)",
 			"true"  : "Oui"
 		},
-		in: {
+		"in": {
 			"false" : "नहीं",
 			"noRows": "(कोई पंक्तियाँ)",
 			"true"  : "हाँ"
@@ -805,7 +801,6 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 							if (DEBUG) console.table( inObj.listCols );
 
 							// STEP 2: Resolve Promise
-							APP_LIST_COL_METAS[inName] = inObj.listCols;
 							resolve();
 						})
 						.fail(function(jqXHR,textStatus,errorThrown){
