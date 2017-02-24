@@ -6,7 +6,7 @@
 	<meta name="website"     content="https://github.com/gitbrent/SpRestLib/">
 	<meta name="keywords"    content="SpRestLib, JavaScript, js-sharepoint, OData, REST, SharePoint 2013, SP2013, SharePoint 2016, SP2016, SharePoint Online">
 	<meta name="description" content="Content Editor WebPart to showcase SpRestLib features and capabilities">
-	<meta name="revised"     content="Feb 17, 2017">
+	<meta name="revised"     content="Feb 23, 2017">
 
 	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300">
 	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:700">
@@ -17,7 +17,7 @@
 	<!-- HOWTO / FAQ / SETUP -->
 	<!--
 		FAQ:
-		*** This pages JavaScript requires a browser that supports ES6/JS2015 (IE wont work) ***
+		*** This pages JavaScript requires a browser that supports ES6/JS2015 (IE11 wont work, sorry. sprLib does support it though!) ***
 
 		SETUP:
 		1) Create new folder under ./SiteAssets: "sprestlib"
@@ -31,6 +31,9 @@
 	<link rel="stylesheet" type="text/css" href="../SiteAssets/sprestlib/css/sprestlib.css">
 	<link rel="stylesheet" type="text/css" href="../SiteAssets/sprestlib/css/sprestlib-demo.css">
 
+	<!--
+	<script type="text/javascript" src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+	-->
 	<script type="text/javascript" src="../SiteAssets/sprestlib/js/jquery.min.js"></script>
 	<script type="text/javascript" src="../SiteAssets/sprestlib/js/jquery.tablesorter.min.js"></script>
 	<script type="text/javascript" src="../SiteAssets/sprestlib/js/sprestlib.js"></script>
@@ -71,6 +74,51 @@
 
 		// ==================================================================================================================
 
+		function handleListChange() {
+			// A: Clear results
+			$('#tab1-ListInfo table').remove();
+			$('#tab1-ListCols table').remove();
+			// B: Return if nothing selected
+			if ( !$('#selSiteLists').val() ) return;
+
+			// LIST INFO:
+			$('#tab1-ListInfo .divCode').text( 'sprLib.list(\''+ $('#selSiteLists').val() +'\').info()' );
+			sprLib.list($('#selSiteLists').val()).info()
+			.then(function(objInfo){
+				var $table = $('<table><tbody></tbody></table>');
+				Object.keys(objInfo).forEach(function(key,idx){
+					//$table.find('thead tr').append('<th>'+ key +'</th>');
+					$table.find('tbody').append('<tr><th>'+ key +'</th>'+'<td>'+ objInfo[key] +'</td></tr>');
+				});
+				$('#tab1-ListInfo .divCode').after( $table );
+			})
+			.catch(function(errMsg){
+				$('$tab1-ListInfo .tableRows').after( '<table><tbody><tr><td>'+errMsg+'</td></tr></tbody></table>' );
+			});
+
+			// LIST COLS:
+			$('#tab1-ListCols .divCode').text( 'sprLib.list(\''+ $('#selSiteLists').val() +'\').cols()' );
+			sprLib.list($('#selSiteLists').val()).cols()
+			.then(function(arrColObjs){
+				var $table = $('<table><thead><tr></tr></thead><tbody></tbody></table>');
+
+				if ( arrColObjs.length ) $.each(arrColObjs[0],function(key,val){ $table.find('thead tr').append('<th>'+key+'</th>') });
+
+				arrColObjs.forEach(function(obj,idx){
+					let $row = $('<tr/>');
+					$.each(obj,function(key,val){ $row.append('<td>'+val+'</td>') });
+					$table.find('tbody').append( $row );
+				});
+
+				$('#tab1-ListCols .divCode').after( $table );
+			})
+			.catch(function(errMsg){
+				$('$tab1-ListCols .tableRows').after( '<table><tbody><tr><td>'+errMsg+'</td></tr></tbody></table>' );
+			});
+		}
+
+		// ==================================================================================================================
+
 		function execCodeAndShowResults(eleCode, eleData) {
 			// A:
 			$('#'+eleData).html( HTML_SPINNER );
@@ -103,6 +151,52 @@
 			// STEP 1: HTML Setup
 			document.title = "SpRestLib - JavaScript Library for SharePoint Web Services";
 
+			// STEP 2: Populate SETUP Tab
+
+			// A: jQuery
+			if ( typeof jQuery !== 'undefined' ) {
+				$('#libChkJquery').append( '<div class="iconYes"></div>' );
+			}
+			else {
+				$('#libChkJquery').append( 'oops - go check <script> tag ' );
+			}
+
+			// B: sprLib
+			if ( typeof sprLib !== 'undefined' ) {
+				$('#libChkSprLib').append( '<div class="iconYes"></div>' );
+				var baseUrl = sprLib.baseUrl();
+
+				// Make human readable when relative directory returned
+				if ( baseUrl == ".." ) {
+					baseUrl = location.href.substring(0, location.href.lastIndexOf('/'));
+					baseUrl = baseUrl.substring(0, baseUrl.lastIndexOf('/'));
+
+					$('#spVersion').text( sprLib.version() );
+				}
+				$('#spBaseUrl').text( baseUrl );
+			}
+			else {
+				$('#libChkSprLib').append( '<div class="iconFail"></div><br>oops - go check <script> tag ' );
+				$('#spBaseUrl').text( '(n/a)' );
+
+				// Halt execution
+				return;
+			}
+
+			// TAB 1:
+			// Populate <select> with List names
+			sprLib.rest({ restUrl:'/_api/web/lists/' })
+			.then(function(arrayListObjs){
+				arrayListObjs
+				.sort(function(a,b){return (a.Title > b.Title) ? 1 : ((b.Title > a.Title) ? -1 : 0);} )
+				.forEach(function(obj,idx){
+					if ( !obj.Hidden ) $('#selSiteLists').append('<option value="'+ obj.Title +'">'+ obj.Title +'</option>');
+				});
+				$('#contListSelect .sprlib-spinner').remove();
+			});
+
+
+
 			// STEP 2: Fill tab code and/or Populate Results of queries
 
 			// TAB 1: List CRUD
@@ -117,8 +211,8 @@
 			// TAB 2: User/Group
 			$('.testGroup > div > div:first-child span').each(function(i,tab){ $(this).text(i+1); });
 			$('.testGroup > div .divTableRows').each(function(i,tab){
-				$(tab).find('.tst').prop('id', 'tst'+(i+1));
-				$(tab).find('.res').prop('id', 'res'+(i+1));
+				$(tab).find('.boxCode').prop('id', 'tst'+(i+1));
+				$(tab).find('.boxData').prop('id', 'res'+(i+1));
 			});
 
 			$('#tst1').html("sprLib.user().info()\n"
@@ -188,17 +282,87 @@
 
 		<div id="navTabs" class="modernTabs">
 			<ul>
-				<li class="active" onclick="$('#navTabs').find('> div, li').removeClass('active'); $(this).addClass('active'); $('#tab1').addClass('active');">List Get / CRUD Ops</li><li onclick="$('#navTabs').find('> div, li').removeClass('active'); $(this).addClass('active'); $('#tab2').addClass('active');">User Info and Groups</li><li onclick="$('#navTabs').find('> div, li').removeClass('active'); $(this).addClass('active'); $('#tab3').addClass('active');">HTML Form Population</li><li onclick="$('#navTabs').find('> div, li').removeClass('active'); $(this).addClass('active'); $('#tab4').addClass('active');">REST API Calls</li><li onclick="$('#navTabs').find('> div, li').removeClass('active'); $(this).addClass('active'); $('#tab5').addClass('active');">Code Sandbox</li>
+				<li class="active" onclick="$('#navTabs').find('> div, li').removeClass('active'); $(this).addClass('active'); $('#tab0').addClass('active');">Setup</li><li onclick="$('#navTabs').find('> div, li').removeClass('active'); $(this).addClass('active'); $('#tab1').addClass('active');">List Get / CRUD</li><li onclick="$('#navTabs').find('> div, li').removeClass('active'); $(this).addClass('active'); $('#tab2').addClass('active');">User Info</li><li onclick="$('#navTabs').find('> div, li').removeClass('active'); $(this).addClass('active'); $('#tab3').addClass('active');">HTML Form Population</li><li onclick="$('#navTabs').find('> div, li').removeClass('active'); $(this).addClass('active'); $('#tab4').addClass('active');">REST API Calls</li><li onclick="$('#navTabs').find('> div, li').removeClass('active'); $(this).addClass('active'); $('#tab5').addClass('active');">Code Sandbox</li>
 			</ul>
 
-			<div id="tab1" data-tab="List CRUD" class="active">
-				<div class="subTitle">List/Library Methods</div>
+			<div id="tab0" data-tab="Setup" class="active">
+				<div class="subTitle">Welcome!</div>
+				<p>
+					Let's check your setup and show you how SpRestLib is configured. If everything below looks okay, then
+					all the functionality in the demo tabs are ready to explore.<br>
+					<br>
+					&bull;&nbsp;Please check the <a href="https://github.com/gitbrent/SpRestLib">GitHub Project Site</a>
+					for setup and configuration FAQs and full documentation.
+				</p>
 
-				<div id="tab1Code1" class="boxCode"><!-- populated by doPageLoad --></div>
+				<div class="divTable">
+					<div data-name="col1" style="width:33%">
+						<div class="subTitle">JavaScript Library Check</div>
+						<div class="divTableRows">
+							<div>
+								<div id="libChkJquery"></div><div>jQuery loaded?</div>
+							</div>
+							<div>
+								<div id="libChkSprLib"></div><div>sprLib loaded?</div>
+							</div>
+						</div>
+					</div>
+					<div data-name="col2" style="width:67%">
+						<div class="subTitle">SharePoint Environment / Configuration</div>
+						<div class="divTableRows">
+							<div>
+								<div><div class="iconInfo"></div></div><div>SpRestLib Base URL</div><div id="spBaseUrl"></div>
+							</div>
+							<div>
+								<div><div class="iconInfo"></div></div><div>SpRestLib Version</div><div id="spVersion">?</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<div id="tab1" data-tab="List CRUD">
+				<div class="subTitle">List/Library Methods</div>
+				<p>
+					Here are all the Lists/Libraries found on this site:<br>
+					Select one and try some CRUD ops!
+				</p>
+
+				<div id="contListSelect" class="divTable" style="width:auto; margin-bottom:20px;">
+					<div class="th">
+						Site Lists/Libraries
+					</div>
+					<div>
+						<div class="sprlib-spinner"><div class="sprlib-bounce1"></div><div class="sprlib-bounce2"></div><div class="sprlib-bounce3"></div></div>
+						<select id="selSiteLists" onchange="handleListChange()"></select>
+						<span>(only non-hidden Lists/Libraries are shown)</span>
+					</div>
+				</div>
+
+				<div id="tab1-ListInfo" style="margin-bottom:20px;">
+					<div class="subTitle">List Information</div>
+					<div class="divCode">sprLib.list('listName').info()</div>
+				</div>
+
+				<div id="tab1-ListCols" style="margin-bottom:20px;">
+					<div class="subTitle">List Columns</div>
+					<div class="divCode">sprLib.list('listName').cols()</div>
+				</div>
+
+				<!--
+				<div class="divTableRows">
+					<div class="row"><div>INPUT </div><div class="boxCode" id="tst1"></div></div>
+					<div class="row"><div>OUTPUT</div><div class="boxData" id="res1"></div></div>
+				</div>
+				-->
+
+				<!-- OLD
+				<div id="tab1Code1" class="boxCode"></div>
 				<div style="text-align:center; padding:10px; margin:20px 0;">
 					<button type="button" class="flatBtn flatBtn-blue" onclick="execCodeAndShowResults('tab1Code1','tab1Data1')">SIMPLE TEST</button>
 				</div>
 				<div id="tab1Data1" class="boxData"></div>
+				-->
 
 				<!-- TODO: core API calls: eg: _/api/webs -->
 			</div>
@@ -211,7 +375,7 @@
 						<div>
 							<div class="divTableRows">
 								<div class="row"><div>INPUT </div><div class="boxCode"></div></div>
-								<div class="row"><div>OUTPUT</div><div class="boxData res"></div></div>
+								<div class="row"><div>OUTPUT</div><div class="boxData"></div></div>
 							</div>
 						</div>
 					</div>
@@ -220,7 +384,7 @@
 						<div>
 							<div class="divTableRows">
 								<div class="row"><div>INPUT </div><div class="boxCode"></div></div>
-								<div class="row"><div>OUTPUT</div><div class="res"></div></div>
+								<div class="row"><div>OUTPUT</div><div class="boxData"></div></div>
 							</div>
 						</div>
 					</div>
