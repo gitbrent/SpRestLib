@@ -25,13 +25,8 @@ Reduces your SharePoint AJAX interaction to a few lines of code. Easily read ite
 
 **************************************************************************************************
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
-**Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 
-- [SpRestLib](#sprestlib)
-  - [JavaScript Library for SharePoint Web Services](#javascript-library-for-sharepoint-web-services)
-    - [Features:](#features)
-    - [Methods:](#methods)
-    - [Supported Environments:](#supported-environments)
 - [Installation](#installation)
   - [Client-Side](#client-side)
   - [Node](#node)
@@ -76,6 +71,7 @@ Reduces your SharePoint AJAX interaction to a few lines of code. Easily read ite
 - [Issues / Suggestions](#issues--suggestions)
 - [Special Thanks](#special-thanks)
 - [License](#license)
+
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
 **************************************************************************************************
