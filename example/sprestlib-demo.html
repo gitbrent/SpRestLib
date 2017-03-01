@@ -6,7 +6,7 @@
 	<meta name="website"     content="https://github.com/gitbrent/SpRestLib/">
 	<meta name="keywords"    content="SpRestLib, JavaScript, js-sharepoint, OData, REST, SharePoint 2013, SP2013, SharePoint 2016, SP2016, SharePoint Online">
 	<meta name="description" content="Content Editor WebPart to showcase SpRestLib features and capabilities">
-	<meta name="revised"     content="Feb 23, 2017">
+	<meta name="revised"     content="Feb 28, 2017">
 
 	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300">
 	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:700">
@@ -25,6 +25,8 @@
 		3) Create a new Page: DEMO_SpRestLib.aspx
 		4) Add a Content Editor Web Part to the page and point it to ./SiteAssets/sprestlib/sprestlib-demo.html
 		5) The DEMO_SpRestLib.aspx page is ready to go!
+
+		!!!==>> Check the img folder for screencaps of the SharePoint setup! <<==!!!
 	-->
 
 	<link rel="stylesheet" type="text/css" href="../SiteAssets/sprestlib/css/tablesorter.css">
@@ -151,49 +153,60 @@
 			// STEP 1: HTML Setup
 			document.title = "SpRestLib - JavaScript Library for SharePoint Web Services";
 
-			// STEP 2: Populate SETUP Tab
-
-			// A: jQuery
-			if ( typeof jQuery !== 'undefined' ) {
-				$('#libChkJquery').append( '<div class="iconYes"></div>' );
-			}
-			else {
-				$('#libChkJquery').append( 'oops - go check <script> tag ' );
-			}
-
-			// B: sprLib
-			if ( typeof sprLib !== 'undefined' ) {
-				$('#libChkSprLib').append( '<div class="iconYes"></div>' );
-				var baseUrl = sprLib.baseUrl();
-
-				// Make human readable when relative directory returned
-				if ( baseUrl == ".." ) {
-					baseUrl = location.href.substring(0, location.href.lastIndexOf('/'));
-					baseUrl = baseUrl.substring(0, baseUrl.lastIndexOf('/'));
-
-					$('#spVersion').text( sprLib.version() );
+			// TAB 0: Setup
+			{
+				// A: jQuery
+				if ( typeof jQuery !== 'undefined' ) {
+					$('#libChkJquery').append( '<div class="iconYes"></div>' );
 				}
-				$('#spBaseUrl').text( baseUrl );
-			}
-			else {
-				$('#libChkSprLib').append( '<div class="iconFail"></div><br>oops - go check <script> tag ' );
-				$('#spBaseUrl').text( '(n/a)' );
+				else {
+					$('#libChkJquery').append( 'oops - go check <script> tag ' );
+				}
 
-				// Halt execution
-				return;
+				// B: sprLib
+				if ( typeof sprLib !== 'undefined' ) {
+					$('#libChkSprLib').append( '<div class="iconYes"></div>' );
+					var baseUrl = sprLib.baseUrl();
+
+					// Make human readable when relative directory returned
+					if ( baseUrl == ".." ) {
+						baseUrl = location.href.substring(0, location.href.lastIndexOf('/'));
+						baseUrl = baseUrl.substring(0, baseUrl.lastIndexOf('/'));
+
+						$('#spVersion').text( sprLib.version() );
+					}
+					$('#spBaseUrl').text( baseUrl );
+				}
+				else {
+					$('#libChkSprLib').append( '<div class="iconFail"></div><br>oops - go check <script> tag ' );
+					$('#spBaseUrl').text( '(n/a)' );
+
+					// Halt execution
+					return;
+				}
 			}
 
-			// TAB 1:
-			// Populate <select> with List names
-			sprLib.rest({ restUrl:'/_api/web/lists/' })
-			.then(function(arrayListObjs){
-				arrayListObjs
-				.sort(function(a,b){return (a.Title > b.Title) ? 1 : ((b.Title > a.Title) ? -1 : 0);} )
-				.forEach(function(obj,idx){
-					if ( !obj.Hidden ) $('#selSiteLists').append('<option value="'+ obj.Title +'">'+ obj.Title +'</option>');
+			// TAB 1: List CRUD
+			{
+				// Populate <select> with List names
+				sprLib.rest({ restUrl:'/_api/web/lists/' })
+				.then(function(arrayListObjs){
+					arrayListObjs
+					.sort(function(a,b){return (a.Title > b.Title) ? 1 : ((b.Title > a.Title) ? -1 : 0);} )
+					.forEach(function(obj,idx){
+						if ( !obj.Hidden ) $('#selSiteLists').append('<option value="'+ obj.Title +'">'+ obj.Title +'</option>');
+					});
+					$('#contListSelect .sprlib-spinner').remove();
 				});
-				$('#contListSelect .sprlib-spinner').remove();
-			});
+			}
+
+
+
+
+
+
+			// OLD BELOW:
+			////////////////////////
 
 
 
@@ -222,6 +235,7 @@
 				+ "    });\n"
 				+ '});'
 			);
+
 			$('#tst2').html('sprLib.user().groups() <br>'
 				+ '.then(function(arrGroups){ <br>'
 				+ "    $.each(arrGroups,function(idx,objGroup){ $('#res2').append('&lt;span&gt;'+ objGroup.Title +'&lt;/span&gt;') }); <br>"
@@ -266,7 +280,7 @@
 			sprLib.user().groups().then(function(arrGroups){ $('#currUserGroups').text( arrGroups.toString() ); });
 
 			// STEP 4: Execute code
-			$('#demoBody code').each(function(i,code){ eval( $(this).text() ); });
+			$('#tabUser .boxCode').each(function(i,code){ eval( $(this).text() ); });
 		}
 
 		// ==================================================================================================================
@@ -277,26 +291,27 @@
 	<a class="github-fork-ribbon" href="https://github.com/GitBrent/SpRestLib" title="Fork me on GitHub">Fork me on GitHub</a>
 
 	<div id="demoBody">
-		<div class="bigTitle">SpRestLib :: Feature Demos</div>
+		<div class="bigTitle">SpRestLib Feature Demos</div>
 		<div class="subTitle">JavaScript Library for SharePoint Web Services</div>
 
 		<div id="navTabs" class="modernTabs">
 			<ul>
-				<li class="active" onclick="$('#navTabs').find('> div, li').removeClass('active'); $(this).addClass('active'); $('#tab0').addClass('active');">Setup</li><li onclick="$('#navTabs').find('> div, li').removeClass('active'); $(this).addClass('active'); $('#tab1').addClass('active');">List Get / CRUD</li><li onclick="$('#navTabs').find('> div, li').removeClass('active'); $(this).addClass('active'); $('#tab2').addClass('active');">User Info</li><li onclick="$('#navTabs').find('> div, li').removeClass('active'); $(this).addClass('active'); $('#tab3').addClass('active');">HTML Form Population</li><li onclick="$('#navTabs').find('> div, li').removeClass('active'); $(this).addClass('active'); $('#tab4').addClass('active');">REST API Calls</li><li onclick="$('#navTabs').find('> div, li').removeClass('active'); $(this).addClass('active'); $('#tab5').addClass('active');">Code Sandbox</li>
+				<li class="active" onclick="$('#navTabs').find('> div, li').removeClass('active'); $(this).addClass('active'); $('#tabSetup').addClass('active');">Setup</li><li onclick="$('#navTabs').find('> div, li').removeClass('active'); $(this).addClass('active'); $('#tabForm').addClass('active');">Binding / Population</li><li onclick="$('#navTabs').find('> div, li').removeClass('active'); $(this).addClass('active'); $('#tabList').addClass('active');">List Methods</li><li onclick="$('#navTabs').find('> div, li').removeClass('active'); $(this).addClass('active'); $('#tabUser').addClass('active');">User Methods</li><li onclick="$('#navTabs').find('> div, li').removeClass('active'); $(this).addClass('active'); $('#tabRest').addClass('active');">REST API Calls</li><li onclick="$('#navTabs').find('> div, li').removeClass('active'); $(this).addClass('active'); $('#tabSandbox').addClass('active');">Code Sandbox</li>
 			</ul>
 
-			<div id="tab0" data-tab="Setup" class="active">
+			<div id="tabSetup" data-tab="Setup" class="active">
 				<div class="subTitle">Welcome!</div>
 				<p>
-					Let's check your setup and show you how SpRestLib is configured. If everything below looks okay, then
-					all the functionality in the demo tabs are ready to explore.<br>
-					<br>
-					&bull;&nbsp;Please check the <a href="https://github.com/gitbrent/SpRestLib">GitHub Project Site</a>
-					for setup and configuration FAQs and full documentation.
+					Let's check your setup and show you how SpRestLib is configured.
+					<ul>
+						<li>If everything below looks okay, then all the functionality in the demo tabs are ready to explore.</li>
+						<li>Please check the <a href="https://github.com/gitbrent/SpRestLib">GitHub Project Site</a> for setup
+						and configuration FAQs and full documentation.</li>
+					</ul>
 				</p>
 
 				<div class="divTable">
-					<div data-name="col1" style="width:33%">
+					<div data-name="col1" style="width:33%; padding:0px;">
 						<div class="subTitle">JavaScript Library Check</div>
 						<div class="divTableRows">
 							<div>
@@ -307,7 +322,7 @@
 							</div>
 						</div>
 					</div>
-					<div data-name="col2" style="width:67%">
+					<div data-name="col2" style="width:67%; padding:0px;">
 						<div class="subTitle">SharePoint Environment / Configuration</div>
 						<div class="divTableRows">
 							<div>
@@ -319,9 +334,80 @@
 						</div>
 					</div>
 				</div>
+				<p>
 			</div>
 
-			<div id="tab1" data-tab="List CRUD">
+			<div id="tabForm" dats-tab="Data Binding">
+				<div class="subTitle" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
+					<div class="arrow active"></div>HTML Form Binding/Population
+				</div>
+				<div id="tabHtmlElements" class="divTableRows testGroup">
+					<div>
+						<div><div id="htmlEleSpanCode" class="divCode"></div></div>
+						<div><div id="htmlEleSpanHtml"></div></div>
+					</div>
+					<div>
+						<div><div id="htmlEleTextCode" class="divCode"></div></div>
+						<div><div id="htmlEleTextHtml"></div></div>
+					</div>
+					<div>
+						<div><div id="htmlEleSel1Code" class="divCode"></div></div>
+						<div><div id="htmlEleSel1Html"></div></div>
+					</div>
+					<div>
+						<div><div id="htmlEleSel2Code" class="divCode"></div></div>
+						<div><div id="htmlEleSel2Html"></div></div>
+					</div>
+				</div>
+
+				<div class="subTitle" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
+					<div class="arrow active"></div>EX: table-foreach
+				</div>
+				<div>
+					<div id="htmlEleTab1Code" class="divCode"></div>
+					<div id="htmlEleTab1Html"></div>
+
+					<table data-sprlib='{ "list":"Departments", "cols":["Title","Modified"], "showBusy":true }'></table>
+				</div>
+
+				<div class="subTitle" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
+					<div class="arrow active"></div>EX: tbody-foreach
+				</div>
+				<div>
+					<table border="0" cellpadding="0" cellspacing="0">
+						<thead>
+							<tr><th>Emp ID</th><th>Employee Name</th><th>Badge #</th></tr>
+						</thead>
+						<tbody data-sprlib='{ "list":"Employees", "cols":["Id","Name","Badge_x0020_Number"], "showBusy":true }'></tbody>
+					</table>
+				</div>
+
+
+				<!-- Populate HTML elements before doc.ready is fired -->
+				<script type="text/javascript">
+					var htmlEleSpan = '<span data-sprlib=\'\n{ "list":"Employees", "value":"Name", "filter":{"col":"Badge_x0020_Number", "op":"eq", "val":"666"} }\'>\n</span>';
+					$('#htmlEleSpanCode').text( htmlEleSpan );
+					$('#htmlEleSpanHtml').html( htmlEleSpan );
+
+					var htmlEleText = '<input type="text" data-sprlib=\'{ "list":"Departments", "value":"Title" }\'></input>';
+					$('#htmlEleTextCode').text( htmlEleText );
+					$('#htmlEleTextHtml').html( htmlEleText );
+
+					var htmlEleSel1 = '<select data-sprlib=\'{ "list":"Employees", "value":"Id", "text":"Name" }\'></select>';
+					$('#htmlEleSel1Code').text( htmlEleSel1 );
+					$('#htmlEleSel1Html').html( htmlEleSel1 );
+
+					var htmlEleSel2 = '<select data-sprlib=\'{ "list":"Employees", "value":"Name", "text":"Id" }\'></select>';
+					$('#htmlEleSel2Code').text( htmlEleSel2 );
+					$('#htmlEleSel2Html').html( htmlEleSel2 );
+
+					var htmlEleTab1 = '<table data-sprlib=\'{ "list":"Departments", "cols":["Id","Title"], "showBusy":true }\'></table>';
+					$('#htmlEleTab1Code').text( htmlEleTab1 );
+					$('#htmlEleTab1Html').html( htmlEleTab1 );
+				</script>
+			</div>
+
+			<div id="tabList" data-tab="List Methods">
 				<div class="subTitle">List/Library Methods</div>
 				<p>
 					Here are all the Lists/Libraries found on this site:<br>
@@ -334,7 +420,9 @@
 					</div>
 					<div>
 						<div class="sprlib-spinner"><div class="sprlib-bounce1"></div><div class="sprlib-bounce2"></div><div class="sprlib-bounce3"></div></div>
-						<select id="selSiteLists" onchange="handleListChange()"></select>
+						<select id="selSiteLists" onchange="handleListChange()">
+							<option value="">Select...</option>
+						</select>
 						<span>(only non-hidden Lists/Libraries are shown)</span>
 					</div>
 				</div>
@@ -367,7 +455,7 @@
 				<!-- TODO: core API calls: eg: _/api/webs -->
 			</div>
 
-			<div id="tab2" data-tab="Users">
+			<div id="tabUser" data-tab="Users">
 				<div class="subTitle">User Methods</div>
 				<div id="tabUsersGroups" class="divTableRows testGroup" style="margin-top:0">
 					<div class="row">
@@ -391,55 +479,22 @@
 				</div>
 			</div>
 
-			<div id="tab3" dats-tab="Data Binding">
-				<div class="subTitle" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
-					<div class="arrow active"></div>HTML Form Binding/Population
-				</div>
-				<div id="tabHtmlElements" class="divTableRows testGroup">
-					<div>
-						<div class="subTitle">EX: Populate <kbd>&lt;span&gt;</kbd></div>
-						Employee #1: <b><span data-sprlib='{ "list":"Employees", "value":"Name", "filter":{"col":"Name", "op":"eq", "val":"Brent Ely"} }'></span></b>
-					</div>
-					<div>
-						<div class="subTitle">EX: Populate &lt;select&gt;</div>
-						<select id="selTest1" data-sprlib='{ "list":"Employees", "value":"Id",   "text":"Name" }'></select>
-						<select id="selTest2" data-sprlib='{ "list":"Employees", "value":"Name", "text":"Name" }'></select>
-					</div>
-					<div>
-						<div class="subTitle">EX: Unknown Model</div>
-						<input type="text" data-sprlib='{ "list":"Departments", "value":"Title" }' placeholder="Departments.Title"></input>
-						<input type="text" data-TODO='{ "list":"ListDoesntExistTest", "value":"Name" }' placeholder="(Negative Test)"></input>
-					</div>
-				</div>
-
-				<div class="subTitle" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
-					<div class="arrow active"></div>EX: table-foreach
-				</div>
-				<div>
-					<table data-sprlib='{ "list":"Departments", "cols":["Id","Title"], "showBusy":true }'></table>
-					<table data-sprlib='{ "list":"Departments", "cols":["Title","Modified"], "showBusy":true }'></table>
-				</div>
-
-				<div class="subTitle" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
-					<div class="arrow active"></div>EX: tbody-foreach
-				</div>
-				<div>
-					<table border="0" cellpadding="0" cellspacing="0">
-						<thead>
-							<tr><th>Emp ID</th><th>Employee Name</th><th>Badge #</th></tr>
-						</thead>
-						<tbody data-sprlib='{ "list":"Employees", "cols":["Id","Name","Badge_x0020_Number"], "showBusy":true }'></tbody>
-					</table>
-				</div>
-			</div>
-
-			<div id="tab4" data-tab="RESR API">
+			<div id="tabRest" data-tab="RESR API">
 				<div class="subTitle" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
 					<div class="arrow active"></div>REST API Calls
 				</div>
+
+				<div class="divCode">
+					sprLib.rest({ restUrl:'/_api/web/lists/' })
+					.then(function(arrayListObjs){
+						var table = new AsciiTable('Site Lists').setHeading(Object.keys(arrayListObjs[0]));
+						$.each(arrayListObjs,function(idx,obj){ let vals = []; $.each(obj, function(key,val){ vals.push(val) }); table.addRow(vals); });
+						table.toString()
+					});
+				</div>
 			</div>
 
-			<div id="tab5" data-tab="Code Sandbox">
+			<div id="tabSandbox" data-tab="Code Sandbox">
 				<div id="sandboxMessage">Code below is editable</div>
 				<div id="sandboxCode" class="boxCode" contenteditable="true"></div>
 				<div style="text-align:center; padding:10px; margin:20px 0;">

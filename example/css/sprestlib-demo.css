@@ -37,7 +37,7 @@
 .modernTabs {
 	width: 100%;
 	margin: 20px 0 10px 0;
-	font-family: Roboto, "Segoe UI", Helvetica, Arial, sans-serif;
+	font-family: "Open Sans", "Segoe UI", Arial, Verdana, sans-serif;
 	border: 1px solid #d5d5d5;
 	box-shadow: 0px 4px 10px -5px rgba(0,0,0,0.5);
 	border-radius: 5px;
@@ -53,10 +53,12 @@
 .modernTabs > ul > li {
 	box-sizing: border-box;
 	cursor: pointer;
+	white-space: nowrap;
 	text-shadow: 2px 2px #efefef;
 	width: 16.66%;
 	text-align: center;
-	display: inline-block; list-style-type:none;
+	display: inline-block;
+	list-style-type:none;
 	padding: 15px;
 	font-size: 14px;
 	color: #a7a7a7;
@@ -92,24 +94,31 @@
 */
 
 /* */
-#tab0 .divTable > div {
+#tabSetup .divTableRows {
+	width: auto;
+	min-width: 200px;
+	font-size: 14px;
+	border: 1px solid #d7e7f7;
+}
+#tabSetup .divTableRows > div > div { padding: 15px; background: #f2f9fc; }
+/*
+#tabSetup .divTable > div {
 	vertical-align: top;
 }
-#tab0 .divTable .subTitle {
+#tabSetup .divTable .subTitle {
     margin: 10px 0 15px 0;
 }
-#tab0 .divTableRows {
+#tabSetup .divTableRows {
 	width: auto;
 	min-width: 200px;
 }
-#tab0 .divTableRows > div > div {
+#tabSetup .divTableRows > div > div {
 	background: #fff;
 	border-bottom: 1px solid #f2f9fc;
-	vertical-align: middle;
 	font-size: 14px;
 }
-
-#tab5 .flatBtn { width:35%; }
+*/
+#tabSandbox .flatBtn { width:35%; }
 
 .divCode {
 	white-space: pre;
@@ -160,14 +169,14 @@ border: 1px solid #c7c7c7;
 */
 
 div.divTable { display: table; box-sizing: border-box; width: 100%; font-size: 12px; }
-div.divTable > div { display: table-cell; padding:10px; vertical-align: middle; background-color: #f6f9f9; border-right: 1px solid white; }
+div.divTable > div { display: table-cell; padding:10px; vertical-align: top; }
 div.divTable .subTitle { margin: 0 0 10px 0; }
 div.divTable label { display: block; margin-bottom: 3px; color:#bcbcbc; }
 
 /*-*/
-div.divTableRows { display: table; box-sizing: border-box; width: 100%; font-size: 12px; }
+div.divTableRows { display:table; box-sizing:border-box; width:100%; font-size:12px; border: 1px solid #d7e7f7; }
 div.divTableRows > div { display: table-row; }
-div.divTableRows > div > div { display: table-cell; padding: 5px 10px; }
+div.divTableRows > div > div { display: table-cell; padding: 5px 10px; vertical-align: middle; background: #f2f9fc; }
 
 /*-*/
 #demoBody table { width:100%; margin: 10px 0; border-collapse: collapse; }
@@ -234,7 +243,7 @@ kbd, .key {
 	padding:0.1em 0.6em;
 	border:1px solid #ccc;
 	font-size:12px;
-	font-family:Arial,Helvetica,sans-serif;
+	font-family: "Roboto Mono",Consolas,"Courier New",monospace;
 	background-color:#f7f7f7;
 	color:#696969;
 	text-shadow:0 1px 0 #fff;
