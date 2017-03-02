@@ -41,7 +41,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 (function(){
 	// APP VERSION/BUILD
 	var APP_VER = "0.9.1";
-	var APP_BLD = "20170222";
+	var APP_BLD = "20170301";
 	var DEBUG = false; // (verbose mode/lots of logging. FIXME:remove prior to v1.0.0)
 	// APP FUNCTIONALITY
 	var APP_FILTEROPS = {
@@ -235,13 +235,23 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 			<select data-sprlib='{ "list":"Employees", "value":"Title", "text":"Id" }'></select>
 			*/
 			$('[data-sprlib]').each(function(i,tag){
+				if (DEBUG) { console.log('--------------------'); console.log('Found tag: '+$(tag).prop('tagName')+' - id: '+$(tag).prop('id')); }
+
 				// A: Parse bind data from html tags
 				var data = {};
 				try {
 					// NOTE: jQuery returns an JSON-type object automatically (no JSON.parse required)
 					data = $(tag).data('sprlib');
 					// Ignore garbage or tags w/o a LIST
-					if ( typeof data !== 'object' || !data.list ) return; // aka:next
+					if ( typeof data !== 'object' || !data.list ) {
+						if (DEBUG) {
+							console.log('**Warning** this tag has `data-sprlib` but its data isnt an object or its lacks `list` arg');
+							console.log(data);
+							console.log(`${typeof data}`);
+							console.log( (data.list ? data.list : 'data.list does not exist') );
+						}
+						return; // aka:next
+					}
 				}
 				catch(ex) {
 					console.log( 'Unable to ingest data-sprlib!' + '\n' );
@@ -256,7 +266,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 
 					return;
 				}
-				if (DEBUG) console.log( data );
+				if (DEBUG) { console.log('tag data: '); console.log(data); }
 
 				// TODO: Check select for text/value (fallback to cols if exists), etc.!
 				// TODO: REQD field checks here (we need cols right?)
@@ -308,9 +318,9 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 			// STEP 3: Wait for each List query to provide all the data needed to fill all tags
 			Promise.all( arrPromises )
 			.then(function(){
-				if (DEBUG) console.table(arrTags);
+				if (DEBUG) { console.log('arrTags:\n'); console.table(arrTags); }
 				// Populate each tag
-				$.each(arrTags, function(idx,objTag){
+				arrTags.forEach(function(objTag,idx){
 					// A: Remove any temporary UI items now that this element is being populated
 					objTag.tag.find('.sprlibTemp').remove();
 
@@ -639,7 +649,11 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 					// STEP 1: Gather fields
 					$.each(data.d.Fields.results, function(i,result){
 						// DESIGN: Only capture "user" columns (Type=17 are `Calculated` cols)
-						if ( result.InternalName == 'ID' || (!result.Hidden && result.CanBeDeleted) || (!result.CanBeDeleted && result.FieldTypeKind == 17) ) {
+						if (
+							result.InternalName == 'ID'
+							|| ( !result.Hidden && (result.CanBeDeleted || result.InternalName == 'Title') )
+							|| ( !result.CanBeDeleted && result.FieldTypeKind == 17 )
+						) {
 							arrColumns.push({
 								dispName:     result.Title,
 								dataName:     result.InternalName,

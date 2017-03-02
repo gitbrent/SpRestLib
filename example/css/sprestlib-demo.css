@@ -17,7 +17,7 @@
 #demoBody div { box-sizing: border-box; }
 
 .bigTitle { font-family:'Roboto'; font-size:36px; color:#0088cc; margin:15px 0 10px 0; }
-.subTitle { font-family:'Roboto'; font-size:18px; color:#0088cc; margin:10px 0 20px 0; }
+.subTitle { font-family:'Roboto'; font-size:18px; color:#0088cc; margin:20px 0 10px 0; }
 
 .arrow {
 	display: inline-block;
@@ -95,12 +95,18 @@
 
 /* */
 #tabSetup .divTableRows {
-	width: auto;
+	width: 75%;
 	min-width: 200px;
 	font-size: 14px;
 	border: 1px solid #d7e7f7;
 }
 #tabSetup .divTableRows > div > div { padding: 15px; background: #f2f9fc; }
+#tabSetup .divTableRows > div > div:first-child { width:1%; }
+
+#tabForm #tabHtmlElements.divTableRows { border: 0; }
+#tabForm #tabHtmlElements.divTableRows > div > div { background: none; padding: 10px 0; }
+#tabForm #tabHtmlElements.divTableRows > div > div:first-child { padding-right: 20px; }
+
 /*
 #tabSetup .divTable > div {
 	vertical-align: top;
@@ -119,6 +125,11 @@
 }
 */
 #tabSandbox .flatBtn { width:35%; }
+
+.code {
+	white-space: pre;
+	font-family: 'Roboto Mono', "Consolas", "Courier New", monospace;
+}
 
 .divCode {
 	white-space: pre;

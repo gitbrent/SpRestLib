@@ -153,7 +153,7 @@
 			// STEP 1: HTML Setup
 			document.title = "SpRestLib - JavaScript Library for SharePoint Web Services";
 
-			// TAB 0: Setup
+			// TAB: Setup
 			{
 				// A: jQuery
 				if ( typeof jQuery !== 'undefined' ) {
@@ -186,7 +186,7 @@
 				}
 			}
 
-			// TAB 1: List CRUD
+			// TAB: List CRUD
 			{
 				// Populate <select> with List names
 				sprLib.rest({ restUrl:'/_api/web/lists/' })
@@ -200,47 +200,50 @@
 				});
 			}
 
+			// TAB: User/Groups
+			{
+				var user1Code = "sprLib.user().info()\n"
+					+ ".then(function(objUser){\n"
+					+ "    $.each(objUser,function(key,val){\n"
+					+ "        if (typeof val !== 'object') $('#user1Html').append('<div>'+ key +' = '+ val +'</div>');\n"
+					+ "    });\n"
+					+ '});';
+				$('#user1Code').text( user1Code );
+				eval(user1Code);
 
+				var user2Code = "sprLib.user().groups()\n"
+					+ '.then(function(arrGroups){\n'
+					+ "  $.each(arrGroups,function(idx,objGroup){\n"
+					+ "    $('#user2Html').append('<div>'+ objGroup.Title +'</div>')\n"
+					+ "  });\n"
+					+ '});'
+				$('#user2Code').text( user2Code );
+				eval(user2Code);
+			}
+
+			// TAB: REST API
+			{
+				var rest1Code = "sprLib.rest({ restUrl:'/_api/web/lists/' })\n"
+					+ ".then(function(arrayListObjs){\n"
+					+ "  var table = new AsciiTable('Site Lists').setHeading(['BaseType','ItemCount','Title']);\n"
+					+ "  $.each(arrayListObjs,function(idx,obj){\n"
+					+ "    let vals = [];\n"
+					+ "    $.each(obj, function(key,val){ if ($.inArray(key,['BaseType','ItemCount','Title']) > -1) vals.push(val) });\n"
+					+ "    table.addRow(vals);\n"
+					+ "  });\n"
+					+ "  $('#rest1Html').append( table.toString() );\n"
+					+ "});";
+				$('#rest1Code').text( rest1Code );
+				eval(rest1Code);
+			}
 
 
 
 
 			// OLD BELOW:
 			////////////////////////
-
-
-
 			// STEP 2: Fill tab code and/or Populate Results of queries
 
-			// TAB 1: List CRUD
-			$('#tab1Code1').html("sprLib.list('Employees')\n"
-				+ ".getItems({\n"
-				+ "    listCols: ['Name', 'Badge_x0020_Number']\n"
-				+ "})\n"
-				+ ".then(function(arrData){ return arrData })\n"
-				+ ".catch(function(errStr){ throw new Error(errStr) });"
-			);
-
-			// TAB 2: User/Group
-			$('.testGroup > div > div:first-child span').each(function(i,tab){ $(this).text(i+1); });
-			$('.testGroup > div .divTableRows').each(function(i,tab){
-				$(tab).find('.boxCode').prop('id', 'tst'+(i+1));
-				$(tab).find('.boxData').prop('id', 'res'+(i+1));
-			});
-
-			$('#tst1').html("sprLib.user().info()\n"
-				+ ".then(function(objUser){\n"
-				+ "    $.each(objUser,function(key,val){\n"
-				+ "        if (typeof val !== 'object') $('#res1').append('&lt;span&gt;'+ key +':&lt;br&gt;*&nbsp;'+ val +'&lt;/span&gt;');\n"
-				+ "    });\n"
-				+ '});'
-			);
-
-			$('#tst2').html('sprLib.user().groups() <br>'
-				+ '.then(function(arrGroups){ <br>'
-				+ "    $.each(arrGroups,function(idx,objGroup){ $('#res2').append('&lt;span&gt;'+ objGroup.Title +'&lt;/span&gt;') }); <br>"
-				+ '});'
-			);
 
 			$('#sandboxCode').html("sprLib.list('Employees')\n"
 				+ ".getItems({\n"
@@ -337,9 +340,9 @@
 				<p>
 			</div>
 
-			<div id="tabForm" dats-tab="Data Binding">
+			<div id="tabForm" data-tab="Data Binding">
 				<div class="subTitle" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
-					<div class="arrow active"></div>HTML Form Binding/Population
+					<div class="arrow active"></div>HTML Elements
 				</div>
 				<div id="tabHtmlElements" class="divTableRows testGroup">
 					<div>
@@ -359,35 +362,11 @@
 						<div><div id="htmlEleSel2Html"></div></div>
 					</div>
 				</div>
-
-				<div class="subTitle" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
-					<div class="arrow active"></div>EX: table-foreach
-				</div>
-				<div>
-					<div id="htmlEleTab1Code" class="divCode"></div>
-					<div id="htmlEleTab1Html"></div>
-
-					<table data-sprlib='{ "list":"Departments", "cols":["Title","Modified"], "showBusy":true }'></table>
-				</div>
-
-				<div class="subTitle" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
-					<div class="arrow active"></div>EX: tbody-foreach
-				</div>
-				<div>
-					<table border="0" cellpadding="0" cellspacing="0">
-						<thead>
-							<tr><th>Emp ID</th><th>Employee Name</th><th>Badge #</th></tr>
-						</thead>
-						<tbody data-sprlib='{ "list":"Employees", "cols":["Id","Name","Badge_x0020_Number"], "showBusy":true }'></tbody>
-					</table>
-				</div>
-
-
 				<!-- Populate HTML elements before doc.ready is fired -->
 				<script type="text/javascript">
-					var htmlEleSpan = '<span data-sprlib=\'\n{ "list":"Employees", "value":"Name", "filter":{"col":"Badge_x0020_Number", "op":"eq", "val":"666"} }\'>\n</span>';
+					var htmlEleSpan = '<span id="eleSpan" data-sprlib=\'\n{ "list":"Employees", "value":"Name", "filter":{"col":"Badge_x0020_Number", "op":"eq", "val":"666"} }\'>\n</span>';
 					$('#htmlEleSpanCode').text( htmlEleSpan );
-					$('#htmlEleSpanHtml').html( htmlEleSpan );
+					$('#htmlEleSpanHtml').html( htmlEleSpan.replace('\n','') );
 
 					var htmlEleText = '<input type="text" data-sprlib=\'{ "list":"Departments", "value":"Title" }\'></input>';
 					$('#htmlEleTextCode').text( htmlEleText );
@@ -400,10 +379,37 @@
 					var htmlEleSel2 = '<select data-sprlib=\'{ "list":"Employees", "value":"Name", "text":"Id" }\'></select>';
 					$('#htmlEleSel2Code').text( htmlEleSel2 );
 					$('#htmlEleSel2Html').html( htmlEleSel2 );
+				</script>
 
+				<div class="subTitle" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
+					<div class="arrow active"></div>Tables
+				</div>
+				<div>
+					<div id="htmlEleTab1Code" class="divCode"></div>
+					<div id="htmlEleTab1Html" style="margin-bottom:20px"></div>
+
+					<div id="htmlEleTab2Code" class="divCode"></div>
+					<div id="htmlEleTab2Html" style="margin-bottom:20px"></div>
+
+					<div id="htmlEleTab3Code" class="divCode"></div>
+					<div id="htmlEleTab3Html"></div>
+				</div>
+				<!-- Populate HTML elements before doc.ready is fired -->
+				<script type="text/javascript">
 					var htmlEleTab1 = '<table data-sprlib=\'{ "list":"Departments", "cols":["Id","Title"], "showBusy":true }\'></table>';
 					$('#htmlEleTab1Code').text( htmlEleTab1 );
 					$('#htmlEleTab1Html').html( htmlEleTab1 );
+
+					var htmlEleTab2 = '<table data-sprlib=\'{ "list":"Departments", "cols":["Title","Modified"], "showBusy":true }\'></table>';
+					$('#htmlEleTab2Code').text( htmlEleTab2 );
+					$('#htmlEleTab2Html').html( htmlEleTab2 );
+
+					var htmlEleTab3 = '<table border="0" cellpadding="0" cellspacing="0">\n'
+						+ '  <thead><tr><th>Emp ID</th><th>Employee Name</th><th>Badge #</th></tr></thead>\n'
+						+ '  <tbody data-sprlib=\'{ "list":"Employees", "cols":["Id","Name","Badge_x0020_Number"], "showBusy":true }\'></tbody>\n'
+						+ '</table>';
+					$('#htmlEleTab3Code').text( htmlEleTab3 );
+					$('#htmlEleTab3Html').html( htmlEleTab3 );
 				</script>
 			</div>
 
@@ -436,46 +442,18 @@
 					<div class="subTitle">List Columns</div>
 					<div class="divCode">sprLib.list('listName').cols()</div>
 				</div>
-
-				<!--
-				<div class="divTableRows">
-					<div class="row"><div>INPUT </div><div class="boxCode" id="tst1"></div></div>
-					<div class="row"><div>OUTPUT</div><div class="boxData" id="res1"></div></div>
-				</div>
-				-->
-
-				<!-- OLD
-				<div id="tab1Code1" class="boxCode"></div>
-				<div style="text-align:center; padding:10px; margin:20px 0;">
-					<button type="button" class="flatBtn flatBtn-blue" onclick="execCodeAndShowResults('tab1Code1','tab1Data1')">SIMPLE TEST</button>
-				</div>
-				<div id="tab1Data1" class="boxData"></div>
-				-->
-
-				<!-- TODO: core API calls: eg: _/api/webs -->
 			</div>
 
 			<div id="tabUser" data-tab="Users">
 				<div class="subTitle">User Methods</div>
-				<div id="tabUsersGroups" class="divTableRows testGroup" style="margin-top:0">
-					<div class="row">
-						<div>Current User<br>Info</div>
-						<div>
-							<div class="divTableRows">
-								<div class="row"><div>INPUT </div><div class="boxCode"></div></div>
-								<div class="row"><div>OUTPUT</div><div class="boxData"></div></div>
-							</div>
-						</div>
-					</div>
-					<div class="row">
-						<div>Current User<br>Groups</div>
-						<div>
-							<div class="divTableRows">
-								<div class="row"><div>INPUT </div><div class="boxCode"></div></div>
-								<div class="row"><div>OUTPUT</div><div class="boxData"></div></div>
-							</div>
-						</div>
-					</div>
+
+				<div>
+					<div id="user1Code" class="divCode"></div>
+					<div id="user1Html" style="margin-bottom:20px"></div>
+				</div>
+				<div>
+					<div id="user2Code" class="divCode"></div>
+					<div id="user2Html" style="margin-bottom:20px"></div>
 				</div>
 			</div>
 
@@ -484,13 +462,9 @@
 					<div class="arrow active"></div>REST API Calls
 				</div>
 
-				<div class="divCode">
-					sprLib.rest({ restUrl:'/_api/web/lists/' })
-					.then(function(arrayListObjs){
-						var table = new AsciiTable('Site Lists').setHeading(Object.keys(arrayListObjs[0]));
-						$.each(arrayListObjs,function(idx,obj){ let vals = []; $.each(obj, function(key,val){ vals.push(val) }); table.addRow(vals); });
-						table.toString()
-					});
+				<div>
+					<div id="rest1Code" class="divCode"></div>
+					<div id="rest1Html" class="code" style="margin-bottom:20px"></div>
 				</div>
 			</div>
 
