@@ -6,7 +6,7 @@
 	<meta name="website"     content="https://github.com/gitbrent/SpRestLib/">
 	<meta name="keywords"    content="SpRestLib, JavaScript, js-sharepoint, OData, REST, SharePoint 2013, SP2013, SharePoint 2016, SP2016, SharePoint Online">
 	<meta name="description" content="Content Editor WebPart to showcase SpRestLib features and capabilities">
-	<meta name="revised"     content="Feb 28, 2017">
+	<meta name="revised"     content="Mar 05, 2017">
 
 	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300">
 	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:700">
@@ -205,7 +205,7 @@
 				var user1Code = "sprLib.user().info()\n"
 					+ ".then(function(objUser){\n"
 					+ "    $.each(objUser,function(key,val){\n"
-					+ "        if (typeof val !== 'object') $('#user1Html').append('<div>'+ key +' = '+ val +'</div>');\n"
+					+ "        if (typeof val !== 'object') $('#user1Html table tbody').append('<tr><th>'+ key +'</th><td>'+ val +'</td></tr>');\n"
 					+ "    });\n"
 					+ '});';
 				$('#user1Code').text( user1Code );
@@ -213,10 +213,10 @@
 
 				var user2Code = "sprLib.user().groups()\n"
 					+ '.then(function(arrGroups){\n'
-					+ "  $.each(arrGroups,function(idx,objGroup){\n"
-					+ "    $('#user2Html').append('<div>'+ objGroup.Title +'</div>')\n"
-					+ "  });\n"
-					+ '});'
+					+ "    arrGroups.forEach(function(objGroup,idx){\n"
+					+ "        $('#user2Html table tbody').append('<tr><th>Group Name</th><td>'+ objGroup.Title +'</td></tr>');\n"
+					+ "    });\n"
+					+ '});';
 				$('#user2Code').text( user2Code );
 				eval(user2Code);
 			}
@@ -236,54 +236,6 @@
 				$('#rest1Code').text( rest1Code );
 				eval(rest1Code);
 			}
-
-
-
-
-			// OLD BELOW:
-			////////////////////////
-			// STEP 2: Fill tab code and/or Populate Results of queries
-
-
-			$('#sandboxCode').html("sprLib.list('Employees')\n"
-				+ ".getItems({\n"
-				+ "  listCols:    ['Name','Hire_x0020_Date','Comments','Versioned_x0020_Comments'],\n"
-				+ "  //queryFilter: 'Id eq 66',\n"
-				+ "  fetchAppend: true\n"
-				+ "})\n"
-				+ ".then(function(arrData){ return arrData })\n"
-				+ ".catch(function(errStr){ throw new Error(errStr) });"
-			);
-
-			// STEP 3: SPRLIB examples
-			sprLib.list('Employees').getItems({
-				listCols: {
-					id:       { dataName:'ID' },
-					name:     { dataName:'Name' },
-					badgeNum: { dataName:'Badge_x0020_Number' },
-					hireDate: { dataName:'Hire_x0020_Date', dispName:'Hire Date', dateFormat:'INTL' },
-					salary:   { dataName:'Salary' },
-					extn:     { dataName:'Extension' },
-					utilPct:  { dataName:'Utilization_x0020_Pct', dispName:'Util %' },
-					comments: { dataName:'Comments' }
-				},
-				queryMaxItems: "10"
-			})
-			.then(function(arrData){ console.log('Employees getItems done -> array length:'+arrData.length); })
-			.catch(function(errMsg){ console.error('ERROR:'+errMsg); });
-
-			sprLib.user().info().then(function(objUser){ $('#currUserName').text( objUser.Title ) });
-
-			sprLib.user().info().then(function(objUser){
-				$('#currUserId').text( objUser.Id );
-				$('#currUserName').text( objUser.Title );
-				$('#currUserEmail').text( objUser.Email );
-			});
-
-			sprLib.user().groups().then(function(arrGroups){ $('#currUserGroups').text( arrGroups.toString() ); });
-
-			// STEP 4: Execute code
-			$('#tabUser .boxCode').each(function(i,code){ eval( $(this).text() ); });
 		}
 
 		// ==================================================================================================================
@@ -312,6 +264,7 @@
 						and configuration FAQs and full documentation.</li>
 					</ul>
 				</p>
+				<br>
 
 				<div class="divTable">
 					<div data-name="col1" style="width:33%; padding:0px;">
@@ -449,11 +402,19 @@
 
 				<div>
 					<div id="user1Code" class="divCode"></div>
-					<div id="user1Html" style="margin-bottom:20px"></div>
+					<div id="user1Html" style="margin-bottom:20px">
+						<table>
+							<tbody></tbody>
+						</table>
+					</div>
 				</div>
 				<div>
 					<div id="user2Code" class="divCode"></div>
-					<div id="user2Html" style="margin-bottom:20px"></div>
+					<div id="user2Html" style="margin-bottom:20px">
+						<table>
+							<tbody></tbody>
+						</table>
+					</div>
 				</div>
 			</div>
 
