@@ -1,27 +1,27 @@
 {
-    "name": "sprestlib",
+	"name": "sprestlib",
+	"version": "0.9.0",
 	"author": {
 		"name": "Brent Ely",
 		"url": "https://github.com/gitbrent/"
 	},
-    "version": "0.9.0",
-    "description": "JavaScript SharePoint REST Library",
+	"description": "JavaScript SharePoint REST Library",
 	"homepage": "https://gitbrent.github.io/SpRestLib/",
 	"license": "MIT",
 	"dependencies": {
-        "jquery-node": ">=0.2.0",
+		"jquery-node": ">=0.2.0",
 		"promise": ">=6.1.0"
-    },
-    "main": "sprestlib.js",
-    "directories": {
+	},
+	"main": "dist/sprestlib.js",
+	"directories": {
 		"example": "example",
-        "lib": "dist"
-    },
-    "repository": {
-        "type": "git",
-        "url": "git+https://github.com/gitbrent/SpRestLib.git"
-    },
-    "keywords": [
+		"lib": "dist"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/gitbrent/SpRestLib.git"
+	},
+	"keywords": [
 		"sharepoint",
 		"sharepoint-web-services",
 		"sp2013",
@@ -29,11 +29,11 @@
 		"javascript",
 		"rest",
 		"odata"
-    ],
-    "bugs": {
-        "url": "https://github.com/gitbrent/SpRestLib/issues"
-    },
+	],
+	"bugs": {
+		"url": "https://github.com/gitbrent/SpRestLib/issues"
+	},
 	"scripts": {
-        "test": "echo \"Error: no test specified\" && exit 1"
-    }
+		"test": "echo \"Error: no test specified\" && exit 1"
+	}
 }
