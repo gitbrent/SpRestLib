@@ -253,9 +253,9 @@ NOTE: Omitting `listCols` will result in all List columns being returned (mimics
 #### `listCols` Object
 | Option       | Type     | Required? | Description           | Possible Values / Return Values     |
 | :----------- | :------- | :-------- | :-------------------- | :---------------------------------- |
-| `dataName`   | string   |           | the column name       | the fixed, back-end REST column name (use descList() if unknown) |
+| `dataName`   | string   |           | the column name       | the fixed, back-end REST column name (use [Get List Column Properties](#get-list-column-properties)) |
 | `dispName`   | string   |           | the name to use when displaying results in table headers, etc. |  |
-| `dateFormat` | string   |           | format to use when returning/displaying date | `INTL`, `INTLTIME`, `YYYYMMDD`, `ISO`, 'US' |
+| `dateFormat` | string   |           | format to use when returning/displaying date | `INTL`, `INTLTIME`, `YYYYMMDD`, `ISO`, `US` |
 | `dataFunc`   | function |           | function to use for returning a result | use a custom function to transform the query result (see below) |
 
 #### listCols `dataFunc`
@@ -282,7 +282,8 @@ sprLib.list('Employees').getItems({
     listCols: {
         empName:  { dataName:'Name'               },
         badgeNum: { dataName:'Badge_x0020_Number' },
-        hireDate: { dataName:'Hire_x0020_Date'    }
+        hireDate: { dataName:'Hire_x0020_Date'    },
+		funcTest: { dataFunc:function(objItem){ return '<a href="/sites/dev/Lists/Employees/DispForm.aspx?ID='+objItem.Id +'">View Item</a>' } }
     },
     queryFilter:  'Salary gt 100000',
     queryOrderby: 'Hire_x0020_Date',
