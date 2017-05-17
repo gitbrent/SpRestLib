@@ -280,9 +280,9 @@ sprLib.list('Employees').getItems({
 // Utilize listCols object to name our columns, use filtering options
 sprLib.list('Employees').getItems({
     listCols: {
-		empName:  { dataName:'Name'               },
+        empName:  { dataName:'Name'               },
         badgeNum: { dataName:'Badge_x0020_Number' },
-		hireDate: { dataName:'Hire_x0020_Date'    }
+        hireDate: { dataName:'Hire_x0020_Date'    }
     },
     queryFilter:  'Salary gt 100000',
     queryOrderby: 'Hire_x0020_Date',
@@ -323,11 +323,11 @@ Returns: Array of objects containing name/value pairs
 ## Examples
 ```javascript
 sprLib.rest({
-	restUrl:      '/sites/dev/_api/web/sitegroups',
-	queryCols:    ['Title','LoginName','AllowMembersEditMembership'],
-	queryFilter:  'AllowMembersEditMembership eq false',
-	queryOrderby: 'Title',
-	queryLimit:   10
+    restUrl:      '/sites/dev/_api/web/sitegroups',
+    queryCols:    ['Title','LoginName','AllowMembersEditMembership'],
+    queryFilter:  'AllowMembersEditMembership eq false',
+    queryOrderby: 'Title',
+    queryLimit:   10
 })
 .then(function(arrayResults){ console.table(arrayResults) });
 
@@ -355,8 +355,8 @@ Note: *Uses the basic SP User service (not the Enterprise licensed User Profile 
 ```javascript
 sprLib.user().info()
 .then(function(objUser){
-	console.log("Current User Info:\n");
-	console.log("Id:" + objUser.Id +" - Title:"+ objUser.Title +" - Email:"+ objUser.Email); }
+    console.log("Current User Info:\n");
+    console.log("Id:" + objUser.Id +" - Title:"+ objUser.Title +" - Email:"+ objUser.Email); }
 });
 ```
 
@@ -370,8 +370,8 @@ Returns: Array of objects containing the user's SharePoint groups [SPGroup](http
 ```javascript
 sprLib.user().groups()
 .then(function(arrGroups){
-	console.log("Current User Groups count = "+ arrGroups.length);
-	console.log("Group[0] info: "+ arrGroups[0].Id +" - "+ arrGroups[0].Title);
+    console.log("Current User Groups count = "+ arrGroups.length);
+    console.log("Group[0] info: "+ arrGroups[0].Id +" - "+ arrGroups[0].Title);
 });
 ```
 
@@ -450,10 +450,10 @@ Example
 ```javascript
 Promise.all([ sprLib.user().info(), sprLib.user().groups() ])
 .then(function(arrResults){
-	// arrResults holds the return values of each SpRestLib method above, in the order they were provided
-	// so, arrResults[0] is info() and arrResults[1] is groups()
-	console.log( "Current User Info `Title`: " + arrResults[0].Title  );
-	console.log( "Current User Groups count: " + arrResults[1].length );
+    // arrResults holds the return values of each SpRestLib method above, in the order they were provided
+    // so, arrResults[0] is info() and arrResults[1] is groups()
+    console.log( "Current User Info `Title`: " + arrResults[0].Title  );
+    console.log( "Current User Groups count: " + arrResults[1].length );
 });
 ```
 
