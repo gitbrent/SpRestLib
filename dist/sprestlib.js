@@ -41,7 +41,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 (function(){
 	// APP VERSION/BUILD
 	var APP_VER = "0.9.1";
-	var APP_BLD = "20170301";
+	var APP_BLD = "20170307";
 	var DEBUG = false; // (verbose mode/lots of logging. FIXME:remove prior to v1.0.0)
 	// APP FUNCTIONALITY
 	var APP_FILTEROPS = {
@@ -99,6 +99,13 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 		updatingErr: { 'background-color':'#e2999c', 'color':'#fff' },
 		updatingEnd: { 'background-color':'', 'color':'' }
 	};
+
+
+	// TODO: values removed for checkin, run node demo and copy values here for testing
+	var gAuthCookie1 = '';
+	var gAuthCookie2 = '';
+
+
 
 	/* ===============================================================================================
 	|
@@ -639,11 +646,15 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 			return new Promise(function(resolve, reject) {
 				var arrColumns = [];
 
+// TODO: node testing!!!
+var cookie = (gAuthCookie1+'; '+gAuthCookie2);
+
 				$.ajax({
 					url    : _urlBase+"?$select=Fields&$expand=Fields",
 					type   : "GET",
 					cache  : false,
-					headers: {"Accept":"application/json;odata=verbose"}
+					xhrFields: { withCredentials:true }, // NODE TEST // TODO: this still doesnt set cookie!
+					headers: { "Accept":"application/json;odata=verbose", "Cookie":cookie, "Access-Control-Allow-Credentials":"gitbrent.sharepoint.com" }
 				})
 				.done(function(data,textStatus){
 					// STEP 1: Gather fields
