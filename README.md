@@ -263,11 +263,11 @@ There are many times where you'll need more than a simple column value.  For exa
 form so users can edit the item directly.
 
 The `dataFunc` option allows you access to the entire result set and to return any type of value.  See sample below where
-editLink is created.
+"editLink" is created.
 
 #### Sample Code
 ```javascript
-// Get all List items, order by Name
+// EX: Get all List items, order by Name
 sprLib.list('Employees').getItems({
     listCols:     ['Name', 'Badge_x0020_Number', 'Hire_x0020_Date'],
     queryOrderby: 'Name'
@@ -277,13 +277,13 @@ sprLib.list('Employees').getItems({
 ```
 
 ```javascript
-// Utilize listCols object to name our columns, use filtering options
+// EX: Utilize listCols object to name our columns; Use filtering options
 sprLib.list('Employees').getItems({
     listCols: {
         empName:  { dataName:'Name'               },
         badgeNum: { dataName:'Badge_x0020_Number' },
         hireDate: { dataName:'Hire_x0020_Date'    },
-		funcTest: { dataFunc:function(objItem){ return '<a href="/sites/dev/Lists/Employees/DispForm.aspx?ID='+objItem.Id +'">View Item</a>' } }
+        editLink: { dataFunc:function(objItem){ return '<a href="/sites/dev/Lists/Employees/DispForm.aspx?ID='+objItem.Id +'">View Item</a>' } }
     },
     queryFilter:  'Salary gt 100000',
     queryOrderby: 'Hire_x0020_Date',
