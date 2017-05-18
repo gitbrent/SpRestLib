@@ -892,8 +892,8 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 										if ( col.dataName ) {
 											arrCol = col.dataName.replace(/\//gi,'.').split('.');
 											colVal = ( arrCol.length > 1 ? result[arrCol[0]][arrCol[1]] : result[arrCol[0]] );
-											// TODO: ^^^ results like 'Account/Title' will be created above (!)
-											// TODO: is above still true?? (20161212)
+											// TODO: FIXME: ^^^ results like 'Account/Title' will be created above (20170517)
+											// SOLN: create {Account} and add Title etc. (for cases where users query more than 1 field per lookup)
 										}
 										else if ( col.dataFunc ) {
 											colVal = col.dataFunc(result);
