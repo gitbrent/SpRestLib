@@ -48,7 +48,7 @@ a:focus {
 }
 #main-slider .item {
 	background-image: url(../images/slider-bg.png);
-    background-position: 50% 60%;
+    background-position: 50% 56%;
     background-repeat: no-repeat;
 	/*
 	background-attachment: fixed;
@@ -652,6 +652,9 @@ textarea#message {
 }
 
 a.fa-download:hover { color:white !important; }
+
+div.table { display: table; }
+div.table > div { display: table-cell; text-align: left; padding: 10px; }
 
 /* ============= */
 

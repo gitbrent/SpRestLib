@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<meta name="author" content="https://github.com/gitbrent/">
     <meta name="description" content="JavaScript Library for SharePoint Web Services">
-    <title>SpRestLib | JavaScript Library for SharePoint Web Services</title>
+    <title>SpRestLib | JavaScript SharePoint REST Library</title>
     <link rel="stylesheet" href="css/bootstrap.min.css">
     <link rel="stylesheet" href="css/font-awesome.min.css">
     <link rel="stylesheet" href="css/prettyPhoto.css">
@@ -82,7 +82,7 @@
                 <div class="container">
                     <div class="carousel-content">
                         <h1>SpRestLib</h1>
-                        <p class="lead">JavaScript Library for SharePoint Web Services</p>
+                        <p class="lead">SharePoint REST Library: JavaScript Library for SP2013+ Web Services</p>
                     </div>
                 </div>
             </div>
@@ -98,8 +98,8 @@
 				}
 				</script><script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
 				<p class="lead center">
-					Reduces your SharePoint AJAX interaction to a few lines of code.<br>
-					Easily read items, perform CRUD operations, gather user information and populate form elements
+					SharePoint REST Library that simplifies AJAX interaction to a few lines of code.<br>
+					Easily read items, perform CRUD operations, gather user information and populate form elements.
 				</p>
 				<div class="center">
 					<h2>Features</h2>
@@ -161,6 +161,36 @@
                 <div class="center gap">
                     <h2>Examples</h2>
                     <p class="lead">See what SpRestLib can do for you<br>Let the Library do all the heavy-lifting for you.</p>
+
+					<div class="table">
+						<div style="width:45%">
+							<p>Get List Items</p>
+							<pre>
+sprLib.list('Employees').getItems({
+    listCols: ['Id', 'Name', 'Hire_x0020_Date'],
+    queryOrderby: 'Name',
+    queryFilter: 'Id eq 99'
+})
+.then(function(arrData){ console.table(arrData) })
+.catch(function(errMsg){ console.error(errMsg) });
+							</pre>
+						</div>
+						<div style="width:55%">
+							<p>CRUD</p>
+							<pre>
+var item = { Name:'Marty McFly', Hire_x0020_Date:new Date() };
+
+Promise.resolve()
+.then(function()    { return sprLib.list('Employees').create(item); })
+.then(function(item){ return sprLib.list('Employees').update(item); })
+.then(function(item){ return sprLib.list('Employees').delete(item); })
+.then(function(item){ console.log('Ran entire CRUD chain!'); });
+							</pre>
+						</div>
+					</div>
+
+					<h3>Documentation</h3>
+					<p><a href="https://github.com/gitbrent/SpRestLib">Full Documentation and Code Examples</a></p>
                 </div>
                 <ul class="portfolio-filter">
                     <li><a class="btn btn-primary active" href="javascript:void(0)" onclick="handlePortfolioClick(this)" data-filter="">All</a></li>
