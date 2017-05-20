@@ -485,13 +485,6 @@ a:focus {
   margin-left: 20px;
   width: 200px;
   height: 78px;
-  /**background: url(../images/logo.png) no-repeat 0 50%;*/
-/*
-  padding-top: 28px;
-  font-family: 'Open Sans',Helvetica,Arial,sans-serif;
-  font-size: 36px;
-  font-weight: 100;
-*/
 }
 .navbar-default .navbar-nav > li {
   margin-left: 1px;
