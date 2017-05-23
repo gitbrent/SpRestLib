@@ -1,6 +1,6 @@
 {
 	"name": "sprestlib",
-	"version": "0.9.0",
+	"version": "0.10.0",
 	"author": {
 		"name": "Brent Ely",
 		"url": "https://github.com/gitbrent/"
@@ -23,12 +23,16 @@
 	},
 	"keywords": [
 		"sharepoint",
+		"sharepoint-javascript",
+		"sharepoint-javascript-library",
+		"sharepoint-rest",
+		"sharepoint-rest-library",
 		"sharepoint-web-services",
+		"sharepoint-web-services-library",
 		"sp2013",
 		"sp2016",
-		"javascript",
-		"rest",
-		"odata"
+		"odata",
+		"odata-library"
 	],
 	"bugs": {
 		"url": "https://github.com/gitbrent/SpRestLib/issues"
