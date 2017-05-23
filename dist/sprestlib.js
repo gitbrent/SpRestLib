@@ -41,7 +41,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 (function(){
 	// APP VERSION/BUILD
 	var APP_VER = "0.10.0";
-	var APP_BLD = "20170517";
+	var APP_BLD = "20170522";
 	var DEBUG = false; // (verbose mode/lots of logging. FIXME:remove prior to v1.0.0)
 	// APP FUNCTIONALITY
 	var APP_FILTEROPS = {
@@ -661,6 +661,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 								isAppend:     ( result.AppendOnly || false ),
 								isNumPct:     ( result.SchemaXml.toLowerCase().indexOf('percentage="true"') > -1 ),
 								isReadOnly:   result.ReadOnlyField,
+								isRequired:   result.Required,
 								isUnique:     result.EnforceUniqueValues,
 								defaultValue: ( result.DefaultValue || null ),
 								maxLength:    ( result.MaxLength || null )
