@@ -826,6 +826,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 				.then(function(){
 					return new Promise(function(resolve, reject) {
 						var objAjax = {};
+						var arrExpands = [];
 						var strAjaxUrl = "", strExpands = "";
 
 						// STEP 1: Start building REST URL
@@ -842,7 +843,13 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 								if ( strAjaxUrl.substring(strAjaxUrl.length-1) == '=' ) strAjaxUrl += col.dataName;
 								else strAjaxUrl += ( strAjaxUrl.lastIndexOf(',') == strAjaxUrl.length-1 ? col.dataName : ','+col.dataName );
 								// 2:
-								if ( col.dataName.indexOf('/') > -1 ) strExpands += (strExpands == '' ? '' : ',') + col.dataName.substring(0,col.dataName.indexOf('/'));
+								if ( col.dataName.indexOf('/') > -1 ) {
+									var strFieldName = col.dataName.substring(0, col.dataName.indexOf('/'));
+									if ( arrExpands.indexOf(strFieldName) == -1 ) {
+										arrExpands.push( strFieldName );
+										strExpands += (strExpands == '' ? '' : ',') + strFieldName;
+									}
+								}
 							});
 
 							// B: Add maxrows (if any) or use default b/c SP2013 default is a paltry 100 rows!
@@ -890,18 +897,26 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 										var arrCol = [];
 										var colVal = "";
 
+										// A3-1: Get value for this key
 										if ( col.dataName ) {
 											arrCol = col.dataName.replace(/\//gi,'.').split('.');
 											colVal = ( arrCol.length > 1 ? result[arrCol[0]][arrCol[1]] : result[arrCol[0]] );
-											// TODO: FIXME: ^^^ results like 'Account/Title' will be created above (20170517)
-											// SOLN: create {Account} and add Title etc. (for cases where users query more than 1 field per lookup)
 										}
 										else if ( col.dataFunc ) {
 											colVal = col.dataFunc(result);
 										}
 
-										// Convert: Not all values can be taken at return value (dates have to be turned into actual Date objects, etc.)
-										if ( col.dataType == 'DateTime' ) { objRow[key] = new Date(colVal); }
+										// A3-2: Set value for this key
+										// NOTE: Not all values can be taken at return value (dates->Date objects, etc.), so convert when needed
+										if ( col.dataType == 'DateTime' ) {
+											objRow[key] = new Date(colVal);
+										}
+										else if ( col.dataName && col.dataName.indexOf('/') > -1 ) {
+											// Store object results as objects (Ex: 'Manager/Title' -> Manager.Title)
+											arrCol = col.dataName.split('/');
+											if ( !objRow[arrCol[0]] ) objRow[arrCol[0]] = {};
+											objRow[arrCol[0]][arrCol[1]] = colVal;
+										}
 										else {
 											objRow[key] = ( APP_OPTS.cleanColHtml && col.listDataType == 'string' ? colVal.replace(/<div(.|\n)*?>/gi,'').replace(/<\/div>/gi,'') : colVal );
 										}
