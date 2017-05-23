@@ -2,8 +2,8 @@
 
 # SpRestLib
 
-## JavaScript Library for SharePoint Web Services
-Reduces your SharePoint AJAX interaction to a few lines of code. Easily read items, perform CRUD operations, gather user information and populate form elements.
+## JavaScript Library for SharePoint Web Services / REST Library
+Simplify SharePoint REST/Web Service interaction to a few lines of code. Easily read items, perform CRUD operations, execute REST calls, gather user/group information and populate form elements.
 
 ### Features:
 * Form Population - Fill a table with List items, populate a select, and much more
@@ -184,12 +184,13 @@ Returns: Array of columns with name value pairs of property values
 | `dispName`     | string   | display name                 |
 | `dataName`     | string   | internal name - used in REST queries and in `listCols` arguments |
 | `dataType`     | string   | column type - values: `Boolean`, `Calculated`, `Currency`, `DateTime`, `Note`, `Number`, `Text`  |
-| `isAppend`     | boolean  | is this an append text column? |
-| `isNumPct`     | boolean  | is this a percentage number column? |
-| `isReadOnly`   | boolean  | is this an read only column? |
+| `defaultValue` | boolean  | the default value (if any)                 |
+| `isAppend`     | boolean  | is this an append text column?             |
+| `isNumPct`     | boolean  | is this a percentage number column?        |
+| `isReadOnly`   | boolean  | is this an read only column?               |
+| `isRequired`   | boolean  | is a value required in this column?        |
 | `isUnique`     | boolean  | are unique values enforced on this column? |
-| `defaultValue` | boolean  | the default value (if any) |
-| `maxLength`    | boolean  | the maxlength of the column |
+| `maxLength`    | boolean  | the maximum length of the column value     |
 
 #### Sample Code
 ```javascript
@@ -197,14 +198,14 @@ sprLib.list('Employees').cols().then(function(data){ console.table(data) });
 
 // Result:
 /*
-.-------------------------------------------------------------------------------------------------------------------------------------.
-|      dispName      |         dataName         |  dataType  | isAppend | isNumPct | isReadOnly | isUnique | defaultValue | maxLength |
-|--------------------|--------------------------|------------|----------|----------|------------|----------|--------------|-----------|
-| Name               | Name                     | Text       | false    | false    | false      | false    |              |       255 |
-| Badge Number       | Badge_x0020_Number       | Number     | false    | false    | false      | false    |              |           |
-| Hire Date          | Hire_x0020_Date          | DateTime   | false    | false    | false      | false    |              |           |
-| ID                 | ID                       | Counter    | false    | false    | true       | false    |              |           |
-'-------------------------------------------------------------------------------------------------------------------------------------'
+.--------------------------------------------------------------------------------------------------------------------------------------------------.
+|      dispName      |         dataName         |  dataType  | isAppend | isNumPct | isReadOnly | isRequired | isUnique | defaultValue | maxLength |
+|--------------------|--------------------------|------------|----------|----------|------------|------------|----------|--------------|-----------|
+| Name               | Name                     | Text       | false    | false    | false      | false      | false    |              |       255 |
+| Badge Number       | Badge_x0020_Number       | Number     | false    | false    | false      | true       | true     |              |           |
+| Hire Date          | Hire_x0020_Date          | DateTime   | false    | false    | false      | false      | false    |              |           |
+| ID                 | ID                       | Counter    | false    | false    | true       | false      | false    |              |           |
+'--------------------------------------------------------------------------------------------------------------------------------------------------'
 */
 ```
 
@@ -319,7 +320,7 @@ Returns: Array of objects containing name/value pairs
 | `queryLimit`  | string  |           | max items to return   | 1-*N* |
 | `queryOrderby`| string  |           | column(s) to order by | Ex:`queryOrderby:Name` |
 
-* url can be relative, / or http:
+* url can be relative, `/`, `http:`, or `https:`
 
 ## Examples
 ```javascript
@@ -330,13 +331,18 @@ sprLib.rest({
     queryOrderby: 'Title',
     queryLimit:   10
 })
-.then(function(arrayResults){ console.table(arrayResults) });
+.then(function(arrayResults){ console.table(arrayResults) })
+.catch(function(errMsg){ console.error(errMsg) });
 
-sprLib.rest({ restUrl:"/sites/dev/_api/web/sitegroups" }).then(function(data){ console.table(data); }); //(data.d.results)
+// Absolute URL
+sprLib.rest({ restUrl:"/sites/dev/_api/web/sitegroups" })
+.then(function(data){ console.table(data); })
+.catch(function(errMsg){ console.error(errMsg) });
 
-sprLib.rest({ restUrl:"_api/web/lists/getbytitle('Employees')" }).then(function(data){ console.table(data); }); //(data.d)
-
-(TODO:) show example with post
+// Relative URL
+sprLib.rest({ restUrl:"_api/web/lists/getbytitle('Employees')" })
+.then(function(data){ console.table(data); })
+.catch(function(errMsg){ console.error(errMsg) });
 ```
 
 **************************************************************************************************
@@ -378,6 +384,8 @@ sprLib.user().groups()
 
 **************************************************************************************************
 # Form Binding
+
+Perform control/form binding with an AngluarJS-like syntax made especially for SharePoint Web Services.
 
 Many different HTML tags can be populated by adding an `data-sprlib` property to many HTML element types.
 
