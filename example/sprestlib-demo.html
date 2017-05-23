@@ -6,7 +6,7 @@
 	<meta name="website"     content="https://github.com/gitbrent/SpRestLib/">
 	<meta name="keywords"    content="SpRestLib, JavaScript, js-sharepoint, OData, REST, SharePoint 2013, SP2013, SharePoint 2016, SP2016, SharePoint Online">
 	<meta name="description" content="Content Editor WebPart to showcase SpRestLib features and capabilities">
-	<meta name="revised"     content="Mar 05, 2017">
+	<meta name="revised"     content="May 22, 2017">
 
 	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300">
 	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:700">
@@ -235,6 +235,15 @@
 					+ "});";
 				$('#rest1Code').text( rest1Code );
 				eval(rest1Code);
+			}
+
+			// TAB: Sandbox
+			{
+				$('#sandboxCode').text(
+					"sprLib.list('Employees')\n"
+					+ ".getItems({ listCols:['Id','Name','Manager/Id','Manager/Title'] })\n"
+					+ ".then(function(data){ data.forEach(function(row,idx){ console.log(row.Manager); }); return data; });"
+				);
 			}
 		}
 
