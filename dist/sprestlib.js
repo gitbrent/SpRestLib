@@ -29,8 +29,10 @@
 
 /*
 v1.0.0 DEVLIST:
+	* Add `recycle()`
+	* Add `$skip`
 	* Add `Intl` (i18n) support (its supported in IE11!!) - Date and Currency formats are awesome (can we add Direction for our R->L users too?)
-	* Add logic we learned the hard way where FILTER cant have true/false but uses 0/1 due to MS bug
+	* Add logic we learned the hard way where FILTER cant have true/false but uses 0/1 due to MS bug (still needed?)
 v.FUTURE:
 	* Support for turning LOOKUP values into a "text; text"-type output
 */
@@ -41,7 +43,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 (function(){
 	// APP VERSION/BUILD
 	var APP_VER = "0.10.0";
-	var APP_BLD = "20170522";
+	var APP_BLD = "20170523";
 	var DEBUG = false; // (verbose mode/lots of logging. FIXME:remove prior to v1.0.0)
 	// APP FUNCTIONALITY
 	var APP_FILTEROPS = {
@@ -713,8 +715,24 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 		* | `queryOrderby`| string  | no    | OData style order by  | `Badge_x0020_Number`, `Badge_x0020_Number desc` [asc sort is SP2013 default] |
 		* | `queryLimit`  | number  | no    | OData style row limit | `10` would limit number of rows returned to 10 |
 		*
-		* @example - omitting listCols means "return all" (mirrors SP behavior)
-		* sprLib.list('Employees').getItems().then(function(arrData){ console.table(arrData); });
+		* @example - no args - omitting listCols/arguments means "return all" (mirrors SP behavior)
+		* sprLib.list('Employees').getItems()
+		*
+		* @example - simple array of column names
+		* sprLib.list('Employees').getItems(['Name', 'Badge_x0020_Number', 'Hire_x0020_Date'])
+		*
+		* @example using `listCols` - simple array of column names
+		* sprLib.list('Employees').getItems({
+		*   listCols: ['Name', 'Badge_x0020_Number', 'Hire_x0020_Date']
+		* })
+		*
+		* @example using `listCols` - object with user designated key names and column options
+		* sprLib.list('Employees').getItems({
+		*   listCols: {
+		*     name:  { dataName:'Name'               },
+		*     badge: { dataName:'Badge_x0020_Number' }
+		*   }
+		* })
 		*
 		* @example - with some options
 		* sprLib.list('Employees').getItems({
@@ -723,17 +741,6 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 		*   queryOrderby: "Hire_x0020_Date",
 		*   queryLimit:   100
 		* })
-		* .then(function(arrData){ console.log(arrData) })
-		* .catch(function(errMsg){ console.error(errMsg) });
-		*
-		* @example listCols - simple array of column names
-		* listCols: ['Name', 'Badge_x0020_Number', 'Hire_x0020_Date']
-		*
-		* @example listCols - object with user designated key names and column options
-		* listCols: {
-		*   name:  { dataName:'Name'               },
-		*   badge: { dataName:'Badge_x0020_Number', dispName:'Badge Number' }
-		* }
 		*
 		* listCols properties:
 		*
@@ -761,24 +768,25 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 				var listGUID = '';
 
 				// FIRST: Param check
-				// N/A for this Method: `getItems()` does not req any opts/params.  We do need a valid inObj though, so create if needed
+				// N/A for this Method: `getItems()` does not req any opts/params, however we do need a valid inObj, so if needed
 				if ( !inObj || typeof inObj !== 'object' ) inObj = {};
+				if ( !inObj.listCols ) inObj.listCols = [];
 
 				// STEP 1: Attach/Init data properties to this query
+				inObj.spArrData = [];
 				inObj.spObjData = {};
 				inObj.spObjMeta = {};
-				inObj.spArrData = [];
 
-				// STEP 2: `listCols` can be: string, array of strings, or objects
-				// A: Convert single string column into an array for use below
+				// STEP 2: Parse/build `listCols`
+
+				// A: First, convert simple string -> array
 				if ( typeof inObj.listCols === 'string' ) inObj.listCols = [ inObj.listCols ];
-				// B: Build query object
-				if ( inObj.listCols && $.isArray(inObj.listCols) ) {
-					var listCols = {};
-					$.each(inObj.listCols, function(i,colStr){
-						listCols[colStr] = { dataName:colStr }
-					});
-					inObj.listCols = listCols;
+
+				// B: Next, turn array of col names into `listCols` object
+				if ( Array.isArray(inObj.listCols) ) {
+					var objListCols = {};
+					inObj.listCols.forEach(function(colStr,i){ objListCols[colStr.replace('/','')] = { dataName:colStr } });
+					inObj.listCols = objListCols;
 				}
 
 				// STEP 3: Start data fetch Promise chain
@@ -876,59 +884,62 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 							headers: { "Accept":"application/json; odata=verbose", "X-RequestDigest":$("#__REQUESTDIGEST").val() }
 						})
 						.done(function(data,textStatus){
-							// A: Iterate over results
-							$.each((data.d.results || data), function(i,result){
-								// A1: Create row object JSON
+							var arrResults = (data.d.results || data);
+
+							// A: Add all cols is none provided (aka:"fetch all")
+							if ( !inObj.listCols || Object.keys(inObj.listCols).length == 0 && arrResults.length > 0 ) {
+								var objListCols = {};
+								Object.keys(arrResults[0]).forEach(function(colStr,i){
+									if ( typeof arrResults[0][colStr] !== 'object' ) objListCols[colStr.replace('/','')] = { dataName:colStr };
+								});
+								inObj.listCols = objListCols;
+							}
+
+							// B: Iterate over results and capture them
+							arrResults.forEach(function(result,idx){
+								// 1: Create row object JSON
 								var objRow = {};
 								var objId = 0;
 
-								// A2: Add {Id} and {__metadata} (if any returned)
+								// 2: Add {Id} and {__metadata} (if any returned)
 								if ( result.__metadata ) {
+									// Capture metadata
 									objRow['__metadata'] = result.__metadata;
 
-									// Capture this item's `Id` by parsing metadata (so we dont add "Id," to the select etc)
-									if ( result.__metadata.uri && result.__metadata.uri.indexOf('/Items(') > -1 )
+									// Capture this item's `Id` by parsing metadata (to avoid adding "Id," to the $select)
+									if ( result.__metadata.uri && result.__metadata.uri.indexOf('/Items(') > -1 ) {
 										objId = Number(result.__metadata.uri.split('/Items(').pop().replace(')',''));
+									}
 								}
 
-								// A3: Add columns specified -OR- add everything we got back (mirror SP behavior)
-								if ( inObj.listCols && typeof inObj.listCols === 'object' ) {
-									$.each(inObj.listCols, function(key,col){
-										var arrCol = [];
-										var colVal = "";
+								// 3: Capture query results
+								$.each(inObj.listCols, function(key,col){
+									var arrCol = [];
+									var colVal = "";
 
-										// A3-1: Get value for this key
-										if ( col.dataName ) {
-											arrCol = col.dataName.replace(/\//gi,'.').split('.');
-											colVal = ( arrCol.length > 1 ? result[arrCol[0]][arrCol[1]] : result[arrCol[0]] );
-										}
-										else if ( col.dataFunc ) {
-											colVal = col.dataFunc(result);
-										}
+									// A3-1: Get value for this key
+									if ( col.dataName ) {
+										arrCol = col.dataName.replace(/\//gi,'.').split('.');
+										colVal = ( arrCol.length > 1 ? result[arrCol[0]][arrCol[1]] : result[arrCol[0]] );
+									}
+									else if ( col.dataFunc ) {
+										// TODO: adressing vars inside func by keyname doesnt work
+										// funcTest: { dataFunc:function(result){ return result.name+':'+result.badgeNum } }
+										// fix code to use keyname (not 'Badge_x0020_Number')!
+										colVal = col.dataFunc(result);
+									}
 
-										// A3-2: Set value for this key
-										// NOTE: Not all values can be taken at return value (dates->Date objects, etc.), so convert when needed
-										if ( col.dataType == 'DateTime' ) {
-											objRow[key] = new Date(colVal);
-										}
-										else if ( col.dataName && col.dataName.indexOf('/') > -1 ) {
-											// Store object results as objects (Ex: 'Manager/Title' -> Manager.Title)
-											arrCol = col.dataName.split('/');
-											if ( !objRow[arrCol[0]] ) objRow[arrCol[0]] = {};
-											objRow[arrCol[0]][arrCol[1]] = colVal;
-										}
-										else {
-											objRow[key] = ( APP_OPTS.cleanColHtml && col.listDataType == 'string' ? colVal.replace(/<div(.|\n)*?>/gi,'').replace(/<\/div>/gi,'') : colVal );
-										}
-									});
-								}
-								else {
-									$.each(result, function(key,val){
-										if ( typeof val !== 'object' ) objRow[key] = val;
-									});
-								}
+									// A3-2: Set value for this key
+									// NOTE: Not all values can be taken at return value (dates->Date objects, etc.), so convert when needed
+									if ( col.dataType == 'DateTime' ) {
+										objRow[key] = new Date(colVal);
+									}
+									else {
+										objRow[key] = ( APP_OPTS.cleanColHtml && col.listDataType == 'string' ? colVal.replace(/<div(.|\n)*?>/gi,'').replace(/<\/div>/gi,'') : colVal );
+									}
+								});
 
-								// A4: Store data as array and as object (for lookups so we dont have to spArrData.filter) if Id exists
+								// 4: Store data as array and as object (for lookups so we dont have to spArrData.filter) if Id exists
 								if ( objId ) {
 									inObj.spObjData[objId] = objRow;
 									inObj.spObjMeta[objId] = ( result.__metadata || {} );
@@ -1147,6 +1158,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 
 		/**
 		* Delete an item from a SP List/Library
+		* This operation is permanent (item does not go into Recycle Bin)!
 		*
 		* @example - with etag
 		* sprLib.list('Employees').delete({
@@ -1199,6 +1211,26 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 				.fail(function(jqXHR, textStatus, errorThrown){
 					reject( parseErrorMessage(jqXHR, textStatus, errorThrown) );
 				});
+			});
+		};
+
+		/**
+		* Remove an item from a SP List/Library
+		* This operation sends the item to Recycle Bin
+		*
+		* @example - with etag
+		* sprLib.list('Employees').recycle({ __metadata:{ etag:10 }, Id:123 })
+		*
+		* @example - without etag
+		* sprLib.list('Employees').recycle({ Id:123 })
+		*
+		* @example - simple ID (number or string)
+		* sprLib.list('Employees').recycle(123)
+		*/
+		_newList.recycle = function(inArg) {
+			return new Promise(function(resolve,reject) {
+				// TODO: add recycle support
+				// http://<sitecollection>/<site>/_api/web/lists(listid)/items(itemid)/recycle()
 			});
 		};
 
