@@ -10,13 +10,33 @@
 var RESTROOT = '/sites/dev';
 var gNewEmpItem = -1;
 var gTestUserId = 9;
-var gUpdateItem = { Id:55 };
+var gUpdateItem = { Id:237 };
+
+function getAsciiTableStr(arrayResults) {
+	var arrColHeadings = [];
+
+	Object.keys(arrayResults[0]).forEach(function(key,idx){
+		if ( typeof key === 'object' ) Object.keys(key).forEach(function(key,idx){ arrColHeadings.push(key) });
+		else arrColHeadings.push(key);
+	});
+
+	let table = new AsciiTable().setHeading( arrColHeadings );
+
+	$.each(arrayResults,function(idx,obj){
+		let vals = [];
+		$.each(obj, function(key,val){ vals.push(val) });
+		table.addRow(vals);
+	});
+
+	return table.toString();
+}
 
 // ================================================================================================
 QUnit.module( "LIST > MISC Methods" );
 // ================================================================================================
 {
-	['Departments', 'Employees', '8fda2798-dbbc-497d-9840-df87b08e09c1'].forEach(function(list,idx){
+	['Departments', 'Employees', '8fda2798-dbbc-497d-9840-df87b08e09c1']
+	.forEach(function(list,idx){
 		QUnit.test(`sprLib.list().cols() - using '${list}'`, function(assert){
 			var done = assert.async();
 			// TEST:
@@ -39,10 +59,10 @@ QUnit.module( "LIST > MISC Methods" );
 			// TEST:
 			sprLib.list(list).info()
 			.then(function(objInfo){
-				assert.ok( objInfo.Id		, "Pass: Id....... = " + objInfo.Id );
-				assert.ok( objInfo.Created	, "Pass: Created.. = " + objInfo.Created );
-				assert.ok( objInfo.ItemCount, "Pass: ItemCount = " + objInfo.ItemCount );
-				assert.ok( objInfo.Title	, "Pass: Title.... = " + objInfo.Title );
+				assert.ok( objInfo.Id		     , "Pass: Id....... = " + objInfo.Id );
+				assert.ok( objInfo.Created	     , "Pass: Created.. = " + objInfo.Created );
+				assert.ok( objInfo.ItemCount >= 0, "Pass: ItemCount = " + objInfo.ItemCount );
+				assert.ok( objInfo.Title	     , "Pass: Title.... = " + objInfo.Title );
 				done();
 			});
 		});
@@ -54,23 +74,25 @@ QUnit.module( "LIST > ITEM CRUD Methods" );
 // ================================================================================================
 {
 	QUnit.test("sprLib.list().create()", function(assert){
-		var done = assert.async();
-		// TEST:
-		sprLib.list('Employees').create({
-			__metadata: { type:"SP.Data.EmployeesListItem" },
-			Name: 'Mr. SP REST Library',
-			Badge_x0020_Number: 123,
-			Hire_x0020_Date: new Date(),
-			Salary: 12345.49,
-			Utilization_x0020_Pct: 1.0,
-			Extension: 1234,
-			Comments: 'New employee created',
-			Active_x003f_: true
-		})
-		.then(function(newObj){
-			assert.ok( (newObj.Id), "Created! Id: " + newObj.Id );
-			gNewEmpItem = newObj.Id;
-			done();
+		[1,2,3].forEach(function(done,idx){
+			done = assert.async();
+			sprLib.list('Employees').create({
+				__metadata: { type:"SP.Data.EmployeesListItem" },
+				Name:                  'QUnit Created',
+				ManagerId:             gTestUserId,
+				Badge_x0020_Number:    Math.round(new Date().getTime() / 1000000),
+				Hire_x0020_Date:       new Date(),
+				Salary:                12345.49,
+				Utilization_x0020_Pct: 1.0,
+				Extension:             (1234+idx).toString(),
+				Comments:              'New employee created',
+				Active_x003f_:         true
+			})
+			.then(function(newObj){
+				assert.ok( (newObj.Id), "Created! Id: " + newObj.Id );
+				gNewEmpItem = newObj.Id;
+				done();
+			});
 		});
 	});
 
@@ -142,7 +164,7 @@ QUnit.module( "LIST > ITEM CRUD Methods" );
 				id: gUpdateItem.Id
 			})
 			.then(function(){
-				assert.ok( (true), "Deleted!" );
+				assert.ok( (true), "Deleted! "+gUpdateItem.Id );
 				done();
 			});
 		});
@@ -161,7 +183,7 @@ QUnit.module( "LIST > ITEM CRUD Methods" );
 				id: gUpdateItem.Id
 			})
 			.then(function(){
-				assert.ok( (true), "Deleted!" );
+				assert.ok( (true), "Deleted! "+gUpdateItem.Id );
 				done();
 			});
 		});
@@ -177,7 +199,7 @@ QUnit.module( "LIST > ITEM CRUD Methods" );
 			sprLib.list('Employees')
 			.delete({ id:numId })
 			.then(function(){
-				assert.ok( (true), "Deleted!" );
+				assert.ok( (true), "Deleted! "+numId );
 				done();
 			});
 		})
@@ -190,7 +212,7 @@ QUnit.module( "LIST > ITEM CRUD Methods" );
 	QUnit.test("sprLib.list().create().update().delete() chain!", function(assert){
 		var done = assert.async();
 		//
-		var item = { Name:'Marty McFly', Hire_x0020_Date:new Date() };
+		var item = { Name:'Marty McFly', ManagerId:gTestUserId, Hire_x0020_Date:new Date() };
 		Promise.resolve()
 		.then(function()    { return sprLib.list('Employees').create(item); })
 		.then(function(item){ return sprLib.list('Employees').update(item); })
@@ -218,33 +240,73 @@ QUnit.module( "LIST > ITEM GET Methods" );
 		.then(function(arrayResults){
 			assert.ok( arrayResults.length > 0, "arrayResults is an Array and length > 0: "+ arrayResults.length );
 			assert.ok( (arrayResults[0].__metadata), "arrayResults[0].__metadata exists: \n"+ JSON.stringify(arrayResults[0].__metadata) );
-			//
-			let table = new AsciiTable().setHeading(Object.keys(arrayResults[0]));
-			$.each(arrayResults,function(idx,obj){ let vals = []; $.each(obj, function(key,val){ vals.push(val) }); table.addRow(vals); });
-			assert.ok( table.toString(), `RESULTS:\n${table.toString()}`);
-			//
+			assert.ok( getAsciiTableStr(arrayResults), `RESULTS:\n${getAsciiTableStr(arrayResults)}`);
 			done();
 		})
-		.catch(function(err){
-			assert.ok( (false), err );
+		.catch(function(errorMessage){
+			assert.ok( (false), errorMessage );
 			done();
 		});
 	});
 
-	QUnit.test("sprLib.getListItems() 2: w listCols", function(assert){
+	QUnit.test("sprLib.getListItems() 2: simple array of col names (w Person object)", function(assert){
+		var done = assert.async();
+		// TEST:
+		sprLib.list('Employees')
+		.getItems(
+			['Id', 'Name', 'Manager/Title']
+		)
+		.then(function(arrayResults){
+			assert.ok( arrayResults.length > 0, "arrayResults is an Array and length > 0: "+ arrayResults.length );
+			assert.ok( (arrayResults[0].__metadata.id), "arrayResults[0].__metadata.id exists: \n"+ JSON.stringify(arrayResults[0].__metadata.id) );
+			assert.ok( getAsciiTableStr(arrayResults), `RESULTS:\n${getAsciiTableStr(arrayResults)}`);
+			done();
+		})
+		.catch(function(errorMessage){
+			assert.ok( (false), errorMessage );
+			done();
+		});
+	});
+
+	QUnit.test("sprLib.getListItems() 3: `listCols` with simple array of col names (w Person object)", function(assert){
 		var done = assert.async();
 		// TEST:
 		sprLib.list('Employees')
 		.getItems({
-			listCols: { title:{dataName:'Title'}, badgeNum:{dataName:'Badge_x0020_Number'} }
+			listCols:['Id', 'Name', 'Manager/Title']
 		})
 		.then(function(arrayResults){
 			assert.ok( arrayResults.length > 0, "arrayResults is an Array and length > 0: "+ arrayResults.length );
-			assert.ok( (arrayResults[0].__metadata), "arrayResults[0].__metadata exists: \n"+ JSON.stringify(arrayResults[0].__metadata) );
+			assert.ok( (arrayResults[0].__metadata.id), "arrayResults[0].__metadata.id exists: \n"+ JSON.stringify(arrayResults[0].__metadata.id) );
+			assert.ok( getAsciiTableStr(arrayResults), `RESULTS:\n${getAsciiTableStr(arrayResults)}`);
 			done();
 		})
-		.catch(function(err){
-			assert.ok( (false), err );
+		.catch(function(errorMessage){
+			assert.ok( (false), errorMessage );
+			done();
+		});
+	});
+
+	QUnit.test("sprLib.getListItems() 4: `listCols` with named columns", function(assert){
+		var done = assert.async();
+		// TEST:
+		sprLib.list('Employees')
+		.getItems({
+			listCols: {
+				name:     { dataName:'Name'              },
+				badgeNum: { dataName:'Badge_x0020_Number' },
+				mgrTitle: { dataName:'Manager/Title'      },
+				funcTest: { dataFunc:function(result){ return result.name+':'+result.badgeNum } }
+			}
+		})
+		.then(function(arrayResults){
+			assert.ok( arrayResults.length > 0, "arrayResults is an Array and length > 0: "+ arrayResults.length );
+			assert.ok( (arrayResults[0].__metadata.id), "arrayResults[0].__metadata.id exists: \n"+ JSON.stringify(arrayResults[0].__metadata.id) );
+			assert.ok( getAsciiTableStr(arrayResults), `RESULTS:\n${getAsciiTableStr(arrayResults)}`);
+			done();
+		})
+		.catch(function(errorMessage){
+			assert.ok( (false), errorMessage );
 			done();
 		});
 	});
@@ -291,11 +353,8 @@ QUnit.module( "REST Methods" );
 		// TEST:
 		sprLib.rest({ restUrl:RESTROOT+'/_api/web/lists/' })
 		.then(function(arrayListObjs){
-			var table = new AsciiTable('Site Lists').setHeading(Object.keys(arrayListObjs[0]));
-			$.each(arrayListObjs,function(idx,obj){ let vals = []; $.each(obj, function(key,val){ vals.push(val) }); table.addRow(vals); });
-			//
 			assert.ok( arrayListObjs.length > 0, "arrayListObjs is an Array and length > 0: "+ arrayListObjs.length );
-			assert.ok( table.toString(), `table.toString():\n ${table.toString()}`);
+			assert.ok( getAsciiTableStr(arrayListObjs), `RESULTS:\n${getAsciiTableStr(arrayListObjs)}`);
 			done();
 		})
 		.catch(function(err){
@@ -341,6 +400,11 @@ QUnit.module( "USER Methods" );
 	});
 }
 
+
+// TODO: add .recycle to SPRESTLIB!!!
+// TODO: add test for vvv
+// http://<sitecollection>/<site>/_api/web/lists(listid)/items(itemid)/recycle()
+// recycle ^^^ (delete makes it gone forever )
 
 
 // NEGATIVE TSET:
