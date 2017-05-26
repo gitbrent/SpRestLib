@@ -27,6 +27,7 @@ Simplify SharePoint REST/Web Service interaction to a few lines of code. Easily 
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 
+
 - [Installation](#installation)
   - [Client-Side](#client-side)
   - [Node](#node)
@@ -41,6 +42,7 @@ Simplify SharePoint REST/Web Service interaction to a few lines of code. Easily 
     - [Create Item](#create-item)
     - [Update Item](#update-item)
     - [Delete Item](#delete-item)
+    - [Recycle Item](#recycle-item)
     - [Get List Column Properties](#get-list-column-properties)
       - [Column Properties](#column-properties)
       - [Sample Code](#sample-code)
@@ -49,8 +51,8 @@ Simplify SharePoint REST/Web Service interaction to a few lines of code. Easily 
       - [Sample Code](#sample-code-1)
     - [Get Items](#get-items)
       - [Options](#options-1)
-      - [`listCols` Object](#listcols-object)
-      - [listCols `dataFunc`](#listcols-datafunc)
+      - [listCols Object](#listcols-object)
+      - [listCols dataFunc Option](#listcols-datafunc-option)
       - [Sample Code](#sample-code-2)
 - [REST Calls](#rest-calls)
   - [Options](#options-2)
@@ -83,7 +85,7 @@ SpRestLib utilizes the jQuery library - include it before sprestlib.  That's it!
 <script lang="javascript" src="https://code.jquery.com/jquery-3.1.1.slim.min.js"></script>
 <script lang="javascript" src="https://yourhost.com/subsite/SiteAssets/js/sprestlib.js"></script>
 ```
-**NOTE**: IE11 support requires you include a Promises polyfill as well (one is included in the `libs` folder)
+**NOTE**: IE11 support requires a Promises polyfill as well (included in the `libs` folder)
 
 ## Node
 ```javascript
@@ -98,9 +100,10 @@ var sprLib = require("sprestlib");
 ## List/Library
 * `sprLib.list(listName).getItems(options)` - Returns an array of item objects using a variety of possible options
 
-* `sprLib.list(listName).create(item)` - Add the new item to the List/Library
-* `sprLib.list(listName).update(item)` - Update the existing item using the data provided
-* `sprLib.list(listName).delete(item)` - Delete the item (placed into the Recycle Bin)
+* `sprLib.list(listName).create(item)`  - Create new item in the List/Library
+* `sprLib.list(listName).update(item)`  - Update the existing item using the data provided
+* `sprLib.list(listName).delete(item)`  - Delete the item (permanently delete)
+* `sprLib.list(listName).recycle(item)` - Recycle the item (move into the Recycle Bin)
 
 * `sprLib.list(listName).cols()` - Returns an array of column objects with useful info (name, datatype, etc.)
 
@@ -133,6 +136,9 @@ Syntax:
 Options:
 An object with internal name/value pairs to be inserted
 
+Returns:
+Object with key/value pairs
+
 Example:
 ```javascript
 sprLib.list('Employees')
@@ -149,6 +155,9 @@ Options:
 * An object with internal name/value pairs to be inserted
 * if `__metadata.etag` is not provided, this is equivalent to force:true (`etag:'"*"'` is used)
 
+Returns:
+The object provided
+
 Example:
 ```javascript
 sprLib.list('Employees')
@@ -164,6 +173,30 @@ Syntax:
 Options:
 * if `__metadata.etag` is not provided, this is equivalent to force:true (`etag:'"*"'` is used)
 
+Returns:
+Id of the item just deleted
+
+Notes:
+Permanently deletes the item (bypasses Recycle Bin; Is not recoverable)
+
+Example:
+```javascript
+sprLib.list('Employees')
+.delete(99)
+.then(function(objItem){ console.log('Deleted Item:'); console.table(objItem); })
+.catch(function(strErr){ console.error(strErr); });
+```
+
+### Recycle Item
+Syntax:
+`sprLib.list(listName|listGUID).recycle(itemId)`
+
+Returns:
+Id of the item just recycled
+
+Notes:
+Moves the item into the Site Recycle Bin
+
 Example:
 ```javascript
 sprLib.list('Employees')
@@ -171,6 +204,8 @@ sprLib.list('Employees')
 .then(function(objItem){ console.log('Updated Item:'); console.table(objItem); })
 .catch(function(strErr){ console.error(strErr); });
 ```
+
+
 
 ### Get List Column Properties
 Syntax:
@@ -234,11 +269,15 @@ Returns: Array of list properties and their values
 sprLib.list('Employees').info().then(function(data){ console.table(data) });
 ```
 
+
+
 ### Get Items
 Syntax:
 `sprLib.list(listName|listGUID).getItems()`
 
-Returns: Array of objects containing name/value pairs
+Returns:
+* Array of objects containing name/value pairs
+* `__metadata` and `Id` values are always included in the results array (to enable further operations, etc.)
 
 #### Options
 | Option        | Type     | Required? | Description           | Possible Values / Returns           |
@@ -251,7 +290,7 @@ Returns: Array of objects containing name/value pairs
 
 NOTE: Omitting `listCols` will result in all List columns being returned (mimics SharePoint default behavior)
 
-#### `listCols` Object
+#### listCols Object
 | Option       | Type     | Required? | Description           | Possible Values / Return Values     |
 | :----------- | :------- | :-------- | :-------------------- | :---------------------------------- |
 | `dataName`   | string   |           | the column name       | the fixed, back-end REST column name (use [Get List Column Properties](#get-list-column-properties)) |
@@ -259,7 +298,7 @@ NOTE: Omitting `listCols` will result in all List columns being returned (mimics
 | `dateFormat` | string   |           | format to use when returning/displaying date | `INTL`, `INTLTIME`, `YYYYMMDD`, `ISO`, `US` |
 | `dataFunc`   | function |           | function to use for returning a result | use a custom function to transform the query result (see below) |
 
-#### listCols `dataFunc`
+#### listCols dataFunc Option
 There are many times where you'll need more than a simple column value.  For example, I often provide a link to the InfoPath
 form so users can edit the item directly.
 
@@ -268,17 +307,35 @@ The `dataFunc` option allows you access to the entire result set and to return a
 
 #### Sample Code
 ```javascript
-// EX: Get all List items, order by Name
+// EX: Simple array of column names
+sprLib.list('Employees')
+.getItems(['Id', 'Name', 'Badge_x0020_Number'])
+.then(function(arrData){ console.table(arrData) })
+.catch(function(errMsg){ console.error(errMsg) });
+
+// Result:
+/*
+.---------------------------------------------------------.
+|   __metadata    | Id  |    Name    | Badge_x0020_Number |
+|-----------------|-----|------------|--------------------|
+| [object Object] | 253 | Hal Jordan |              12345 |
+'---------------------------------------------------------'
+*/
+```
+
+```javascript
+// EX: Using 'listCols' option with array of column names
 sprLib.list('Employees').getItems({
-    listCols:     ['Name', 'Badge_x0020_Number', 'Hire_x0020_Date'],
-    queryOrderby: 'Name'
+    listCols: ['Name', 'Badge_x0020_Number', 'Hire_x0020_Date']
 })
 .then(function(arrData){ console.table(arrData) })
 .catch(function(errMsg){ console.error(errMsg) });
 ```
 
 ```javascript
-// EX: Utilize listCols object to name our columns; Use filtering options
+// EX: Using 'listCols' option to name our columns
+// EX: Using 'dataFunc' option to return a calculated value
+// EX: Using query options: filter, order, limit
 sprLib.list('Employees').getItems({
     listCols: {
         empName:  { dataName:'Name'               },
