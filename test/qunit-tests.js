@@ -8,7 +8,7 @@
  * sprLib.list('Employees').getItems(['Id', 'Name', 'Badge_x0020_Number']).then(function(arrData){ console.log(getAsciiTableStr(arrData)) });
  *
  // REALITY-CHECK:
- //QUnit.test("QUnit Base Test", function(assert){ assert.ok( true === true, "Passed!" ); });
+ // QUnit.test("QUnit Base Test", function(assert){ assert.ok( true === true, "Passed!" ); });
  */
 var RESTROOT = '/sites/dev';
 var gNewEmpItem = -1;
@@ -77,7 +77,7 @@ QUnit.module( "LIST > ITEM CRUD Methods" );
 // ================================================================================================
 {
 	QUnit.test("sprLib.list().create()", function(assert){
-		[1,2,3].forEach(function(done,idx){
+		[1,2,3,4].forEach(function(done,idx){
 			done = assert.async();
 			sprLib.list('Employees').create({
 				__metadata: { type:"SP.Data.EmployeesListItem" },
@@ -196,13 +196,40 @@ QUnit.module( "LIST > ITEM CRUD Methods" );
 		// PREP:
 		var numId = "'-1'";
 		sprLib.list('Employees').getItems({ listCols:'Id', queryOrderby:'Modified', queryLimit:1 })
-		.then(function(data){ numId = data[0].Id; })
+		.then(function(data){
+			numId = data[0].Id;
+			assert.ok( (true), "Found Id: "+numId );
+		})
 		.then(function(){
 			// TEST:
 			sprLib.list('Employees')
 			.delete({ id:numId })
-			.then(function(){
-				assert.ok( (true), "Deleted! "+numId );
+			.then(function(retNum){
+				assert.ok( retNum, "Success! Returned Id: "+retNum );
+				done();
+			});
+		})
+		.catch(function(err){
+			assert.ok( (false), err );
+			done();
+		});
+	});
+
+	QUnit.test("sprLib.list().recycle()", function(assert){
+		var done = assert.async();
+		// PREP:
+		var numId = "'-1'";
+		sprLib.list('Employees').getItems({ listCols:'Id', queryOrderby:'Modified', queryLimit:1 })
+		.then(function(data){
+			numId = data[0].Id;
+			assert.ok( (true), "Found Id: "+numId );
+		})
+		.then(function(){
+			// TEST:
+			sprLib.list('Employees')
+			.recycle( numId )
+			.then(function(retNum){
+				assert.ok( retNum, "Success! Returned Id: "+retNum );
 				done();
 			});
 		})
@@ -301,15 +328,40 @@ QUnit.module( "LIST > ITEM GET Methods" );
 			listCols: {
 				name:     { dataName:'Name'               },
 				badgeNum: { dataName:'Badge_x0020_Number' },
-				mgrTitle: { dataName:'Manager/Title'      },
-				funcTest: { dataFunc:function(result){ return result.name+':'+result.badgeNum } }
+				mgrTitle: { dataName:'Manager/Title'      }
 			}
 		})
 		.then(function(arrayResults){
-			assert.ok( arrayResults.length > 0        , "arrayResults is an Array and length > 0: "+ arrayResults.length );
-			assert.ok( (arrayResults[0].__metadata.id), "arrayResults[0].__metadata.id exists: \n"+ JSON.stringify(arrayResults[0].__metadata.id) );
-			assert.ok( Object.keys(arrayResults[0]).length == 6, "arrayResults[0] has length == 6: "+ Object.keys(arrayResults[0]).length );
-			assert.ok( getAsciiTableStr(arrayResults) , `RESULTS:\n${getAsciiTableStr(arrayResults)}`);
+			assert.ok( arrayResults.length > 0                 , "arrayResults is an Array and length > 0: "+ arrayResults.length );
+			assert.ok( (arrayResults[0].__metadata.id)         , "arrayResults[0].__metadata.id exists: "+ JSON.stringify(arrayResults[0].__metadata.id) );
+			assert.ok( Object.keys(arrayResults[0]).length == 5, "arrayResults[0] has length == 5: "+ Object.keys(arrayResults[0]).length );
+			assert.ok( getAsciiTableStr(arrayResults)          , `RESULTS:\n${getAsciiTableStr(arrayResults)}`);
+			done();
+		})
+		.catch(function(errorMessage){
+			assert.ok( (false), errorMessage );
+			done();
+		});
+	});
+
+	QUnit.test("sprLib.getListItems() 5: `dataFunc` tests", function(assert){
+		var done = assert.async();
+		// TEST:
+		sprLib.list('Employees')
+		.getItems({
+			listCols: {
+				name:     { dataName:'Name'               },
+				badgeNum: { dataName:'Badge_x0020_Number' },
+				mgrTitle: { dataName:'Manager/Title'      },
+				funcTest: { dataFunc:function(result){ return result.Name+':'+result.Badge_x0020_Number } }
+			}
+		})
+		.then(function(arrayResults){
+			assert.ok(
+				'"'+arrayResults[0].funcTest+'"' == '"'+arrayResults[0].name+':'+arrayResults[0].badgeNum+'"',
+				"dataFunc result is accurate: "+ arrayResults[0].funcTest +" == "+ arrayResults[0].name+':'+arrayResults[0].badgeNum
+			);
+			assert.ok( getAsciiTableStr(arrayResults), `RESULTS:\n${getAsciiTableStr(arrayResults)}`);
 			done();
 		})
 		.catch(function(errorMessage){
