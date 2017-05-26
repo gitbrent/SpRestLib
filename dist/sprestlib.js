@@ -770,7 +770,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 				// FIRST: Param check
 				// N/A for this Method: `getItems()` does not req any opts/params, however we do need a valid inObj, so if needed
 				if ( !inObj || typeof inObj !== 'object' ) inObj = {};
-				if ( !inObj.listCols ) inObj.listCols = [];
+				if ( !inObj.listCols ) inObj.listCols = ( Array.isArray(inObj) ? inObj : [] );
 
 				// STEP 1: Attach/Init data properties to this query
 				inObj.spArrData = [];
