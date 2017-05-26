@@ -1172,7 +1172,9 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 		* sprLib.list('Employees').delete({ Id: 1 })
 		* .then(function(){ console.log('Deleted!') })
 		* .catch(function(strErr){ console.error(strErr)  });
-	 	*/
+		*
+		* @return {number} Return the `id` just deleted.
+		*/
 		_newList.delete = function(jsonData) {
 			return new Promise(function(resolve,reject) {
 				// FIRST: Param checks
@@ -1205,8 +1207,8 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 					headers    : objHeaders
 				})
 				.done(function(data, textStatus){
-					// SP doesnt return anything for Deletes, so return is empty.
-					resolve();
+					// SP doesnt return anything for Deletes, but we return id
+					resolve( itemId );
 				})
 				.fail(function(jqXHR, textStatus, errorThrown){
 					reject( parseErrorMessage(jqXHR, textStatus, errorThrown) );
@@ -1226,11 +1228,28 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 		*
 		* @example - simple ID (number or string)
 		* sprLib.list('Employees').recycle(123)
+		*
+		* @return {number} Return the `id` just deleted.
 		*/
 		_newList.recycle = function(inArg) {
 			return new Promise(function(resolve,reject) {
-				// TODO: add recycle support
-				// http://<sitecollection>/<site>/_api/web/lists(listid)/items(itemid)/recycle()
+				if ( !inArg || typeof inArg.toString() !== 'string' ) reject("{id} expected");
+
+				// STEP 1: Recycle item
+				$.ajax({
+					type       : "POST",
+					url        : _urlBase+"/items("+ inArg.toString() +")/recycle()",
+					contentType: "application/json;odata=verbose",
+					headers    : { "Accept":"application/json; odata=verbose", "X-RequestDigest":$("#__REQUESTDIGEST").val() }
+				})
+				.done(function(data, textStatus){
+					// SP returns the item guid for Recycle operations
+					// EX: {"d":{"Recycle":"ed504e3d-f8ab-4dd4-bb22-6ddaa78bd117"}}
+					resolve( Number(inArg) );
+				})
+				.fail(function(jqXHR, textStatus, errorThrown){
+					reject( parseErrorMessage(jqXHR, textStatus, errorThrown) );
+				});
 			});
 		};
 
