@@ -2,7 +2,10 @@
  * NAME: qunit-test.js
  * DESC: tests for qunit-test.html (coded to the gitbrent O365 Dev Site)
  * AUTH: https://github.com/gitbrent/
- * DATE: 2016-12-27
+ * DATE: May 25, 2017
+ *
+ * HOWTO: Generate text tables for README etc.:
+ * sprLib.list('Employees').getItems(['Id', 'Name', 'Badge_x0020_Number']).then(function(arrData){ console.log(getAsciiTableStr(arrData)) });
  *
  // REALITY-CHECK:
  //QUnit.test("QUnit Base Test", function(assert){ assert.ok( true === true, "Passed!" ); });
@@ -238,9 +241,9 @@ QUnit.module( "LIST > ITEM GET Methods" );
 		sprLib.list('Employees')
 		.getItems()
 		.then(function(arrayResults){
-			assert.ok( arrayResults.length > 0, "arrayResults is an Array and length > 0: "+ arrayResults.length );
-			assert.ok( (arrayResults[0].__metadata), "arrayResults[0].__metadata exists: \n"+ JSON.stringify(arrayResults[0].__metadata) );
-			assert.ok( getAsciiTableStr(arrayResults), `RESULTS:\n${getAsciiTableStr(arrayResults)}`);
+			assert.ok( arrayResults.length > 0        , "arrayResults is an Array and length > 0: "+ arrayResults.length );
+			assert.ok( (arrayResults[0].__metadata.id), "arrayResults[0].__metadata.id exists: "+ JSON.stringify(arrayResults[0].__metadata.id) );
+			assert.ok( getAsciiTableStr(arrayResults) , `RESULTS:\n${getAsciiTableStr(arrayResults)}`);
 			done();
 		})
 		.catch(function(errorMessage){
@@ -257,9 +260,10 @@ QUnit.module( "LIST > ITEM GET Methods" );
 			['Id', 'Name', 'Manager/Title']
 		)
 		.then(function(arrayResults){
-			assert.ok( arrayResults.length > 0, "arrayResults is an Array and length > 0: "+ arrayResults.length );
-			assert.ok( (arrayResults[0].__metadata.id), "arrayResults[0].__metadata.id exists: \n"+ JSON.stringify(arrayResults[0].__metadata.id) );
-			assert.ok( getAsciiTableStr(arrayResults), `RESULTS:\n${getAsciiTableStr(arrayResults)}`);
+			assert.ok( arrayResults.length > 0                 , "arrayResults is an Array and length > 0: "+ arrayResults.length );
+			assert.ok( (arrayResults[0].__metadata.id)         , "arrayResults[0].__metadata.id exists: "+ JSON.stringify(arrayResults[0].__metadata.id) );
+			assert.ok( Object.keys(arrayResults[0]).length == 4, "arrayResults[0] has length == 4: "+ Object.keys(arrayResults[0]).length );
+			assert.ok( getAsciiTableStr(arrayResults)          , `RESULTS:\n${getAsciiTableStr(arrayResults)}`);
 			done();
 		})
 		.catch(function(errorMessage){
@@ -276,9 +280,11 @@ QUnit.module( "LIST > ITEM GET Methods" );
 			listCols:['Id', 'Name', 'Manager/Title']
 		})
 		.then(function(arrayResults){
-			assert.ok( arrayResults.length > 0, "arrayResults is an Array and length > 0: "+ arrayResults.length );
-			assert.ok( (arrayResults[0].__metadata.id), "arrayResults[0].__metadata.id exists: \n"+ JSON.stringify(arrayResults[0].__metadata.id) );
-			assert.ok( getAsciiTableStr(arrayResults), `RESULTS:\n${getAsciiTableStr(arrayResults)}`);
+			assert.ok( arrayResults.length > 0                 , "arrayResults is an Array and length > 0: "+ arrayResults.length );
+			assert.ok( (arrayResults[0].__metadata.id)         , "arrayResults[0].__metadata.id exists: "+ JSON.stringify(arrayResults[0].__metadata.id) );
+			assert.ok( Object.keys(arrayResults[0]).length == 4, "arrayResults[0] has length == 4: "+ Object.keys(arrayResults[0]).length );
+			assert.ok( Object.keys(arrayResults[0]).indexOf('ManagerTitle') > -1, "'Manager/Title' -> 'ManagerTitle': "+ Object.keys(arrayResults[0]).indexOf('ManagerTitle') );
+			assert.ok( getAsciiTableStr(arrayResults)          , `RESULTS:\n${getAsciiTableStr(arrayResults)}`);
 			done();
 		})
 		.catch(function(errorMessage){
@@ -293,16 +299,17 @@ QUnit.module( "LIST > ITEM GET Methods" );
 		sprLib.list('Employees')
 		.getItems({
 			listCols: {
-				name:     { dataName:'Name'              },
+				name:     { dataName:'Name'               },
 				badgeNum: { dataName:'Badge_x0020_Number' },
 				mgrTitle: { dataName:'Manager/Title'      },
 				funcTest: { dataFunc:function(result){ return result.name+':'+result.badgeNum } }
 			}
 		})
 		.then(function(arrayResults){
-			assert.ok( arrayResults.length > 0, "arrayResults is an Array and length > 0: "+ arrayResults.length );
+			assert.ok( arrayResults.length > 0        , "arrayResults is an Array and length > 0: "+ arrayResults.length );
 			assert.ok( (arrayResults[0].__metadata.id), "arrayResults[0].__metadata.id exists: \n"+ JSON.stringify(arrayResults[0].__metadata.id) );
-			assert.ok( getAsciiTableStr(arrayResults), `RESULTS:\n${getAsciiTableStr(arrayResults)}`);
+			assert.ok( Object.keys(arrayResults[0]).length == 6, "arrayResults[0] has length == 6: "+ Object.keys(arrayResults[0]).length );
+			assert.ok( getAsciiTableStr(arrayResults) , `RESULTS:\n${getAsciiTableStr(arrayResults)}`);
 			done();
 		})
 		.catch(function(errorMessage){
