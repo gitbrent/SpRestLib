@@ -923,9 +923,6 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 										colVal = ( arrCol.length > 1 ? result[arrCol[0]][arrCol[1]] : result[arrCol[0]] );
 									}
 									else if ( col.dataFunc ) {
-										// TODO: adressing vars inside func by keyname doesnt work
-										// funcTest: { dataFunc:function(result){ return result.name+':'+result.badgeNum } }
-										// fix code to use keyname (not 'Badge_x0020_Number')!
 										colVal = col.dataFunc(result);
 									}
 
