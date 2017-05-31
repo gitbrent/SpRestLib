@@ -42,8 +42,8 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 
 (function(){
 	// APP VERSION/BUILD
-	var APP_VER = "0.10.0";
-	var APP_BLD = "20170523";
+	var APP_VER = "0.11.0";
+	var APP_BLD = "20170530";
 	var DEBUG = false; // (verbose mode/lots of logging. FIXME:remove prior to v1.0.0)
 	// APP FUNCTIONALITY
 	var APP_FILTEROPS = {
@@ -1408,27 +1408,33 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 
 	// API: USER
 	sprLib.user = function user(inOpt) {
-		// STEP 1: Create new user object
+		// STEP 1: Variables
 		var newUser = {};
+		var strDynUrl = "";
 
-		// STEP 2: Build query URL based on whether its current user (no parameter) or a passed in one
-		var strDynUrl = APP_OPTS.baseUrl+"/_api/Web/" + ( inOpt && !isNaN(inOpt) ? "GetUserById("+inOpt+")" : "CurrentUser" );
+		// STEP 2: Build query URL based on whether its current user (no parameter) or a passed in object
+		// NOTE: Use CurrentUser service as it is included in SP-Foundation and will work for everyone (Users will need SP-Enterprise for UserProfiles service to work)
+		if      ( !inOpt         ) strDynUrl = APP_OPTS.baseUrl+"/_api/Web/CurrentUser?";
+		else if ( inOpt['Id']    ) strDynUrl = APP_OPTS.baseUrl+"/_api/Web/GetUserById("+ inOpt['Id'] +")?";
+		else if ( inOpt['Email'] ) strDynUrl = APP_OPTS.baseUrl+"/_api/web/siteusers?$filter=Email%20eq%20%27"+ inOpt['Email'] +"%27&";
+		else if ( inOpt['Title'] ) strDynUrl = APP_OPTS.baseUrl+"/_api/web/siteusers?$filter=Title%20eq%20%27"+ inOpt['Title'] +"%27&";
 
 		/**
-		* Get user's base info (`Id`, `Title`, `LoginName`, `Email`)
+		* Get user info: (`Id`, `Email`, `IsSiteAdmin`, `LoginName`, `PrincipalType`, `Title`)
 		*
-		* @example
+		* @example - no args - omitting arguments means "current user"
 		* sprLib.user().info().then( function(objUser){ console.table(objUser) } );
-		* sprLib.user(1234).info().then( function(objUser){ console.table(objUser) } );
 		*
-		* @return {Promise} - return `Promise` containing User info (`Id`, `Title`, `LoginName`, `Email`)
+		* @example - get user by ID
+		* sprLib.user({Id:1234}).info().then( function(objUser){ console.table(objUser) } );
+		*
+		* @return {Promise} - return `Promise` containing User info object
 		*/
 		newUser.info = function() {
 			return new Promise(function(resolve, reject) {
 				// STEP 1: Get SP.User info
-				// NOTE: Use CurrentUser service as it is included in SP-Foundation and will work for everyone (Users will need SP-Enterprise for UserProfiles service to work)
 				$.ajax({
-					url    : strDynUrl += "?$select=Id,LoginName,Title,Email,PrincipalType,IsSiteAdmin",
+					url    : strDynUrl + "$select=Id,Email,IsSiteAdmin,LoginName,PrincipalType,Title",
 					type   : "GET",
 					cache  : false,
 					headers: {"Accept":"application/json; odata=verbose"}
@@ -1436,7 +1442,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 				.done(function(data, textStatus){
 					// A: Gather user data
 					var objUser = {};
-					$.each(data.d, function(key,result){ objUser[key] = result; });
+					$.each((data.d.results ? data.d.results[0] : data.d), function(key,result){ objUser[key] = result; });
 
 					// B: Resolve results
 					resolve( objUser );
@@ -1459,15 +1465,17 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 		newUser.groups = function() {
 			return new Promise(function(resolve, reject) {
 				$.ajax({
-					url    : strDynUrl += "?$select=Groups/Id,Groups/Title&$expand=Groups",
+					url    : strDynUrl + "$select=Groups/Id,Groups/Title&$expand=Groups",
 					type   : "GET",
 					cache  : false,
 					headers: {"Accept":"application/json; odata=verbose"}
 				})
 				.done(function(data, textStatus) {
-					// A: Gather groups
 					var arrGroups = [];
-					$.each(data.d.Groups.results, function(idx,group){ arrGroups.push({ Id:group.Id, Title:group.Title }); });
+
+					// A: Gather groups
+					( data.d.results ? data.d.results[0].Groups.results : data.d.Groups.results )
+					.forEach(function(group,idx){ arrGroups.push({ Id:group.Id, Title:group.Title }); });
 
 					// B: Resolve results
 					resolve( arrGroups );

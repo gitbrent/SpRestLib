@@ -427,46 +427,47 @@ QUnit.module( "REST Methods" );
 QUnit.module( "USER Methods" );
 // ================================================================================================
 {
-	[gTestUserId,''].forEach(function(userId,idx){
-		QUnit.test(`sprLib.user(${userId}).info()`, function(assert){
-			var done = assert.async();
-			// TEST:
-			sprLib.user(userId).info()
-			.then(function(objUser){
-				assert.ok( objUser.Id		,"Pass: Id....... - " + objUser.Id );
-				assert.ok( objUser.Title	,"Pass: Title.... - " + objUser.Title );
-				assert.ok( objUser.Email	,"Pass: Email.... - " + objUser.Email );
-				assert.ok( objUser.LoginName,"Pass: LoginName - " + objUser.LoginName );
-				done();
-			});
-		});
+	var gObjCurrUser = {};
 
-		QUnit.test(`sprLib.user(${userId}).groups()`, function(assert){
-			var done = assert.async();
-			// TEST:
-			sprLib.user(userId).groups()
-			.then(function(arrGroups){
-				assert.ok( arrGroups.length > 0, "arrGroups is an Array, and length > 0: "+ arrGroups.length );
-				//
-				let table = new AsciiTable();
-				if (arrGroups.length > 0) table.setHeading( Object.keys(arrGroups[0]) );
-				$.each(arrGroups,function(idx,obj){ let vals = []; $.each(obj, function(key,val){ vals.push(val) }); table.addRow(vals); });
-				assert.ok( table.toString(), `RESULTS:\n${table.toString()}`);
-				//
-				done();
+	sprLib.user().info()
+	.then(function(objUser){ gObjCurrUser = objUser })
+	.then(function(){
+		['', {Id:gObjCurrUser.Id}, {Title:gObjCurrUser.Title}, {Email:gObjCurrUser.Email}]
+		.forEach(function(param,idx){
+			QUnit.test('sprLib.user('+ JSON.stringify(param) +').info()', function(assert){
+				var done = assert.async();
+				// TEST:
+				sprLib.user(param).info()
+				.then(function(objUser){
+					assert.ok( objUser.Id		,"Pass: Id....... - " + objUser.Id );
+					assert.ok( objUser.Title	,"Pass: Title.... - " + objUser.Title );
+					assert.ok( objUser.Email	,"Pass: Email.... - " + objUser.Email );
+					assert.ok( objUser.LoginName,"Pass: LoginName - " + objUser.LoginName );
+					done();
+				});
+			});
+
+			QUnit.test('sprLib.user('+ JSON.stringify(param) +').groups()', function(assert){
+				var done = assert.async();
+				// TEST:
+				sprLib.user(param).groups()
+				.then(function(arrGroups){
+					assert.ok( arrGroups.length > 0, "arrGroups is an Array, and length > 0: "+ arrGroups.length );
+					//
+					let table = new AsciiTable();
+					if (arrGroups.length > 0) table.setHeading( Object.keys(arrGroups[0]) );
+					$.each(arrGroups,function(idx,obj){ let vals = []; $.each(obj, function(key,val){ vals.push(val) }); table.addRow(vals); });
+					assert.ok( table.toString(), `RESULTS:\n${table.toString()}`);
+					//
+					done();
+				});
 			});
 		});
 	});
 }
 
 
-// TODO: add .recycle to SPRESTLIB!!!
-// TODO: add test for vvv
-// http://<sitecollection>/<site>/_api/web/lists(listid)/items(itemid)/recycle()
-// recycle ^^^ (delete makes it gone forever )
-
-
-// NEGATIVE TSET:
+// NEGATIVE TEST:
 /*
 sprLib.rest({ restUrl:'../_api/web/GetByTitle' });
 */
