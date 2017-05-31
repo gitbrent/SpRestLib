@@ -1415,9 +1415,9 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 		// STEP 2: Build query URL based on whether its current user (no parameter) or a passed in object
 		// NOTE: Use CurrentUser service as it is included in SP-Foundation and will work for everyone (Users will need SP-Enterprise for UserProfiles service to work)
 		if      ( !inOpt         ) strDynUrl = APP_OPTS.baseUrl+"/_api/Web/CurrentUser?";
-		else if ( inOpt['Id']    ) strDynUrl = APP_OPTS.baseUrl+"/_api/Web/GetUserById("+ inOpt['Id'] +")?";
-		else if ( inOpt['Email'] ) strDynUrl = APP_OPTS.baseUrl+"/_api/web/siteusers?$filter=Email%20eq%20%27"+ inOpt['Email'] +"%27&";
-		else if ( inOpt['Title'] ) strDynUrl = APP_OPTS.baseUrl+"/_api/web/siteusers?$filter=Title%20eq%20%27"+ inOpt['Title'] +"%27&";
+		else if ( inOpt['id']    ) strDynUrl = APP_OPTS.baseUrl+"/_api/Web/GetUserById("+ inOpt['id'] +")?";
+		else if ( inOpt['email'] ) strDynUrl = APP_OPTS.baseUrl+"/_api/web/siteusers?$filter=Email%20eq%20%27"+ inOpt['email'] +"%27&";
+		else if ( inOpt['title'] ) strDynUrl = APP_OPTS.baseUrl+"/_api/web/siteusers?$filter=Title%20eq%20%27"+ inOpt['title'] +"%27&";
 
 		/**
 		* Get user info: (`Id`, `Email`, `IsSiteAdmin`, `LoginName`, `PrincipalType`, `Title`)

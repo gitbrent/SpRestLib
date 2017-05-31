@@ -113,8 +113,8 @@ var sprLib = require("sprestlib");
 * `sprLib.rest(options)` - Returns the results of a given REST call to any [SharePoint REST API](https://msdn.microsoft.com/en-us/library/office/dn268594.aspx)
 
 ## User Info/Groups
-* `sprLib.user(id).info()` - Returns information about the current [SPUser](https://msdn.microsoft.com/en-us/library/microsoft.sharepoint.spuser.aspx)
-* `sprLib.user(id).groups()` - Returns an of SPGroup objects with information about the current users Groups
+* `sprLib.user(options).info()`   - Returns basic User information [SPUser](https://msdn.microsoft.com/en-us/library/microsoft.sharepoint.spuser.aspx)
+* `sprLib.user(options).groups()` - Returns an of SPGroup objects with information about the Users Groups
 
 ## Form Population
 * `data-sprlib{options}` - Populates the parent tag using the options provided
@@ -183,7 +183,7 @@ Example:
 ```javascript
 sprLib.list('Employees')
 .delete(99)
-.then(function(objItem){ console.log('Deleted Item:'); console.table(objItem); })
+.then(function(intId){ console.log('Deleted Item:'+intId); })
 .catch(function(strErr){ console.error(strErr); });
 ```
 
@@ -200,8 +200,8 @@ Moves the item into the Site Recycle Bin
 Example:
 ```javascript
 sprLib.list('Employees')
-.delete(99)
-.then(function(objItem){ console.log('Updated Item:'); console.table(objItem); })
+.recycle(99)
+.then(function(intId){ console.log('Recycled Item:'+intId); })
 .catch(function(strErr){ console.error(strErr); });
 ```
 
@@ -404,10 +404,18 @@ sprLib.rest({ restUrl:"_api/web/lists/getbytitle('Employees')" })
 
 **************************************************************************************************
 # User Info/Groups
-Omitting the userID argument will return information about the current user, otherwise, the specified user is returned.  
-`sprLib.user()` or `sprLib.user(userID)`
+Omitting the options will return information about the current user, otherwise, the specified user is returned.  
+`sprLib.user()`
+`sprLib.user(options)`
 
-## Get Current User Information (`SPUser`)
+## Options
+| Option   | Type     | Required? | Description           | Possible Values / Returns           |
+| :------- | :------- | :-------- | :-------------------- | :---------------------------------- |
+| `id`     | number   |           | user ID               | user id to query. Ex: `{Id:99}`     |
+| `email`  | string   |           | user email address    | user email to query. Ex: `{email:'brent@github.com'}` |
+| `title`  | string   |           | user title            | user title to query. Ex: `{title:'Brent Ely'}` |
+
+## Get User Information (`SPUser`)
 Syntax:
 `sprLib.user().info()`
 
@@ -417,14 +425,22 @@ Note: *Uses the basic SP User service (not the Enterprise licensed User Profile 
 
 ### Sample Code
 ```javascript
+// Get current user info
 sprLib.user().info()
+.then(function(objUser){
+    console.log("Current User Info:\n");
+    console.log("Id:" + objUser.Id +" - Title:"+ objUser.Title +" - Email:"+ objUser.Email); }
+});
+
+// Get user info by email address
+sprLib.user({ email:'brent.ely@github.com' }).info()
 .then(function(objUser){
     console.log("Current User Info:\n");
     console.log("Id:" + objUser.Id +" - Title:"+ objUser.Title +" - Email:"+ objUser.Email); }
 });
 ```
 
-## Get Current User Groups (`SPGroup`)
+## Get User Groups (`SPGroup`)
 Syntax:
 `sprLib.user().groups()`
 

@@ -432,7 +432,7 @@ QUnit.module( "USER Methods" );
 	sprLib.user().info()
 	.then(function(objUser){ gObjCurrUser = objUser })
 	.then(function(){
-		['', {Id:gObjCurrUser.Id}, {Title:gObjCurrUser.Title}, {Email:gObjCurrUser.Email}]
+		['', {id:gObjCurrUser.Id}, {title:gObjCurrUser.Title}, {email:gObjCurrUser.Email}]
 		.forEach(function(param,idx){
 			QUnit.test('sprLib.user('+ JSON.stringify(param) +').info()', function(assert){
 				var done = assert.async();
