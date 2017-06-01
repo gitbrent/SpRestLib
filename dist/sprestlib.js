@@ -29,7 +29,6 @@
 
 /*
 v1.0.0 DEVLIST:
-	* Add `recycle()`
 	* Add `$skip`
 	* Add `Intl` (i18n) support (its supported in IE11!!) - Date and Currency formats are awesome (can we add Direction for our R->L users too?)
 	* Add logic we learned the hard way where FILTER cant have true/false but uses 0/1 due to MS bug (still needed?)
@@ -43,7 +42,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 (function(){
 	// APP VERSION/BUILD
 	var APP_VER = "0.11.0";
-	var APP_BLD = "20170530";
+	var APP_BLD = "20170531";
 	var DEBUG = false; // (verbose mode/lots of logging. FIXME:remove prior to v1.0.0)
 	// APP FUNCTIONALITY
 	var APP_FILTEROPS = {
@@ -574,6 +573,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 
 	this.sprLib = {};
 
+	// API: OPTIONS
 	/**
 	* Getter/Setter for the app option APP_OPTS.baseUrl (our _api call base)
 	*
@@ -1493,7 +1493,11 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 		return newUser;
 	}
 
-	// API: Version
+	// API: UTILITY
+	sprLib.renewSecurityToken = function renewSecurityToken(){
+		return doRenewDigestToken();
+	}
+
 	sprLib.version = function version(){
 		return APP_VER;
 	}

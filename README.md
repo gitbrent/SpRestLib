@@ -6,11 +6,10 @@
 Simplify SharePoint REST/Web Service interaction to a few lines of code. Easily read items, perform CRUD operations, execute REST calls, gather user/group information and populate form elements.
 
 ### Features:
-* Form Population - Fill a table with List items, populate a select, and much more
-* Easy Async - Utilizes the new [ES6 Promise](http://www.datchley.name/es6-promises/) architecture to enable chaining of asynchronous operations
-* Modern API - Built for [SharePoint 2013 API](https://msdn.microsoft.com/en-us/library/office/jj860569.aspx) / [OData v3](http://www.odata.org/documentation/odata-version-3-0/)
-* Simple - Most REST interaction can be done in 1-2 lines of code
-* Modern - Pure JavaScript solution (no other libraries are required)
+* Simple - Most REST/Web Service interaction can be done in a couple of lines of code
+* Modern - Lightweight, pure JavaScript solution
+* Async Ops - Utilizes the new [ES6 Promise](http://www.datchley.name/es6-promises/) architecture to enable chaining of asynchronous operations
+* Works - Built for [SharePoint 2013 API](https://msdn.microsoft.com/en-us/library/office/jj860569.aspx) / [OData v3](http://www.odata.org/documentation/odata-version-3-0/)
 * Robust - Handles errors and monitors the SharePoint authentication token
 
 ### Methods:
@@ -20,7 +19,7 @@ Simplify SharePoint REST/Web Service interaction to a few lines of code. Easily 
 * Form Population - Populate form elements using data-bind declarative binding system like Knockout or AngluarJS
 
 ### Supported Environments:
-* SharePoint Online (O365), SharePoint 2013 (SP2013), SharePoint 2016 (SP2016)
+* SharePoint 2013 (SP2013), SharePoint 2016 (SP2016), SharePoint Online (O365)
 * *Enterprise license not required*
 
 **************************************************************************************************
@@ -118,6 +117,9 @@ var sprLib = require("sprestlib");
 
 ## Form Population
 * `data-sprlib{options}` - Populates the parent tag using the options provided
+
+## Utility
+* `sprLib.renewSecurityToken()` - Refreshes the SharePoint page security digest token
 
 **************************************************************************************************
 # API Reference
@@ -269,8 +271,6 @@ Returns: Array of list properties and their values
 sprLib.list('Employees').info().then(function(data){ console.table(data) });
 ```
 
-
-
 ### Get Items
 Syntax:
 `sprLib.list(listName|listGUID).getItems()`
@@ -351,6 +351,8 @@ sprLib.list('Employees').getItems({
 .catch(function(errMsg){ console.error(errMsg) });
 ```
 
+
+
 **************************************************************************************************
 # REST Calls
 Returns the results of a given REST call to any [SharePoint REST API](https://msdn.microsoft.com/en-us/library/office/dn268594.aspx)
@@ -401,6 +403,8 @@ sprLib.rest({ restUrl:"_api/web/lists/getbytitle('Employees')" })
 .then(function(data){ console.table(data); })
 .catch(function(errMsg){ console.error(errMsg) });
 ```
+
+
 
 **************************************************************************************************
 # User Info/Groups
@@ -455,6 +459,8 @@ sprLib.user().groups()
 });
 ```
 
+
+
 **************************************************************************************************
 # Form Binding
 
@@ -494,6 +500,22 @@ The following HTML element tags can be populated:
 <table data-sprlib='{ "foreach": {"list":"Employees", "filter":{"col":"Badge_x0020_Number", "op":"eq", "val":1234}}, "options":{"showBusySpinner":true} }'>
 <tbody data-sprlib='{ "foreach": {"list":"Employees", "cols":["Name","Utilization_x0020_Pct"] } }'></tbody>
 ```
+
+
+
+**************************************************************************************************
+# Utility
+Refreshes the SharePoint page security digest token.  
+`sprLib.renewSecurityToken()`
+
+Starting in SP2013, .aspx pages include a security digest token in a hidden input element that will expire
+after 30 minutes (by default).
+
+This method allows the refresh of this value, which can be useful in certain cases.
+
+NOTE: SpRestLib will refresh the token automatically as needed during CRUD operations.
+
+
 
 **************************************************************************************************
 # Lets Talk Async Operations: ES6 Promises vs Callbacks
