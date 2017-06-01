@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+	<meta name="author" content="https://github.com/gitbrent/">
+	<meta name="description" content="JavaScript Library for SharePoint Web Services, JavaScript SharePoint REST Library, JavaScript SharePoint Form Population">
+	<title>SpRestLib | JavaScript SharePoint REST / Web Service Library</title>
+
+	<link rel="stylesheet" type="text/css" href="../css/bootstrap.min.css">
+	<style>
+		.group {
+		    background: yellow;
+		    width: 200px;
+		    height: 500px;
+		}
+		.group .subgroup {
+		    background: orange;
+		    width: 150px;
+		    height: 200px;
+		}
+		.fixed {
+		    position: fixed;
+		}
+
+		/* sidebar */
+		.bs-docs-sidebar {
+		    padding-left: 20px;
+		    margin-top: 20px;
+		    margin-bottom: 20px;
+		}
+
+		/* all links */
+		.bs-docs-sidebar .nav>li>a {
+		    color: #999;
+		    border-left: 2px solid transparent;
+		    padding: 4px 20px;
+		    font-size: 13px;
+		    font-weight: 400;
+		}
+
+		/* nested links */
+		.bs-docs-sidebar .nav .nav>li>a {
+		    padding-top: 1px;
+		    padding-bottom: 1px;
+		    padding-left: 30px;
+		    font-size: 12px;
+		}
+
+		/* active & hover links */
+		.bs-docs-sidebar .nav>.active>a,
+		.bs-docs-sidebar .nav>li>a:hover,
+		.bs-docs-sidebar .nav>li>a:focus {
+		    color: #563d7c;
+		    text-decoration: none;
+		    background-color: transparent;
+		    border-left-color: #563d7c;
+		}
+		/* all active links */
+		.bs-docs-sidebar .nav>.active>a,
+		.bs-docs-sidebar .nav>.active:hover>a,
+		.bs-docs-sidebar .nav>.active:focus>a {
+		    font-weight: 700;
+		}
+		/* nested active links */
+		.bs-docs-sidebar .nav .nav>.active>a,
+		.bs-docs-sidebar .nav .nav>.active:hover>a,
+		.bs-docs-sidebar .nav .nav>.active:focus>a {
+		    font-weight: 500;
+		}
+
+		/* hide inactive nested list */
+		.bs-docs-sidebar .nav ul.nav {
+		    display: none;
+		}
+		/* show active nested list */
+		.bs-docs-sidebar .nav>.active>ul.nav {
+		    display: block;
+		}
+
+		/*Header formatting */
+		.MainContent {
+		    margin-top: 50px;
+		}
+		.group, .subgroup {
+		    padding-top: 50px;
+		    margin-top: -50px;
+		}
+	</style>
+
+	<script src="../js/jquery.js"></script>
+	<script src="../js/bootstrap.min.js"></script>
+	<script>
+		$(document).ready(function(){
+			$('body').scrollspy({
+			    target: '.bs-docs-sidebar',
+			    offset: 40
+			});
+		});
+	</script>
+
+	<!-- vvv ANALYTICS vvv -->
+	<!--
+	<script>
+		(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+		(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+		m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+		})(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+		ga('create', 'UA-75147115-3', 'auto');
+		ga('send', 'pageview');
+	</script>
+	-->
+	<!-- ^^^ ANALYTICS ^^^ -->
+</head>
+<body>
+	<!-- Top Navbar -->
+	<div class="navbar navbar-inverse navbar-fixed-top">
+	    <div class="container">
+	        <div class="navbar-header">
+	            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+	                <span class="icon-bar"></span>
+	                <span class="icon-bar"></span>
+	                <span class="icon-bar"></span>
+	            </button> <a class="navbar-brand" href="#">Bootstrap 3.0 Skeleton</a>
+
+	        </div>
+	        <div class="collapse navbar-collapse">
+	            <ul class="nav navbar-nav">
+	                <li class="active"><a href="#">Home</a>
+	                </li>
+	                <li><a href="#about">About</a>
+	                </li>
+	                <li><a href="#contact">Contact</a>
+	                </li>
+	            </ul>
+	        </div>
+	        <!--/.nav-collapse -->
+	    </div>
+	</div>
+
+	<!-- Main Content -->
+	<div class="row MainContent">
+	    <!--Side Nav Bar -->
+	    <nav class="col-xs-3 bs-docs-sidebar">
+	        <ul id="sidebar" class="nav nav-stacked fixed">
+	            <li>
+	                <a href="#GroupA">Group A</a>
+	                <ul class="nav nav-stacked">
+	                    <li><a href="#GroupASub1">Sub-Group 1</a></li>
+	                    <li><a href="#GroupASub2">Sub-Group 2</a></li>
+	                </ul>
+	            </li>
+	            <li>
+	                <a href="#GroupB">Group B</a>
+	                <ul class="nav nav-stacked">
+	                    <li><a href="#GroupBSub1">Sub-Group 1</a></li>
+	                    <li><a href="#GroupBSub2">Sub-Group 2</a></li>
+	                </ul>
+	            </li>
+	            <li>
+	                <a href="#GroupC">Group C</a>
+	                <ul class="nav nav-stacked">
+	                    <li><a href="#GroupCSub1">Sub-Group 1</a></li>
+	                    <li><a href="#GroupCSub2">Sub-Group 2</a></li>
+	                </ul>
+	            </li>
+	        </ul>
+	    </nav>
+
+	    <!--Main Content -->
+	    <div class="col-xs-9">
+	        <section id="GroupA" class="group">
+	            <h3>Group A</h3>
+	            <div id="GroupASub1" class="subgroup">
+	                <h4>Group A Sub 1</h4>
+	            </div>
+	            <div id="GroupASub2" class="subgroup">
+	                <h4>Group A Sub 2</h4>
+	            </div>
+	        </section>
+	        <section id="GroupB" class="group">
+	            <h3>Group B</h3>
+	            <div id="GroupBSub1" class="subgroup">
+	                <h4>Group B Sub 1</h4>
+	            </div>
+	            <div id="GroupBSub2" class="subgroup">
+	                <h4>Group B Sub 2</h4>
+	            </div>
+	        </section>
+	        <section id="GroupC" class="group">
+	            <h3>Group C</h3>
+	            <div id="GroupCSub1" class="subgroup">
+	                <h4>Group C Sub 1</h4>
+	            </div>
+	            <div id="GroupCSub2" class="subgroup">
+	                <h4>Group C Sub 2</h4>
+	            </div>
+	        </section>
+	    </div>
+	</div>
+</body>
+</html>
