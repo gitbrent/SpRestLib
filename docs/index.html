@@ -115,7 +115,7 @@
 	                <span class="icon-bar"></span>
 	                <span class="icon-bar"></span>
 	            </button>
-				<a class="navbar-brand" href="https://github.com/gitbrent/SpRestLib#sprestlib">SpRestLib Documentation</a>
+				<a class="navbar-brand" href="https://github.com/gitbrent/SpRestLib#sprestlib">Full Documentation</a>
 	        </div>
 	        <div class="collapse navbar-collapse">
 	            <ul class="nav navbar-nav">
@@ -155,21 +155,21 @@
 				<li>
 	                <a href="#GroupB">List and Library Utility Methods</a>
 	                <ul class="nav nav-stacked">
-						<li><a href="#GroupBSub2">List Field Information</a></li>
-						<li><a href="#GroupBSub2">Create Items</a></li>
+						<li><a href="#GroupBSub1">List Info</a></li>
+						<li><a href="#GroupBSub2">List Column Info</a></li>
 	                </ul>
 	            </li>
 	            <li>
 	                <a href="#GroupC">User and Group Methods</a>
 	                <ul class="nav nav-stacked">
-	                    <li><a href="#GroupCSub1">Sub-Group 1</a></li>
-	                    <li><a href="#GroupCSub2">Sub-Group 2</a></li>
+	                    <li><a href="#GroupCSub1">Get User</a></li>
+	                    <li><a href="#GroupCSub2">Get User Groups</a></li>
 	                </ul>
 	            </li>
 	            <li>
 	                <a href="#GroupD">REST Methods</a>
 	                <ul class="nav nav-stacked">
-	                    <li><a href="#GroupDSub1">Sub-Group 1</a></li>
+	                    <li><a href="#GroupDSub1">REST API Calls</a></li>
 	                    <li><a href="#GroupDSub2">Sub-Group 2</a></li>
 	                </ul>
 	            </li>
@@ -187,6 +187,9 @@
 	    <div class="col-xs-9">
 			<section id="Group0" class="group">
 	            <h2>Introduction</h2>
+
+				<h4>SpRestLib is a jQuery library that abstracts SharePoint Web Service/REST fucntionality into a lightweight API.</h4>
+
 	            <div id="Group0Sub1" class="subgroup">
 					<h3>Library Setup</h3>
 
@@ -195,7 +198,7 @@
 <pre><code class="language-html">&lt;script lang="javascript" src="https://code.jquery.com/jquery-3.1.1.slim.min.js"&gt;&lt;/script&gt;
 &lt;script lang="javascript" src="https://yourhost.com/subsite/SiteAssets/js/sprestlib.js"&gt;&lt;/script&gt;
 </code></pre>
-					<p><b>NOTE</b>: IE11 support requires a Promises polyfill as well (included in the libs folder)</p>
+					<p><b>NOTE</b>: IE11 support requires a Promises polyfill as well (included in the <code>libs</code> folder)</p>
 
 					<h4>Node</h4>
 <pre><code class="language-javascript">npm install sprestlib
@@ -229,14 +232,20 @@ var sprLib = require("sprestlib");
 			<!-- ============================= -->
 	        <section id="GroupA" class="group">
 	            <h2>List and Library Item Methods</h2>
-				NOTE: <code>__metadata</code> is always included in results.  This enables easy chaining of operations,
-				like passing a result to another op, eg: CRUD.
+				NOTES:
+				<ul>
+					<li><code>__metadata</code> is always included in results to enable easy chaining of operations (<code>__metadata.type</code> is required for CRUD ops)</li>
+					<li>The default max items returned by SharePoint 2013+ is 100 - SpRestLib's default is 1000</li>
+					<li>Either List Name or List GUID can be used</li>
+					<li>Results are an array of item objects</li>
+				</ul>
+
 
 	            <div id="GroupASub1" class="subgroup">
 	                <h3>Get Items</h3>
 					<div>
 
-<h4>Example: Simple array of column names</h4>
+<h4>Passing a simple array of column names will return the first 1,000 items</h4>
 <pre><code class="language-javascript">sprLib.list('Employees')
 .getItems(
     ['Id', 'Name', 'Badge_x0020_Number']
@@ -250,12 +259,23 @@ var sprLib = require("sprestlib");
 |   __metadata    | Id  |    Name     | Badge_x0020_Number |   Hire_x0020_Date    | Salary |
 |-----------------|-----|-------------|--------------------|----------------------|--------|
 | [object Object] | 287 | Bob Ross    |            1496450 | 1986-06-02T06:00:00Z | 101000 |
-| [object Object] | 291 | Hal Jorden  |            1496451 | 2017-06-02T06:00:00Z | 125000 |
+| [object Object] | 291 | Hal Jordan  |            1496451 | 2017-06-02T06:00:00Z | 125000 |
 | [object Object] | 292 | Barry Allen |            1496452 | 2010-12-25T06:00:00Z | 175000 |
 '------------------------------------------------------------------------------------------'
 </code></pre>
 
-<h4>Example</h4>
+<h4>Utilize <code>query*</code> parameters to filter, sort, or set max items</h4>
+<pre><code class="language-javascript">sprLib.list('Employees').getItems({
+    listCols: ['Id', 'Name', 'Badge_x0020_Number'],
+    queryFilter:  'Salary gt 100000',
+    queryOrderby: 'Hire_x0020_Date',
+    queryLimit:   10
+})
+.then(function(arrData){ console.table(arrData) })
+.catch(function(errMsg){ console.error(errMsg) });
+</code></pre>
+
+<h4>Utilize <code>listCols</code> and <code>query*</code> parameters for more complicated operations like filtering</h4>
 <ul>
 	<li>Using <code>listCols</code> option to name our columns</li>
 	<li>Using <code>dataFunc</code> option to return a calculated value</li>
@@ -318,37 +338,66 @@ sprLib.list('Employees')
 					</div>
 				</div>
 	        </section>
+
 	        <section id="GroupB" class="group">
 	            <h3>List and Library Utility Methods</h3>
 				<div id="GroupBSub1" class="subgroup">
-	                <h4>Column Info</h4>
-					<div>
-						<code>sprLib.list(listName).cols()</code> - Returns an array of column objects with useful info (name, datatype, etc.)
-					</div>
-				</div>
-				<div id="GroupBSub2" class="subgroup">
 	                <h4>List Info</h4>
 					<div>
 						<code>sprLib.list(listName).info()</code> - Returns information about the list (GUID, numberOfItems, etc.)
 					</div>
 				</div>
+				<div id="GroupBSub2" class="subgroup">
+	                <h4>Column Info</h4>
+
+<h4>Get information about a List's columns</h4>
+<pre><code class="language-javascript">sprLib.list('Employees').cols()
+.then(function(data){ console.table(data) });
+</code></pre>
+
+<h4>Results</h4>
+<pre><code>.--------------------------------------------------------------------------------------------------------------------------------------------------.
+|      dispName      |         dataName         |  dataType  | isAppend | isNumPct | isReadOnly | isRequired | isUnique | defaultValue | maxLength |
+|--------------------|--------------------------|------------|----------|----------|------------|------------|----------|--------------|-----------|
+| Name               | Name                     | Text       | false    | false    | false      | false      | false    |              |       255 |
+| Badge Number       | Badge_x0020_Number       | Number     | false    | false    | false      | true       | true     |              |           |
+| Hire Date          | Hire_x0020_Date          | DateTime   | false    | false    | false      | false      | false    |              |           |
+| ID                 | ID                       | Counter    | false    | false    | true       | false      | false    |              |           |
+'--------------------------------------------------------------------------------------------------------------------------------------------------'
+</code></pre>
+					<div>
+						<code>sprLib.list(listName).cols()</code> - Returns an array of column objects with useful info (name, datatype, etc.)
+					</div>
+				</div>
 	        </section>
+
 	        <section id="GroupC" class="group">
-	            <h3>Group C</h3>
+	            <h3>User and Group Methods</h3>
 	            <div id="GroupCSub1" class="subgroup">
-	                <h4>Group C Sub 1</h4>
+	                <h4>Get User</h4>
 	            </div>
 	            <div id="GroupCSub2" class="subgroup">
-	                <h4>Group C Sub 2</h4>
+	                <h4>Get User Groups</h4>
 	            </div>
 	        </section>
+
 			<section id="GroupD" class="group">
-	            <h3>Group D</h3>
+	            <h3>REST API Calls</h3>
 	            <div id="GroupDSub1" class="subgroup">
 	                <h4>Group D Sub 1</h4>
 	            </div>
 	            <div id="GroupDSub2" class="subgroup">
 	                <h4>Group D Sub 2</h4>
+	            </div>
+	        </section>
+
+			<section id="GroupE" class="group">
+	            <h3>Form Binding/Population</h3>
+	            <div id="GroupESub1" class="subgroup">
+	                <h4>Group E Sub 1</h4>
+	            </div>
+	            <div id="GroupESub2" class="subgroup">
+	                <h4>Group E Sub 2</h4>
 	            </div>
 	        </section>
 	    </div>
