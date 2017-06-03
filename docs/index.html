@@ -10,7 +10,8 @@
 	<link rel="stylesheet" type="text/css" href="../css/bootstrap.min.css">
 	<style>
 		.group { min-height: 500px; }
-		.group .subgroup { min-height: 200px; }
+		.group .subgroup { min-height: 200px; width: 90%; margin-bottom: 40px; }
+		.group .subgroup h4 { margin-top:30px; }
 
 		.fixed { position: fixed; }
 
@@ -134,6 +135,13 @@
 	    <!--Side Nav Bar -->
 	    <nav class="col-xs-3 bs-docs-sidebar">
 	        <ul id="sidebar" class="nav nav-stacked fixed">
+				<li>
+	                <a href="#Group0">Introduction</a>
+	                <ul class="nav nav-stacked">
+	                    <li><a href="#Group0Sub1">Library Setup</a></li>
+	                    <li><a href="#Group0Sub2">Asyncronous Calls</a></li>
+	                </ul>
+	            </li>
 	            <li>
 	                <a href="#GroupA">List and Library Item Methods</a>
 	                <ul class="nav nav-stacked">
@@ -177,49 +185,134 @@
 
 	    <!--Main Content -->
 	    <div class="col-xs-9">
+			<section id="Group0" class="group">
+	            <h2>Introduction</h2>
+	            <div id="Group0Sub1" class="subgroup">
+					<h3>Library Setup</h3>
+
+					<h4>Client-Side</h4>
+					<p>SpRestLib utilizes the jQuery library - include it before sprestlib. That's it!</p>
+<pre><code class="language-html">&lt;script lang="javascript" src="https://code.jquery.com/jquery-3.1.1.slim.min.js"&gt;&lt;/script&gt;
+&lt;script lang="javascript" src="https://yourhost.com/subsite/SiteAssets/js/sprestlib.js"&gt;&lt;/script&gt;
+</code></pre>
+					<p><b>NOTE</b>: IE11 support requires a Promises polyfill as well (included in the libs folder)</p>
+
+					<h4>Node</h4>
+<pre><code class="language-javascript">npm install sprestlib
+var sprLib = require("sprestlib");
+</code></pre>
+				</div>
+
+	            <div id="Group0Sub2" class="subgroup">
+					<h3>Asyncronous Calls</h3>
+					<p>All of the SpRestLib methods return JavaScript Promises, which provide two main benefits:</p>
+					<ul>
+						<li>No more callback functions</li>
+						<li>No more managing async operations</li>
+					</ul>
+					<p>
+						If you're unfamiliar with the new <a href="http://www.datchley.name/es6-promises/">ES6 Promise</a> functionality,
+						you may want to the a moment to read more about them. They really are a game changer for those of us who deal with asynchronous operations.
+					</p>
+					<p>
+						All major browsers (and Node.js) now fully support ES6 Promises, and they're why all the <code>.then()</code> code below.
+					</p>
+					<div style="background:#fffccc; padding:20px;">
+						<div><b>tl;dr;</b></div>
+						Promises can be chained together and will execute only after the previous asyncronous operation completes
+					</p>
+				</div>
+			</section>
+
+			<!-- ============================= -->
+			<!-- List and Library Item Methods -->
+			<!-- ============================= -->
 	        <section id="GroupA" class="group">
-	            <h3>List and Library Item Methods</h3>
+	            <h2>List and Library Item Methods</h2>
+				NOTE: <code>__metadata</code> is always included in results.  This enables easy chaining of operations,
+				like passing a result to another op, eg: CRUD.
+
 	            <div id="GroupASub1" class="subgroup">
-	                <h4>Get Items</h4>
+	                <h3>Get Items</h3>
 					<div>
-						<code>sprLib.list(listName).getItems(options)</code> - Returns an array of item objects using a variety of possible options
-						<pre><code class="language-javascript">sprLib.list('Employees')
-// EX: Simple array of column names
-sprLib.list('Employees')
-.getItems(['Id', 'Name', 'Badge_x0020_Number'])
+
+<h4>Example: Simple array of column names</h4>
+<pre><code class="language-javascript">sprLib.list('Employees')
+.getItems(
+    ['Id', 'Name', 'Badge_x0020_Number']
+)
 .then(function(arrData){ console.table(arrData) })
 .catch(function(errMsg){ console.error(errMsg) });
-						</code></pre>
-						<h5>Result</h5>
-<code style="white-space:pre">.---------------------------------------------------------.
-|   __metadata    | Id  |    Name    | Badge_x0020_Number |
-|-----------------|-----|------------|--------------------|
-| [object Object] | 253 | Hal Jordan |              12345 |
-'---------------------------------------------------------'
-</code>
+</code></pre>
+
+<h4>Results</h4>
+<pre><code>.------------------------------------------------------------------------------------------.
+|   __metadata    | Id  |    Name     | Badge_x0020_Number |   Hire_x0020_Date    | Salary |
+|-----------------|-----|-------------|--------------------|----------------------|--------|
+| [object Object] | 287 | Bob Ross    |            1496450 | 1986-06-02T06:00:00Z | 101000 |
+| [object Object] | 291 | Hal Jorden  |            1496451 | 2017-06-02T06:00:00Z | 125000 |
+| [object Object] | 292 | Barry Allen |            1496452 | 2010-12-25T06:00:00Z | 175000 |
+'------------------------------------------------------------------------------------------'
+</code></pre>
+
+<h4>Example</h4>
+<ul>
+	<li>Using <code>listCols</code> option to name our columns</li>
+	<li>Using <code>dataFunc</code> option to return a calculated value</li>
+	<li>Using query options: filter, order, limit</li>
+</ul>
+<pre><code class="language-javascript">sprLib.list('Employees').getItems({
+    listCols: {
+		id:       { dataName:'Id'                 },
+        empName:  { dataName:'Name'               },
+        badgeNum: { dataName:'Badge_x0020_Number' },
+        editLink: { dataFunc:function(objItem){ return '<a href="../DispForm.aspx?ID='+objItem.Id +'">View Item</a>' } }
+    },
+    queryFilter:  'Salary gt 100000',
+    queryOrderby: 'Hire_x0020_Date',
+    queryLimit:   10
+})
+.then(function(arrData){ console.table(arrData) })
+.catch(function(errMsg){ console.error(errMsg) });
+</code></pre>
+
+<h4>Results</h4>
+<pre><code>.--------------------------------------------------------------------------------------------------------.
+|   __metadata    | id  |   empName   | badgeNum |                    editLink                     | Id  |
+|-----------------|-----|-------------|----------|-------------------------------------------------|-----|
+| [object Object] | 287 | Bob Ross    |  1496450 | &lt;a href="../DispForm.aspx?ID=287"&gt;View Item&lt;/a&gt; | 287 |
+| [object Object] | 291 | Hal Jorden  |  1496451 | &lt;a href="../DispForm.aspx?ID=291"&gt;View Item&lt;/a&gt; | 291 |
+| [object Object] | 292 | Barry Allen |  1496452 | &lt;a href="../DispForm.aspx?ID=292"&gt;View Item&lt;/a&gt; | 292 |
+'--------------------------------------------------------------------------------------------------------'
+</code></pre>
 					</div>
 
 	            </div>
 	            <div id="GroupASub2" class="subgroup">
-	                <h4>Create Items</h4>
+	                <h3>Create Items</h3>
 					<div>
-						<code>sprLib.list(listName).create(item)</code> - Create new item in the List/Library
+<pre><code class="language-javascript">sprLib.list('Employees')
+sprLib.list('Employees')
+.create({ Name:'Marty McFly', Badge_x0020_Number:12345, Hire_x0020_Date:new Date() })
+.then(function(objItem){ console.log('New Item:'); console.table(objItem); })
+.catch(function(strErr){ console.error(strErr); });
+</code></pre>
 					</div>
 				</div>
 				<div id="GroupASub3" class="subgroup">
-	                <h4>Update Items</h4>
+	                <h3>Update Items</h3>
 					<div>
 						<code>sprLib.list(listName).update(item)</code> - Update the existing item using the data provided
 					</div>
 				</div>
 				<div id="GroupASub4" class="subgroup">
-	                <h4>Update Items</h4>
+	                <h3>Delete Items</h3>
 					<div>
 						<code>sprLib.list(listName).delete(item)</code> - Delete the item (permanently delete)
 					</div>
 				</div>
 				<div id="GroupASub5" class="subgroup">
-	                <h4>Update Items</h4>
+	                <h3>Recycle Items</h3>
 					<div>
 						<code>sprLib.list(listName).recycle(item)</code> - Recycle the item (move into the Recycle Bin)
 					</div>
@@ -228,13 +321,13 @@ sprLib.list('Employees')
 	        <section id="GroupB" class="group">
 	            <h3>List and Library Utility Methods</h3>
 				<div id="GroupBSub1" class="subgroup">
-	                <h4>Update Items</h4>
+	                <h4>Column Info</h4>
 					<div>
 						<code>sprLib.list(listName).cols()</code> - Returns an array of column objects with useful info (name, datatype, etc.)
 					</div>
 				</div>
 				<div id="GroupBSub2" class="subgroup">
-	                <h4>Update Items</h4>
+	                <h4>List Info</h4>
 					<div>
 						<code>sprLib.list(listName).info()</code> - Returns information about the list (GUID, numberOfItems, etc.)
 					</div>
