@@ -1,8 +1,8 @@
 /*
  * NAME: qunit-test.js
- * DESC: tests for qunit-test.html (coded to the gitbrent O365 Dev Site)
+ * DESC: tests for qunit-test.html (coded to my O365 Dev Site - YMMV)
  * AUTH: https://github.com/gitbrent/
- * DATE: May 25, 2017
+ * DATE: May 31, 2017
  *
  * HOWTO: Generate text tables for README etc.:
  * sprLib.list('Employees').getItems(['Id', 'Name', 'Badge_x0020_Number']).then(function(arrData){ console.log(getAsciiTableStr(arrData)) });
@@ -10,6 +10,7 @@
  // REALITY-CHECK:
  // QUnit.test("QUnit Base Test", function(assert){ assert.ok( true === true, "Passed!" ); });
  */
+
 var RESTROOT = '/sites/dev';
 var gNewEmpItem = -1;
 var gTestUserId = 9;
@@ -334,7 +335,7 @@ QUnit.module( "LIST > ITEM GET Methods" );
 		.then(function(arrayResults){
 			assert.ok( arrayResults.length > 0                 , "arrayResults is an Array and length > 0: "+ arrayResults.length );
 			assert.ok( (arrayResults[0].__metadata.id)         , "arrayResults[0].__metadata.id exists: "+ JSON.stringify(arrayResults[0].__metadata.id) );
-			assert.ok( Object.keys(arrayResults[0]).length == 5, "arrayResults[0] has length == 5: "+ Object.keys(arrayResults[0]).length );
+			assert.ok( Object.keys(arrayResults[0]).length == 4, "arrayResults[0] has length == 4: "+ Object.keys(arrayResults[0]).length );
 			assert.ok( getAsciiTableStr(arrayResults)          , `RESULTS:\n${getAsciiTableStr(arrayResults)}`);
 			done();
 		})
@@ -357,6 +358,7 @@ QUnit.module( "LIST > ITEM GET Methods" );
 			}
 		})
 		.then(function(arrayResults){
+			assert.ok( Object.keys(arrayResults[0]).length == 5, "arrayResults[0] has length == 5: "+ Object.keys(arrayResults[0]).length );
 			assert.ok(
 				'"'+arrayResults[0].funcTest+'"' == '"'+arrayResults[0].name+':'+arrayResults[0].badgeNum+'"',
 				"dataFunc result is accurate: "+ arrayResults[0].funcTest +" == "+ arrayResults[0].name+':'+arrayResults[0].badgeNum
@@ -369,6 +371,19 @@ QUnit.module( "LIST > ITEM GET Methods" );
 			done();
 		});
 	});
+
+	// TODO: querySkip
+	/*
+	sprLib.list('Departments')
+	.getItems({
+		listCols:['Id', 'Title'],
+		queryOrderby: 'Id',
+		querySkip: 5
+	})
+	.then(function(arrayResults){
+		console.log( arrayResults );
+	});
+	*/
 }
 
 // ================================================================================================
@@ -465,6 +480,8 @@ QUnit.module( "USER Methods" );
 		});
 	});
 }
+
+// TODO: Add Utility method
 
 
 // NEGATIVE TEST:

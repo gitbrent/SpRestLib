@@ -29,7 +29,7 @@
 
 /*
 v1.0.0 DEVLIST:
-	* Add `$skip`
+	* Add `$skip` (https://sharepoint.stackexchange.com/questions/45719/paging-using-rest-odata-with-sp-2013)
 	* Add `Intl` (i18n) support (its supported in IE11!!) - Date and Currency formats are awesome (can we add Direction for our R->L users too?)
 	* Add logic we learned the hard way where FILTER cant have true/false but uses 0/1 due to MS bug (still needed?)
 v.FUTURE:
@@ -42,7 +42,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 (function(){
 	// APP VERSION/BUILD
 	var APP_VER = "0.11.0";
-	var APP_BLD = "20170531";
+	var APP_BLD = "20170602";
 	var DEBUG = false; // (verbose mode/lots of logging. FIXME:remove prior to v1.0.0)
 	// APP FUNCTIONALITY
 	var APP_FILTEROPS = {
@@ -940,7 +940,6 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 								if ( objId ) {
 									inObj.spObjData[objId] = objRow;
 									inObj.spObjMeta[objId] = ( result.__metadata || {} );
-									objRow.Id = objId;
 								}
 								inObj.spArrData.push( objRow );
 							});
