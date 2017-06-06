@@ -78,6 +78,9 @@
 		    padding-top: 50px;
 		    margin-top: -50px;
 		}
+		/* ===== */
+		.result > pre { overflow-x: scroll; }
+		.result > pre code { white-space: pre !important; }
 	</style>
 
 	<script src="../js/jquery.js"></script>
@@ -133,7 +136,7 @@
 	<!-- Main Content -->
 	<div class="row MainContent">
 	    <!--Side Nav Bar -->
-	    <nav class="col-xs-3 bs-docs-sidebar">
+	    <nav class="col-xs-2 bs-docs-sidebar">
 	        <ul id="sidebar" class="nav nav-stacked fixed">
 				<li>
 	                <a href="#Group0">Introduction</a>
@@ -170,25 +173,25 @@
 	                <a href="#GroupD">REST Methods</a>
 	                <ul class="nav nav-stacked">
 	                    <li><a href="#GroupDSub1">REST API Calls</a></li>
-	                    <li><a href="#GroupDSub2">Sub-Group 2</a></li>
 	                </ul>
 	            </li>
 				<li>
 	                <a href="#GroupE">Form Binding/Population</a>
 	                <ul class="nav nav-stacked">
-	                    <li><a href="#GroupESub1">Sub-Group 1</a></li>
-	                    <li><a href="#GroupESub2">Sub-Group 2</a></li>
+						<li><a href="#GroupESub1">Static Elements</a></li>
+						<li><a href="#GroupESub2">Select Elements</a></li>
+	                    <li><a href="#GroupESub3">Table Elements</a></li>
 	                </ul>
 	            </li>
 	        </ul>
 	    </nav>
 
 	    <!--Main Content -->
-	    <div class="col-xs-9">
+	    <div class="col-xs-10">
 			<section id="Group0" class="group">
 	            <h2>Introduction</h2>
 
-				<h4>SpRestLib is a jQuery library that abstracts SharePoint Web Service/REST fucntionality into a lightweight API.</h4>
+				<h4>SpRestLib is a jQuery library for SharePoint 2013+ that abstracts SharePoint Web Service/REST functionality into a lightweight API.</h4>
 
 	            <div id="Group0Sub1" class="subgroup">
 					<h3>Library Setup</h3>
@@ -208,21 +211,24 @@ var sprLib = require("sprestlib");
 
 	            <div id="Group0Sub2" class="subgroup">
 					<h3>Asyncronous Calls</h3>
-					<p>All of the SpRestLib methods return JavaScript Promises, which provide two main benefits:</p>
-					<ul>
+					<h4>Promises replace Callbacks</h4>
+					<h5>All of the SpRestLib methods return <a href="http://www.datchley.name/es6-promises/">JavaScript Promises</a>,
+						which provide two main benefits:</h5>
+					<ol>
 						<li>No more callback functions</li>
 						<li>No more managing async operations</li>
-					</ul>
+					</ol>
 					<p>
 						If you're unfamiliar with the new <a href="http://www.datchley.name/es6-promises/">ES6 Promise</a> functionality,
-						you may want to the a moment to read more about them. They really are a game changer for those of us who deal with asynchronous operations.
+						you will want to a moment to read more about them. They offer a whole new paradigm for dealing with asynchronous operations.
 					</p>
 					<p>
-						All major browsers (and Node.js) now fully support ES6 Promises, and they're why all the <code>.then()</code> code below.
+						All major browsers and Node.js now fully support ES6 Promises, and they're the reason for all of the <code>.then()</code> code below.
 					</p>
 					<div style="background:#fffccc; padding:20px;">
-						<div><b>tl;dr;</b></div>
-						Promises can be chained together and will execute only after the previous asyncronous operation completes
+						<h4 style="margin-top:auto">Short Version: Async Promise Results Make Your Life Better and Easier</h4>
+						Asyncronous operations return Promises which can be chained together and will execute only after the
+						previous asyncronous operation completes, or they can be grouped to run at once then advance once all are completed.
 					</p>
 				</div>
 			</section>
@@ -239,7 +245,6 @@ var sprLib = require("sprestlib");
 					<li>Either List Name or List GUID can be used</li>
 					<li>Results are an array of item objects</li>
 				</ul>
-
 
 	            <div id="GroupASub1" class="subgroup">
 	                <h3>Get Items</h3>
@@ -340,22 +345,27 @@ sprLib.list('Employees')
 	        </section>
 
 	        <section id="GroupB" class="group">
-	            <h3>List and Library Utility Methods</h3>
+	            <h2>List and Library Utility Methods</h2>
 				<div id="GroupBSub1" class="subgroup">
-	                <h4>List Info</h4>
+	                <h3>List Properties</h3>
+					<h4>Returns the List/Library GUID, and other useful metadata about the List itself.</h4>
+
 					<div>
 						<code>sprLib.list(listName).info()</code> - Returns information about the list (GUID, numberOfItems, etc.)
 					</div>
 				</div>
 				<div id="GroupBSub2" class="subgroup">
-	                <h4>Column Info</h4>
+	                <h3>Column Info</h3>
 
-<h4>Get information about a List's columns</h4>
+<h4>HowTo Get a List/Library Column Information</h4>
+<h5>Find metadata about each column in a List/Library including datatype, uniqueness, max length, default value, etc.</h5>
+
 <pre><code class="language-javascript">sprLib.list('Employees').cols()
 .then(function(data){ console.table(data) });
 </code></pre>
 
 <h4>Results</h4>
+<div class="result">
 <pre><code>.--------------------------------------------------------------------------------------------------------------------------------------------------.
 |      dispName      |         dataName         |  dataType  | isAppend | isNumPct | isReadOnly | isRequired | isUnique | defaultValue | maxLength |
 |--------------------|--------------------------|------------|----------|----------|------------|------------|----------|--------------|-----------|
@@ -365,9 +375,7 @@ sprLib.list('Employees')
 | ID                 | ID                       | Counter    | false    | false    | true       | false      | false    |              |           |
 '--------------------------------------------------------------------------------------------------------------------------------------------------'
 </code></pre>
-					<div>
-						<code>sprLib.list(listName).cols()</code> - Returns an array of column objects with useful info (name, datatype, etc.)
-					</div>
+</div>
 				</div>
 	        </section>
 
@@ -384,20 +392,31 @@ sprLib.list('Employees')
 			<section id="GroupD" class="group">
 	            <h3>REST API Calls</h3>
 	            <div id="GroupDSub1" class="subgroup">
-	                <h4>Group D Sub 1</h4>
-	            </div>
-	            <div id="GroupDSub2" class="subgroup">
-	                <h4>Group D Sub 2</h4>
+	                <h4>Make any ad-hoc Call to REST/OData endpoints</h4>
 	            </div>
 	        </section>
 
 			<section id="GroupE" class="group">
 	            <h3>Form Binding/Population</h3>
 	            <div id="GroupESub1" class="subgroup">
-	                <h4>Group E Sub 1</h4>
+	                <h4>Static Elements</h4>
 	            </div>
 	            <div id="GroupESub2" class="subgroup">
-	                <h4>Group E Sub 2</h4>
+	                <h4>Select Elements</h4>
+	            </div>
+				<div id="GroupESub3" class="subgroup">
+	                <h4>Table Elements</h4>
+
+
+					&lt;select data-sprlib='{ "list":"Employees", "value":"Id", "text":"Name" }'&gt;&lt;/select&gt;
+
+					&lt;input type="text" data-sprlib='{ "list":"Departments", "value":"Title" }' placeholder="Departments.Title"&gt;&lt;/input&gt;
+
+					&lt;span data-sprlib='{ "list":"Employees", "value":"Name", "filter":{"col":"Name", "op":"eq", "val":"Brent Ely"} }'&gt;&lt;/span&gt;
+
+					&lt;table data-sprlib='{ "foreach": {"list":"Employees", "filter":{"col":"Badge_x0020_Number", "op":"eq", "val":1234}}, "options":{"showBusySpinner":true} }'&gt;
+					&lt;tbody data-sprlib='{ "foreach": {"list":"Employees", "cols":["Name","Utilization_x0020_Pct"] } }'&gt;&lt;/tbody&gt;
+
 	            </div>
 	        </section>
 	    </div>
