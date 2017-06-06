@@ -26,9 +26,11 @@ function getAsciiTableStr(arrayResults) {
 
 	let table = new AsciiTable().setHeading( arrColHeadings );
 
-	$.each(arrayResults,function(idx,obj){
+	arrayResults.forEach(function(obj,idx){
 		let vals = [];
-		$.each(obj, function(key,val){ vals.push(val) });
+		$.each(obj, function(key,val){
+			vals.push( ( typeof val === 'object' && key != '__metadata' ? JSON.stringify(val) : val ) );
+		});
 		table.addRow(vals);
 	});
 
@@ -371,6 +373,81 @@ QUnit.module( "LIST > ITEM GET Methods" );
 			done();
 		});
 	});
+
+	QUnit.test("sprLib.getListItems() 6: `listCols` with column array: Multi-Lookup test `Id`", function(assert){
+		var done = assert.async();
+		// TEST:
+		sprLib.list('Employees')
+		.getItems({
+			listCols: ['Name', 'Manager/Title', 'Departments_x0020_Supported/Id'],
+			queryFilter: 'Badge_x0020_Number eq 100'
+		})
+		.then(function(arrayResults){
+			assert.ok( Object.keys(arrayResults[0]).length == 4, "arrayResults[0] has length == 4: "+ Object.keys(arrayResults[0]).length );
+			assert.ok(
+				!isNaN( arrayResults[0].Departments_x0020_Supported[0].Id ),
+				"arrayResults[0].Departments_x0020_Supported[0].Id is a number: "+ arrayResults[0].Departments_x0020_Supported[0].Id
+			);
+			assert.ok( getAsciiTableStr(arrayResults), `RESULTS:\n${getAsciiTableStr(arrayResults)}`);
+			done();
+		})
+		.catch(function(errorMessage){
+			assert.ok( (false), errorMessage );
+			done();
+		});
+	});
+
+	QUnit.test("sprLib.getListItems() 7: `listCols` with column array: Multi-Lookup test with 2 fields (`Id`, `Title`)", function(assert){
+		var done = assert.async();
+		// TEST:
+		sprLib.list('Employees')
+		.getItems({
+			listCols: ['Name', 'Departments_x0020_Supported/Id', 'Departments_x0020_Supported/Title'],
+			queryFilter: 'Badge_x0020_Number eq 100'
+		})
+		.then(function(arrayResults){
+			assert.ok( Object.keys(arrayResults[0]).length == 4, "arrayResults[0] has length == 4: "+ Object.keys(arrayResults[0]).length );
+			assert.ok(
+				!isNaN( arrayResults[0].Departments_x0020_Supported[0].Id ),
+				"arrayResults[0].Departments_x0020_Supported[0].Id is a number: "+ arrayResults[0].Departments_x0020_Supported[0].Id
+			);
+			assert.ok(
+				(arrayResults[0].Departments_x0020_Supported[0].Title),
+				"arrayResults[0].Departments_x0020_Supported[0].Title exists: "+ arrayResults[0].Departments_x0020_Supported[0].Title
+			);
+			assert.ok( getAsciiTableStr(arrayResults), `RESULTS:\n${getAsciiTableStr(arrayResults)}`);
+			done();
+		})
+		.catch(function(errorMessage){
+			assert.ok( (false), errorMessage );
+			done();
+		});
+	});
+
+	QUnit.test("sprLib.getListItems() 8: `listCols` with named columns: Multi-Lookup test `Id`", function(assert){
+		var done = assert.async();
+		// TEST:
+		sprLib.list('Employees')
+		.getItems({
+			listCols: {
+				empName:  { dataName:'Name'          },
+				mgrTitle: { dataName:'Manager/Title' },
+				depsArr:  { dataName:'Departments_x0020_Supported/Id' }
+			},
+			queryFilter: 'Badge_x0020_Number eq 100'
+		})
+		.then(function(arrayResults){
+			assert.ok( Object.keys(arrayResults[0]).length == 4, "arrayResults[0] has length == 4: "+ Object.keys(arrayResults[0]).length );
+			assert.ok( !isNaN(arrayResults[0].depsArr[0].Id), "arrayResults[0].depsArr[0].Id is a number: "+ arrayResults[0].depsArr[0].Id );
+			assert.ok( getAsciiTableStr(arrayResults), `RESULTS:\n${getAsciiTableStr(arrayResults)}`);
+			done();
+		})
+		.catch(function(errorMessage){
+			assert.ok( (false), errorMessage );
+			done();
+		});
+	});
+
 
 	// TODO: querySkip
 	/*

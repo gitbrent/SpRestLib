@@ -42,7 +42,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 (function(){
 	// APP VERSION/BUILD
 	var APP_VER = "0.11.0";
-	var APP_BLD = "20170602";
+	var APP_BLD = "20170606";
 	var DEBUG = false; // (verbose mode/lots of logging. FIXME:remove prior to v1.0.0)
 	// APP FUNCTIONALITY
 	var APP_FILTEROPS = {
@@ -79,6 +79,11 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 			"false" : "नहीं",
 			"noRows": "(कोई पंक्तियाँ)",
 			"true"  : "हाँ"
+		},
+		"jp": {
+			"false" : "偽",
+			"noRows": "(行がありません)",
+			"true"  : "真実"
 		}
 	};
 
@@ -887,7 +892,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 							var arrResults = (data.d.results || data);
 
 							// A: Add all cols is none provided (aka:"fetch all")
-							if ( !inObj.listCols || Object.keys(inObj.listCols).length == 0 && arrResults.length > 0 ) {
+							if ( (!inObj.listCols || Object.keys(inObj.listCols).length == 0) && arrResults.length > 0 ) {
 								var objListCols = {};
 								Object.keys(arrResults[0]).forEach(function(colStr,i){
 									if ( typeof arrResults[0][colStr] !== 'object' ) objListCols[colStr.replace('/','')] = { dataName:colStr };
@@ -918,7 +923,22 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 									var colVal = "";
 
 									// A3-1: Get value for this key
-									if ( col.dataName ) {
+									// Handle LookupMulti columns
+									if ( col.dataName && col.dataName.indexOf('/') > -1 && result[col.dataName.split('/')[0]].results ) {
+
+										// TODO: we need to name after custom key "depsArr" not just "Departments_x0020_Supported"!!
+										// TODO: check for custom key, then use DataNAme
+										//console.log(key + " ... "+ col.dataName);
+
+										key = col.dataName.split('/')[0];
+										colVal = [];
+										result[key].results.forEach(function(obj,idx){
+											var objItem = {};
+											objItem[col.dataName.split('/')[1]] = obj[col.dataName.split('/')[1]];
+											colVal.push( objItem );
+										});
+									}
+									else if ( col.dataName ) {
 										arrCol = col.dataName.replace(/\//gi,'.').split('.');
 										colVal = ( arrCol.length > 1 ? result[arrCol[0]][arrCol[1]] : result[arrCol[0]] );
 									}
