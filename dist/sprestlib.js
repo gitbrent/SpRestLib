@@ -932,20 +932,13 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 
 									// Handle LookupMulti columns
 									if ( col.dataName && col.dataName.indexOf('/') > -1 && result[col.dataName.split('/')[0]].results ) {
+										// A:
 										// NOTE: `listCols` can have "Dept/Id" and "Dept/Title", but SP only returns *ONE* result
 										// ....: So, skip any subsequnt listCol once results have been captured
 										if ( objRow[key] ) return;
 
-										// A: Default for this column type is empty array
+										// B: Default for this column type is empty array
 										colVal = [];
-
-										// TODO: we need to name after custom key "depsArr" not just "Departments_x0020_Supported"!!
-										// TODO: check for custom key, then use DataName
-										//console.log(key +" ... "+ col.dataName);
-
-										// B: Set key to base value - Ex:'Departments/Title'
-										//key = ( key.indexOf('/') > -1 ? col.dataName.split('/')[0] : key );
-										//console.log(key);
 
 										// C: Add any results
 										result[col.dataName.split('/')[0]].results.forEach(function(objResult,idx){
@@ -1351,10 +1344,14 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 				if ( typeof inOpt.queryCols === 'string' ) inOpt.queryCols = [ inOpt.queryCols ];
 
 				// B: Build query object
-				if ( inOpt.queryCols && $.isArray(inOpt.queryCols) ) {
-					var listCols = {};
-					$.each(inOpt.queryCols, function(i,colStr){ listCols[colStr] = { dataName:colStr } });
-					inOpt.queryCols = listCols;
+				if ( inOpt.queryCols && Array.isArray(inOpt.queryCols) ) {
+					var objListCols = {};
+					inOpt.queryCols.forEach(function(colStr,i){
+						var strTmp = ( colStr.indexOf('/') > -1 ? colStr.substring(0,colStr.indexOf('/')) : colStr );
+						// Handle cases where there are 2 expands from same column. Ex: 'Manager/Id' and 'Manager/Title'
+						objListCols[strTmp] = ( objListCols[strTmp] ? { dataName:objListCols[strTmp].dataName+','+colStr } : { dataName:colStr } );
+					});
+					inOpt.queryCols = objListCols;
 				}
 
 				// C: Add columns
@@ -1392,15 +1389,48 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 
 				// A: Depending upon which REST endpoint used, SP can return results in various ways... (!)
 
-				// data.d.results is an [] of {}: [ {Title:'Brent', Email:'Brent.Ely@microsoft.com'}, {}, {} ]
+				// data.d.results is an [] of {}: [ {Title:'Brent Ely', Email:'Brent.Ely@microsoft.com'}, {}, {} ]
 				if ( data && data.d && data.d.results ) {
 					$.each(data.d.results, function(key,result){
 						var objRow = {};
 
 						if ( inOpt.queryCols ) {
 							$.each(inOpt.queryCols, function(key,col){
-								var arrCol = col.dataName.replace(/\//gi,'.').split('.');
-								var colVal = ( arrCol.length > 1 ? result[arrCol[0]][arrCol[1]] : result[arrCol[0]] );
+								var arrCol = [];
+								var colVal = "";
+
+								// B.3.1: Get value(s) for this key
+
+								// Handle LookupMulti columns
+								if ( col.dataName && col.dataName.indexOf('/') > -1 && result[col.dataName.split('/')[0]].results ) {
+									// A:
+									// NOTE: `listCols` can have "Dept/Id" and "Dept/Title", but SP only returns *ONE* result
+									// ....: So, skip any subsequnt listCol once results have been captured
+									if ( objRow[key] ) return;
+
+									// B: Default for this column type is empty array
+									colVal = [];
+
+									// C: Add any results
+									result[col.dataName.split('/')[0]].results.forEach(function(objResult,idx){
+										// EX: {__metadata:Object, Id:2, Title:"Human Resources"}
+										if ( objResult.__metadata ) delete objResult.__metadata;
+										// Capture any-and-all columns returned (aside from removal of above)
+										colVal.push( objResult );
+									});
+								}
+								// Handle Lookup/Person/Url/etc. Ex: 'Manager/Title'
+								else if ( col.dataName && col.dataName.indexOf('/') > -1 ) {
+									arrCol = col.dataName.split('/');
+									if ( result[ arrCol[0] ].__metadata ) delete result[ arrCol[0] ].__metadata;
+									// Capture any-and-all columns returned (aside from removal of above)
+									colVal = result[ arrCol[0] ];
+								}
+								else if ( col.dataName ) {
+									arrCol = col.dataName.split('/');
+									colVal = ( arrCol.length > 1 ? result[arrCol[0]][arrCol[1]] : result[arrCol[0]] );
+								}
+
 								// DESIGN: Not all values can be taken at return value - things like dates have to be turned into actual Date objects
 								if ( col.dataType == 'DateTime' ) objRow[key] = new Date(colVal);
 								else objRow[key] = ( APP_OPTS.cleanColHtml && col.listDataType == 'string' ? colVal.replace(/<div(.|\n)*?>/gi,'').replace(/<\/div>/gi,'') : colVal );
