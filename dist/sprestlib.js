@@ -773,7 +773,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 				var listGUID = '';
 
 				// FIRST: Param check
-				// N/A for this Method: `getItems()` does not req any opts/params, however we do need a valid inObj, so if needed
+				// N/A for this Method: `getItems()` does not req any opts/params, however we do need a valid inObj, so create if needed
 				if ( !inObj || typeof inObj !== 'object' ) inObj = {};
 				if ( !inObj.listCols ) inObj.listCols = ( Array.isArray(inObj) ? inObj : [] );
 
@@ -790,7 +790,11 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 				// B: Next, turn array of col names into `listCols` object
 				if ( Array.isArray(inObj.listCols) ) {
 					var objListCols = {};
-					inObj.listCols.forEach(function(colStr,i){ objListCols[colStr.replace('/','')] = { dataName:colStr } });
+					inObj.listCols.forEach(function(colStr,i){
+						var strTmp = ( colStr.indexOf('/') > -1 ? colStr.substring(0,colStr.indexOf('/')) : colStr );
+						// Handle cases where there are 2 expands from same column. Ex: 'Manager/Id' and 'Manager/Title'
+						objListCols[strTmp] = ( objListCols[strTmp] ? { dataName:objListCols[strTmp].dataName+','+colStr } : { dataName:colStr } );
+					});
 					inObj.listCols = objListCols;
 				}
 
@@ -895,18 +899,20 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 							if ( (!inObj.listCols || Object.keys(inObj.listCols).length == 0) && arrResults.length > 0 ) {
 								var objListCols = {};
 								Object.keys(arrResults[0]).forEach(function(colStr,i){
-									if ( typeof arrResults[0][colStr] !== 'object' ) objListCols[colStr.replace('/','')] = { dataName:colStr };
+									if ( typeof arrResults[0][colStr] !== 'object' ) {
+										objListCols[colStr] = { dataName:colStr };
+									}
 								});
 								inObj.listCols = objListCols;
 							}
 
 							// B: Iterate over results and capture them
 							arrResults.forEach(function(result,idx){
-								// 1: Create row object JSON
+								// B.1: Create row object
 								var objRow = {};
 								var objId = 0;
 
-								// 2: Add {Id} and {__metadata} (if any returned)
+								// B.2: Capture `Id` and `__metadata` (if any)
 								if ( result.__metadata ) {
 									// Capture metadata
 									objRow['__metadata'] = result.__metadata;
@@ -917,36 +923,53 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 									}
 								}
 
-								// 3: Capture query results
+								// B.3: Capture query results
 								$.each(inObj.listCols, function(key,col){
 									var arrCol = [];
 									var colVal = "";
 
-									// A3-1: Get value for this key
+									// B.3.1: Get value(s) for this key
+
 									// Handle LookupMulti columns
 									if ( col.dataName && col.dataName.indexOf('/') > -1 && result[col.dataName.split('/')[0]].results ) {
+										// NOTE: `listCols` can have "Dept/Id" and "Dept/Title", but SP only returns *ONE* result
+										// ....: So, skip any subsequnt listCol once results have been captured
+										if ( objRow[key] ) return;
+
+										// A: Default for this column type is empty array
+										colVal = [];
 
 										// TODO: we need to name after custom key "depsArr" not just "Departments_x0020_Supported"!!
-										// TODO: check for custom key, then use DataNAme
-										//console.log(key + " ... "+ col.dataName);
+										// TODO: check for custom key, then use DataName
+										//console.log(key +" ... "+ col.dataName);
 
-										key = col.dataName.split('/')[0];
-										colVal = [];
-										result[key].results.forEach(function(obj,idx){
-											var objItem = {};
-											objItem[col.dataName.split('/')[1]] = obj[col.dataName.split('/')[1]];
-											colVal.push( objItem );
+										// B: Set key to base value - Ex:'Departments/Title'
+										//key = ( key.indexOf('/') > -1 ? col.dataName.split('/')[0] : key );
+										//console.log(key);
+
+										// C: Add any results
+										result[col.dataName.split('/')[0]].results.forEach(function(objResult,idx){
+											// EX: {__metadata:Object, Id:2, Title:"Human Resources"}
+											if ( objResult.__metadata ) delete objResult.__metadata;
+											// Capture any-and-all columns returned (aside from removal of above)
+											colVal.push( objResult );
 										});
 									}
+									// Handle Lookup/Person/Url/etc. Ex: 'Manager/Title'
+									else if ( col.dataName && col.dataName.indexOf('/') > -1 ) {
+										arrCol = col.dataName.split('/');
+										if ( result[ arrCol[0] ].__metadata ) delete result[ arrCol[0] ].__metadata;
+										// Capture any-and-all columns returned (aside from removal of above)
+										colVal = result[ arrCol[0] ];
+									}
 									else if ( col.dataName ) {
-										arrCol = col.dataName.replace(/\//gi,'.').split('.');
-										colVal = ( arrCol.length > 1 ? result[arrCol[0]][arrCol[1]] : result[arrCol[0]] );
+										colVal = result[col.dataName];
 									}
 									else if ( col.dataFunc ) {
 										colVal = col.dataFunc(result);
 									}
 
-									// A3-2: Set value for this key
+									// B.3.2: Set value for this key
 									// NOTE: Not all values can be taken at return value (dates->Date objects, etc.), so convert when needed
 									if ( col.dataType == 'DateTime' ) {
 										objRow[key] = new Date(colVal);
@@ -956,12 +979,14 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 									}
 								});
 
-								// 4: Store data as array and as object (for lookups so we dont have to spArrData.filter) if Id exists
+								// 4: Set data
+								// 4.A: Result row
+								inObj.spArrData.push( objRow );
+								// 4.B: Create data object if we have ID (for lookups w/o spArrData.filter)
 								if ( objId ) {
 									inObj.spObjData[objId] = objRow;
 									inObj.spObjMeta[objId] = ( result.__metadata || {} );
 								}
-								inObj.spArrData.push( objRow );
 							});
 
 							// LAST:

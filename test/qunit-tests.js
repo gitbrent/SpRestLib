@@ -302,7 +302,7 @@ QUnit.module( "LIST > ITEM GET Methods" );
 		});
 	});
 
-	QUnit.test("sprLib.getListItems() 3: `listCols` with simple array of col names (w Person object)", function(assert){
+	QUnit.test("sprLib.getListItems() 3: `listCols` with simple array of col names (Manager/Title)", function(assert){
 		var done = assert.async();
 		// TEST:
 		sprLib.list('Employees')
@@ -310,10 +310,9 @@ QUnit.module( "LIST > ITEM GET Methods" );
 			listCols:['Id', 'Name', 'Manager/Title']
 		})
 		.then(function(arrayResults){
-			assert.ok( arrayResults.length > 0                 , "arrayResults is an Array and length > 0: "+ arrayResults.length );
-			assert.ok( (arrayResults[0].__metadata.id)         , "arrayResults[0].__metadata.id exists: "+ JSON.stringify(arrayResults[0].__metadata.id) );
 			assert.ok( Object.keys(arrayResults[0]).length == 4, "arrayResults[0] has length == 4: "+ Object.keys(arrayResults[0]).length );
-			assert.ok( Object.keys(arrayResults[0]).indexOf('ManagerTitle') > -1, "'Manager/Title' -> 'ManagerTitle': "+ Object.keys(arrayResults[0]).indexOf('ManagerTitle') );
+			assert.ok( (arrayResults[0].__metadata.id)         , "arrayResults[0].__metadata.id exists: "+ JSON.stringify(arrayResults[0].__metadata.id) );
+			assert.ok( (arrayResults[0].Manager.Title)         , "arrayResults[0].Manager.Title exists: "+ JSON.stringify(arrayResults[0].Manager.Title) );
 			assert.ok( getAsciiTableStr(arrayResults)          , `RESULTS:\n${getAsciiTableStr(arrayResults)}`);
 			done();
 		})
@@ -323,7 +322,28 @@ QUnit.module( "LIST > ITEM GET Methods" );
 		});
 	});
 
-	QUnit.test("sprLib.getListItems() 4: `listCols` with named columns", function(assert){
+	QUnit.test("sprLib.getListItems() 4: `listCols` with simple array of col names (Manager/Id and Manager/Title)", function(assert){
+		var done = assert.async();
+		// TEST:
+		sprLib.list('Employees')
+		.getItems({
+			listCols:['Id', 'Name', 'Manager/Id', 'Manager/Title']
+		})
+		.then(function(arrayResults){
+			assert.ok( Object.keys(arrayResults[0]).length == 4, "arrayResults[0] has length == 4: "+ Object.keys(arrayResults[0]).length );
+			assert.ok( (arrayResults[0].__metadata.id)         , "arrayResults[0].__metadata.id exists: "+ JSON.stringify(arrayResults[0].__metadata.id) );
+			assert.ok( (arrayResults[0].Manager.Id)            , "arrayResults[0].Manager.Id exists: "+ JSON.stringify(arrayResults[0].Manager.Id) );
+			assert.ok( (arrayResults[0].Manager.Title)         , "arrayResults[0].Manager.Title exists: "+ JSON.stringify(arrayResults[0].Manager.Title) );
+			assert.ok( getAsciiTableStr(arrayResults)          , `RESULTS:\n${getAsciiTableStr(arrayResults)}`);
+			done();
+		})
+		.catch(function(errorMessage){
+			assert.ok( (false), errorMessage );
+			done();
+		});
+	});
+
+	QUnit.test("sprLib.getListItems() 5: `listCols` with named columns", function(assert){
 		var done = assert.async();
 		// TEST:
 		sprLib.list('Employees')
@@ -338,6 +358,7 @@ QUnit.module( "LIST > ITEM GET Methods" );
 			assert.ok( arrayResults.length > 0                 , "arrayResults is an Array and length > 0: "+ arrayResults.length );
 			assert.ok( (arrayResults[0].__metadata.id)         , "arrayResults[0].__metadata.id exists: "+ JSON.stringify(arrayResults[0].__metadata.id) );
 			assert.ok( Object.keys(arrayResults[0]).length == 4, "arrayResults[0] has length == 4: "+ Object.keys(arrayResults[0]).length );
+			assert.ok( (arrayResults[0].badgeNum),               "named column returned: arrayResults[0].badgeNum: "+ arrayResults[0].badgeNum );
 			assert.ok( getAsciiTableStr(arrayResults)          , `RESULTS:\n${getAsciiTableStr(arrayResults)}`);
 			done();
 		})
@@ -347,7 +368,7 @@ QUnit.module( "LIST > ITEM GET Methods" );
 		});
 	});
 
-	QUnit.test("sprLib.getListItems() 5: `dataFunc` tests", function(assert){
+	QUnit.test("sprLib.getListItems() 6: `dataFunc` tests", function(assert){
 		var done = assert.async();
 		// TEST:
 		sprLib.list('Employees')
@@ -374,7 +395,7 @@ QUnit.module( "LIST > ITEM GET Methods" );
 		});
 	});
 
-	QUnit.test("sprLib.getListItems() 6: `listCols` with column array: Multi-Lookup test `Id`", function(assert){
+	QUnit.test("sprLib.getListItems() 7: `listCols` with column array: Multi-Lookup test `Id`", function(assert){
 		var done = assert.async();
 		// TEST:
 		sprLib.list('Employees')
@@ -397,7 +418,7 @@ QUnit.module( "LIST > ITEM GET Methods" );
 		});
 	});
 
-	QUnit.test("sprLib.getListItems() 7: `listCols` with column array: Multi-Lookup test with 2 fields (`Id`, `Title`)", function(assert){
+	QUnit.test("sprLib.getListItems() 8: `listCols` with column array: Multi-Lookup test with 2 fields (`Id`, `Title`)", function(assert){
 		var done = assert.async();
 		// TEST:
 		sprLib.list('Employees')
@@ -406,7 +427,7 @@ QUnit.module( "LIST > ITEM GET Methods" );
 			queryFilter: 'Badge_x0020_Number eq 100'
 		})
 		.then(function(arrayResults){
-			assert.ok( Object.keys(arrayResults[0]).length == 4, "arrayResults[0] has length == 4: "+ Object.keys(arrayResults[0]).length );
+			assert.ok( Object.keys(arrayResults[0]).length == 3, "arrayResults[0] has length == 3: "+ Object.keys(arrayResults[0]).length );
 			assert.ok(
 				!isNaN( arrayResults[0].Departments_x0020_Supported[0].Id ),
 				"arrayResults[0].Departments_x0020_Supported[0].Id is a number: "+ arrayResults[0].Departments_x0020_Supported[0].Id
@@ -424,7 +445,7 @@ QUnit.module( "LIST > ITEM GET Methods" );
 		});
 	});
 
-	QUnit.test("sprLib.getListItems() 8: `listCols` with named columns: Multi-Lookup test `Id`", function(assert){
+	QUnit.test("sprLib.getListItems() 9: `listCols` with named columns: Multi-Lookup test `Id`", function(assert){
 		var done = assert.async();
 		// TEST:
 		sprLib.list('Employees')
