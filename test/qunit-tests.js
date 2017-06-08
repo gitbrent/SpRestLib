@@ -84,7 +84,7 @@ QUnit.module( "LIST > ITEM CRUD Methods" );
 			done = assert.async();
 			sprLib.list('Employees').create({
 				__metadata: { type:"SP.Data.EmployeesListItem" },
-				Name:                  'QUnit Created',
+				Name:                  'QUnit Test',
 				ManagerId:             gTestUserId,
 				Badge_x0020_Number:    Math.round(new Date().getTime() / 1000000),
 				Hire_x0020_Date:       new Date(),
@@ -92,6 +92,8 @@ QUnit.module( "LIST > ITEM CRUD Methods" );
 				Utilization_x0020_Pct: 1.0,
 				Extension:             (1234+idx).toString(),
 				Comments:              'New employee created',
+				Job_x0020_GradeId:     idx,
+				Departments_x0020_SupportedId: {results: [1, 2, 3]},
 				Active_x003f_:         true
 			})
 			.then(function(newObj){
