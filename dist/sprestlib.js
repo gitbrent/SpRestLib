@@ -253,7 +253,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 						if (DEBUG) {
 							console.log('**Warning** this tag has `data-sprlib` but its data isnt an object or its lacks `list` arg');
 							console.log(data);
-							console.log(`${typeof data}`);
+							console.log(typeof data);
 							console.log( (data.list ? data.list : 'data.list does not exist') );
 						}
 						return; // aka:next
@@ -633,6 +633,19 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 		}
 
 		// STEP 1: Add public methods
+
+		/**
+		* Set baseUrl for this List
+		* - Enables dynamically querying without redefining the library's baseUrl (eg: search subsites)
+		*
+		* @example: sprLib.list('Employees').baseUrl('/sites/dev/brent/')
+		*/
+		_newList.baseUrl = function(strUrl) {
+			if ( strUrl && strUrl.toString().length > 0 ) {
+				_urlBase = strUrl + (strUrl.substring(strUrl.length-2,1) == "/" ? '' : '/') + "_api/lists" + ( guidRegex.test(inName) ? "(guid'"+ inName +"')" : "/getbytitle('"+ inName.replace(/\s/gi,'%20') +"')" );
+				return _newList;
+			}
+		};
 
 		/**
 		* Return array of column objects with info about each (title, REST/internal name, type, etc.)

@@ -39,6 +39,7 @@ Simplify SharePoint REST/Web Service interaction to a few lines of code. Easily 
 - [API Reference](#api-reference)
   - [Options](#options)
   - [List/Library Operations (`SPList`)](#listlibrary-operations-splist)
+    - [Dynamically Setting Base Url](#dynamically-setting-base-url)
     - [Create Item](#create-item)
     - [Update Item](#update-item)
     - [Delete Item](#delete-item)
@@ -133,6 +134,13 @@ var sprLib = require("sprestlib");
 ## List/Library Operations (`SPList`)
 Lists can be accessed by either their name or their GUID:  
 `sprLib.list(ListName)` or `sprLib.list(ListGUID)`
+
+### Dynamically Setting Base Url
+Sometimes you will need to query various subsites, etc. so just having site the baseUrl set at the library-level is not sufficient.
+In these cases, you can dynamically set a baseUrl for a List by using the `baseUrl()` method, then use any List method afterwards.
+
+Syntax:
+`sprLib.list(listName|listGUID).baseUrl('/sites/dev/brent')`
 
 ### Create Item
 Syntax:
