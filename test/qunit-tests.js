@@ -488,6 +488,26 @@ QUnit.module( "LIST > ITEM GET Methods" );
 QUnit.module( "REST Methods" );
 // ================================================================================================
 {
+	// REST
+	QUnit.test("sprLib.rest() ex: '/sites/dev/_api/lists/getbytitle('Employees')/items' with Manager/Title", function(assert){
+		var done = assert.async();
+		// TEST:
+		sprLib.rest({
+			restUrl: "/sites/dev/_api/lists/getbytitle('Employees')/items",
+			queryCols: ['Id', 'Name', 'Manager/Title']
+		})
+		.then(function(arrayResults){
+			assert.ok( Object.keys(arrayResults[0]).length == 3, "arrayResults[0] has length == 3: "+ Object.keys(arrayResults[0]).length );
+			assert.ok( (arrayResults[0].Manager.Title), "arrayResults[0].Manager.Title exists: "+ arrayResults[0].Manager.Title );
+			assert.ok( getAsciiTableStr(arrayResults), `RESULTS:\n${getAsciiTableStr(arrayResults)}` );
+			done();
+		})
+		.catch(function(err){
+			assert.ok( (false), err );
+			done();
+		});
+	});
+
 	// REST endpoints that return `data.d.results` [{}]
 	QUnit.test("sprLib.rest() ex: '/_api/web/sitegroups'", function(assert){
 		var done = assert.async();
@@ -505,12 +525,7 @@ QUnit.module( "REST Methods" );
 		})
 		.then(function(arrayResults){
 			assert.ok( arrayResults.length > 0, "arrayResults is an Array and length > 0: "+ arrayResults.length );
-			//
-			let table = new AsciiTable();
-			if (arrayResults.length > 0) table.setHeading( Object.keys(arrayResults[0]) );
-			$.each(arrayResults,function(idx,obj){ let vals = []; $.each(obj, function(key,val){ vals.push(val) }); table.addRow(vals); });
-			assert.ok( table.toString(), `RESULTS:\n${table.toString()}`);
-			//
+			assert.ok( getAsciiTableStr(arrayResults), `RESULTS:\n${getAsciiTableStr(arrayResults)}` );
 			done();
 		})
 		.catch(function(err){
