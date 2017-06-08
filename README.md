@@ -136,11 +136,11 @@ Lists can be accessed by either their name or their GUID:
 `sprLib.list(ListName)` or `sprLib.list(ListGUID)`
 
 ### Dynamically Setting Base Url
-Sometimes you will need to query various subsites, etc. so just having site the baseUrl set at the library-level is not sufficient.
+Sometimes you will need to query various subsites, etc. so just having the baseUrl set at the library-level is insufficient.
 In these cases, you can dynamically set a baseUrl for a List by using the `baseUrl()` method, then use any List method afterwards.
 
 Syntax:
-`sprLib.list(listName|listGUID).baseUrl('/sites/dev/brent')`
+`sprLib.list(listName|listGUID).baseUrl('/sites/HR/dev')`
 
 ### Create Item
 Syntax:
