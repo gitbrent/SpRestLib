@@ -1,10 +1,22 @@
-/* ========== CSS3 Spinners (https://github.com/tobiasahlin/SpinKit/) ========== */
-.sprlib-spinner { display: block; text-align: center; height: 16px; }
+/*
+ * NAME: sprestlib.css
+ * VER.: 0.11.0
+ * REL.: 20170609
+ * SRC.: [CSS Spinners](https://github.com/tobiasahlin/SpinKit/)
+ */
+.sprlib-spinner {
+	display: block;
+	height: 16px;
+	text-align: center;
+	white-space: nowrap;
+}
 .sprlib-spinner > div {
 	display: inline-block;
-	animation: sprlib-sk-bouncedelay 1.4s infinite ease-in-out both;
 	width:16px; height:16px;
-	background-color: #40b0df; border-radius: 100%; border: 3px solid #f2f9fc;
+	background-color: #40b0df;
+	border: 3px solid #f2f9fc;
+	border-radius: 100%;
+	animation: sprlib-sk-bouncedelay 1.4s infinite ease-in-out both;
 }
 .sprlib-spinner .sprlib-bounce1 { animation-delay: -0.32s; }
 .sprlib-spinner .sprlib-bounce2 { animation-delay: -0.16s; }
