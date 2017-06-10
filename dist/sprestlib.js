@@ -28,12 +28,9 @@
 \*/
 
 /*
-v1.0.0 DEVLIST:
-	* Add `$skip` (https://sharepoint.stackexchange.com/questions/45719/paging-using-rest-odata-with-sp-2013)
-	* Add `Intl` (i18n) support (its supported in IE11!!) - Date and Currency formats are awesome (can we add Direction for our R->L users too?)
-	* Add logic we learned the hard way where FILTER cant have true/false but uses 0/1 due to MS bug (still needed?)
-v.FUTURE:
-	* Support for turning LOOKUP values into a "text; text"-type output
+DEVLIST:
+ - Add `$skip` (https://sharepoint.stackexchange.com/questions/45719/paging-using-rest-odata-with-sp-2013)
+ - Add `Intl` (i18n) support (its supported in IE11!!) - Date and Currency formats are awesome (can we add Direction for our R->L users too?)
 */
 
 // Detect Node.js
@@ -42,7 +39,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 (function(){
 	// APP VERSION/BUILD
 	var APP_VER = "0.11.0";
-	var APP_BLD = "20170606";
+	var APP_BLD = "20170609";
 	var DEBUG = false; // (verbose mode/lots of logging. FIXME:remove prior to v1.0.0)
 	// APP FUNCTIONALITY
 	var APP_FILTEROPS = {
@@ -294,7 +291,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 				if ( !objListData[data.list] ) objListData[data.list] = { cols:(data.cols || []) };
 
 				// D: Add columns to query list if needed - there's 4 ways cols come in:
-				$.each(data.cols, function(i,col){
+				(data.cols || []).forEach(function(col,i){
 					if (objListData[data.list].cols.indexOf(col) == -1) objListData[data.list].cols.push( col );
 				});
 				if ( data.filter && data.filter.col && objListData[data.list].cols.indexOf(data.filter.col) == -1 )
@@ -311,11 +308,11 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 				arrPromises.push(
 					sprLib.list(list)
 					.getItems({ listCols:opts.cols })
-					.catch(function(err){
-						console.log('TODO: bad list! or some err! set data to null and keep going!');
-					})
 					.then(function(data){
 						arrTags.filter(function(tag){ return tag.list == list }).map(function(tag){ tag.data = data });
+					})
+					.catch(function(err){
+						console.log('TODO: bad list! or some err! set data to null and keep going!');
 					})
 				);
 			});
@@ -387,7 +384,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 							}
 
 							// B: Add each table row
-							$.each(objTag.data, function(i,arrData){
+							objTag.data.forEach(function(arrData,i){
 								// 1: Add row
 								isFilterPassed = false;
 								var $newRow = $('<tr/>');
@@ -667,8 +664,8 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 				})
 				.done(function(data,textStatus){
 					// STEP 1: Gather fields
-					$.each(data.d.Fields.results, function(i,result){
-						// DESIGN: Only capture "user" columns (Type=17 are `Calculated` cols)
+					(data.d.Fields.results || []).forEach(function(result,i){
+						// DESIGN: Only capture "user" columns (FYI: Type=17 are `Calculated` cols)
 						if (
 							result.InternalName == 'ID'
 							|| ( !result.Hidden && (result.CanBeDeleted || result.InternalName == 'Title') )
@@ -831,17 +828,16 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 							listGUID = data.d.__metadata.id.split("guid'").pop().replace(/\'\)/g,'');
 
 							// B: Gather field metadata
-							$.each(data.d.Fields.results, function(i,result){
-								// TODO-1.0: FIXME: handle 'Account/Title' etc.
-								$.each(inObj.listCols, function(key,col){
-									// DESIGN: col.dataName is *NOT REQD*
-									if ( col.dataName && col.dataName.split('/')[0] == result.InternalName ) {
+							(data.d.Fields.results || []).forEach(function(result,i){
+								for (var key in inObj.listCols) {
+									// DESIGN: inObj.listCols[key].dataName is *NOT REQD*
+									if ( inObj.listCols[key].dataName && inObj.listCols[key].dataName.split('/')[0] == result.InternalName ) {
 										inObj.listCols[key].dataType = result.TypeAsString;
 										inObj.listCols[key].dispName = ( inObj.listCols[key].dispName || result.Title ); // Fallback to SP.Title ("Display Name"]
 										inObj.listCols[key].isAppend = ( result.AppendOnly || false );
 										inObj.listCols[key].isNumPct = ( result.SchemaXml.toLowerCase().indexOf('percentage="true"') > -1 );
 									}
-								});
+								}
 							});
 							if (DEBUG) console.table( inObj.listCols );
 
@@ -906,7 +902,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 							headers: { "Accept":"application/json; odata=verbose", "X-RequestDigest":$("#__REQUESTDIGEST").val() }
 						})
 						.done(function(data,textStatus){
-							var arrResults = (data.d.results || data);
+							var arrResults = (data.d.results || data || []);
 
 							// A: Add all cols is none provided (aka:"fetch all")
 							if ( (!inObj.listCols || Object.keys(inObj.listCols).length == 0) && arrResults.length > 0 ) {
