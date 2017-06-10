@@ -32,6 +32,7 @@
 	<link rel="stylesheet" type="text/css" href="../SiteAssets/sprestlib/css/tablesorter.css">
 	<link rel="stylesheet" type="text/css" href="../SiteAssets/sprestlib/css/sprestlib.css">
 	<link rel="stylesheet" type="text/css" href="../SiteAssets/sprestlib/css/sprestlib-demo.css">
+	<link rel="stylesheet" type="text/css" href="../SiteAssets/sprestlib/css/prism-coy.min.css">
 
 	<!--
 	<script type="text/javascript" src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
@@ -40,6 +41,7 @@
 	<script type="text/javascript" src="../SiteAssets/sprestlib/js/jquery.tablesorter.min.js"></script>
 	<script type="text/javascript" src="../SiteAssets/sprestlib/js/sprestlib.js"></script>
 	<script type="text/javascript" src="../SiteAssets/sprestlib/js/ascii-table.min.js"></script>
+	<script type="text/javascript" src="../SiteAssets/sprestlib/js/prism.min.js"></script>
 
 	<script type="text/javascript">
 		var HTML_SPINNER = '<div class="sprlib-spinner"><div class="sprlib-bounce1"></div><div class="sprlib-bounce2"></div><div class="sprlib-bounce3"></div></div>';
@@ -84,22 +86,21 @@
 			if ( !$('#selSiteLists').val() ) return;
 
 			// LIST INFO:
-			$('#tab1-ListInfo .divCode').text( 'sprLib.list(\''+ $('#selSiteLists').val() +'\').info()' );
+			$('#tab1-ListInfo pre code').text( 'sprLib.list(\''+ $('#selSiteLists').val() +'\').info()' );
 			sprLib.list($('#selSiteLists').val()).info()
 			.then(function(objInfo){
 				var $table = $('<table><tbody></tbody></table>');
 				Object.keys(objInfo).forEach(function(key,idx){
-					//$table.find('thead tr').append('<th>'+ key +'</th>');
 					$table.find('tbody').append('<tr><th>'+ key +'</th>'+'<td>'+ objInfo[key] +'</td></tr>');
 				});
-				$('#tab1-ListInfo .divCode').after( $table );
+				$('#tab1-ListInfo').append( $table );
 			})
 			.catch(function(errMsg){
 				$('$tab1-ListInfo .tableRows').after( '<table><tbody><tr><td>'+errMsg+'</td></tr></tbody></table>' );
 			});
 
 			// LIST COLS:
-			$('#tab1-ListCols .divCode').text( 'sprLib.list(\''+ $('#selSiteLists').val() +'\').cols()' );
+			$('#tab1-ListCols pre code').text( 'sprLib.list(\''+ $('#selSiteLists').val() +'\').cols()' );
 			sprLib.list($('#selSiteLists').val()).cols()
 			.then(function(arrColObjs){
 				var $table = $('<table><thead><tr></tr></thead><tbody></tbody></table>');
@@ -112,7 +113,7 @@
 					$table.find('tbody').append( $row );
 				});
 
-				$('#tab1-ListCols .divCode').after( $table );
+				$('#tab1-ListCols').append( $table );
 			})
 			.catch(function(errMsg){
 				$('$tab1-ListCols .tableRows').after( '<table><tbody><tr><td>'+errMsg+'</td></tr></tbody></table>' );
@@ -208,7 +209,7 @@
 					+ "        if (typeof val !== 'object') $('#user1Html table tbody').append('<tr><th>'+ key +'</th><td>'+ val +'</td></tr>');\n"
 					+ "    });\n"
 					+ '});';
-				$('#user1Code').text( user1Code );
+				$('#user1Code pre code').text( user1Code );
 				eval(user1Code);
 
 				var user2Code = "sprLib.user().groups()\n"
@@ -217,7 +218,7 @@
 					+ "        $('#user2Html table tbody').append('<tr><th>Group Name</th><td>'+ objGroup.Title +'</td></tr>');\n"
 					+ "    });\n"
 					+ '});';
-				$('#user2Code').text( user2Code );
+				$('#user2Code pre code').text( user2Code );
 				eval(user2Code);
 			}
 
@@ -225,15 +226,15 @@
 			{
 				var rest1Code = "sprLib.rest({ restUrl:'/_api/web/lists/' })\n"
 					+ ".then(function(arrayListObjs){\n"
-					+ "  var table = new AsciiTable('Site Lists').setHeading(['BaseType','ItemCount','Title']);\n"
-					+ "  $.each(arrayListObjs,function(idx,obj){\n"
-					+ "    let vals = [];\n"
-					+ "    $.each(obj, function(key,val){ if ($.inArray(key,['BaseType','ItemCount','Title']) > -1) vals.push(val) });\n"
-					+ "    table.addRow(vals);\n"
-					+ "  });\n"
-					+ "  $('#rest1Html').append( table.toString() );\n"
+					+ "    var table = new AsciiTable('Site Lists').setHeading(['BaseType','ItemCount','Title']);\n"
+					+ "    arrayListObjs.forEach(function(obj,idx){\n"
+					+ "        let vals = [];\n"
+					+ "        for (var key in obj) { if ($.inArray(key,['BaseType','ItemCount','Title']) > -1) vals.push(obj[key]) };\n"
+					+ "        table.addRow(vals);\n"
+					+ "    });\n"
+					+ "    $('#rest1Html').append( table.toString() );\n"
 					+ "});";
-				$('#rest1Code').text( rest1Code );
+				$('#rest1Code pre code').text( rest1Code );
 				eval(rest1Code);
 			}
 
@@ -308,38 +309,38 @@
 				</div>
 				<div id="tabHtmlElements" class="divTableRows testGroup">
 					<div>
-						<div><div id="htmlEleSpanCode" class="divCode"></div></div>
+						<div><div id="htmlEleSpanCode"><pre><code class="language-html"></code></pre></div></div>
 						<div><div id="htmlEleSpanHtml"></div></div>
 					</div>
 					<div>
-						<div><div id="htmlEleTextCode" class="divCode"></div></div>
+						<div><div id="htmlEleTextCode"><pre><code class="language-html"></code></pre></div></div>
 						<div><div id="htmlEleTextHtml"></div></div>
 					</div>
 					<div>
-						<div><div id="htmlEleSel1Code" class="divCode"></div></div>
+						<div><div id="htmlEleSel1Code"><pre><code class="language-html"></code></pre></div></div>
 						<div><div id="htmlEleSel1Html"></div></div>
 					</div>
 					<div>
-						<div><div id="htmlEleSel2Code" class="divCode"></div></div>
+						<div><div id="htmlEleSel2Code"><pre><code class="language-html"></code></pre></div></div>
 						<div><div id="htmlEleSel2Html"></div></div>
 					</div>
 				</div>
 				<!-- Populate HTML elements before doc.ready is fired -->
 				<script type="text/javascript">
-					var htmlEleSpan = '<span id="eleSpan" data-sprlib=\'\n{ "list":"Employees", "value":"Name", "filter":{"col":"Badge_x0020_Number", "op":"eq", "val":"666"} }\'>\n</span>';
-					$('#htmlEleSpanCode').text( htmlEleSpan );
+					var htmlEleSpan = '<span id="eleSpan" data-sprlib=\'\n  { "list":"Employees", "value":"Name", "filter":{"col":"Badge_x0020_Number", "op":"eq", "val":"666"} }\'>\n</span>';
+					$('#htmlEleSpanCode pre code').text( htmlEleSpan );
 					$('#htmlEleSpanHtml').html( htmlEleSpan.replace('\n','') );
 
 					var htmlEleText = '<input type="text" data-sprlib=\'{ "list":"Departments", "value":"Title" }\'></input>';
-					$('#htmlEleTextCode').text( htmlEleText );
+					$('#htmlEleTextCode pre code').text( htmlEleText );
 					$('#htmlEleTextHtml').html( htmlEleText );
 
 					var htmlEleSel1 = '<select data-sprlib=\'{ "list":"Employees", "value":"Id", "text":"Name" }\'></select>';
-					$('#htmlEleSel1Code').text( htmlEleSel1 );
+					$('#htmlEleSel1Code pre code').text( htmlEleSel1 );
 					$('#htmlEleSel1Html').html( htmlEleSel1 );
 
 					var htmlEleSel2 = '<select data-sprlib=\'{ "list":"Employees", "value":"Name", "text":"Id" }\'></select>';
-					$('#htmlEleSel2Code').text( htmlEleSel2 );
+					$('#htmlEleSel2Code pre code').text( htmlEleSel2 );
 					$('#htmlEleSel2Html').html( htmlEleSel2 );
 				</script>
 
@@ -347,30 +348,30 @@
 					<div class="arrow active"></div>Tables
 				</div>
 				<div>
-					<div id="htmlEleTab1Code" class="divCode"></div>
+					<div id="htmlEleTab1Code"><pre><code class="language-html"></code></pre></div>
 					<div id="htmlEleTab1Html" style="margin-bottom:20px"></div>
 
-					<div id="htmlEleTab2Code" class="divCode"></div>
+					<div id="htmlEleTab2Code"><pre><code class="language-html"></code></pre></div>
 					<div id="htmlEleTab2Html" style="margin-bottom:20px"></div>
 
-					<div id="htmlEleTab3Code" class="divCode"></div>
+					<div id="htmlEleTab3Code"><pre><code class="language-html"></code></pre></div>
 					<div id="htmlEleTab3Html"></div>
 				</div>
 				<!-- Populate HTML elements before doc.ready is fired -->
 				<script type="text/javascript">
 					var htmlEleTab1 = '<table data-sprlib=\'{ "list":"Departments", "cols":["Id","Title"], "showBusy":true }\'></table>';
-					$('#htmlEleTab1Code').text( htmlEleTab1 );
+					$('#htmlEleTab1Code pre code').text( htmlEleTab1 );
 					$('#htmlEleTab1Html').html( htmlEleTab1 );
 
 					var htmlEleTab2 = '<table data-sprlib=\'{ "list":"Departments", "cols":["Title","Modified"], "showBusy":true }\'></table>';
-					$('#htmlEleTab2Code').text( htmlEleTab2 );
+					$('#htmlEleTab2Code pre code').text( htmlEleTab2 );
 					$('#htmlEleTab2Html').html( htmlEleTab2 );
 
 					var htmlEleTab3 = '<table border="0" cellpadding="0" cellspacing="0">\n'
 						+ '  <thead><tr><th>Emp ID</th><th>Employee Name</th><th>Badge #</th></tr></thead>\n'
 						+ '  <tbody data-sprlib=\'{ "list":"Employees", "cols":["Id","Name","Badge_x0020_Number"], "showBusy":true }\'></tbody>\n'
 						+ '</table>';
-					$('#htmlEleTab3Code').text( htmlEleTab3 );
+					$('#htmlEleTab3Code pre code').text( htmlEleTab3 );
 					$('#htmlEleTab3Html').html( htmlEleTab3 );
 				</script>
 			</div>
@@ -397,28 +398,34 @@
 
 				<div id="tab1-ListInfo" style="margin-bottom:20px;">
 					<div class="subTitle">List Information</div>
-					<div class="divCode">sprLib.list('listName').info()</div>
+					<div><pre><code class="language-javascript">sprLib.list('listName').info()</code></pre></div>
 				</div>
 
 				<div id="tab1-ListCols" style="margin-bottom:20px;">
 					<div class="subTitle">List Columns</div>
-					<div class="divCode">sprLib.list('listName').cols()</div>
+					<div><pre><code class="language-javascript">sprLib.list('listName').cols()</code></pre></div>
 				</div>
 			</div>
 
 			<div id="tabUser" data-tab="Users">
 				<div class="subTitle">User Methods</div>
+				<p>
+					Get User Information (Title, Email, etc.) and User Groups (which SP Groups they belong to).
+				</p>
 
+				<div class="subTitle">User Information</div>
 				<div>
-					<div id="user1Code" class="divCode"></div>
+					<div id="user1Code"><pre><code class="language-javascript"></code></pre></div>
 					<div id="user1Html" style="margin-bottom:20px">
 						<table>
 							<tbody></tbody>
 						</table>
 					</div>
 				</div>
+
+				<div class="subTitle">User Groups</div>
 				<div>
-					<div id="user2Code" class="divCode"></div>
+					<div id="user2Code"><pre><code class="language-javascript"></code></pre></div>
 					<div id="user2Html" style="margin-bottom:20px">
 						<table>
 							<tbody></tbody>
@@ -433,7 +440,7 @@
 				</div>
 
 				<div>
-					<div id="rest1Code" class="divCode"></div>
+					<div id="rest1Code"><pre><code class="language-javascript"></code></pre></div>
 					<div id="rest1Html" class="code" style="margin-bottom:20px"></div>
 				</div>
 			</div>
