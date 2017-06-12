@@ -30,6 +30,7 @@
 /*
 DEVLIST:
  - Add `$skip` (https://sharepoint.stackexchange.com/questions/45719/paging-using-rest-odata-with-sp-2013)
+ - @see: https://dev.office.com/sharepoint/docs/sp-add-ins/use-odata-query-operations-in-sharepoint-rest-requests#page-through-returned-items
  - Add `Intl` (i18n) support (its supported in IE11!!) - Date and Currency formats are awesome (can we add Direction for our R->L users too?)
 */
 
@@ -39,7 +40,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 (function(){
 	// APP VERSION/BUILD
 	var APP_VER = "0.11.0";
-	var APP_BLD = "20170609";
+	var APP_BLD = "20170611";
 	var DEBUG = false; // (verbose mode/lots of logging. FIXME:remove prior to v1.0.0)
 	// APP FUNCTIONALITY
 	var APP_FILTEROPS = {
@@ -1322,8 +1323,8 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 	// sprLib.rest({ restUrl:"/sites/dev/_api/web/sitegroups" }).then(function(data){ console.table(data); }); (data.d.results)
 	// sprLib.rest({ restUrl:"/_api/web/lists/getbytitle('Employees')" }).then(function(data){ console.table(data); }); (data.d)
 	//
-	// EX: https://gitbrent.sharepoint.com/sites/dev/_api/web/lists/getbytitle('Employees')/
-	// EX: https://gitbrent.sharepoint.com/sites/dev/_api/web/sitegroups
+	// EX: https://siteurl.sharepoint.com/sites/dev/_api/web/lists/getbytitle('Employees')/
+	// EX: https://siteurl.sharepoint.com/sites/dev/_api/web/sitegroups
 	sprLib.rest = function rest(inOpt) {
 		return new Promise(function(resolve, reject) {
 			// STEP 1: REALITY-CHECK
@@ -1484,8 +1485,8 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 			* `sprLib.site().listPerms()` - Returns an array of all List/Library Permissions for the current/specified Site
 			* `sprLib.site().permGroups()` - Returns an array of Permission Groups and their membership for the current/specified Site
 			*/
-			// 2: Get SITE info (logo, etc): https://gitbrent.sharepoint.com/sites/dev/_api/web/
-			// 3: Lists+props: https://gitbrent.sharepoint.com/sites/dev/_api/web/Lists/
+			// 2: Get SITE info (logo, etc): https://siteurl.sharepoint.com/sites/dev/_api/web/
+			// 3: Lists+props: https://siteurl.sharepoint.com/sites/dev/_api/web/Lists/
 		});
 	}
 
@@ -1569,8 +1570,37 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 			});
 		}
 
+		// TODO: Add newUser.profile - that will work when users have Enterpise license/access to User-Profile-Service
 		// FUTURE: add ability to fetch individual properties (`Manager` etc)
 		// http://sharepoint.stackexchange.com/questions/207422/getting-user-profile-property-with-dash-in-name-with-rest-api
+		// User Profile service - https://msdn.microsoft.com/en-us/library/office/dn790354.aspx
+		//
+		/* WORKS:
+			/sites/dev/_api/sp.userprofiles.profileloader.getprofileloader/getuserprofile - (The user profile of the current user)
+			/sites/dev/_api/sp.userprofiles.profileloader.getprofileloader/getuserprofile/AccountName
+			/sites/dev/_api/sp.userprofiles.profileloader.getowneruserprofile
+		*/
+		/* 20170611:
+			sprLib.rest({
+				restUrl: "/sites/dev/_api/sp.userprofiles.profileloader.getowneruserprofile",
+				ajaxType: 'POST'
+			})
+			// WORKS in SP Online
+			PictureUrl, SipAddress, etc.
+		*/
+		/* 20170611:
+		// NOTE: Encode "#" to "%23" or query fails!
+		// NOTE: Per MSDN we can only query with `accountName`
+			sprLib.rest({
+				restUrl: "/sites/dev/_api/SP.UserProfiles.PeopleManager/GetPropertiesFor(accountName=@v)?@v='i:0%23.f|membership|admin@siteurl.onmicrosoft.com'",
+				ajaxType: 'POST'
+			})
+		*/
+		/* More Ex:
+		http://siteurl/_api/SP.UserProfiles.PeopleManager/GetUserProfilePropertyFor(accountName=@v,propertyName='LastName')?@v='i:0%23.f|membership|brent@siteurl.onmicrosoft.com'
+		http://siteurl/_api/SP.UserProfiles.PeopleManager/GetMyProperties?$select=PictureUrl,AccountName
+		*/
+
 
 		// LAST: Return this List to enable chaining
 		return newUser;
