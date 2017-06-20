@@ -395,6 +395,7 @@ Returns: Array of objects containing name/value pairs
 
 ## Examples
 ```javascript
+// Example: Get site group info
 sprLib.rest({
     url:          '/sites/dev/_api/web/sitegroups',
     queryCols:    ['Title','LoginName','AllowMembersEditMembership'],
@@ -405,18 +406,13 @@ sprLib.rest({
 .then(function(arrayResults){ console.table(arrayResults) })
 .catch(function(errMsg){ console.error(errMsg) });
 
-// Absolute URL
-sprLib.rest(
-	{ url:"/sites/dev/_api/web/sitegroups" }
-)
-.then(function(data){ console.table(data); })
-.catch(function(errMsg){ console.error(errMsg) });
-
-// Relative URL
-sprLib.rest(
-	{ url:"_api/web/lists/getbytitle('Employees')" }
-)
-.then(function(data){ console.table(data); })
+// Example: Create a new List column
+sprLib.rest({
+    url:  "_api/web/lists/getbytitle('Employees')/fields"
+    type: "POST",
+    data: "{'__metadata':{'type':'SP.FieldDateTime'}, 'FieldTypeKind':4, 'Title':'Bonus Date', 'DisplayFormat':1 }"
+})
+.then(function(){ console.log("New column created!"); })
 .catch(function(errMsg){ console.error(errMsg) });
 ```
 
