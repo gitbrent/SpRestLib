@@ -383,16 +383,15 @@ Returns: Array of objects containing name/value pairs
 ## Options
 | Option        | Type    | Default     | Description           | Possible Values / Returns           |
 | :------------ | :------ | :---------- | :-------------------- | :---------------------------------- |
-| `url`         | string  | current url | REST API endpoint     | [SharePoint REST API](https://msdn.microsoft.com/en-us/library/office/dn268594.aspx) |
+| `url`         | string  | current url | REST API endpoint     | full or relative url. See: [SharePoint REST API](https://msdn.microsoft.com/en-us/library/office/dn268594.aspx) |
 | `type`        | string  | `GET`       | rest type             | `GET` or `POST` |
-| `data`        | string  |             | data to be sent       | Ex:`{ 'type': 'SP.FieldDateTime' }` |
-| `cache`       | boolean | `false`     | data to be sent       | Ex:`cache:true` |
+| `data`        | string  |             | data to be sent       | Ex:`data: {'type': 'SP.FieldDateTime'}` |
+| `cache`       | boolean | `false`     | data to be sent       | Ex:`cache: true` |
+| `contentType` | string  | `application/json` | request header content-type | Only used with `POST` type |
 | `queryCols`   | string  |             | fields/columns to get | any available field from the SP REST API |
-| `queryFilter` | string  |             | query filter          | utilizes OData style [Query Operators](https://msdn.microsoft.com/en-us/library/office/fp142385.aspx#Anchor_7) Ex:`queryFilter:'Salary lt 99000'` |
-| `queryLimit`  | string  | `1000`      | max items to return   | 1-*N*. Ex:`queryLimit:5000` |
-| `queryOrderby`| string  |             | column(s) to order by | Ex:`queryOrderby:Name` |
-
-* url can be relative, `/`, `http:`, or `https:`
+| `queryFilter` | string  |             | query filter          | utilizes OData style [Query Operators](https://msdn.microsoft.com/en-us/library/office/fp142385.aspx#Anchor_7) Ex:`queryFilter: 'Salary lt 99000'` |
+| `queryLimit`  | string  | `1000`      | max items to return   | 1-*N*. Ex:`queryLimit: 5000` |
+| `queryOrderby`| string  |             | column(s) to order by | Ex:`queryOrderby: Name` |
 
 ## Examples
 ```javascript
@@ -407,12 +406,16 @@ sprLib.rest({
 .catch(function(errMsg){ console.error(errMsg) });
 
 // Absolute URL
-sprLib.rest({ url:"/sites/dev/_api/web/sitegroups" })
+sprLib.rest(
+	{ url:"/sites/dev/_api/web/sitegroups" }
+)
 .then(function(data){ console.table(data); })
 .catch(function(errMsg){ console.error(errMsg) });
 
 // Relative URL
-sprLib.rest({ url:"_api/web/lists/getbytitle('Employees')" })
+sprLib.rest(
+	{ url:"_api/web/lists/getbytitle('Employees')" }
+)
 .then(function(data){ console.table(data); })
 .catch(function(errMsg){ console.error(errMsg) });
 ```

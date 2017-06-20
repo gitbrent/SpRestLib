@@ -40,7 +40,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 (function(){
 	// APP VERSION/BUILD
 	var APP_VER = "0.11.0";
-	var APP_BLD = "20170611";
+	var APP_BLD = "20170619";
 	var DEBUG = false; // (verbose mode/lots of logging. FIXME:remove prior to v1.0.0)
 	// APP FUNCTIONALITY
 	var APP_FILTEROPS = {
@@ -619,7 +619,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 		*/
 		function getMetaType() {
 			return new Promise(function(resolve, reject) {
-				sprLib.rest({ restUrl:_urlRest+"?$select=ListItemEntityTypeFullName" })
+				sprLib.rest({ url:_urlRest+"?$select=ListItemEntityTypeFullName" })
 				.then(function(result){
 					if (result && Array.isArray(result) && result.length == 1) resolve( {"type":result[0].ListItemEntityTypeFullName } );
 					else reject('Invalid result!');
@@ -703,10 +703,9 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 		*/
 		_newList.info = function() {
 			return new Promise(function(resolve, reject) {
-				var strUrl = _urlRest
-					+ "?$select=AllowContentTypes,BaseTemplate,Created,Description,EnableAttachments,ForceCheckout,Hidden,Id,ItemCount,Title";
+				var strUrl = _urlRest + "?$select=AllowContentTypes,BaseTemplate,Created,Description,EnableAttachments,ForceCheckout,Hidden,Id,ItemCount,Title";
 
-				sprLib.rest({ restUrl:strUrl })
+				sprLib.rest({ url:strUrl })
 				.then(function(data){
 					resolve(data[0]);
 				})
@@ -852,8 +851,8 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 				})
 				.then(function(){
 					return new Promise(function(resolve, reject) {
-						var objAjax = {};
 						var arrExpands = [];
+						// TODO: build ``$.ajax` object like we do in .rest() (instead of strAjaxUrl); use defaults in setup etc.
 						var strAjaxUrl = "", strExpands = "";
 
 						// STEP 1: Start building REST URL
@@ -1301,54 +1300,63 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 		return _newList;
 	};
 
-	// API: REST (raw, ad-hoc interface)
+	// API: REST (direct/ad-hoc interface)
 	/**
 	* Execute an ad-hoc REST query to one of many endpoints
 	*
 	* @example
 	sprLib.rest({
-		restUrl: '/sites/dev/_api/web/sitegroups',
-		restType: ["GET" | "POST"],
+		url: '/sites/dev/_api/web/sitegroups',
+		type: ['GET' | 'POST'],
 		queryCols: {
-			title: { dataName:'Title' },
-			loginName: { dataName:'LoginName' },
+			title:       { dataName:'Title' },
+			loginName:   { dataName:'LoginName' },
 			editAllowed: { dataName:'AllowMembersEditMembership' }
 		},
-		queryFilter:   "AllowMembersEditMembership eq 1",
-		queryOrderby:  "Title",
-		queryLimit: 10
+		queryFilter:  "AllowMembersEditMembership eq 1",
+		queryOrderby: "Title",
+		queryLimit:   10
 	})
 	.then(function(arrayResults){ console.table(arrayResults) });
 	*/
-	// sprLib.rest({ restUrl:"/sites/dev/_api/web/sitegroups" }).then(function(data){ console.table(data); }); (data.d.results)
-	// sprLib.rest({ restUrl:"/_api/web/lists/getbytitle('Employees')" }).then(function(data){ console.table(data); }); (data.d)
+	// sprLib.rest({ url:"/sites/dev/_api/web/sitegroups" }).then(function(data){ console.table(data); }); (data.d.results)
+	// sprLib.rest({ url:"/_api/web/lists/getbytitle('Employees')" }).then(function(data){ console.table(data); }); (data.d)
 	//
 	// EX: https://siteurl.sharepoint.com/sites/dev/_api/web/lists/getbytitle('Employees')/
 	// EX: https://siteurl.sharepoint.com/sites/dev/_api/web/sitegroups
 	sprLib.rest = function rest(inOpt) {
 		return new Promise(function(resolve, reject) {
-			// STEP 1: REALITY-CHECK
-			if ( !inOpt.restUrl ) {
-				var strTemp = 'restQuery ERROR:\n\n object parameter must contain: restUrl';
-				( inObj.onFail ) ? inObj.onFail(strTemp) : console.error(strTemp);
-				return null;
-			}
-
-			// STEP 2: Setup vars
-			var objAjax = {};
-			var strAjaxUrl = "", strExpands = "";
+			// STEP 1: Options setup
+			inOpt = inOpt || {};
+			inOpt.cache = inOpt.cache || false;
+			inOpt.type  = inOpt.restType || inOpt.type || "GET";
+			inOpt.url   = (inOpt.restUrl  || inOpt.url  || APP_OPTS.baseUrl).replace(/\"/g, "'");
+			//
 			inOpt.spArrData = [];
 
-			// STEP 3: Construct Base URL: restUrl can be presented in many different forms...
-			if      ( inOpt.restUrl.indexOf('/_api') == 0 )						strAjaxUrl = APP_OPTS.baseUrl + inOpt.restUrl;
-			else if ( inOpt.restUrl.indexOf('_api')  == 0 )						strAjaxUrl = APP_OPTS.baseUrl + "/" + inOpt.restUrl;
-			else if ( inOpt.restUrl.indexOf('/')     == 0 &&  inOpt.queryCols )	strAjaxUrl = inOpt.restUrl + "?$select=";
-			else if ( inOpt.restUrl.indexOf('/')     == 0 && !inOpt.queryCols )	strAjaxUrl = inOpt.restUrl;
-			else if ( inOpt.restUrl.indexOf('http')  == 0 &&  inOpt.queryCols )	strAjaxUrl = inOpt.restUrl + "?$select=";
-			else if ( inOpt.restUrl.indexOf('http')  == 0 && !inOpt.queryCols )	strAjaxUrl = inOpt.restUrl;
+			// STEP 2: Setup vars
+			var strExpands = "";
+			var objAjaxQuery = {
+				url    : "",
+				type   : inOpt.type,
+				cache  : inOpt.cache,
+				headers: { "Accept":"application/json;odata=verbose", "X-RequestDigest":$("#__REQUESTDIGEST").val() }
+			};
+			// Add `data` if included
+			if ( inOpt.data ) objAjaxQuery.data = inOpt.data;
+			// Add `context-type` for POST if none exists
+			if ( objAjaxQuery.type == 'POST' && !objAjaxQuery.headers.contentType ) objAjaxQuery.headers['content-type'] = 'application/json;odata=verbose';
+
+			// STEP 3: Construct Base URL: `url` can be presented in many different forms...
+			if      ( inOpt.url.indexOf('/_api') == 0 )						objAjaxQuery.url = APP_OPTS.baseUrl + inOpt.url;
+			else if ( inOpt.url.indexOf('_api')  == 0 )						objAjaxQuery.url = APP_OPTS.baseUrl + "/" + inOpt.url;
+			else if ( inOpt.url.indexOf('/')     == 0 &&  inOpt.queryCols )	objAjaxQuery.url = inOpt.url + "?$select=";
+			else if ( inOpt.url.indexOf('/')     == 0 && !inOpt.queryCols )	objAjaxQuery.url = inOpt.url;
+			else if ( inOpt.url.indexOf('http')  == 0 &&  inOpt.queryCols )	objAjaxQuery.url = inOpt.url + "?$select=";
+			else if ( inOpt.url.indexOf('http')  == 0 && !inOpt.queryCols )	objAjaxQuery.url = inOpt.url;
 
 			// STEP 4: Continue building URL: Some REST API calls can contain select columns (`queryCols`)
-			if ( strAjaxUrl.indexOf('$select') > -1 ) {
+			if ( objAjaxQuery.url.indexOf('$select') > -1 ) {
 				// `listCols` can be: string, array of strings, or objects
 				// A: Convert single string column into an array for use below
 				if ( typeof inOpt.queryCols === 'string' ) inOpt.queryCols = [ inOpt.queryCols ];
@@ -1368,32 +1376,27 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 				$.each(inOpt.queryCols, function(key,col){
 					if ( !col.dataName ) return; // Skip columns without a 'dataName' key
 					// A:
-					if ( strAjaxUrl.substring(strAjaxUrl.length-1) == '=' ) strAjaxUrl += col.dataName;
-					else strAjaxUrl += ( strAjaxUrl.lastIndexOf(',') == strAjaxUrl.length-1 ? col.dataName : ','+col.dataName );
+					if ( objAjaxQuery.url.substring(objAjaxQuery.url.length-1) == '=' ) objAjaxQuery.url += col.dataName;
+					else objAjaxQuery.url += ( objAjaxQuery.url.lastIndexOf(',') == objAjaxQuery.url.length-1 ? col.dataName : ','+col.dataName );
 					// B:
 					if ( col.dataName.indexOf('/') > -1 ) strExpands += ( strExpands == '' ? col.dataName.substring(0,col.dataName.indexOf('/')) : ','+col.dataName.substring(0,col.dataName.indexOf('/')) );
 				});
 
 				// D: Add maxrows as default in SP2013 is a paltry 100 rows
-				strAjaxUrl += '&$top=' + ( inOpt.queryLimit ? inOpt.queryLimit : APP_OPTS.maxRows );
+				objAjaxQuery.url += '&$top=' + ( inOpt.queryLimit ? inOpt.queryLimit : APP_OPTS.maxRows );
 
 				// E: Add expand (if any)
-				if ( strExpands ) strAjaxUrl += '&$expand=' + strExpands;
+				if ( strExpands ) objAjaxQuery.url += '&$expand=' + strExpands;
 
 				// F: Add filter (if any)
-				else if ( inOpt.queryFilter ) strAjaxUrl += '&$filter=' + ( inOpt.queryFilter.indexOf('%') == -1 ? encodeURI(inOpt.queryFilter) : inOpt.queryFilter );
+				else if ( inOpt.queryFilter ) objAjaxQuery.url += '&$filter=' + ( inOpt.queryFilter.indexOf('%') == -1 ? encodeURI(inOpt.queryFilter) : inOpt.queryFilter );
 
 				// G: Add orderby (if any)
-				if ( inOpt.queryOrderby ) strAjaxUrl += '&$orderby=' + inOpt.queryOrderby;
+				if ( inOpt.queryOrderby ) objAjaxQuery.url += '&$orderby=' + inOpt.queryOrderby;
 			}
 
 			// STEP 5: Execute REST call
-			$.ajax({
-				url    : strAjaxUrl,
-				type   : (inOpt.ajaxType || "GET"),
-				cache  : false,
-				headers: { "Accept":"application/json; odata=verbose", "X-RequestDigest":$("#__REQUESTDIGEST").val() }
-			})
+			$.ajax(objAjaxQuery)
 			.done(function(data,textStatus){
 				var arrResults = [];
 
@@ -1469,7 +1472,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 				resolve( inOpt.spArrData );
 			})
 			.fail(function(jqXHR,textStatus,errorThrown){
-				reject( parseErrorMessage(jqXHR, textStatus, errorThrown) + "\n\nURL used: " + strAjaxUrl );
+				reject( parseErrorMessage(jqXHR, textStatus, errorThrown) + "\n\nURL used: " + objAjaxQuery.url );
 			});
 		});
 	}
@@ -1582,8 +1585,8 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 		*/
 		/* 20170611:
 			sprLib.rest({
-				restUrl: "/sites/dev/_api/sp.userprofiles.profileloader.getowneruserprofile",
-				ajaxType: 'POST'
+				url: "/sites/dev/_api/sp.userprofiles.profileloader.getowneruserprofile",
+				type: 'POST'
 			})
 			// WORKS in SP Online
 			PictureUrl, SipAddress, etc.
@@ -1592,8 +1595,8 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 		// NOTE: Encode "#" to "%23" or query fails!
 		// NOTE: Per MSDN we can only query with `accountName`
 			sprLib.rest({
-				restUrl: "/sites/dev/_api/SP.UserProfiles.PeopleManager/GetPropertiesFor(accountName=@v)?@v='i:0%23.f|membership|admin@siteurl.onmicrosoft.com'",
-				ajaxType: 'POST'
+				url: "/sites/dev/_api/SP.UserProfiles.PeopleManager/GetPropertiesFor(accountName=@v)?@v='i:0%23.f|membership|admin@siteurl.onmicrosoft.com'",
+				type: 'POST'
 			})
 		*/
 		/* More Ex:

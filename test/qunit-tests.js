@@ -2,7 +2,7 @@
  * NAME: qunit-test.js
  * DESC: tests for qunit-test.html (coded to my O365 Dev Site - YMMV)
  * AUTH: https://github.com/gitbrent/
- * DATE: May 31, 2017
+ * DATE: Jun 19, 2017
  *
  * HOWTO: Generate text tables for README etc.:
  * sprLib.list('Employees').getItems(['Id', 'Name', 'Badge_x0020_Number']).then(function(arrData){ console.log(getAsciiTableStr(arrData)) });
@@ -92,7 +92,7 @@ QUnit.module( "LIST > ITEM CRUD Methods" );
 				Utilization_x0020_Pct: 1.0,
 				Extension:             (1234+idx).toString(),
 				Comments:              'New employee created',
-				Job_x0020_GradeId:     idx,
+				Job_x0020_GradeId:     (idx+1),
 				Departments_x0020_SupportedId: {results: [1, 2, 3]},
 				Active_x003f_:         true
 			})
@@ -403,7 +403,8 @@ QUnit.module( "LIST > ITEM GET Methods" );
 		sprLib.list('Employees')
 		.getItems({
 			listCols: ['Name', 'Manager/Title', 'Departments_x0020_Supported/Id'],
-			queryFilter: 'Badge_x0020_Number eq 100'
+			queryLimit: 1,
+			queryOrderby: "Modified desc"
 		})
 		.then(function(arrayResults){
 			assert.ok( Object.keys(arrayResults[0]).length == 4, "arrayResults[0] has length == 4: "+ Object.keys(arrayResults[0]).length );
@@ -426,7 +427,8 @@ QUnit.module( "LIST > ITEM GET Methods" );
 		sprLib.list('Employees')
 		.getItems({
 			listCols: ['Name', 'Departments_x0020_Supported/Id', 'Departments_x0020_Supported/Title'],
-			queryFilter: 'Badge_x0020_Number eq 100'
+			queryLimit: 1,
+			queryOrderby: "Modified desc"
 		})
 		.then(function(arrayResults){
 			assert.ok( Object.keys(arrayResults[0]).length == 3, "arrayResults[0] has length == 3: "+ Object.keys(arrayResults[0]).length );
@@ -457,7 +459,8 @@ QUnit.module( "LIST > ITEM GET Methods" );
 				mgrTitle: { dataName:'Manager/Title' },
 				depsArr:  { dataName:'Departments_x0020_Supported/Id' }
 			},
-			queryFilter: 'Badge_x0020_Number eq 100'
+			queryLimit: 1,
+			queryOrderby: "Modified desc"
 		})
 		.then(function(arrayResults){
 			assert.ok( Object.keys(arrayResults[0]).length == 4, "arrayResults[0] has length == 4: "+ Object.keys(arrayResults[0]).length );
@@ -495,7 +498,8 @@ QUnit.module( "REST Methods" );
 		var done = assert.async();
 		// TEST:
 		sprLib.rest({
-			restUrl: "/sites/dev/_api/lists/getbytitle('Employees')/items",
+			url : "/sites/dev/_api/lists/getbytitle('Employees')/items",
+			type: "GET",
 			queryCols: ['Id', 'Name', 'Manager/Title']
 		})
 		.then(function(arrayResults){
@@ -515,18 +519,19 @@ QUnit.module( "REST Methods" );
 		var done = assert.async();
 		// TEST:
 		sprLib.rest({
-			restUrl: RESTROOT+'/_api/web/sitegroups',
+			url: RESTROOT+'/_api/web/sitegroups',
 			queryCols: {
 				title: { dataName:'Title' },
 				loginName: { dataName:'LoginName' },
 				editAllowed: { dataName:'AllowMembersEditMembership' }
 			}
-			//,queryFilter:   "AllowMembersEditMembership eq 1"
-			//,queryOrderby:  "Title"
-			//,queryLimit: 10
+			,queryFilter:   "AllowMembersEditMembership eq true"
+			,queryOrderby:  "Title"
+			,queryLimit: 10
 		})
 		.then(function(arrayResults){
 			assert.ok( arrayResults.length > 0, "arrayResults is an Array and length > 0: "+ arrayResults.length );
+			assert.ok( (arrayResults[0].editAllowed), "arrayResults[0].editAllowed exists: "+ arrayResults[0].editAllowed );
 			assert.ok( getAsciiTableStr(arrayResults), `RESULTS:\n${getAsciiTableStr(arrayResults)}` );
 			done();
 		})
@@ -540,7 +545,7 @@ QUnit.module( "REST Methods" );
 	QUnit.test("sprLib.rest() ex: '/_api/web/lists'", function(assert){
 		var done = assert.async();
 		// TEST:
-		sprLib.rest({ restUrl:RESTROOT+'/_api/web/lists/' })
+		sprLib.rest({ url:RESTROOT+'/_api/web/lists?$select=Title,ItemCount' })
 		.then(function(arrayListObjs){
 			assert.ok( arrayListObjs.length > 0, "arrayListObjs is an Array and length > 0: "+ arrayListObjs.length );
 			assert.ok( getAsciiTableStr(arrayListObjs), `RESULTS:\n${getAsciiTableStr(arrayListObjs)}`);
@@ -551,6 +556,26 @@ QUnit.module( "REST Methods" );
 			done();
 		});
 	});
+
+	/* works
+	QUnit.test("sprLib.rest() ex: post+data (create new list column)", function(assert){
+		var done = assert.async();
+		// TEST:
+		sprLib.rest({
+			url:  RESTROOT+'/_api/web/lists/getbytitle("Test")/fields',
+			type: 'POST',
+			data: "{'__metadata':{'type':'SP.FieldDateTime'}, 'FieldTypeKind':4, 'Title':'New Date Column', 'DisplayFormat':1 }"
+		})
+		.then(function(arrayListObjs){
+			assert.ok( true, "Executed without errors: true" );
+			done();
+		})
+		.catch(function(err){
+			assert.ok( (false), err );
+			done();
+		});
+	});
+	*/
 }
 
 // ================================================================================================
