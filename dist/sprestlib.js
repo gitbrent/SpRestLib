@@ -40,7 +40,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 (function(){
 	// APP VERSION/BUILD
 	var APP_VER = "0.11.0";
-	var APP_BLD = "20170619";
+	var APP_BLD = "20170620";
 	var DEBUG = false; // (verbose mode/lots of logging. FIXME:remove prior to v1.0.0)
 	// APP FUNCTIONALITY
 	var APP_FILTEROPS = {
@@ -1403,7 +1403,8 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 				// A: Depending upon which REST endpoint used, SP can return results in various ways... (!)
 
 				// data.d.results is an [] of {}: [ {Title:'Brent Ely', Email:'Brent.Ely@microsoft.com'}, {}, {} ]
-				if ( data && data.d && data.d.results ) {
+				// NOTE: Test for results being object because SP can return an entire HTML page as a result in some error cases.
+				if ( data && data.d && data.d.results && typeof data.d.results === 'object' ) {
 					$.each(data.d.results, function(key,result){
 						var objRow = {};
 
@@ -1458,7 +1459,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 					});
 				}
 				// data.d or data is an {}: { listTitle:'Game Systems', numberOfItems:25 }
-				else if ( data ) {
+				else if ( data.d || data ) {
 					var objRow = {};
 
 					$.each((data.d || data), function(key,result){
