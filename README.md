@@ -349,10 +349,11 @@ sprLib.list('Employees').getItems({
 // EX: Using query options: filter, order, limit
 sprLib.list('Employees').getItems({
     listCols: {
+		empId:    { dataName:'Id'                 },
         empName:  { dataName:'Name'               },
         badgeNum: { dataName:'Badge_x0020_Number' },
         hireDate: { dataName:'Hire_x0020_Date'    },
-        editLink: { dataFunc:function(objItem){ return '<a href="/sites/dev/Lists/Employees/DispForm.aspx?ID='+objItem.Id +'">View Item</a>' } }
+        editLink: { dataFunc:function(objItem){ return '<a href="/sites/dev/Lists/Employees/DispForm.aspx?ID='+objItem.empId+'">View Emp</a>' } }
     },
     queryFilter:  'Salary gt 100000',
     queryOrderby: 'Hire_x0020_Date',
@@ -395,7 +396,7 @@ Returns: Array of objects containing name/value pairs
 
 ## Examples
 ```javascript
-// Example: Get site group info
+// EX: Get site group info
 sprLib.rest({
     url:          '/sites/dev/_api/web/sitegroups',
     queryCols:    ['Title','LoginName','AllowMembersEditMembership'],
@@ -405,10 +406,19 @@ sprLib.rest({
 })
 .then(function(arrayResults){ console.table(arrayResults) })
 .catch(function(errMsg){ console.error(errMsg) });
+/*
+.------------------------------------------------------------------------------.
+|         Title          |       LoginName        | AllowMembersEditMembership |
+|------------------------|------------------------|----------------------------|
+| Dev Site Owners        | Dev Site Owners        | false                      |
+| Dev Site Visitors      | Dev Site Visitors      | false                      |
+| Excel Services Viewers | Excel Services Viewers | false                      |
+'------------------------------------------------------------------------------'
+*/
 
-// Example: Create a new List column
+// EX: Create a new List column
 sprLib.rest({
-    url:  "_api/web/lists/getbytitle('Employees')/fields"
+    url:  "_api/web/lists/getbytitle('Employees')/fields",
     type: "POST",
     data: "{'__metadata':{'type':'SP.FieldDateTime'}, 'FieldTypeKind':4, 'Title':'Bonus Date', 'DisplayFormat':1 }"
 })
