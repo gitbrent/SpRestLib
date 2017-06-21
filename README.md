@@ -386,7 +386,7 @@ Returns: Array of objects containing name/value pairs
 | `url`         | string  | current url | REST API endpoint     | full or relative url. See: [SharePoint REST API](https://msdn.microsoft.com/en-us/library/office/dn268594.aspx) |
 | `type`        | string  | `GET`       | rest type             | `GET` or `POST` |
 | `data`        | string  |             | data to be sent       | Ex:`data: {'type': 'SP.FieldDateTime'}` |
-| `cache`       | boolean | `false`     | data to be sent       | Ex:`cache: true` |
+| `cache`       | boolean | `false`     | cache settings        | Ex:`cache: true` |
 | `contentType` | string  | `application/json` | request header content-type | Only used with `POST` type |
 | `queryCols`   | string  |             | fields/columns to get | any available field from the SP REST API |
 | `queryFilter` | string  |             | query filter          | utilizes OData style [Query Operators](https://msdn.microsoft.com/en-us/library/office/fp142385.aspx#Anchor_7) Ex:`queryFilter: 'Salary lt 99000'` |
