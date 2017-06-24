@@ -40,7 +40,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 (function(){
 	// APP VERSION/BUILD
 	var APP_VER = "0.11.0";
-	var APP_BLD = "20170620";
+	var APP_BLD = "20170623";
 	var DEBUG = false; // (verbose mode/lots of logging. FIXME:remove prior to v1.0.0)
 	// APP FUNCTIONALITY
 	var APP_FILTEROPS = {
@@ -1514,20 +1514,26 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 		* sprLib.user().info().then( function(objUser){ console.table(objUser) } );
 		*
 		* @example - get user by ID
-		* sprLib.user({Id:1234}).info().then( function(objUser){ console.table(objUser) } );
+		* sprLib.user({ id:1234 }).info().then( function(objUser){ console.table(objUser) } );
 		*
 		* @return {Promise} - return `Promise` containing User info object
 		*/
 		newUser.info = function() {
 			return new Promise(function(resolve, reject) {
-				// STEP 1: Get SP.User info
+				// A: Handle case when options have empty//null/undef params
+				if ( inOpt && !inOpt['id'] && !inOpt['email'] && !inOpt['title'] ) {
+					resolve( {} );
+					return;
+				}
+
+				// B:
 				$.ajax({
-					url    : strDynUrl + "$select=Id,Email,IsSiteAdmin,LoginName,PrincipalType,Title",
+					url    : strDynUrl + "$select=Id,Title,Email,LoginName,IsSiteAdmin,PrincipalType",
 					type   : "GET",
 					cache  : false,
 					headers: {"Accept":"application/json; odata=verbose"}
 				})
-				.done(function(data, textStatus){
+				.done(function(data, textStatus) {
 					// A: Gather user data
 					var objUser = {};
 					$.each((data.d.results ? data.d.results[0] : data.d), function(key,result){ objUser[key] = result; });
@@ -1535,7 +1541,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 					// B: Resolve results
 					resolve( objUser );
 				})
-				.fail(function(jqXHR, textStatus, errorThrown){
+				.fail(function(jqXHR, textStatus, errorThrown) {
 					reject( parseErrorMessage(jqXHR, textStatus, errorThrown) );
 				});
 			});
