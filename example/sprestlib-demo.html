@@ -6,7 +6,7 @@
 	<meta name="website"     content="https://github.com/gitbrent/SpRestLib/">
 	<meta name="keywords"    content="SpRestLib, JavaScript, js-sharepoint, OData, REST, SharePoint 2013, SP2013, SharePoint 2016, SP2016, SharePoint Online">
 	<meta name="description" content="Content Editor WebPart to showcase SpRestLib features and capabilities">
-	<meta name="revised"     content="Jun 09, 2017">
+	<meta name="revised"     content="Jun 24, 2017">
 
 	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300">
 	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:700">
@@ -131,15 +131,18 @@
 			Promise.resolve()
 			.then(function(){ return eval( $('#'+eleCode).text() ) })
 			.then(function(arrItems){
-				var table = new AsciiTable();
+				var arrColHeadings = [];
+				Object.keys(arrItems[0]).forEach(function(key,idx){
+					if ( typeof key === 'object' ) Object.keys(key).forEach(function(key,idx){ arrColHeadings.push(key) });
+					else arrColHeadings.push(key);
+				});
 
-				// DEBUG
-				//console.log('execSandboxCode() => arrItems:'); console.table(arrItems); console.log('==============================\n');
-
-				if (arrItems && arrItems.length > 0) table.setHeading( Object.keys(arrItems[0]) );
-				$.each(arrItems, function(idx,obj){
-					let vals = [];
-					$.each(obj, function(key,val){ vals.push(val || '') });
+				var table = new AsciiTable().setHeading( arrColHeadings );
+				arrItems.forEach(function(obj,idx){
+					var vals = [];
+					$.each(obj, function(key,val){
+						vals.push( ( typeof val === 'object' && key != '__metadata' ? JSON.stringify(val) : val ) );
+					});
 					table.addRow(vals);
 				});
 
@@ -216,7 +219,7 @@
 				var user2Code = "sprLib.user().groups()\n"
 					+ '.then(function(arrGroups){\n'
 					+ "    arrGroups.forEach(function(objGroup,idx){\n"
-					+ "        $('#user2Html table tbody').append('<tr><th>Group Name</th><td>'+ objGroup.Title +'</td></tr>');\n"
+					+ "        $('#user2Html table tbody').append('<tr><td>'+ objGroup.Id +'</td><td>'+ objGroup.Title +'</td></tr>');\n"
 					+ "    });\n"
 					+ '});';
 				$('#user2Code pre code').text( user2Code );
@@ -429,6 +432,12 @@
 					<div id="user2Code"><pre><code class="language-javascript"></code></pre></div>
 					<div id="user2Html" style="margin-bottom:20px">
 						<table>
+							<thead>
+								<tr>
+									<th style="width:10%">Group ID</th>
+									<th style="width:90%">Group Title</th>
+								</tr>
+							</thead>
 							<tbody></tbody>
 						</table>
 					</div>
