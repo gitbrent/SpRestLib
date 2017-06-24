@@ -5,7 +5,7 @@
 		"name": "Brent Ely",
 		"url": "https://github.com/gitbrent/"
 	},
-	"description": "JavaScript SharePoint REST Library",
+	"description": "JavaScript Library for SharePoint Web Services/REST API",
 	"homepage": "https://gitbrent.github.io/SpRestLib/",
 	"license": "MIT",
 	"dependencies": {
@@ -23,12 +23,18 @@
 	},
 	"keywords": [
 		"sharepoint",
+		"sharepoint-framework",
 		"sharepoint-javascript",
 		"sharepoint-javascript-library",
+		"sharepoint-online",
+		"sharepoint-list",
+		"sharepoint-list-crud",
 		"sharepoint-rest",
+		"sharepoint-rest-api",
 		"sharepoint-rest-library",
 		"sharepoint-web-services",
 		"sharepoint-web-services-library",
+		"sharepoint-user",
 		"sp2013",
 		"sp2016",
 		"odata",
