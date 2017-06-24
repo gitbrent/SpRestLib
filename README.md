@@ -431,13 +431,13 @@ sprLib.rest({
 **************************************************************************************************
 # User Info/Groups
 Omitting the options will return information about the current user, otherwise, the specified user is returned.  
-`sprLib.user()`
+`sprLib.user()`  
 `sprLib.user(options)`
 
 ## Options
 | Option   | Type     | Required? | Description           | Possible Values / Returns           |
 | :------- | :------- | :-------- | :-------------------- | :---------------------------------- |
-| `id`     | number   |           | user ID               | user id to query. Ex: `{Id:99}`     |
+| `id`     | number   |           | user id               | user id to query. Ex: `{id:99}`     |
 | `email`  | string   |           | user email address    | user email to query. Ex: `{email:'brent@github.com'}` |
 | `title`  | string   |           | user title            | user title to query. Ex: `{title:'Brent Ely'}` |
 
@@ -451,19 +451,22 @@ Note: *Uses the basic SP User service (not the Enterprise licensed User Profile 
 
 ### Sample Code
 ```javascript
-// Get current user info
+// EXAMPLE: Get current user info
 sprLib.user().info()
-.then(function(objUser){
-    console.log("Current User Info:\n");
-    console.log("Id:" + objUser.Id +" - Title:"+ objUser.Title +" - Email:"+ objUser.Email); }
-});
+.then(function(objUser){ console.table(objUser) });
 
-// Get user info by email address
-sprLib.user({ email:'brent.ely@github.com' }).info()
-.then(function(objUser){
-    console.log("Current User Info:\n");
-    console.log("Id:" + objUser.Id +" - Title:"+ objUser.Title +" - Email:"+ objUser.Email); }
-});
+// EXAMPLE: Get user info by email address
+sprLib.user({ email:'brent.ely@microsoft.com' }).info()
+.then(function(objUser){ console.table(objUser) });
+
+// RESULT:
+/*
+.---------------------------------------------------------------------------------------------.
+|  Id |              LoginName                |   Title   |        Email        | IsSiteAdmin |
+|-----|---------------------------------------|-----------|---------------------|-------------|
+|   9 | i:0#.f|membership|brent@microsoft.com | Brent Ely | brent@microsoft.com | true        |
+'---------------------------------------------------------------------------------------------'
+*/
 ```
 
 ## Get User Groups (`SPGroup`)
