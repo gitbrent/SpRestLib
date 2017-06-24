@@ -1,0 +1,42 @@
+{
+  "name": "sprestlib",
+  "description": "JavaScript Library for SharePoint Web Services/REST API",
+  "main": [
+    "dist/sprestlib.js"
+  ],
+  "dependencies": {
+    "jquery": "^3.2.1",
+    "promise": "^0.2.2"
+  },
+  "authors": [
+    "Brent Ely <https://github.com/gitbrent>"
+  ],
+  "license": "MIT",
+  "keywords": [
+	  "sharepoint",
+	  "sharepoint-framework",
+	  "sharepoint-javascript",
+	  "sharepoint-javascript-library",
+	  "sharepoint-online",
+	  "sharepoint-list",
+	  "sharepoint-list-crud",
+	  "sharepoint-rest",
+	  "sharepoint-rest-api",
+	  "sharepoint-rest-library",
+	  "sharepoint-web-services",
+	  "sharepoint-web-services-library",
+	  "sharepoint-user",
+	  "sp2013",
+	  "sp2016",
+	  "odata",
+	  "odata-library"
+  ],
+  "homepage": "https://github.com/gitbrent/SpRestLib",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ]
+}
