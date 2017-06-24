@@ -29,7 +29,10 @@ Simplify SharePoint REST/Web Service interaction to a few lines of code. Easily 
 
 - [Installation](#installation)
   - [Client-Side](#client-side)
-  - [Node](#node)
+    - [Include Local Scripts](#include-local-scripts)
+    - [Include Bundle Script](#include-bundle-script)
+    - [Install With Bower](#install-with-bower)
+  - [Node.js](#nodejs)
 - [Methods](#methods)
   - [List/Library](#listlibrary)
   - [REST API](#rest-api)
@@ -83,14 +86,26 @@ Simplify SharePoint REST/Web Service interaction to a few lines of code. Easily 
 # Installation
 
 ## Client-Side
-SpRestLib utilizes the jQuery library - include it before sprestlib.  That's it!
+
+### Include Local Scripts
 ```javascript
 <script lang="javascript" src="https://code.jquery.com/jquery-3.1.1.slim.min.js"></script>
 <script lang="javascript" src="https://yourhost.com/subsite/SiteAssets/js/sprestlib.js"></script>
 ```
 **NOTE**: IE11 support requires a Promises polyfill as well (included in the `libs` folder)
 
-## Node
+### Include Bundle Script
+```javascript
+<script lang="javascript" src="https://yourhost.com/subsite/SiteAssets/js/sprestlib.bundle.js"></script>
+```
+** NOTE**: Bundle includes all required libraries (jQuery and Promises)
+
+### Install With Bower
+```javascript
+bower install sprestlib
+```
+
+## Node.js
 ```javascript
 npm install sprestlib
 
