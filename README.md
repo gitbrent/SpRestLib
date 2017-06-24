@@ -98,7 +98,7 @@ Simplify SharePoint REST/Web Service interaction to a few lines of code. Easily 
 ```javascript
 <script lang="javascript" src="https://yourhost.com/subsite/SiteAssets/js/sprestlib.bundle.js"></script>
 ```
-** NOTE**: Bundle includes all required libraries (jQuery and Promises)
+** NOTE**: Bundle includes all required libraries (SpRestLib + jQuery and Promises)
 
 ### Install With Bower
 ```javascript
