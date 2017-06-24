@@ -621,7 +621,7 @@ QUnit.module( "USER Methods" );
 	});
 }
 
-// TODO: Add Utility method
+// TODO: Add Utility methods
 
 
 // NEGATIVE TEST:
