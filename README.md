@@ -3,19 +3,18 @@
 # SpRestLib
 
 ## JavaScript Library for SharePoint Web Services / REST Library
-Simplify SharePoint REST/Web Service interaction to a few lines of code. Easily read items, perform CRUD operations, execute REST calls, gather user/group information and populate form elements.
+Simplify SharePoint REST/Web Service interaction to a few lines of code. Easily read items, perform CRUD operations, execute REST calls, gather user/group information and populate form elements. Enables rapid development apps for SharePoint/SharePoint Add-ins using the SharePoint App Model.
 
 ### Features:
 * Simple - Most REST/Web Service interaction can be done in a couple of lines of code
 * Modern - Lightweight, pure JavaScript solution
-* Async Ops - Utilizes the new [ES6 Promise](http://www.datchley.name/es6-promises/) architecture to enable chaining of asynchronous operations
-* Works - Built for [SharePoint 2013 API](https://msdn.microsoft.com/en-us/library/office/jj860569.aspx) / [OData v3](http://www.odata.org/documentation/odata-version-3-0/)
-* Robust - Handles errors and monitors the SharePoint authentication token
+* Elegant - Utilizes the new [ES6 Promise](http://www.datchley.name/es6-promises/) architecture for asynchronous operations
+* Robust - Built for [SharePoint 2013 API](https://msdn.microsoft.com/en-us/library/office/jj860569.aspx) / [OData v3](http://www.odata.org/documentation/odata-version-3-0/)
 
 ### Methods:
-* List Interface - Read, create, update and delete List/Library items with a single line of code
-* REST Interface - Run ad-hoc REST calls to any [SharePoint REST API](https://msdn.microsoft.com/en-us/library/office/dn268594.aspx)
-* User Interface - Get current or specified User information and Groups
+* List Interface - Create, read, update, and delete (CRUD) List/Library items with a single line of code
+* REST Interface - Run ad-hoc REST calls to any [SharePoint REST API](https://msdn.microsoft.com/en-us/library/office/dn268594.aspx) endpoint
+* User Interface - Get current or specified User and Groups details
 * Form Population - Populate form elements using data-bind declarative binding system like Knockout or AngluarJS
 
 ### Supported Environments:
@@ -89,16 +88,16 @@ Simplify SharePoint REST/Web Service interaction to a few lines of code. Easily 
 
 ### Include Local Scripts
 ```javascript
-<script lang="javascript" src="https://code.jquery.com/jquery-3.1.1.slim.min.js"></script>
+<script lang="javascript" src="https://yourhost.com/subsite/SiteAssets/js/jquery.min.js"></script>
 <script lang="javascript" src="https://yourhost.com/subsite/SiteAssets/js/sprestlib.js"></script>
 ```
-**NOTE**: IE11 support requires a Promises polyfill as well (included in the `libs` folder)
+*IE11 support requires a Promises polyfill as well (included in the `libs` folder)*
 
 ### Include Bundle Script
 ```javascript
 <script lang="javascript" src="https://yourhost.com/subsite/SiteAssets/js/sprestlib.bundle.js"></script>
 ```
-** NOTE**: Bundle includes all required libraries (SpRestLib + jQuery and Promises)
+*Bundle includes all required libraries (SpRestLib + jQuery and Promises)*
 
 ### Install With Bower
 ```javascript
