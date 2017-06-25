@@ -3,7 +3,7 @@
 # SpRestLib
 
 ## JavaScript Library for SharePoint Web Services / REST Library
-Simplify SharePoint REST/Web Service interaction to a few lines of code. Easily read items, perform CRUD operations, execute REST calls, gather user/group information and populate form elements. Enables rapid development apps for SharePoint/SharePoint Add-ins using the SharePoint App Model.
+Simplify SharePoint REST/Web Service interaction to a few lines of code. Easily read items, perform CRUD operations, execute REST calls, gather user/group information and populate form elements. Enables rapid development of apps for SharePoint (SharePoint Add-ins) using the SharePoint App Model.
 
 ### Features:
 * Simple - Most REST/Web Service interaction can be done in a couple of lines of code
@@ -118,9 +118,9 @@ var sprLib = require("sprestlib");
 * `sprLib.list(listName).getItems(options)` - Returns an array of item objects using a variety of possible options
 
 * `sprLib.list(listName).create(item)`  - Create new item in the List/Library
-* `sprLib.list(listName).update(item)`  - Update the existing item using the data provided
-* `sprLib.list(listName).delete(item)`  - Delete the item (permanently delete)
-* `sprLib.list(listName).recycle(item)` - Recycle the item (move into the Recycle Bin)
+* `sprLib.list(listName).update(item)`  - Update an existing item using the data provided
+* `sprLib.list(listName).delete(item)`  - Delete an item (permanently delete)
+* `sprLib.list(listName).recycle(item)` - Recycle an item (move into the Recycle Bin)
 
 * `sprLib.list(listName).cols()` - Returns an array of column objects with useful info (name, datatype, etc.)
 
