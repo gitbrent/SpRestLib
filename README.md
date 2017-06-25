@@ -9,7 +9,7 @@ Simplify SharePoint REST/Web Service interaction to a few lines of code. Easily 
 * Simple - Most REST/Web Service interaction can be done in a couple of lines of code
 * Modern - Lightweight, pure JavaScript solution
 * Elegant - Utilizes the new [ES6 Promise](http://www.datchley.name/es6-promises/) architecture for asynchronous operations
-* Robust - Built for [SharePoint 2013 API](https://msdn.microsoft.com/en-us/library/office/jj860569.aspx) / [OData v3](http://www.odata.org/documentation/odata-version-3-0/)
+* Robust - Built for [SharePoint 2013 API](https://msdn.microsoft.com/en-us/library/office/jj860569.aspx) and [OData v3](http://www.odata.org/documentation/odata-version-3-0/)
 
 ### Methods:
 * List Interface - Create, read, update, and delete (CRUD) List/Library items with a single line of code
@@ -117,14 +117,14 @@ var sprLib = require("sprestlib");
 ## List/Library
 * `sprLib.list(listName).getItems(options)` - Returns an array of item objects using a variety of possible options
 
-* `sprLib.list(listName).create(item)`  - Create new item in the List/Library
-* `sprLib.list(listName).update(item)`  - Update an existing item using the data provided
-* `sprLib.list(listName).delete(item)`  - Delete an item (permanently delete)
-* `sprLib.list(listName).recycle(item)` - Recycle an item (move into the Recycle Bin)
+* `sprLib.list(listName).create(item)`  - Create a new item in the List/Library
+* `sprLib.list(listName).update(item)`  - Update an existing List/Library item using JSON data
+* `sprLib.list(listName).delete(item)`  - Delete an existing item (permanently delete)
+* `sprLib.list(listName).recycle(item)` - Recycle an existing item (move into the Recycle Bin)
 
 * `sprLib.list(listName).cols()` - Returns an array of column objects with useful info (name, datatype, etc.)
 
-* `sprLib.list(listName).info()` - Returns information about the list (GUID, numberOfItems, etc.)
+* `sprLib.list(listName).info()` - Returns information about the List/Library (GUID, numberOfItems, etc.)
 
 ## REST API
 * `sprLib.rest(options)` - Returns the results of a given REST call to any [SharePoint REST API](https://msdn.microsoft.com/en-us/library/office/dn268594.aspx)
@@ -201,7 +201,7 @@ Options:
 * if `__metadata.etag` is not provided, this is equivalent to force:true (`etag:'"*"'` is used)
 
 Returns:
-Id of the item just deleted
+ID of the item just deleted
 
 Notes:
 Permanently deletes the item (bypasses Recycle Bin; Is not recoverable)
@@ -219,7 +219,7 @@ Syntax:
 `sprLib.list(listName|listGUID).recycle(itemId)`
 
 Returns:
-Id of the item just recycled
+ID of the item just recycled
 
 Notes:
 Moves the item into the Site Recycle Bin
@@ -260,14 +260,14 @@ sprLib.list('Employees').cols().then(function(data){ console.table(data) });
 
 // Result:
 /*
-.--------------------------------------------------------------------------------------------------------------------------------------------------.
-|      dispName      |         dataName         |  dataType  | isAppend | isNumPct | isReadOnly | isRequired | isUnique | defaultValue | maxLength |
-|--------------------|--------------------------|------------|----------|----------|------------|------------|----------|--------------|-----------|
-| Name               | Name                     | Text       | false    | false    | false      | false      | false    |              |       255 |
-| Badge Number       | Badge_x0020_Number       | Number     | false    | false    | false      | true       | true     |              |           |
-| Hire Date          | Hire_x0020_Date          | DateTime   | false    | false    | false      | false      | false    |              |           |
-| ID                 | ID                       | Counter    | false    | false    | true       | false      | false    |              |           |
-'--------------------------------------------------------------------------------------------------------------------------------------------------'
+.--------------------------------------------------------------------------------------------------------------------------------------.
+|   dispName   |      dataName      |  dataType  | isAppend | isNumPct | isReadOnly | isRequired | isUnique | defaultValue | maxLength |
+|--------------|--------------------|------------|----------|----------|------------|------------|----------|--------------|-----------|
+| ID           | ID                 | Counter    | false    | false    | true       | false      | false    |              |           |
+| Name         | Name               | Text       | false    | false    | false      | false      | false    |              |       255 |
+| Badge Number | Badge_x0020_Number | Number     | false    | false    | false      | true       | true     |              |           |
+| Hire Date    | Hire_x0020_Date    | DateTime   | false    | false    | false      | false      | false    |              |           |
+'--------------------------------------------------------------------------------------------------------------------------------------'
 */
 ```
 
@@ -294,6 +294,15 @@ Returns: Array of list properties and their values
 #### Sample Code
 ```javascript
 sprLib.list('Employees').info().then(function(data){ console.table(data) });
+
+// Result:
+/*
+.-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------.
+| AllowContentTypes | BaseTemplate |       Created        | Description | EnableAttachments | ForceCheckout | Hidden |                  Id                  | ItemCount |   Title   |
+|-------------------|--------------|----------------------|-------------|-------------------|---------------|--------|--------------------------------------|-----------|-----------|
+| true              |          100 | 2016-08-21T20:48:43Z |             | true              | false         | false  | 8fda2799-dbbc-a420-9869-df87b08b09c1 |        25 | Employees |
+'-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------'
+*/
 ```
 
 ### Get Items
@@ -302,7 +311,7 @@ Syntax:
 
 Returns:
 * Array of objects containing name/value pairs
-* `__metadata` and `Id` values are always included in the results array (to enable further operations, etc.)
+* `__metadata` is always included in the results array (to enable further operations, use of Etag, etc.)
 
 #### Options
 | Option        | Type     | Required? | Description           | Possible Values / Returns           |
@@ -405,7 +414,7 @@ Returns: Array of objects containing name/value pairs
 | `contentType` | string  | `application/json` | request header content-type | Only used with `POST` type |
 | `queryCols`   | string  |             | fields/columns to get | any available field from the SP REST API |
 | `queryFilter` | string  |             | query filter          | utilizes OData style [Query Operators](https://msdn.microsoft.com/en-us/library/office/fp142385.aspx#Anchor_7) Ex:`queryFilter: 'Salary lt 99000'` |
-| `queryLimit`  | string  | `1000`      | max items to return   | 1-*N*. Ex:`queryLimit: 5000` |
+| `queryLimit`  | string  | `1000`      | max items to return   | 1-5000. Ex:`queryLimit: 5000` |
 | `queryOrderby`| string  |             | column(s) to order by | Ex:`queryOrderby: Name` |
 
 ## Examples
@@ -444,7 +453,7 @@ sprLib.rest({
 
 **************************************************************************************************
 # User Info/Groups
-Omitting the options will return information about the current user, otherwise, the specified user is returned.  
+Omitting options will return information about the current user, otherwise, the specified user is returned.  
 `sprLib.user()`  
 `sprLib.user(options)`
 
@@ -470,7 +479,7 @@ sprLib.user().info()
 .then(function(objUser){ console.table(objUser) });
 
 // EXAMPLE: Get user info by email address
-sprLib.user({ email:'brent.ely@microsoft.com' }).info()
+sprLib.user({ email:'brent@microsoft.com' }).info()
 .then(function(objUser){ console.table(objUser) });
 
 // RESULT:
@@ -502,7 +511,6 @@ sprLib.user().groups()
 
 **************************************************************************************************
 # Form Binding
-
 Perform control/form binding with an AngluarJS-like syntax made especially for SharePoint Web Services.
 
 Many different HTML tags can be populated by adding an `data-sprlib` property to many HTML element types.
@@ -610,7 +618,7 @@ When reporting issues, please include a code snippet or a link demonstrating the
 **************************************************************************************************
 # Special Thanks
 
-* [Marc D Anderson](http://sympmarc.com/) - SpRestLib is built in the spirit of the great `SPServices`
+* [Marc D Anderson](http://sympmarc.com/) - SpRestLib is built in the spirit of the great `SPServices` library
 * Microsoft - for the SharePoint.com developer account
 * Everyone who submitted an Issue or Pull Request
 
