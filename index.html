@@ -236,9 +236,7 @@
 		color: #fff;
 		}
 		#main-slider .item {
-		background-image: url(images/slider-bg.png);
-		background-position: 50% 56%;
-		background-repeat: no-repeat;
+		background-image: url(images/slider-bg.jpg);
 		-moz-transition: opacity ease-in-out 500ms;
 		-o-transition: opacity ease-in-out 500ms;
 		-webkit-transition: opacity ease-in-out 500ms;
@@ -906,7 +904,7 @@
                 <div class="container">
                     <div class="carousel-content">
                         <h1>SpRestLib</h1>
-                        <p class="lead">SharePoint REST Library:<br class="visible-xs">JavaScript Library for SP2013+ Web Services</p>
+                        <p class="lead">SharePoint REST Library:<br class="visible-xs">JavaScript Library for SharePoint Web Services</p>
                     </div>
                 </div>
             </div>
@@ -916,67 +914,76 @@
     <section id="features">
         <div class="container">
             <div class="box first">
+				<!-- Google Translate -->
 				<div id="google_translate_element"></div><script type="text/javascript">
 				function googleTranslateElementInit() {
 				  new google.translate.TranslateElement({pageLanguage: 'en', layout: google.translate.TranslateElement.InlineLayout.SIMPLE, gaTrack: true, gaId: 'UA-75147115-3'}, 'google_translate_element');
 				}
 				</script><script defer type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
-				<p class="lead center">
-					SharePoint REST Library that simplifies AJAX interaction to a few lines of code.<br>
-					Easily read items, perform CRUD operations, gather user information and populate form elements.
-				</p>
+				<!-- ================ -->
+
+				<div class="lead center">
+					<h3>
+						SpRestLib simplifies development of Apps for SharePoint (SharePoint Add-ins)<br class="hidden-xs hidden-sm">using the JavaScript SharePoint Web Services Model.
+					</h3>
+					<h4 style="color:#c7c7c7; margin-top:20px;">
+						Enables rapid development of entire SharePoint applications or simple web-part features with plain JavaScript (not CSOM/JSOM).
+					</h4>
+				</div>
 				<div class="center">
 					<h2>Features</h2>
 				</div>
                 <div class="row">
                     <div class="col-lg-4 col-md-6 col-sm-6">
                         <div class="center">
-                            <i class="fa fa-bullseye fa-2x icon-md icon-color1"></i>
-							<h4>Modern API</h4>
+							<i class="fa fa-key fa-2x icon-md icon-color3"></i>
+							<h3>Simple</h3>
+                            <p>Most REST/Web Service interaction can be done in a couple of lines of code<br><br></p>
+                        </div>
+                    </div>
+                    <div class="col-lg-4 col-md-6 col-sm-6">
+                        <div class="center">
+							<i class="fa fa-file-code-o fa-2x icon-md icon-color5"></i>
+                            <h3>Lightweight</h3>
+                            <p>Pure JavaScript solution - a jQuery library with no other dependencies<br><br></p>
+                        </div>
+                    </div>
+                    <div class="col-lg-4 col-md-6 col-sm-6">
+                        <div class="center">
+							<i class="fa fa-bullseye fa-2x icon-md icon-color1"></i>
+							<h3>Modern</h3>
                             <p>
-								Implmements the current <a href="https://msdn.microsoft.com/en-us/library/office/jj860569.aspx">SharePoint 2013 API</a> /
-								<a href="http://www.odata.org/documentation/odata-version-3-0/">OData v3</a>
+								Implements the current <a href="https://msdn.microsoft.com/en-us/library/office/jj860569.aspx">SharePoint 2013 API</a> and
+								<a href="http://www.odata.org/documentation/odata-version-3-0/">OData v3</a><br><br>
 							</p>
                         </div>
                     </div>
                     <div class="col-lg-4 col-md-6 col-sm-6">
                         <div class="center">
-                            <i class="fa fa-gears fa-2x icon-md icon-color2"></i>
-							<h4>Easy Async</h4>
-                            <p>Utilizes the new <a href="http://www.datchley.name/es6-promises/">ES6 Promise</a> architecture to enable chaining of asynchronous REST operations</p>
-                        </div>
-                    </div>
-                    <div class="col-lg-4 col-md-6 col-sm-6">
-                        <div class="center">
-                            <i class="fa fa-key fa-2x icon-md icon-color3"></i>
-                            <h4>Simple</h4>
-                            <p>Most REST interaction can be done in 1-2 lines of code</p>
-                        </div>
-                    </div>
-                    <div class="col-lg-4 col-md-6 col-sm-6">
-                        <div class="center">
                             <i class="fa fa-html5 fa-2x icon-md icon-color4"></i>
-                            <h4>Form Population</h4>
-                            <p>Avoid code altogether and just use data binding syntax to populate form elements</p>
+                            <h3>Capable</h3>
+                            <p>Avoid code altogether and just use data binding syntax to populate form elements<br><br></p>
                         </div>
                     </div>
                     <div class="col-lg-4 col-md-6 col-sm-6">
                         <div class="center">
-                            <i class="fa fa-file-code-o fa-2x icon-md icon-color5"></i>
-                            <h4>Pure Javascript</h4>
-                            <p>SpRestLib only requires the jQuery Library and nothing else</p>
+							<i class="fa fa-gears fa-2x icon-md icon-color2"></i>
+							<h3>Elegant</h3>
+                            <p>
+								Utilizes the new <a href="http://www.datchley.name/es6-promises/">ES6 Promise</a> architecture to for asynchronous REST operations<br><br>
+							</p>
                         </div>
                     </div>
                     <div class="col-lg-4 col-md-6 col-sm-6">
                         <div class="center">
                             <i class="fa fa-thumbs-up fa-2x icon-md icon-color6"></i>
-                            <h4>Robust</h4>
-                            <p>Handles errors and monitors the SharePoint authentication token</p>
+                            <h3>Robust</h3>
+                            <p>Handles errors and can renew the SharePoint authentication token<br><br></p>
                         </div>
                     </div>
                 </div>
-            </div>
-        </div>
+			</div>
+		</div>
     </section>
 
     <section id="examples">
@@ -985,7 +992,42 @@
                 <div class="center gap">
                     <h2>Examples</h2>
                     <p class="lead">SpRestLib does the heavy-lifting for you!</p>
+					<div>
+						<h4 style="color:#c7c7c7">
+							Stop wriiting whole blocks of Ajax REST queries, callbacks, error handlers and async queues.
+							You can do the same amount of work faster in much less code with the SpRestLib web services library.
+							<br>
+						</h4>
+						<!--
+						and with the new Promise async handler features
+						<br>
+						<br>
+						Making custom reports or web-part pages that show List data?
+						You can load all of that data in a fraction of the code with SprestLib and its Promise-bases async calls.
+						...
+						Need to show the current user?
+						Need to limit a web-part to a certain Group?
+						Want to show items from a List or Library in a table on your homepage?
+						Looking for a better way to show announcements on your homepage?
+						-->
+					</div>
 
+					<!--
+					<div class="row text-left">
+						<div class="col-lg-12 col-md-12 col-sm-12">
+							<h3>SharePoint REST Interaction</h3>
+							<h4>You could code the same AJAX calls and parse JSON results... but why?</h4>
+
+							<p>Use simple promise chains instead to accomplish tasks with a few lines of code.</p>
+						</div>
+					</div>
+					-->
+
+					<div class="row text-left">
+	                    <div class="col-lg-6 col-md-12 col-sm-12">
+							<h3>Sample Code: REST/Web Services</h3>
+						</div>
+					</div>
 					<div class="row text-left">
 	                    <div class="col-lg-6 col-md-12 col-sm-12">
 							<h4>Get List Items</h4>
@@ -1044,8 +1086,20 @@ Promise.resolve()
 });
 </code></pre>
 						</div>
+					</div>
+
+					<div class="row text-left">
+	                    <div class="col-lg-12 col-md-12 col-sm-12">
+							<h3>Sample Code: Form Popualtion/Data Binding</h3>
+							<ul>
+								<li>Implementing Angular for SharePoint is a lot of work.</li>
+								<li>Instead, use an Angular-like binding syntax to quickly populate web forms and html elements like tables</li>
+							</ul>
+						</div>
+					</div>
+					<div class="row text-left">
 						<div class="col-lg-12 col-md-12 col-sm-12">
-							<h4>Form Population</h4>
+							<h4>Various Elements</h4>
 <pre><code class="language-javascript">&lt;body&gt;
     &lt;select data-sprlib='{ "list":"Employees", "value":"Id", "text":"Name" }'&gt;&lt;/select&gt;
 
@@ -1059,9 +1113,14 @@ Promise.resolve()
 						</div>
 					</div>
 
-					<h3>Documentation</h3>
-					<p><a href="https://github.com/gitbrent/SpRestLib" onclick="ga('send','event','Link','click','GitHub Docs')">Full Documentation and Code Examples</a></p>
+					<h3>More Examples / Documentation</h3>
+					<p>
+						Visit the <a href="https://github.com/gitbrent/SpRestLib" onclick="ga('send','event','Link','click','GitHub Docs')">GitHub project page</a>
+						for complete documentation and more code examples.<br>
+						There are also web-part and Node demos available.
+					</p>
                 </div>
+				<!--
                 <ul class="portfolio-filter hidden-xs">
                     <li><a class="btn btn-primary active" href="javascript:void(0)" onclick="handlePortfolioClick(this)" data-filter="">All</a></li>
                     <li><a class="btn btn-primary" href="javascript:void(0)" onclick="handlePortfolioClick(this)" data-filter=".list">List/Library</a></li>
@@ -1085,7 +1144,7 @@ Promise.resolve()
 					<li class="portfolio-item user">
                         <div class="item-inner">
                             <div class="portfolio-image">
-                                <img src="images/portfolio/thumb/usergroup1.png" alt="">
+                                <img src="images/portfolio/thumb/usergroup1.png" alt="SharePoint User Methods">
                                 <div class="overlay">
                                     <a href="images/portfolio/full/usergroup1.png" title="SPUser" class="preview btn btn-danger"><i class="fa fa-eye fa-3x"></i></a>
                                 </div>
@@ -1097,7 +1156,7 @@ Promise.resolve()
 					<li class="portfolio-item rest">
                         <div class="item-inner">
                             <div class="portfolio-image">
-                                <img src="images/portfolio/thumb/rest1.png" alt="">
+                                <img src="images/portfolio/thumb/rest1.png" alt="SharePoint REST Methods">
                                 <div class="overlay">
                                     <a href="images/portfolio/full/rest1.png" title="SharePoint REST API" class="preview btn btn-danger"><i class="fa fa-eye fa-3x"></i></a>
                                 </div>
@@ -1109,7 +1168,7 @@ Promise.resolve()
 					<li class="portfolio-item form">
                         <div class="item-inner">
                             <div class="portfolio-image">
-                                <img src="images/portfolio/thumb/form1.png" alt="">
+                                <img src="images/portfolio/thumb/form1.png" alt="SharePoint Data Binding / Form Population Methods">
                                 <div class="overlay">
                                     <a href="images/portfolio/full/form1.png" title="SharePoint Data Binding / Form Population" class="preview btn btn-danger"><i class="fa fa-eye fa-3x"></i></a>
                                 </div>
@@ -1118,6 +1177,7 @@ Promise.resolve()
                         </div>
                     </li>
 				</ul>
+				-->
             </div>
         </div>
     </section>
@@ -1150,19 +1210,27 @@ Promise.resolve()
 	                    <div class="col-lg-12 col-md-12 col-sm-12">
 							<h3>Installation</h3>
 							<h4>Client-Side</h4>
-							<ul>
-								<li>SpRestLib utilizes the jQuery library - include it before sprestlib. That's it!</li>
-								<li>NOTE: IE11 support requires you include a Promises polyfill as well (one is included in the 'libs' folder)</li>
-							</ul>
-<pre><code class="language-html">&lt;script lang="javascript" src="https://code.jquery.com/jquery-3.1.1.slim.min.js"&gt;&lt;/script&gt;
+							<div style="margin:0 0 30px 30px;">
+								<h4>Include Local Scripts</h4>
+<pre><code class="language-html">&lt;script lang="javascript" src="https://yourhost.com/subsite/SiteAssets/js/jquery.min.js"&gt;&lt;/script&gt;
 &lt;script lang="javascript" src="https://yourhost.com/subsite/SiteAssets/js/sprestlib.js"&gt;&lt;/script&gt;
 </code></pre>
+<i style="color:#c7c7c7">IE11 support requires you include a Promises polyfill as well (one is included in the 'libs' folder)</i>
+
+								<h4>Include Bundle Script</h4>
+								<pre><code class="language-html">&lt;script lang="javascript" src="https://yourhost.com/subsite/SiteAssets/js/sprestlib.bundle.js"&gt;&lt;/script&gt;</code></pre>
+								<i style="color:#c7c7c7">Bundle includes all required libraries (SpRestLib + jQuery and Promises)</i>
+
+								<h4>Install With Bower</h4>
+								<pre><code class="language-bash">bower install sprestlib</code></pre>
+							</div>
+
 							<h4>Node.js</h4>
-							<ul>
-								<li><a href="https://www.npmjs.com/package/sprestlib" onclick="ga('send','event','Link','click','NPM Homepage')">SpRestLib NPM Homepage</a></li>
-							</ul>
-							<pre><code class="language-bash">npm install sprestlib</code></pre>
-							<pre><code class="language-javascript">var sprLib = require("sprestlib");</code></pre>
+							<div style="margin-left:30px">
+								<pre><code class="language-bash">npm install sprestlib</code></pre>
+								<pre><code class="language-javascript">var sprLib = require("sprestlib");</code></pre>
+								<a href="https://www.npmjs.com/package/sprestlib" onclick="ga('send','event','Link','click','NPM Homepage')">SpRestLib NPM Homepage</a>
+							</div>
 					</div>
 				</div>
 			</div>
