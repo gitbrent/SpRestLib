@@ -396,8 +396,8 @@ While SpRestLib provides lots of common web service functionality, there are man
 need to execute ad-hoc REST calls.  Using the `sprLib.rest()` interface, any of the REST API endpoints
 can be called in an easy way.
 
-Normally, calling the REST APIs can return results in different ways (some are `data.d` while others are `data.d.results`)
-whereas SpRestLib always returns consistent results will always be array of name/value objects.
+Normally, calling the SharePoint REST APIs can return results in different forms (some are `data.d` while others are `data.d.results`)
+whereas SpRestLib always returns consistent results in the form of array of objects with name/value pairs.
 
 Syntax
 `sprLib.rest(options)`
