@@ -197,16 +197,26 @@
 					<h3>Library Setup</h3>
 
 					<h4>Client-Side</h4>
-					<p>SpRestLib utilizes the jQuery library - include it before sprestlib. That's it!</p>
-<pre><code class="language-html">&lt;script lang="javascript" src="https://code.jquery.com/jquery-3.1.1.slim.min.js"&gt;&lt;/script&gt;
+					<div style="margin-left:30px;">
+					<h5>Include Local Scripts</h5>
+<pre><code class="language-html">&lt;script lang="javascript" src="https://yourhost.com/subsite/SiteAssets/js/jquery.min.js"&gt;&lt;/script&gt;
 &lt;script lang="javascript" src="https://yourhost.com/subsite/SiteAssets/js/sprestlib.js"&gt;&lt;/script&gt;
 </code></pre>
-					<p><b>NOTE</b>: IE11 support requires a Promises polyfill as well (included in the <code>libs</code> folder)</p>
+<i style="color:#c7c7c7">IE11 support requires you include a Promises polyfill as well (one is included in the 'libs' folder)</i>
 
-					<h4>Node</h4>
+					<h5>Include Bundle Script</h5>
+					<pre><code class="language-html">&lt;script lang="javascript" src="https://yourhost.com/subsite/SiteAssets/js/sprestlib.bundle.js"&gt;&lt;/script&gt;</code></pre>
+					<i style="color:#c7c7c7">Bundle includes all required libraries (SpRestLib + jQuery and Promises)</i>
+
+					<h5>Install With Bower</h5>
+					<pre><code class="language-bash">bower install sprestlib</code></pre>
+</div>
+					<h4>Node.js</h4>
+					<div style="margin:0 0 30px 30px;">
 <pre><code class="language-javascript">npm install sprestlib
 var sprLib = require("sprestlib");
 </code></pre>
+					</div>
 				</div>
 
 	            <div id="Group0Sub2" class="subgroup">
@@ -228,7 +238,7 @@ var sprLib = require("sprestlib");
 					<div style="background:#fffccc; padding:20px;">
 						<h4 style="margin-top:auto">Short Version: Async Promise Results Make Your Life Better and Easier</h4>
 						Asyncronous operations return Promises which can be chained together and will execute only after the
-						previous asyncronous operation completes, or they can be grouped to run at once then advance once all are completed.
+						previous asyncronous operation completes, or they can be grouped to run at once then advance all of them are completed.
 					</p>
 				</div>
 			</section>
@@ -283,7 +293,7 @@ var sprLib = require("sprestlib");
 <h4>Utilize <code>listCols</code> and <code>query*</code> parameters for more complicated operations like filtering</h4>
 <ul>
 	<li>Using <code>listCols</code> option to name our columns</li>
-	<li>Using <code>dataFunc</code> option to return a calculated value</li>
+	<li>Using <code>dataFunc</code> option to return a generate a dynamic value (create links, etc.)</li>
 	<li>Using query options: filter, order, limit</li>
 </ul>
 <pre><code class="language-javascript">sprLib.list('Employees').getItems({
@@ -291,7 +301,7 @@ var sprLib = require("sprestlib");
 		id:       { dataName:'Id'                 },
         empName:  { dataName:'Name'               },
         badgeNum: { dataName:'Badge_x0020_Number' },
-        editLink: { dataFunc:function(objItem){ return '<a href="../DispForm.aspx?ID='+objItem.Id +'">View Item</a>' } }
+        editLink: { dataFunc:function(objItem){ return '&lt;a href="../DispForm.aspx?ID='+objItem.Id +'"&gt;View Item&lt;/a&gt;' } }
     },
     queryFilter:  'Salary gt 100000',
     queryOrderby: 'Hire_x0020_Date',
@@ -302,13 +312,13 @@ var sprLib = require("sprestlib");
 </code></pre>
 
 <h4>Results</h4>
-<pre><code>.--------------------------------------------------------------------------------------------------------.
-|   __metadata    | id  |   empName   | badgeNum |                    editLink                     | Id  |
-|-----------------|-----|-------------|----------|-------------------------------------------------|-----|
-| [object Object] | 287 | Bob Ross    |  1496450 | &lt;a href="../DispForm.aspx?ID=287"&gt;View Item&lt;/a&gt; | 287 |
-| [object Object] | 291 | Hal Jorden  |  1496451 | &lt;a href="../DispForm.aspx?ID=291"&gt;View Item&lt;/a&gt; | 291 |
-| [object Object] | 292 | Barry Allen |  1496452 | &lt;a href="../DispForm.aspx?ID=292"&gt;View Item&lt;/a&gt; | 292 |
-'--------------------------------------------------------------------------------------------------------'
+<pre><code>.--------------------------------------------------------------------------------------------------.
+|   __metadata    | id  |   empName   | badgeNum |                    editLink                     |
+|-----------------|-----|-------------|----------|-------------------------------------------------|
+| [object Object] | 287 | Bob Ross    |  1496450 | &lt;a href="../DispForm.aspx?ID=287"&gt;View Item&lt;/a&gt; |
+| [object Object] | 291 | Hal Jordan  |  1496451 | &lt;a href="../DispForm.aspx?ID=291"&gt;View Item&lt;/a&gt; |
+| [object Object] | 292 | Barry Allen |  1496452 | &lt;a href="../DispForm.aspx?ID=292"&gt;View Item&lt;/a&gt; |
+'--------------------------------------------------------------------------------------------------'
 </code></pre>
 					</div>
 
@@ -317,7 +327,6 @@ var sprLib = require("sprestlib");
 	                <h3>Create Items</h3>
 					<div>
 <pre><code class="language-javascript">sprLib.list('Employees')
-sprLib.list('Employees')
 .create({ Name:'Marty McFly', Badge_x0020_Number:12345, Hire_x0020_Date:new Date() })
 .then(function(objItem){ console.log('New Item:'); console.table(objItem); })
 .catch(function(strErr){ console.error(strErr); });
@@ -327,19 +336,29 @@ sprLib.list('Employees')
 				<div id="GroupASub3" class="subgroup">
 	                <h3>Update Items</h3>
 					<div>
-						<code>sprLib.list(listName).update(item)</code> - Update the existing item using the data provided
+<pre><code class="language-javascript">sprLib.list('Employees')
+.update({ Name:'Marty "Nobody call me chicken" McFly' })
+.then(function(objItem){ console.log('Updated Item:'); console.table(objItem); })
+.catch(function(strErr){ console.error(strErr); });
+</code></pre>
 					</div>
 				</div>
 				<div id="GroupASub4" class="subgroup">
 	                <h3>Delete Items</h3>
+					Permanently deletes an item (bypasses Recycle Bin)
 					<div>
-						<code>sprLib.list(listName).delete(item)</code> - Delete the item (permanently delete)
+<pre><code class="language-javascript">sprLib.list(listName).delete(item)
+.then(function(intId){ console.log('Item #'+intId+' was deleted.') })
+</code></pre>
 					</div>
 				</div>
 				<div id="GroupASub5" class="subgroup">
 	                <h3>Recycle Items</h3>
+					Send the item to the site Recycle Bin (fully recoverable)
 					<div>
-						<code>sprLib.list(listName).recycle(item)</code> - Recycle the item (move into the Recycle Bin)
+<pre><code class="language-javascript">sprLib.list(listName).recycle(item)
+.then(function(intId){ console.log('Item #'+intId+' was recycled.') })
+</code></pre>
 					</div>
 				</div>
 	        </section>
@@ -357,23 +376,33 @@ sprLib.list('Employees')
 				<div id="GroupBSub2" class="subgroup">
 	                <h3>Column Info</h3>
 
-<h4>HowTo Get a List/Library Column Information</h4>
-<h5>Find metadata about each column in a List/Library including datatype, uniqueness, max length, default value, etc.</h5>
-
+					<h4>HowTo Get List/Library Column Information</h4>
+					<h5>Find metadata about each column in a List/Library including datatype, uniqueness, max length, default value, etc.</h5>
 <pre><code class="language-javascript">sprLib.list('Employees').cols()
 .then(function(data){ console.table(data) });
 </code></pre>
 
 <h4>Results</h4>
 <div class="result">
-<pre><code>.--------------------------------------------------------------------------------------------------------------------------------------------------.
-|      dispName      |         dataName         |  dataType  | isAppend | isNumPct | isReadOnly | isRequired | isUnique | defaultValue | maxLength |
-|--------------------|--------------------------|------------|----------|----------|------------|------------|----------|--------------|-----------|
-| Name               | Name                     | Text       | false    | false    | false      | false      | false    |              |       255 |
-| Badge Number       | Badge_x0020_Number       | Number     | false    | false    | false      | true       | true     |              |           |
-| Hire Date          | Hire_x0020_Date          | DateTime   | false    | false    | false      | false      | false    |              |           |
-| ID                 | ID                       | Counter    | false    | false    | true       | false      | false    |              |           |
-'--------------------------------------------------------------------------------------------------------------------------------------------------'
+<pre><code>.---------------------------------------------------------------------------------------------------------------------------------------------------------.
+|       dispName        |          dataName           |  dataType   | isAppend | isNumPct | isReadOnly | isRequired | isUnique | defaultValue | maxLength |
+|-----------------------|-----------------------------|-------------|----------|----------|------------|------------|----------|--------------|-----------|
+| ID                    | ID                          | Counter     | false    | false    | true       | false      | false    | null         | null      |
+| Title                 | Title                       | Text        | false    | false    | false      | false      | false    | null         |       255 |
+| Name                  | Name                        | Text        | false    | false    | false      | true       | false    | null         |       255 |
+| Manager               | Manager                     | User        | false    | false    | false      | true       | false    | null         | null      |
+| Badge Number          | Badge_x0020_Number          | Number      | false    | false    | false      | false      | false    | null         | null      |
+| Job Grade             | Job_x0020_Grade             | Lookup      | false    | false    | false      | false      | false    | null         | null      |
+| Hire Date             | Hire_x0020_Date             | DateTime    | false    | false    | false      | false      | false    | null         | null      |
+| Salary                | Salary                      | Currency    | false    | false    | false      | false      | false    | null         | null      |
+| Extension             | Extension                   | Number      | false    | false    | false      | false      | false    | null         | null      |
+| Departments Supported | Departments_x0020_Supported | LookupMulti | false    | false    | false      | false      | false    | null         | null      |
+| Comments              | Comments                    | Note        | false    | false    | false      | false      | false    | null         | null      |
+| Versioned Comments    | Versioned_x0020_Comments    | Note        | true     | false    | false      | false      | false    | null         | null      |
+| Utilization Pct       | Utilization_x0020_Pct       | Number      | false    | true     | false      | false      | false    | null         | null      |
+| Active?               | Active_x003f_               | Boolean     | false    | false    | false      | false      | false    | 1            | null      |
+| CalcCol               | CalcCol                     | Calculated  | false    | false    | true       | false      | false    | null         | null      |
+'---------------------------------------------------------------------------------------------------------------------------------------------------------'
 </code></pre>
 </div>
 				</div>
@@ -382,40 +411,128 @@ sprLib.list('Employees')
 	        <section id="GroupC" class="group">
 	            <h3>User and Group Methods</h3>
 	            <div id="GroupCSub1" class="subgroup">
-	                <h4>Get User</h4>
+	                <h4>Get Current User (SP.User)</h4>
+Get current user (passing no parameters returns the current user)
+<pre><code class="language-javascript">sprLib.user().info()
+.then(function(objUser){ console.table(objUser) });
+</code></pre>
+					<h4>Results</h4>
+					<div class="result">
+<pre><code>.------------------------------------------------------------------------------------------------------------------------------.
+|   __metadata    | Id |              LoginName                |   Title   | PrincipalType |       Email         | IsSiteAdmin |
+|-----------------|----|---------------------------------------|-----------|---------------|---------------------|-------------|
+| [object Object] |  9 | i:0#.f|membership|brent@microsoft.com | Brent Ely |             1 | brent@microsoft.com | true        |
+'------------------------------------------------------------------------------------------------------------------------------'
+</code></pre>
+
+					<h4>Get Any User (SP.User)</h4>
+Get any user info: Query by <code>id</code>, <code>email</code>, or <code>title</code>
+<pre><code class="language-javascript">sprLib.user({ email:'brent@microsoft.com' }).info()
+.then(function(objUser){ console.table(objUser) });
+</code></pre>
+					<h4>Results</h4>
+					<div class="result">
+<pre><code>.------------------------------------------------------------------------------------------------------------------------------.
+|   __metadata    | Id |              LoginName                |   Title   | PrincipalType |       Email         | IsSiteAdmin |
+|-----------------|----|---------------------------------------|-----------|---------------|---------------------|-------------|
+| [object Object] |  9 | i:0#.f|membership|brent@microsoft.com | Brent Ely |             1 | brent@microsoft.com | true        |
+'------------------------------------------------------------------------------------------------------------------------------'
+</code></pre>
 	            </div>
 	            <div id="GroupCSub2" class="subgroup">
-	                <h4>Get User Groups</h4>
+					<h4>Get Current User Groups (SP.Group)</h4>
+Get current user's groups (passing no parameters returns the current user)
+<pre><code class="language-javascript">sprLib.user().groups()
+.then(function(arrGroups){ console.table(arrGroups) });
+</code></pre>
+					<h4>Results</h4>
+					<div class="result">
+<pre><code>.------------------------.
+| Id |       Title       |
+|----|-------------------|
+|  1 | Dev Site Owners   |
+|  6 | Dev Site Members  |
+|  9 | Dev Site Visitors |
+'------------------------'
+</code></pre>
 	            </div>
 	        </section>
 
 			<section id="GroupD" class="group">
 	            <h3>REST API Calls</h3>
 	            <div id="GroupDSub1" class="subgroup">
-	                <h4>Make any ad-hoc Call to REST/OData endpoints</h4>
+	                <h4>Utliize SharePoint REST endpoints</h4>
+
+					<p>Query any of the dozens of available SharePoint Endpoints to gather site/list info, create Lists, column, subsites, you name it.</p>
+
+					<h4>Query all site Lists/Libraries</h4>
+<pre><code class="language-javascript">sprLib.rest({ url:'/_api/web/lists?$select=BaseType,ItemCount,Title' })
+.then(function(arrResults){ console.table(arrResults) });
+</code></pre>
+					<h4>Results</h4>
+					<div class="result">
+<pre><code>.----------------------------------------------------------.
+| BaseType | ItemCount |               Title               |
+|----------|-----------|-----------------------------------|
+|        0 |         0 | appdata                           |
+|        1 |         0 | appfiles                          |
+|        0 |        18 | Composed Looks                    |
+|        0 |         0 | Content type publishing error log |
+|        1 |         0 | Converted Forms                   |
+|        0 |        10 | Departments                       |
+|        1 |        25 | Documents                         |
+|        0 |        25 | Employees                         |
+|        0 |         4 | Job Grades                        |
+|        1 |         1 | List Template Gallery             |
+|        1 |         3 | Maintenance Log Library           |
+|        1 |       225 | Master Page Gallery               |
+|        0 |         2 | MicroFeed                         |
+|        1 |        58 | Site Assets                       |
+|        1 |         7 | Site Pages                        |
+|        1 |         0 | Solution Gallery                  |
+|        1 |         5 | Style Library                     |
+|        1 |        41 | Theme Gallery                     |
+|        1 |        71 | Web Part Gallery                  |
+|        1 |         0 | wfpub                             |
+'----------------------------------------------------------'
+</code></pre>
+
+<h4>Create a new List column</h4>
+<pre><code class="language-javascript">sprLib.rest({
+    url:  "_api/web/lists/getbytitle('Employees')/fields",
+    type: "POST",
+    data: "{'__metadata':{'type':'SP.FieldDateTime'}, 'FieldTypeKind':4, 'Title':'Bonus Date', 'DisplayFormat':1 }"
+})
+.then(function(){ console.log("New column created!"); })
+</code></pre>
+
 	            </div>
 	        </section>
 
 			<section id="GroupE" class="group">
 	            <h3>Form Binding/Population</h3>
+				<p>Quickly populate form elements with data-binding similar to Angular</p>
+
 	            <div id="GroupESub1" class="subgroup">
 	                <h4>Static Elements</h4>
+					<h5>Place a list item inside a static element (<code>&lt;span&gt;</code>, <code>&lt;div&gt;</code> etc.)</h5>
+<pre><code class="language-html">&lt;span data-sprlib='{ "list":"Employees", "value":"Name", "filter":{"col":"Name", "op":"eq", "val":"Brent Ely"} }'&gt;&lt;/span&gt;
+</code></pre>
 	            </div>
 	            <div id="GroupESub2" class="subgroup">
 	                <h4>Select Elements</h4>
+					<h5>Easily populate a <code>&lt;select&gt;</code> dropdown with values from a List (both the text and value can be specified)</h5>
+<pre><code class="language-html">&lt;select data-sprlib='{ "list":"Employees", "value":"Id", "text":"Name" }'&gt;&lt;/select&gt;</code></pre>
 	            </div>
 				<div id="GroupESub3" class="subgroup">
 	                <h4>Table Elements</h4>
+					<h5>Populate a <code>&lt;table&gt;</code> rows with values from a List</h5>
+<pre><code class="language-html">&lt;table data-sprlib='{ "foreach": {"list":"Employees", "filter":{"col":"Badge_x0020_Number", "op":"eq", "val":1234}}, "options":{"showBusySpinner":true} }'&gt;
+</code></pre>
 
-
-					&lt;select data-sprlib='{ "list":"Employees", "value":"Id", "text":"Name" }'&gt;&lt;/select&gt;
-
-					&lt;input type="text" data-sprlib='{ "list":"Departments", "value":"Title" }' placeholder="Departments.Title"&gt;&lt;/input&gt;
-
-					&lt;span data-sprlib='{ "list":"Employees", "value":"Name", "filter":{"col":"Name", "op":"eq", "val":"Brent Ely"} }'&gt;&lt;/span&gt;
-
-					&lt;table data-sprlib='{ "foreach": {"list":"Employees", "filter":{"col":"Badge_x0020_Number", "op":"eq", "val":1234}}, "options":{"showBusySpinner":true} }'&gt;
-					&lt;tbody data-sprlib='{ "foreach": {"list":"Employees", "cols":["Name","Utilization_x0020_Pct"] } }'&gt;&lt;/tbody&gt;
+					<h5>Populate a <code>&lt;table&gt;</code> <code>&lt;tbody&gt;</code> rows with values from a List</h5>
+<pre><code class="language-html">&lt;tbody data-sprlib='{ "foreach": {"list":"Employees", "cols":["Name","Utilization_x0020_Pct"] } }'&gt;&lt;/tbody&gt;
+</code></pre>
 
 	            </div>
 	        </section>
