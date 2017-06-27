@@ -368,22 +368,33 @@ sprLib.list('Employees').getItems({
 
 ```javascript
 // EX: Using 'listCols' option to name our columns
-// EX: Using 'dataFunc' option to return a calculated value
+// EX: Using 'dataFunc' option to return a dynamic, generated value (an html link)
 // EX: Using query options: filter, order, limit
 sprLib.list('Employees').getItems({
     listCols: {
-		empId:    { dataName:'Id'                 },
-        empName:  { dataName:'Name'               },
+        empId:    { dataName:'Id'                 },
         badgeNum: { dataName:'Badge_x0020_Number' },
-        hireDate: { dataName:'Hire_x0020_Date'    },
-        editLink: { dataFunc:function(objItem){ return '<a href="/sites/dev/Lists/Employees/DispForm.aspx?ID='+objItem.empId+'">View Emp</a>' } }
+        editLink: { dataFunc:function(objItem){ return '<a href="/sites/dev/Lists/Employees/DispForm.aspx?ID='+objItem.Id+'">View Emp</a>' } }
     },
     queryFilter:  'Salary gt 100000',
     queryOrderby: 'Hire_x0020_Date',
-    queryLimit:   10
+    queryLimit:   5
 })
 .then(function(arrData){ console.table(arrData) })
 .catch(function(errMsg){ console.error(errMsg) });
+
+// RESULT:
+/*
+.-------------------------------------------------------------------------------------------.
+| empId | badgeNum |                                editLink                                |
+|-------|----------|------------------------------------------------------------------------|
+|   334 |  1497127 | <a href="/sites/dev/Lists/Employees/DispForm.aspx?ID=334">View Emp</a> |
+|   339 |  1497924 | <a href="/sites/dev/Lists/Employees/DispForm.aspx?ID=339">View Emp</a> |
+|   350 |  1497927 | <a href="/sites/dev/Lists/Employees/DispForm.aspx?ID=350">View Emp</a> |
+|   354 |  1497928 | <a href="/sites/dev/Lists/Employees/DispForm.aspx?ID=354">View Emp</a> |
+|   367 |  1497929 | <a href="/sites/dev/Lists/Employees/DispForm.aspx?ID=367">View Emp</a> |
+'-------------------------------------------------------------------------------------------'
+*/
 ```
 
 
@@ -582,9 +593,12 @@ All major browsers (and Node.js) now fully support ES6 Promises, so keep reading
 are a thing of the past.**
 
 ## Async Chaining
-* Promises can be chained so they execute in the order shown only after the previous one has completed.
+* Promises can be chained so they execute in the order shown only after the previous one has completed
 
-Example
+Example Logic:  
+SpRestLib methods return a Promise, meaning the use the "return sprestlib" calls below cause the subsequent .then() to wait for that method to return a result, thereby enabling async chaining.
+
+Example Code:
 ```javascript
 var item = { Name:'Marty McFly', Hire_x0020_Date:new Date() };
 Promise.resolve()
@@ -595,9 +609,13 @@ Promise.resolve()
 ```
 
 ## Async Grouping
-* Promises can be grouped so they have to complete before `then()` is executed.
+* Promises can be grouped using `.all()` meaning each of them must complete before `.then()` is executed.
 
-Example
+Example Logic:  
+This example requires that both the call to user info and user groups both complete before we move on.
+The old AJAX callback method model required a lot more code to do the same thing!
+
+Example Code:
 ```javascript
 Promise.all([ sprLib.user().info(), sprLib.user().groups() ])
 .then(function(arrResults){
