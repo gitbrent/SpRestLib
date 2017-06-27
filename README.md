@@ -597,7 +597,7 @@ are a thing of the past.**
 
 Example Logic:  
 * SpRestLib methods return a Promise, meaning the "return sprestlib" calls below cause the subsequent `.then()` to wait for that method's REST call to return a result
-* That's all you need to code to enable async chaining of sync operations without any callback functions or queue management!
+* That's all you need to code to enable chaining of asynchronous operations without any callback functions or queue management!
 
 Example Code:
 ```javascript
@@ -613,13 +613,14 @@ Promise.resolve()
 * Promises can be grouped using `.all()` meaning each of them must complete before `.then()` is executed.
 
 Example Logic:  
-* This example requires that both the call to user info and user groups both complete before we move on (the old AJAX callback method model required a lot more code to do the same thing!)
+* This example requires that both the user info and user group queries complete before we move on
+* The old AJAX callback method model required a lot more code to do the same thing!
 
 Example Code:
 ```javascript
 Promise.all([ sprLib.user().info(), sprLib.user().groups() ])
 .then(function(arrResults){
-    // 'arrResults' holds the return values of both SpRestLib method calls above - in the order they were provided
+    // 'arrResults' holds the return values of both method calls above - in the order they were provided
     // Therefore, arrResults[0] holds user info() and arrResults[1] holds user groups()
     console.log( "Current User Info `Title`: " + arrResults[0].Title  );
     console.log( "Current User Groups count: " + arrResults[1].length );
