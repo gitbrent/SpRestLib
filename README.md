@@ -480,7 +480,7 @@ Syntax:
 `sprLib.user().info()`  
 `sprLib.user(options).groups()`
 
-Returns: Object with name/value pairs containing information about the user
+Returns: Object with name/value pairs containing information about the SharePoint user
 
 Note: *Uses the basic SP User service (not the Enterprise licensed User Profile service)*
 
@@ -492,15 +492,15 @@ sprLib.user().info()
 
 // EXAMPLE: Get user info by email address
 sprLib.user({ email:'brent@microsoft.com' }).info()
-.then(function(objUser){ console.table(objUser) });
+.then(function(objUser){ console.table(objUser); });
 
 // RESULT:
 /*
-.---------------------------------------------------------------------------------------------.
-|  Id |              LoginName                |   Title   |        Email        | IsSiteAdmin |
-|-----|---------------------------------------|-----------|---------------------|-------------|
-|   9 | i:0#.f|membership|brent@microsoft.com | Brent Ely | brent@microsoft.com | true        |
-'---------------------------------------------------------------------------------------------'
+.--------------------------------------------------------------------------------------------.
+| Id |              LoginName                |   Title   |        Email        | IsSiteAdmin |
+|----|---------------------------------------|-----------|---------------------|-------------|
+|  9 | i:0#.f|membership|brent@microsoft.com | Brent Ely | brent@microsoft.com | true        |
+'--------------------------------------------------------------------------------------------'
 */
 ```
 
@@ -509,24 +509,21 @@ Syntax:
 `sprLib.user().groups()`  
 `sprLib.user(options).groups()`
 
-
 Returns: Array of objects containing the user's SharePoint groups [SPGroup](https://msdn.microsoft.com/en-us/library/microsoft.sharepoint.spgroup.aspx)
 
 ### Sample Code
 ```javascript
 sprLib.user().groups()
-.then(function(arrGroups){
-    console.log("Current User Groups count = "+ arrGroups.length);
-    console.log("Group[0] info: "+ arrGroups[0].Id +" - "+ arrGroups[0].Title);
-});
+.then(function(arrGroups){ console.table(arrGroups) }); });
 
 // RESULT:
 /*
-.---------------------------------------------------------------------------------------.
-| Id |      Title      |        Description         |   OwnerTitle    |    LoginName    |
-|----|-----------------|----------------------------|-----------------|-----------------|
-|  6 | Dev Site Owners | Use for full control perms | Dev Site Owners | Dev Site Owners |
-'---------------------------------------------------------------------------------------'
+.-----------------------------------------------------------------------------------------.
+| Id |      Title       |        Description         |   OwnerTitle    |    LoginName     |
+|----|------------------|----------------------------|-----------------|------------------|
+|  6 | Dev Site Owners  | Use for full control perms | Dev Site Owners | Dev Site Owners  |
+|  7 | Dev Site Members | Use for contribute perms   | Dev Site Owners | Dev Site Members |
+'-----------------------------------------------------------------------------------------'
 */
 ```
 
