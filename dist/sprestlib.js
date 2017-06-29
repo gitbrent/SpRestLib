@@ -39,8 +39,8 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 
 (function(){
 	// APP VERSION/BUILD
-	var APP_VER = "0.11.0";
-	var APP_BLD = "20170623";
+	var APP_VER = "0.12.0-beta";
+	var APP_BLD = "20170628";
 	var DEBUG = false; // (verbose mode/lots of logging. FIXME:remove prior to v1.0.0)
 	// APP FUNCTIONALITY
 	var APP_FILTEROPS = {
@@ -1361,7 +1361,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 				// A: Convert single string column into an array for use below
 				if ( typeof inOpt.queryCols === 'string' ) inOpt.queryCols = [ inOpt.queryCols ];
 
-				// B: Build query object
+				// B: Build query object if `queryCols` array exists
 				if ( inOpt.queryCols && Array.isArray(inOpt.queryCols) ) {
 					var objListCols = {};
 					inOpt.queryCols.forEach(function(colStr,i){
@@ -1373,14 +1373,16 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 				}
 
 				// C: Add columns
-				$.each(inOpt.queryCols, function(key,col){
-					if ( !col.dataName ) return; // Skip columns without a 'dataName' key
-					// A:
-					if ( objAjaxQuery.url.substring(objAjaxQuery.url.length-1) == '=' ) objAjaxQuery.url += col.dataName;
-					else objAjaxQuery.url += ( objAjaxQuery.url.lastIndexOf(',') == objAjaxQuery.url.length-1 ? col.dataName : ','+col.dataName );
-					// B:
-					if ( col.dataName.indexOf('/') > -1 ) strExpands += ( strExpands == '' ? col.dataName.substring(0,col.dataName.indexOf('/')) : ','+col.dataName.substring(0,col.dataName.indexOf('/')) );
-				});
+				if ( inOpt.queryCols && typeof inOpt.queryCols === 'object' ) {
+					$.each(inOpt.queryCols, function(key,col){
+						if ( !col.dataName ) return; // Skip columns without a 'dataName' key
+						// A:
+						if ( objAjaxQuery.url.substring(objAjaxQuery.url.length-1) == '=' ) objAjaxQuery.url += col.dataName;
+						else objAjaxQuery.url += ( objAjaxQuery.url.lastIndexOf(',') == objAjaxQuery.url.length-1 ? col.dataName : ','+col.dataName );
+						// B:
+						if ( col.dataName.indexOf('/') > -1 ) strExpands += ( strExpands == '' ? col.dataName.substring(0,col.dataName.indexOf('/')) : ','+col.dataName.substring(0,col.dataName.indexOf('/')) );
+					});
+				}
 
 				// D: Add maxrows as default in SP2013 is a paltry 100 rows
 				objAjaxQuery.url += '&$top=' + ( inOpt.queryLimit ? inOpt.queryLimit : APP_OPTS.maxRows );
@@ -1473,6 +1475,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 				resolve( inOpt.spArrData );
 			})
 			.fail(function(jqXHR,textStatus,errorThrown){
+				// TODO: 20170628: renewSecurityToken when detected
 				reject( parseErrorMessage(jqXHR, textStatus, errorThrown) + "\n\nURL used: " + objAjaxQuery.url );
 			});
 		});
