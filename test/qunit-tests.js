@@ -41,9 +41,9 @@ function getAsciiTableStr(arrayResults) {
 QUnit.module( "LIST > MISC Methods" );
 // ================================================================================================
 {
-	['Departments', 'Employees', '8fda2798-dbbc-497d-9840-df87b08e09c1']
+	['Departments', 'Employees', 'Empty', '8fda2798-dbbc-497d-9840-df87b08e09c1']
 	.forEach(function(list,idx){
-		QUnit.test(`sprLib.list().cols() - using '${list}'`, function(assert){
+		QUnit.test(`sprLib.list('${list}').cols()`, function(assert){
 			var done = assert.async();
 			// TEST:
 			sprLib.list(list).cols()
@@ -60,7 +60,7 @@ QUnit.module( "LIST > MISC Methods" );
 			});
 		});
 
-		QUnit.test(`sprLib.list().info() - using '${list}'`, function(assert){
+		QUnit.test(`sprLib.list('${list}').info()`, function(assert){
 			var done = assert.async();
 			// TEST:
 			sprLib.list(list).info()
