@@ -130,8 +130,8 @@ var sprLib = require("sprestlib");
 * `sprLib.rest(options)` - Returns the results of a given REST call to any [SharePoint REST API](https://msdn.microsoft.com/en-us/library/office/dn268594.aspx)
 
 ## User Info/Groups
-* `sprLib.user(options).info()`   - Returns basic User information [SPUser](https://msdn.microsoft.com/en-us/library/microsoft.sharepoint.spuser.aspx)
-* `sprLib.user(options).groups()` - Returns an of SPGroup objects with information about the Users Groups
+* `sprLib.user(options).info()`   - Returns user information object (Id, Title, Email, etc.)  ([SPUser](https://msdn.microsoft.com/en-us/library/microsoft.sharepoint.spuser.aspx))
+* `sprLib.user(options).groups()` - Returns array of group objects with group information (Id, Title, Owner, etc.)  ([SPGroup](https://msdn.microsoft.com/en-us/library/microsoft.sharepoint.spgroup.aspx))
 
 ## Form Population
 * `data-sprlib{options}` - Populates the parent tag using the options provided
