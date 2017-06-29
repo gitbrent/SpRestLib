@@ -260,7 +260,7 @@
 				$('#sandboxCode').text(
 					"sprLib.list('Employees')\n"
 					+ ".getItems({ listCols:['Id','Name','Manager/Id','Manager/Title'] })\n"
-					+ ".then(function(data){ data.forEach(function(row,idx){ console.log(row.Manager); }); return data; });"
+					+ ".then(function(data){ return data; });"
 				);
 			}
 		}
