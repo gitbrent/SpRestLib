@@ -6,10 +6,10 @@
 Simplify SharePoint REST/Web Service interaction to a few lines of code. Easily read items, perform CRUD operations, execute REST calls, gather user/group information and populate form elements. Enables rapid development of apps for SharePoint (SharePoint Add-ins) using the SharePoint App Model.
 
 ### Features:
-* Simple - Most REST/Web Service interaction can be done in a couple of lines of code
-* Modern - Lightweight, pure JavaScript solution
+* Simple  - Most REST/Web Service interaction can be done in a couple of lines of code
+* Modern  - Lightweight, pure JavaScript solution
 * Elegant - Utilizes the new [ES6 Promise](http://www.datchley.name/es6-promises/) architecture for asynchronous operations
-* Robust - Built for [SharePoint 2013 API](https://msdn.microsoft.com/en-us/library/office/jj860569.aspx) and [OData v3](http://www.odata.org/documentation/odata-version-3-0/)
+* Robust  - Built for [SharePoint 2013 API](https://msdn.microsoft.com/en-us/library/office/jj860569.aspx) and [OData v3](http://www.odata.org/documentation/odata-version-3-0/)
 
 ### Methods:
 * List Interface - Create, read, update, and delete (CRUD) List/Library items with a single line of code
@@ -637,7 +637,7 @@ When reporting issues, please include a code snippet or a link demonstrating the
 **************************************************************************************************
 # Special Thanks
 
-* [Marc D Anderson](http://sympmarc.com/) - SpRestLib is built in the spirit of the great `SPServices` library
+* [Marc D Anderson](http://sympmarc.com/) - SpRestLib is built in the spirit of the late, great `SPServices` library
 * Microsoft - for the SharePoint.com developer account
 * Everyone who submitted an Issue or Pull Request
 
