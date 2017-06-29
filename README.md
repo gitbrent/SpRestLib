@@ -488,11 +488,11 @@ Note: *Uses the basic SP User service (not the Enterprise licensed User Profile 
 ```javascript
 // EXAMPLE: Get current user info
 sprLib.user().info()
-.then(function(objUser){ console.table(objUser) });
+.then(function(objUser){ console.table([objUser]) });
 
 // EXAMPLE: Get user info by email address
 sprLib.user({ email:'brent@microsoft.com' }).info()
-.then(function(objUser){ console.table(objUser); });
+.then(function(objUser){ console.table([objUser]); });
 
 // RESULT:
 /*
@@ -514,7 +514,7 @@ Returns: Array of objects containing the user's SharePoint groups [SPGroup](http
 ### Sample Code
 ```javascript
 sprLib.user().groups()
-.then(function(arrGroups){ console.table(arrGroups) }); });
+.then(function(arrGroups){ console.table(arrGroups) });
 
 // RESULT:
 /*
