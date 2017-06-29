@@ -1562,7 +1562,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 		newUser.groups = function() {
 			return new Promise(function(resolve, reject) {
 				$.ajax({
-					url    : strDynUrl + "$select=Groups/Id,Groups/Title&$expand=Groups",
+					url    : strDynUrl + "$select=Groups/Id,Groups/Title,Groups/Description,Groups/OwnerTitle,Groups/LoginName&$expand=Groups",
 					type   : "GET",
 					cache  : false,
 					headers: {"Accept":"application/json; odata=verbose"}
@@ -1572,7 +1572,15 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 
 					// A: Gather groups
 					( data.d.results ? data.d.results[0].Groups.results : data.d.Groups.results )
-					.forEach(function(group,idx){ arrGroups.push({ Id:group.Id, Title:group.Title }); });
+					.forEach(function(group,idx){
+						arrGroups.push({
+							Id: group.Id,
+							Title: group.Title,
+							Description: group.Description,
+							OwnerTitle: group.OwnerTitle,
+							LoginName: group.LoginName
+						});
+					});
 
 					// B: Resolve results
 					resolve( arrGroups );
