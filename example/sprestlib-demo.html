@@ -124,6 +124,8 @@
 		// ==================================================================================================================
 
 		function execCodeAndShowResults(eleCode, eleData) {
+			var SKIP_META = true;
+
 			// A:
 			$('#'+eleData).html( HTML_SPINNER );
 
@@ -131,8 +133,18 @@
 			Promise.resolve()
 			.then(function(){ return eval( $('#'+eleCode).text() ) })
 			.then(function(arrItems){
+				if ( arrItems && !Array.isArray(arrItems) ) {
+					$('#'+eleData).html( arrItems );
+					return;
+				}
+				else if ( !arrItems || arrItems.length == 0 ) {
+					$('#'+eleData).html( '(No results returned)' );
+					return;
+				}
+
 				var arrColHeadings = [];
 				Object.keys(arrItems[0]).forEach(function(key,idx){
+					if ( SKIP_META && key == '__metadata' ) return;
 					if ( typeof key === 'object' ) Object.keys(key).forEach(function(key,idx){ arrColHeadings.push(key) });
 					else arrColHeadings.push(key);
 				});
@@ -141,6 +153,7 @@
 				arrItems.forEach(function(obj,idx){
 					var vals = [];
 					$.each(obj, function(key,val){
+						if ( SKIP_META && key == '__metadata' ) return;
 						vals.push( ( typeof val === 'object' && key != '__metadata' ? JSON.stringify(val) : val ) );
 					});
 					table.addRow(vals);
@@ -260,7 +273,7 @@
 	<a class="github-fork-ribbon" href="https://github.com/GitBrent/SpRestLib" title="Fork me on GitHub">Fork me on GitHub</a>
 
 	<div id="demoBody">
-		<div class="bigTitle">SpRestLib Feature Demos</div>
+		<div class="bigTitle"><a href="https://github.com/GitBrent/SpRestLib" target="_blank">SpRestLib</a> Feature Demos</div>
 		<div class="subTitle">JavaScript Library for SharePoint Web Services</div>
 
 		<div id="navTabs" class="modernTabs">
