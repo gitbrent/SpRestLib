@@ -117,10 +117,10 @@ var sprLib = require("sprestlib");
 ## List/Library
 * `sprLib.list(listName).getItems(options)` - Returns an array of item objects using a variety of possible options
 
-* `sprLib.list(listName).create(item)`  - Create a new item in the List/Library
-* `sprLib.list(listName).update(item)`  - Update an existing List/Library item using JSON data
-* `sprLib.list(listName).delete(item)`  - Delete an existing item (permanently delete)
-* `sprLib.list(listName).recycle(item)` - Recycle an existing item (move into the Recycle Bin)
+* `sprLib.list(listName).create(item)` - Create a new list item using JSON data
+* `sprLib.list(listName).update(item)` - Update an existing item using JSON data
+* `sprLib.list(listName).delete(id)`   - Delete an existing item by ID (permanently delete)
+* `sprLib.list(listName).recycle(id)`  - Recycle an existing item by ID (move to Recycle Bin)
 
 * `sprLib.list(listName).cols()` - Returns an array of column objects with useful info (name, datatype, etc.)
 
@@ -131,7 +131,7 @@ var sprLib = require("sprestlib");
 
 ## User Info/Groups
 * `sprLib.user(options).info()`   - Returns user information object (Id, Title, Email, etc.)  ([SPUser](https://msdn.microsoft.com/en-us/library/microsoft.sharepoint.spuser.aspx))
-* `sprLib.user(options).groups()` - Returns array of group objects with group information (Id, Title, Owner, etc.)  ([SPGroup](https://msdn.microsoft.com/en-us/library/microsoft.sharepoint.spgroup.aspx))
+* `sprLib.user(options).groups()` - Returns user group objects (Id, Title, Owner, etc.)  ([SPGroup](https://msdn.microsoft.com/en-us/library/microsoft.sharepoint.spgroup.aspx))
 
 ## Form Population
 * `data-sprlib{options}` - Populates the parent tag using the options provided
@@ -419,10 +419,10 @@ Returns: Array of objects containing name/value pairs
 | Option        | Type    | Default     | Description           | Possible Values / Returns           |
 | :------------ | :------ | :---------- | :-------------------- | :---------------------------------- |
 | `url`         | string  | current url | REST API endpoint     | full or relative url. See: [SharePoint REST API](https://msdn.microsoft.com/en-us/library/office/dn268594.aspx) |
-| `type`        | string  | `GET`       | rest type             | `GET` or `POST` |
+| `type`        | string  | `GET`       | rest type             | `GET` or `POST`. Ex:`type: 'POST'` |
 | `data`        | string  |             | data to be sent       | Ex:`data: {'type': 'SP.FieldDateTime'}` |
 | `cache`       | boolean | `false`     | cache settings        | Ex:`cache: true` |
-| `contentType` | string  | `application/json` | request header content-type | Only used with `POST` type |
+| `contentType` | string  | `application/json` | request header content-type | Only used with `type:'POST'` |
 | `queryCols`   | string  |             | fields/columns to get | any available field from the SP REST API |
 | `queryFilter` | string  |             | query filter          | utilizes OData style [Query Operators](https://msdn.microsoft.com/en-us/library/office/fp142385.aspx#Anchor_7) Ex:`queryFilter: 'Salary lt 99000'` |
 | `queryLimit`  | string  | `1000`      | max items to return   | 1-5000. Ex:`queryLimit: 5000` |
@@ -477,7 +477,8 @@ Omitting options will return information about the current user, otherwise, the 
 
 ## Get User Information (`SPUser`)
 Syntax:
-`sprLib.user().info()`
+`sprLib.user().info()`  
+`sprLib.user(options).groups()`
 
 Returns: Object with name/value pairs containing information about the user
 
@@ -505,7 +506,9 @@ sprLib.user({ email:'brent@microsoft.com' }).info()
 
 ## Get User Groups (`SPGroup`)
 Syntax:
-`sprLib.user().groups()`
+`sprLib.user().groups()`  
+`sprLib.user(options).groups()`
+
 
 Returns: Array of objects containing the user's SharePoint groups [SPGroup](https://msdn.microsoft.com/en-us/library/microsoft.sharepoint.spgroup.aspx)
 
@@ -516,6 +519,15 @@ sprLib.user().groups()
     console.log("Current User Groups count = "+ arrGroups.length);
     console.log("Group[0] info: "+ arrGroups[0].Id +" - "+ arrGroups[0].Title);
 });
+
+// RESULT:
+/*
+.---------------------------------------------------------------------------------------.
+| Id |      Title      |        Description         |   OwnerTitle    |    LoginName    |
+|----|-----------------|----------------------------|-----------------|-----------------|
+|  6 | Dev Site Owners | Use for full control perms | Dev Site Owners | Dev Site Owners |
+'---------------------------------------------------------------------------------------'
+*/
 ```
 
 
@@ -548,14 +560,18 @@ The following HTML element tags can be populated:
 | `options`     | string  |           | table/tbody options   | `showBusySpinner` |
 
 ## Examples
-```javascript
+```html
+<!-- select -->
 <select data-sprlib='{ "list":"Employees", "value":"Id", "text":"Name" }'></select>
 
+<!-- input -->
 <input type="text" data-sprlib='{ "list":"Departments", "value":"Title" }' placeholder="Departments.Title"></input>
 
+<!-- static elements span, div, etc. -->
 <span data-sprlib='{ "list":"Employees", "value":"Name", "filter":{"col":"Name", "op":"eq", "val":"Brent Ely"} }'></span>
 
-<table data-sprlib='{ "foreach": {"list":"Employees", "filter":{"col":"Badge_x0020_Number", "op":"eq", "val":1234}}, "options":{"showBusySpinner":true} }'>
+<!-- table/tbody -->
+<table data-sprlib='{ "foreach": {"list":"Employees", "filter":{"col":"Active", "op":"eq", "val":true}}, "options":{"showBusySpinner":true} }'>
 <tbody data-sprlib='{ "foreach": {"list":"Employees", "cols":["Name","Utilization_x0020_Pct"] } }'></tbody>
 ```
 
