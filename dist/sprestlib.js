@@ -40,7 +40,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 (function(){
 	// APP VERSION/BUILD
 	var APP_VER = "0.12.0-beta";
-	var APP_BLD = "20170628";
+	var APP_BLD = "20170702";
 	var DEBUG = false; // (verbose mode/lots of logging. FIXME:remove prior to v1.0.0)
 	// APP FUNCTIONALITY
 	var APP_FILTEROPS = {
@@ -779,33 +779,51 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 		* @see: FieldTypes: https://msdn.microsoft.com/en-us/library/office/microsoft.sharepoint.client.fieldtype.aspx
 		*/
 		_newList.getItems = function(inObj) {
+			var listGUID = '';
 			return new Promise(function(resolve, reject) {
-				var listGUID = '';
+				// STEP 1: Create/Init Params
+				inObj = inObj || {};
+				// Deal with garbage here instead of in parse
+				if ( inObj == '' || inObj == [] ) inObj = {};
 
-				// FIRST: Param check
-				// N/A for this Method: `getItems()` does not req any opts/params, however we do need a valid inObj, so create if needed
-				if ( !inObj || typeof inObj !== 'object' ) inObj = {};
-				if ( !inObj.listCols ) inObj.listCols = ( Array.isArray(inObj) ? inObj : [] );
+				// STEP 2: Parse options/cols / Set Internal Arrays
+				{
+					// CASE 1: Option: single string col name
+					if ( typeof inObj === 'string' || typeof inObj === 'number' ) {
+						var objCol = {};
+						objCol[ inObj.toString() ] = { dataName:inObj.toString() };
+						inObj = { listCols:objCol };
+					}
+					// CASE 2: Options: array of col names
+					else if ( Array.isArray(inObj) ) {
+						var objListCols = {};
+						inObj.forEach(function(colStr,i){
+							var strTmp = ( colStr.indexOf('/') > -1 ? colStr.substring(0,colStr.indexOf('/')) : colStr );
+							// Handle cases where there are 2 expands from same column. Ex: 'Manager/Id' and 'Manager/Title'
+							if ( colStr ) objListCols[strTmp] = ( objListCols[strTmp] ? { dataName:objListCols[strTmp].dataName+','+colStr } : { dataName:colStr } );
+						});
+						inObj = { listCols: objListCols };
+					}
+					// CASE 3: Options: `listCols` is a simple array of col names
+					else if ( Array.isArray(inObj.listCols) ) {
+						var objListCols = {};
+						inObj.listCols.forEach(function(colStr,i){
+							var strTmp = ( colStr.indexOf('/') > -1 ? colStr.substring(0,colStr.indexOf('/')) : colStr );
+							// Handle cases where there are 2 expands from same column. Ex: 'Manager/Id' and 'Manager/Title'
+							if ( colStr ) objListCols[strTmp] = ( objListCols[strTmp] ? { dataName:objListCols[strTmp].dataName+','+colStr } : { dataName:colStr } );
+						});
+						inObj = { listCols: objListCols };
+					}
+					// CASE 4: No listCols - create when needed
+					else if ( !inObj.listCols ) inObj.listCols = {};
 
-				// STEP 1: Attach/Init data properties to this query
-				inObj.spArrData = [];
-				inObj.spObjData = {};
-				inObj.spObjMeta = {};
+					// AJAX OPTIONS:
+					inObj.cache = inObj.cache || false;
 
-				// STEP 2: Parse/build `listCols`
-
-				// A: First, convert simple string -> array
-				if ( typeof inObj.listCols === 'string' ) inObj.listCols = [ inObj.listCols ];
-
-				// B: Next, turn array of col names into `listCols` object
-				if ( Array.isArray(inObj.listCols) ) {
-					var objListCols = {};
-					inObj.listCols.forEach(function(colStr,i){
-						var strTmp = ( colStr.indexOf('/') > -1 ? colStr.substring(0,colStr.indexOf('/')) : colStr );
-						// Handle cases where there are 2 expands from same column. Ex: 'Manager/Id' and 'Manager/Title'
-						objListCols[strTmp] = ( objListCols[strTmp] ? { dataName:objListCols[strTmp].dataName+','+colStr } : { dataName:colStr } );
-					});
-					inObj.listCols = objListCols;
+					// Add internal data objects
+					inObj.spArrData = [];
+					inObj.spObjData = {};
+					inObj.spObjMeta = {};
 				}
 
 				// STEP 3: Start data fetch Promise chain
@@ -851,23 +869,28 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 				})
 				.then(function(){
 					return new Promise(function(resolve, reject) {
-						var arrExpands = [];
-						// TODO: build ``$.ajax` object like we do in .rest() (instead of strAjaxUrl); use defaults in setup etc.
-						var strAjaxUrl = "", strExpands = "";
+						var objAjaxQuery = {
+							url    : _urlBase+"/items",
+							type   : "GET",
+							cache  : inObj.cache,
+							headers: { "Accept":"application/json;odata=verbose", "X-RequestDigest":$("#__REQUESTDIGEST").val() }
+						};
+						var arrExpands = [], strExpands = "";
 
-						// STEP 1: Start building REST URL
-						strAjaxUrl = _urlBase+"/items";
-						// If columns were provided, start a select query
-						if ( inObj.listCols ) strAjaxUrl = strAjaxUrl+"?$select=";
+						// STEP 1: Start building REST Endpoint URL
+						{
+							// If columns were provided, start a select query
+							if ( inObj.listCols && Object.keys(inObj.listCols).length > 0 ) objAjaxQuery.url += "?$select=";
+						}
 
-						// STEP 2: Continue building REST Endpoint URL
+						// STEP 2: Keep building REST Endpoint URL
 						{
 							// A: Add columns
 							$.each(inObj.listCols, function(key,col){
 								if ( !col.dataName ) return; // Skip columns without a 'dataName' key
 								// 1:
-								if ( strAjaxUrl.substring(strAjaxUrl.length-1) == '=' ) strAjaxUrl += col.dataName;
-								else strAjaxUrl += ( strAjaxUrl.lastIndexOf(',') == strAjaxUrl.length-1 ? col.dataName : ','+col.dataName );
+								if ( objAjaxQuery.url.substring(objAjaxQuery.url.length-1) == '=' ) objAjaxQuery.url += col.dataName;
+								else objAjaxQuery.url += ( objAjaxQuery.url.lastIndexOf(',') == objAjaxQuery.url.length-1 ? col.dataName : ','+col.dataName );
 								// 2:
 								if ( col.dataName.indexOf('/') > -1 ) {
 									var strFieldName = col.dataName.substring(0, col.dataName.indexOf('/'));
@@ -879,36 +902,34 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 							});
 
 							// B: Add maxrows (if any) or use default b/c SP2013 default is a paltry 100 rows!
-							strAjaxUrl += (strAjaxUrl.indexOf('?$') > -1 ? '&':'?') + '$top=' + ( inObj.queryLimit ? inObj.queryLimit : APP_OPTS.maxRows );
+							objAjaxQuery.url += (objAjaxQuery.url.indexOf('?$') > -1 ? '&':'?') + '$top=' + ( inObj.queryLimit ? inObj.queryLimit : APP_OPTS.maxRows );
 
 							// C: Add expand (if any)
-							if ( strExpands ) strAjaxUrl += (strAjaxUrl.indexOf('?$') > -1 ? '&':'?') + '$expand=' + strExpands;
+							if ( strExpands ) objAjaxQuery.url += (objAjaxQuery.url.indexOf('?$') > -1 ? '&':'?') + '$expand=' + strExpands;
 
 							// D: Add filter (if any)
 							if ( inObj.queryFilter ) {
-								strAjaxUrl += (strAjaxUrl.indexOf('?$') > -1 ? '&':'?') + '$filter=' + ( inObj.queryFilter.indexOf('%') == -1 ? encodeURI(inObj.queryFilter) : inObj.queryFilter );
+								objAjaxQuery.url += (objAjaxQuery.url.indexOf('?$') > -1 ? '&':'?') + '$filter=' + ( inObj.queryFilter.indexOf('%') == -1 ? encodeURI(inObj.queryFilter) : inObj.queryFilter );
 							}
 
 							// E: Add orderby (if any)
-							if ( inObj.queryOrderby ) strAjaxUrl += (strAjaxUrl.indexOf('?$') > -1 ? '&':'?') + '$orderby=' + inObj.queryOrderby;
+							if ( inObj.queryOrderby ) objAjaxQuery.url += (objAjaxQuery.url.indexOf('?$') > -1 ? '&':'?') + '$orderby=' + inObj.queryOrderby;
 						}
-						strAjaxUrl = strAjaxUrl.replace(',&','&'); // FIXME: we wont this catch condition after we stop selecting "Id," above!
 
 						// STEP 3: Send AJAX REST query
-						$.ajax({
-							url: strAjaxUrl,
-							type: (inObj.ajaxType || "GET"),
-							cache: false,
-							headers: { "Accept":"application/json; odata=verbose", "X-RequestDigest":$("#__REQUESTDIGEST").val() }
-						})
+						$.ajax(objAjaxQuery)
 						.done(function(data,textStatus){
-							var arrResults = (data.d.results || data || []);
+							var arrResults = data.d.results || data || [];
 
 							// A: Add all cols is none provided (aka:"fetch all")
 							if ( (!inObj.listCols || Object.keys(inObj.listCols).length == 0) && arrResults.length > 0 ) {
 								var objListCols = {};
-								Object.keys(arrResults[0]).forEach(function(colStr,i){
-									if ( typeof arrResults[0][colStr] !== 'object' ) {
+								Object.keys(arrResults[0]).forEach(function(colStr,idx){
+									// DESIGN: Dont include those first few junky fields from SP that point to FieldsAsHTML etc
+									if ( arrResults[0][colStr] && typeof arrResults[0][colStr] === 'object' && arrResults[0][colStr].__deferred ) {
+										if (DEBUG) console.log('FYI: Skipping "select all" column: '+colStr);
+									}
+									else {
 										objListCols[colStr] = { dataName:colStr };
 									}
 								});
@@ -1380,6 +1401,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 						if ( objAjaxQuery.url.substring(objAjaxQuery.url.length-1) == '=' ) objAjaxQuery.url += col.dataName;
 						else objAjaxQuery.url += ( objAjaxQuery.url.lastIndexOf(',') == objAjaxQuery.url.length-1 ? col.dataName : ','+col.dataName );
 						// B:
+						// FIXME: this allows adding same col name - use `arrExpands`-style from getItems
 						if ( col.dataName.indexOf('/') > -1 ) strExpands += ( strExpands == '' ? col.dataName.substring(0,col.dataName.indexOf('/')) : ','+col.dataName.substring(0,col.dataName.indexOf('/')) );
 					});
 				}
@@ -1562,7 +1584,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 		newUser.groups = function() {
 			return new Promise(function(resolve, reject) {
 				$.ajax({
-					url    : strDynUrl + "$select=Groups/Id,Groups/Title,Groups/Description,Groups/OwnerTitle,Groups/LoginName&$expand=Groups",
+					url    : strDynUrl + "$select=Groups/Id,Groups/Title,Groups/Description,Groups/LoginName,Groups/OwnerTitle&$expand=Groups",
 					type   : "GET",
 					cache  : false,
 					headers: {"Accept":"application/json; odata=verbose"}
