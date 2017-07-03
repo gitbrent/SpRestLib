@@ -327,6 +327,24 @@ QUnit.module( "LIST > ITEM GET Methods" );
 		});
 	});
 
+	QUnit.test("sprLib.getItems() 4: `listCols` with simple string", function(assert){
+		var done = assert.async();
+		// TEST:
+		sprLib.list('Employees')
+		.getItems({ listCols:'Manager/Title' })
+		.then(function(arrayResults){
+			assert.ok( Object.keys(arrayResults[0]).length == 2, "arrayResults[0] has length == 2: "+ Object.keys(arrayResults[0]).length );
+			assert.ok( (arrayResults[0].__metadata.id)         , "arrayResults[0].__metadata.id exists: "+ JSON.stringify(arrayResults[0].__metadata.id) );
+			assert.ok( (arrayResults[0].Manager.Title)         , "arrayResults[0].Manager.Title exists: "+ JSON.stringify(arrayResults[0].Manager.Title) );
+			assert.ok( getAsciiTableStr(arrayResults)          , `RESULTS:\n${getAsciiTableStr(arrayResults)}`);
+			done();
+		})
+		.catch(function(errorMessage){
+			assert.ok( (false), errorMessage );
+			done();
+		});
+	});
+
 	QUnit.test("sprLib.getItems() 4: `listCols` with simple array of col names (Manager/Title)", function(assert){
 		var done = assert.async();
 		// TEST:
