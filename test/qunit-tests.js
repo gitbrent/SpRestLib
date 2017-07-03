@@ -2,7 +2,7 @@
  * NAME: qunit-test.js
  * DESC: tests for qunit-test.html (coded to my O365 Dev Site - YMMV)
  * AUTH: https://github.com/gitbrent/
- * DATE: Jun 19, 2017
+ * DATE: Jul 02, 2017
  *
  * HOWTO: Generate text tables for README etc.:
  * sprLib.list('Employees').getItems(['Id', 'Name', 'Badge_x0020_Number']).then(function(arrData){ console.log(getAsciiTableStr(arrData)) });
@@ -11,7 +11,11 @@
  // QUnit.test("QUnit Base Test", function(assert){ assert.ok( true === true, "Passed!" ); });
  */
 
-var RESTROOT = '/sites/dev';
+const RESTROOT = '/sites/dev';
+//
+const ARR_NAMES_FIRST = ['Jack','Mark','CutiePie','Steve','Barry','Clark','Diana','Star','Luke','Captain'];
+const ARR_NAMES_LAST  = ['Septiceye','Iplier','Martzia','Rodgers','Allen','Kent','Prince','Lord','Skywalker','Marvel'];
+//
 var gNewEmpItem = -1;
 var gTestUserId = 9;
 var gUpdateItem = { Id:237 };
@@ -83,18 +87,19 @@ QUnit.module( "LIST > ITEM CRUD Methods" );
 		[1,2,3,4].forEach(function(done,idx){
 			done = assert.async();
 			sprLib.list('Employees').create({
-				__metadata: { type:"SP.Data.EmployeesListItem" },
-				Name:                  'QUnit Test',
-				ManagerId:             gTestUserId,
-				Badge_x0020_Number:    Math.round(new Date().getTime() / 1000000),
-				Hire_x0020_Date:       new Date(),
-				Salary:                12345.49,
-				Utilization_x0020_Pct: 1.0,
-				Extension:             (1234+idx).toString(),
-				Comments:              'New employee created',
-				Job_x0020_GradeId:     (idx+1),
-				Departments_x0020_SupportedId: {results: [1, 2, 3]},
-				Active_x003f_:         true
+				__metadata:						{ type:"SP.Data.EmployeesListItem" },
+				Name:							ARR_NAMES_FIRST[(Math.floor(Math.random()*10)+1)]+' '+ARR_NAMES_LAST[(Math.floor(Math.random()*10)+1)],
+				ManagerId:						gTestUserId,
+				Departments_x0020_SupportedId:	{ results:[1,2,3] },
+				Site_x0020_Link:				{ Url:'https://github.com/', Description:'GitHub Site' },
+				Badge_x0020_Number:				Math.round(new Date().getTime() / 1000000),
+				Job_x0020_GradeId:				(idx+1),
+				Hire_x0020_Date:				new Date(),
+				Salary:							12345.49,
+				Utilization_x0020_Pct:			1.0,
+				Extension:						(1234+idx).toString(),
+				Comments:						'New employee created',
+				Active_x003f_:					true
 			})
 			.then(function(newObj){
 				assert.ok( (newObj.Id), "Created! Id: " + newObj.Id );
@@ -267,7 +272,7 @@ QUnit.module( "LIST > ITEM CRUD Methods" );
 QUnit.module( "LIST > ITEM GET Methods" );
 // ================================================================================================
 {
-	QUnit.test("sprLib.getListItems() 1: no opts", function(assert){
+	QUnit.test("sprLib.getItems() 1: no opts", function(assert){
 		var done = assert.async();
 		// TEST:
 		sprLib.list('Employees')
@@ -284,7 +289,25 @@ QUnit.module( "LIST > ITEM GET Methods" );
 		});
 	});
 
-	QUnit.test("sprLib.getListItems() 2: simple array of col names (w Person object)", function(assert){
+	QUnit.test("sprLib.getItems() 2: simple col name STRING", function(assert){
+		var done = assert.async();
+		// TEST:
+		sprLib.list('Employees')
+		.getItems('Name')
+		.then(function(arrayResults){
+			assert.ok( arrayResults.length > 0                 , "arrayResults is an Array and length > 0: "+ arrayResults.length );
+			assert.ok( (arrayResults[0].__metadata.id)         , "arrayResults[0].__metadata.id exists: "+ JSON.stringify(arrayResults[0].__metadata.id) );
+			assert.ok( Object.keys(arrayResults[0]).length == 2, "arrayResults[0] has length == 2: "+ Object.keys(arrayResults[0]).length );
+			assert.ok( getAsciiTableStr(arrayResults)          , `RESULTS:\n${getAsciiTableStr(arrayResults)}`);
+			done();
+		})
+		.catch(function(errorMessage){
+			assert.ok( (false), errorMessage );
+			done();
+		});
+	});
+
+	QUnit.test("sprLib.getItems() 3: simple col name ARRAY (w Person object)", function(assert){
 		var done = assert.async();
 		// TEST:
 		sprLib.list('Employees')
@@ -304,7 +327,7 @@ QUnit.module( "LIST > ITEM GET Methods" );
 		});
 	});
 
-	QUnit.test("sprLib.getListItems() 3: `listCols` with simple array of col names (Manager/Title)", function(assert){
+	QUnit.test("sprLib.getItems() 4: `listCols` with simple array of col names (Manager/Title)", function(assert){
 		var done = assert.async();
 		// TEST:
 		sprLib.list('Employees')
@@ -324,7 +347,7 @@ QUnit.module( "LIST > ITEM GET Methods" );
 		});
 	});
 
-	QUnit.test("sprLib.getListItems() 4: `listCols` with simple array of col names (Manager/Id and Manager/Title)", function(assert){
+	QUnit.test("sprLib.getItems() 5: `listCols` with simple array of col names (Manager/Id and Manager/Title)", function(assert){
 		var done = assert.async();
 		// TEST:
 		sprLib.list('Employees')
@@ -345,7 +368,7 @@ QUnit.module( "LIST > ITEM GET Methods" );
 		});
 	});
 
-	QUnit.test("sprLib.getListItems() 5: `listCols` with named columns", function(assert){
+	QUnit.test("sprLib.getItems() 6: `listCols` with named columns", function(assert){
 		var done = assert.async();
 		// TEST:
 		sprLib.list('Employees')
@@ -370,7 +393,7 @@ QUnit.module( "LIST > ITEM GET Methods" );
 		});
 	});
 
-	QUnit.test("sprLib.getListItems() 6: `dataFunc` tests", function(assert){
+	QUnit.test("sprLib.getItems() 7: `dataFunc` tests", function(assert){
 		var done = assert.async();
 		// TEST:
 		sprLib.list('Employees')
@@ -397,7 +420,7 @@ QUnit.module( "LIST > ITEM GET Methods" );
 		});
 	});
 
-	QUnit.test("sprLib.getListItems() 7: `listCols` with column array: Multi-Lookup test `Id`", function(assert){
+	QUnit.test("sprLib.getItems() 8: `listCols` with column array: Multi-Lookup test `Id`", function(assert){
 		var done = assert.async();
 		// TEST:
 		sprLib.list('Employees')
@@ -421,7 +444,7 @@ QUnit.module( "LIST > ITEM GET Methods" );
 		});
 	});
 
-	QUnit.test("sprLib.getListItems() 8: `listCols` with column array: Multi-Lookup test with 2 fields (`Id`, `Title`)", function(assert){
+	QUnit.test("sprLib.getItems() 9: `listCols` with column array: Multi-Lookup test with 2 fields (`Id`, `Title`)", function(assert){
 		var done = assert.async();
 		// TEST:
 		sprLib.list('Employees')
@@ -449,7 +472,7 @@ QUnit.module( "LIST > ITEM GET Methods" );
 		});
 	});
 
-	QUnit.test("sprLib.getListItems() 9: `listCols` with named columns: Multi-Lookup test `Id`", function(assert){
+	QUnit.test("sprLib.getItems() 10: `listCols` with named columns: Multi-Lookup test `Id`", function(assert){
 		var done = assert.async();
 		// TEST:
 		sprLib.list('Employees')
@@ -474,6 +497,25 @@ QUnit.module( "LIST > ITEM GET Methods" );
 		});
 	});
 
+	//
+
+	QUnit.test("sprLib.list().getItems()", function(assert){
+		['', [], [''], ['',''], {}].forEach(function(data,idx){
+			var done = assert.async();
+			// TEST:
+			sprLib.list('Employees').getItems(data)
+			.then(function(arrayResults){
+				assert.ok( arrayResults.length > 0        , "arrayResults is an Array and length > 0: "+ arrayResults.length );
+				assert.ok( (arrayResults[0].__metadata.id), "arrayResults[0].__metadata.id exists: "+ JSON.stringify(arrayResults[0].__metadata.id) );
+				assert.ok( getAsciiTableStr(arrayResults) , `RESULTS:\n${getAsciiTableStr(arrayResults)}`);
+				done();
+			})
+			.catch(function(errorMessage){
+				assert.ok( (false), errorMessage );
+				done();
+			});
+		});
+	});
 
 	// TODO: querySkip
 	/*
@@ -631,9 +673,9 @@ sprLib.rest({ restUrl:'../_api/web/GetByTitle' });
 
 
 /*
-QUnit.test("sprLib.getListItems() - onDone", function(assert){
+QUnit.test("sprLib.getItems() - onDone", function(assert){
 	var done = assert.async();
-	sprLib.getListItems({
+	sprLib.getItems({
 		listName: 'Employees',
 		listCols: { id:{dataName:'ID'} },
 		queryLimit: 1,
@@ -641,9 +683,9 @@ QUnit.test("sprLib.getListItems() - onDone", function(assert){
 	});
 });
 
-QUnit.test("sprLib.getListItems() - with listCols", function(assert){
+QUnit.test("sprLib.getItems() - with listCols", function(assert){
 	var done = assert.async();
-	sprLib.getListItems({
+	sprLib.getItems({
 		listName: 'Employees',
 		listCols: {
 			id:       { dataName:'ID' },
@@ -675,9 +717,9 @@ QUnit.test("sprLib.getListItems() - with listCols", function(assert){
 	});
 });
 
-QUnit.test("sprLib.getListItems() - w/o listCols", function(assert){
+QUnit.test("sprLib.getItems() - w/o listCols", function(assert){
 	var done = assert.async();
-	sprLib.getListItems({
+	sprLib.getItems({
 		listName: 'Employees',
 		queryLimit: 10,
 		onDone: function(arrayResults){
@@ -694,9 +736,9 @@ QUnit.test("sprLib.getListItems() - w/o listCols", function(assert){
 	});
 });
 
-QUnit.test("sprLib.getListItems() - dataFunc listCols", function(assert){
+QUnit.test("sprLib.getItems() - dataFunc listCols", function(assert){
 	var done = assert.async();
-	sprLib.getListItems({
+	sprLib.getItems({
 		listName: 'Employees',
 		listCols: {
 			name:     { dataName:'Name' },
