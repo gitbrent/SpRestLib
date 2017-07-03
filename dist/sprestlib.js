@@ -804,7 +804,18 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 						});
 						inObj = { listCols: objListCols };
 					}
-					// CASE 3: Options: `listCols` is a simple array of col names
+					// CASE 3: Options: `listCols` is a simple string
+					else if ( typeof inObj.listCols === 'string' ) {
+						inObj.listCols = [inObj.listCols];
+						var objListCols = {};
+						inObj.listCols.forEach(function(colStr,i){
+							var strTmp = ( colStr.indexOf('/') > -1 ? colStr.substring(0,colStr.indexOf('/')) : colStr );
+							// Handle cases where there are 2 expands from same column. Ex: 'Manager/Id' and 'Manager/Title'
+							if ( colStr ) objListCols[strTmp] = ( objListCols[strTmp] ? { dataName:objListCols[strTmp].dataName+','+colStr } : { dataName:colStr } );
+						});
+						inObj = { listCols: objListCols };
+					}
+					// CASE 4: Options: `listCols` is a simple array of col names
 					else if ( Array.isArray(inObj.listCols) ) {
 						var objListCols = {};
 						inObj.listCols.forEach(function(colStr,i){
@@ -814,7 +825,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 						});
 						inObj = { listCols: objListCols };
 					}
-					// CASE 4: No listCols - create when needed
+					// CASE 5: No listCols - create when needed
 					else if ( !inObj.listCols ) inObj.listCols = {};
 
 					// AJAX OPTIONS:
