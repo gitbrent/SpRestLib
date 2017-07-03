@@ -306,7 +306,7 @@ sprLib.list('Employees').info().then(function(data){ console.table(data) });
 ```
 
 ### Get Items
-Syntax:
+Syntax:  
 `sprLib.list(listName|listGUID).getItems()`
 
 Returns:
@@ -317,10 +317,11 @@ Returns:
 | Option        | Type     | Required? | Description           | Possible Values / Returns           |
 | :------------ | :------- | :-------- | :-------------------- | :---------------------------------- |
 | `listCols`    | array *OR* object |  | column names to be returned | array of column names *OR* object (see below) |
+| `cache`       | boolean  | `false`   | cache settings        | Ex:`cache: true` |
 | `queryFilter` | string   |           | query filter          | utilizes OData style [Query Operators](https://msdn.microsoft.com/en-us/library/office/fp142385.aspx#Anchor_7) |
 | `queryLimit`  | string   |           | max items to return   | 1-*N* |
 | `queryOrderby`| string   |           | column(s) to order by | Ex:`queryOrderby:Name` |
-| `fetchAppend` | boolean  |           | return append text    | `true` or `false` (default is `false`) |
+| `fetchAppend` | boolean  | `false`   | return append text    | `true` or `false` |
 
 NOTE: Omitting `listCols` will result in all List columns being returned (mimics SharePoint default behavior)
 
@@ -469,11 +470,11 @@ Omitting options will return information about the current user, otherwise, the 
 `sprLib.user(options)`
 
 ## Options
-| Option   | Type     | Required? | Description           | Possible Values / Returns           |
-| :------- | :------- | :-------- | :-------------------- | :---------------------------------- |
-| `id`     | number   |           | user id               | user id to query. Ex: `{id:99}`     |
+| Option   | Type     | Required? | Description           | Possible Values / Returns                             |
+| :------- | :------- | :-------- | :-------------------- | :---------------------------------------------------- |
+| `id`     | number   |           | user id               | user id to query. Ex: `{id:99}`                       |
 | `email`  | string   |           | user email address    | user email to query. Ex: `{email:'brent@github.com'}` |
-| `title`  | string   |           | user title            | user title to query. Ex: `{title:'Brent Ely'}` |
+| `title`  | string   |           | user title            | user title to query. Ex: `{title:'Brent Ely'}`        |
 
 ## Get User Information (`SPUser`)
 Syntax:
@@ -546,15 +547,15 @@ The following HTML element tags can be populated:
 * table: a table or tbody can be populates with 1+ columns
 
 ## Data Binding Options
-| Option        | Type    | Required? | Description           | Possible Values / Returns           |
-| :------------ | :------ | :-------- | :-------------------- | :---------------------------------- |
-| `list`        | string  | yes       | List or Library name  |  |
-| `cols`        | array   |           | columns to be populated |  |
-| `text`        | string  |           | text value to use     |  |
-| `value`       | string  |           | REST API endpoint     |  |
-| `filter`      | string  |           | REST API endpoint     |  |
-| `tablesorter` | string  |           | REST API endpoint     |  |
-| `options`     | string  |           | table/tbody options   | `showBusySpinner` |
+| Option        | Type    | Required? | Description             | Possible Values / Returns           |
+| :------------ | :------ | :-------- | :---------------------- | :---------------------------------- |
+| `list`        | string  | yes       | List or Library name    |   |
+| `cols`        | array   |           | columns to be populated |   |
+| `text`        | string  |           | text string to show     |   |
+| `value`       | string  |           | value string to show    |   |
+| `filter`      | string  |           | query filter value      | Ex: `filter="ID eq 100"`  |
+| `tablesorter` | string  |           | whether to add jQuery TableFilter to table |   |
+| `options`     | string  |           | table/tbody options     | `showBusySpinner` |
 
 ## Examples
 ```html
