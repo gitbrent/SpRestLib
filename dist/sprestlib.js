@@ -40,7 +40,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 (function(){
 	// APP VERSION/BUILD
 	var APP_VER = "0.12.0-beta";
-	var APP_BLD = "20170702";
+	var APP_BLD = "20170704";
 	var DEBUG = false; // (verbose mode/lots of logging. FIXME:remove prior to v1.0.0)
 	// APP FUNCTIONALITY
 	var APP_FILTEROPS = {
@@ -165,8 +165,8 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 
 	function parseErrorMessage(jqXHR, textStatus, errorThrown) {
 		// STEP 1:
-		jqXHR       = jqXHR || {};
-		textStatus  = textStatus || "";
+		jqXHR       = jqXHR       || {};
+		textStatus  = textStatus  || "";
 		errorThrown = errorThrown || "";
 
 		// STEP 2:
@@ -604,12 +604,16 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 	* @param inName (string) - required - List Name or List GUID
 	*/
 	sprLib.list = function list(inName) {
-		// FIRST: Param check
-		if ( !inName || typeof inName !== 'string' ) { console.error("ERROR: listName/listGUID [string] is required!"); return null; }
+		// FIRST-1: Param check
+		if ( !inName || typeof inName !== 'string' ) {
+			console.error("ERROR: A 'listName' or 'listGUID' is required! EX: `sprLib.list('Emps')`");
+			return null;
+		}
 
+		// FIRST-2: Set vars
 		var guidRegex = /^[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}$/i;
 		var _newList = {};
-		// DESIGN: Accept [ListName] or [ListGUID]
+		// NOTE: DESIGN: Accept [ListName] or [ListGUID]
 		var _urlBase = APP_OPTS.baseUrl + "/_api/lists" + ( guidRegex.test(inName) ? "(guid'"+ inName +"')" : "/getbytitle('"+ inName.replace(/\s/gi,'%20') +"')" );
 		var _urlRest = "/_api/lists" + ( guidRegex.test(inName) ? "(guid'"+ inName +"')" : "/getbytitle('"+ inName.replace(/\s/gi,'%20') +"')" );
 
@@ -691,7 +695,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 					resolve( arrColumns );
 				})
 				.fail(function(jqXHR,textStatus,errorThrown){
-					reject({ 'jqXHR':jqXHR, 'textStatus':textStatus, 'errorThrown':errorThrown });
+					reject( parseErrorMessage(jqXHR, textStatus, errorThrown) );
 				});
 			});
 		}
@@ -709,8 +713,8 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 				.then(function(data){
 					resolve(data[0]);
 				})
-				.catch(function(err){
-					reject(err);
+				.catch(function(strErr){
+					reject( strErr );
 				});
 			});
 		}
@@ -785,6 +789,8 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 				inObj = inObj || {};
 				// Deal with garbage here instead of in parse
 				if ( inObj == '' || inObj == [] ) inObj = {};
+				// `$filter` only accepts single quote (%27) - double-quote (%22) will fail
+				if ( inObj.queryFilter ) inObj.queryFilter = inObj.queryFilter.replace(/\"/gi,"'");
 
 				// STEP 2: Parse options/cols / Set Internal Arrays
 				{
@@ -806,6 +812,8 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 					}
 					// CASE 3: Options: `listCols` is a simple string
 					else if ( typeof inObj.listCols === 'string' ) {
+						var objNew = {};
+						Object.keys(inObj).forEach(function(key,idx){ objNew[key] = inObj[key]; });
 						inObj.listCols = [inObj.listCols];
 						var objListCols = {};
 						inObj.listCols.forEach(function(colStr,i){
@@ -813,17 +821,21 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 							// Handle cases where there are 2 expands from same column. Ex: 'Manager/Id' and 'Manager/Title'
 							if ( colStr ) objListCols[strTmp] = ( objListCols[strTmp] ? { dataName:objListCols[strTmp].dataName+','+colStr } : { dataName:colStr } );
 						});
-						inObj = { listCols: objListCols };
+						objNew.listCols = objListCols;
+						inObj = objNew;
 					}
 					// CASE 4: Options: `listCols` is a simple array of col names
 					else if ( Array.isArray(inObj.listCols) ) {
+						var objNew = {};
+						Object.keys(inObj).forEach(function(key,idx){ objNew[key] = inObj[key]; });
 						var objListCols = {};
 						inObj.listCols.forEach(function(colStr,i){
 							var strTmp = ( colStr.indexOf('/') > -1 ? colStr.substring(0,colStr.indexOf('/')) : colStr );
 							// Handle cases where there are 2 expands from same column. Ex: 'Manager/Id' and 'Manager/Title'
 							if ( colStr ) objListCols[strTmp] = ( objListCols[strTmp] ? { dataName:objListCols[strTmp].dataName+','+colStr } : { dataName:colStr } );
 						});
-						inObj = { listCols: objListCols };
+						objNew.listCols = objListCols;
+						inObj = objNew;
 					}
 					// CASE 5: No listCols - create when needed
 					else if ( !inObj.listCols ) inObj.listCols = {};
@@ -970,7 +982,6 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 									var colVal = "";
 
 									// B.3.1: Get value(s) for this key
-
 									// Handle LookupMulti columns
 									if ( col.dataName && col.dataName.indexOf('/') > -1 && result[col.dataName.split('/')[0]].results ) {
 										// A:
@@ -991,10 +1002,19 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 									}
 									// Handle Lookup/Person/Url/etc. Ex: 'Manager/Title'
 									else if ( col.dataName && col.dataName.indexOf('/') > -1 ) {
+										// A: Split lookup info object/field
 										arrCol = col.dataName.split('/');
-										if ( result[ arrCol[0] ].__metadata ) delete result[ arrCol[0] ].__metadata;
+										// B: Some lookup results come with their own metadata - ditch it
+										if ( result[arrCol[0]].__metadata ) delete result[arrCol[0]].__metadata;
+										// C: Capture value
+										// CASE 1: `dataName` was used - in this case return the actual field user asked for
+										// Detect use of names listCols by comparing key to dataName
+										if ( key != arrCol[0] && key != col.dataName ) colVal = result[arrCol[0]][arrCol[1]];
+										// CASE 2: Other - in this case return the complete object (Ex: { Title:'Manager' })
+										// IMPORTANT: This de facto returns all the *other* fields queried. Eg: 'Manager/Id' and 'Manager/Title' were in cols
+										// We want to return a *single* object with these 2 elements, so they can be derefereced using 'Manger.Title' etc.
 										// Capture any-and-all columns returned (aside from removal of above)
-										colVal = result[ arrCol[0] ];
+										else colVal = result[arrCol[0]];
 									}
 									else if ( col.dataName ) {
 										colVal = result[col.dataName];
@@ -1075,7 +1095,6 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 					}
 				})
 				.catch(function(objErr){
-					if (DEBUG) console.error(objErr);
 					reject( parseErrorMessage(objErr.jqXHR, objErr.textStatus, objErr.errorThrown) );
 				});
 			});
