@@ -42,7 +42,25 @@ function getAsciiTableStr(arrayResults) {
 }
 
 // ================================================================================================
-QUnit.module( "LIST > MISC Methods" );
+QUnit.module( "Library OPTIONS" );
+// ================================================================================================
+{
+	QUnit.test(`sprLib.baseUrl('${RESTROOT}')`, function(assert){
+		var done = assert.async();
+		// TEST:
+		// A: Set
+		sprLib.baseUrl(RESTROOT);
+		// B: Get
+		var strBaseUrl = sprLib.baseUrl();
+		// C: Test
+		assert.ok( strBaseUrl == RESTROOT, "Pass: `strBaseUrl == RESTROOT` Str: " + strBaseUrl );
+		//
+		done();
+	});
+}
+
+// ================================================================================================
+QUnit.module( "LIST > COLS and INFO Methods" );
 // ================================================================================================
 {
 	['Departments', 'Employees', 'Empty', '8fda2798-dbbc-497d-9840-df87b08e09c1']
@@ -77,6 +95,57 @@ QUnit.module( "LIST > MISC Methods" );
 			});
 		});
 	});
+
+	// NON-EXISTANT LIST: COLS
+	QUnit.test(`sprLib.list('BADLISTNAME').cols()`, function(assert){
+		var done = assert.async();
+		// TEST:
+		sprLib.list('BADLISTNAME').cols()
+		.then(function(arrColObjs){
+			assert.ok( 0 == 1, 'Test should have thrown an error (catch)!' );
+			done();
+		})
+		.catch(function(strErr){
+			assert.ok( typeof strErr === 'string', `typeof strErr 'string': ${typeof strErr}` );
+			assert.ok( strErr, `catch strErr: ${strErr}` );
+			done();
+		});
+	});
+
+	// NON-EXISTANT LIST: INFO
+	QUnit.test(`sprLib.list('BADLISTNAME').info()`, function(assert){
+		var done = assert.async();
+		// TEST:
+		sprLib.list('BADLISTNAME').info()
+		.then(function(arrColObjs){
+			assert.ok( 0 == 1, 'Test should have thrown an error (catch)!' );
+			done();
+		})
+		.catch(function(strErr){
+			assert.ok( typeof strErr === 'string', `typeof strErr 'string': ${typeof strErr}` );
+			assert.ok( strErr, `catch strErr: ${strErr}` );
+			done();
+		});
+	});
+
+	// JUNK NAMES (.list() method only - cant/wont test for cols/info - result w/b null)
+	[ 101, '', null, undefined, {}, [] ]
+	.forEach(function(list,idx){
+		QUnit.test(`sprLib.list('${list}').cols()`, function(assert){
+			var done = assert.async();
+			// TEST:
+			var list = sprLib.list(list);
+			assert.ok( list == null, 'list returned null' );
+			done();
+		});
+	});
+}
+
+// ================================================================================================
+QUnit.module( "LIST > BASEURL Methods" );
+// ================================================================================================
+{
+	// TODO: Set baseUrl (pos/neg) see if we get sprLib.list back!
 }
 
 // ================================================================================================
