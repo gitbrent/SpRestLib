@@ -668,7 +668,7 @@
 		margin-left: 1px;
 		}
 		.navbar-default .navbar-nav > li > a {
-		padding: 30px 25px;
+		padding: 30px 20px;
 		font-size: 16px;
 		line-height: 18px;
 		color: #999;
@@ -834,13 +834,26 @@
 		text-align: center;
 		}
 
+		/* Custom Brent */
+		.codeResult {
+			white-space: pre;
+			background: #f1f1f1;
+			color: #696969;
+			font-family: Consolas,Monaco,monospace;
+			padding: 10px;
+			overflow: scroll;
+		}
+
 		#google_translate_element { float: right; margin-top: -30px; }
 
 		@media (max-width:767px) {
 			#main-slider { padding: 70px 0 60px 0; }
 		}
 		/* https://cdnjs.cloudflare.com/ajax/libs/prism/1.6.0/themes/prism-coy.min.css */
-		code[class*=language-],pre[class*=language-]{color:#000;background:0 0;font-family:Consolas,Monaco,'Andale Mono','Ubuntu Mono',monospace;text-align:left;white-space:pre;word-spacing:normal;word-break:normal;word-wrap:normal;line-height:1.5;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-hyphens:none;-moz-hyphens:none;-ms-hyphens:none;hyphens:none}pre[class*=language-]{position:relative;margin:.5em 0;box-shadow:-1px 0 0 0 #358ccb,0 0 0 1px #dfdfdf;border-left:10px solid #358ccb;background-image:linear-gradient(transparent 50%,rgba(69,142,209,.04) 50%);background-size:3em 3em;background-origin:content-box;overflow:visible;padding:0}code[class*=language]{max-height:inherit;height:100%;padding:0 1em;display:block;overflow:auto}:not(pre)>code[class*=language-],pre[class*=language-]{background-color:#fdfdfd;-webkit-box-sizing:border-box;-moz-box-sizing:border-box;box-sizing:border-box;margin-bottom:1em}:not(pre)>code[class*=language-]{position:relative;padding:.2em;border-radius:.3em;color:#c92c2c;border:1px solid rgba(0,0,0,.1);display:inline;white-space:normal}pre[class*=language-]:after,pre[class*=language-]:before{content:'';z-index:-2;display:block;position:absolute;bottom:.75em;left:.18em;width:40%;height:20%;max-height:13em;box-shadow:0 13px 8px #979797;-webkit-transform:rotate(-2deg);-moz-transform:rotate(-2deg);-ms-transform:rotate(-2deg);-o-transform:rotate(-2deg);transform:rotate(-2deg)}:not(pre)>code[class*=language-]:after,pre[class*=language-]:after{right:.75em;left:auto;-webkit-transform:rotate(2deg);-moz-transform:rotate(2deg);-ms-transform:rotate(2deg);-o-transform:rotate(2deg);transform:rotate(2deg)}.token.block-comment,.token.cdata,.token.comment,.token.doctype,.token.prolog{color:#7D8B99}.token.punctuation{color:#5F6364}.token.boolean,.token.constant,.token.deleted,.token.function-name,.token.number,.token.property,.token.symbol,.token.tag{color:#c92c2c}.token.attr-name,.token.builtin,.token.char,.token.function,.token.inserted,.token.selector,.token.string{color:#2f9c0a}.token.entity,.token.operator,.token.url,.token.variable{color:#a67f59;background:rgba(255,255,255,.5)}.token.atrule,.token.attr-value,.token.class-name,.token.keyword{color:#1990b8}.token.important,.token.regex{color:#e90}.language-css .token.string,.style .token.string{color:#a67f59;background:rgba(255,255,255,.5)}.token.important{font-weight:400}.token.bold{font-weight:700}.token.italic{font-style:italic}.token.entity{cursor:help}.namespace{opacity:.7}@media screen and (max-width:767px){pre[class*=language-]:after,pre[class*=language-]:before{bottom:14px;box-shadow:none}}.token.cr:before,.token.lf:before,.token.tab:not(:empty):before{color:#e0d7d1}pre[class*=language-].line-numbers{padding-left:0}pre[class*=language-].line-numbers code{padding-left:3.8em}pre[class*=language-].line-numbers .line-numbers-rows{left:0}pre[class*=language-][data-line]{padding-top:0;padding-bottom:0;padding-left:0}pre[data-line] code{position:relative;padding-left:4em}pre .line-highlight{margin-top:0}/*# sourceMappingURL=prism-coy.min.css.map */
+		/*
+		code[class*=language-],pre[class*=language-]{color:#000;background:0 0;font-family:Consolas,Monaco,'Andale Mono','Ubuntu Mono',monospace;text-align:left;white-space:pre;word-spacing:normal;word-break:normal;word-wrap:normal;line-height:1.5;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-hyphens:none;-moz-hyphens:none;-ms-hyphens:none;hyphens:none}pre[class*=language-]{position:relative;margin:.5em 0;box-shadow:-1px 0 0 0 #358ccb,0 0 0 1px #dfdfdf;border-left:10px solid #358ccb;background-image:linear-gradient(transparent 50%,rgba(69,142,209,.04) 50%);background-size:3em 3em;background-origin:content-box;overflow:visible;padding:0}code[class*=language]{max-height:inherit;height:100%;padding:0 1em;display:block;overflow:auto}:not(pre)>code[class*=language-],pre[class*=language-]{background-color:#fdfdfd;-webkit-box-sizing:border-box;-moz-box-sizing:border-box;box-sizing:border-box;margin-bottom:1em}:not(pre)>code[class*=language-]{position:relative;padding:.2em;border-radius:.3em;color:#c92c2c;border:1px solid rgba(0,0,0,.1);display:inline;white-space:normal}pre[class*=language-]:after,pre[class*=language-]:before{content:'';z-index:-2;display:block;position:absolute;bottom:.75em;left:.18em;width:40%;height:20%;max-height:13em;box-shadow:0 13px 8px #979797;-webkit-transform:rotate(-2deg);-moz-transform:rotate(-2deg);-ms-transform:rotate(-2deg);-o-transform:rotate(-2deg);transform:rotate(-2deg)}:not(pre)>code[class*=language-]:after,pre[class*=language-]:after{right:.75em;left:auto;-webkit-transform:rotate(2deg);-moz-transform:rotate(2deg);-ms-transform:rotate(2deg);-o-transform:rotate(2deg);transform:rotate(2deg)}.token.block-comment,.token.cdata,.token.comment,.token.doctype,.token.prolog{color:#7D8B99}.token.punctuation{color:#5F6364}.token.boolean,.token.constant,.token.deleted,.token.function-name,.token.number,.token.property,.token.symbol,.token.tag{color:#c92c2c}.token.attr-name,.token.builtin,.token.char,.token.function,.token.inserted,.token.selector,.token.string{color:#2f9c0a}.token.entity,.token.operator,.token.url,.token.variable{color:#a67f59;background:rgba(255,255,255,.5)}.token.atrule,.token.attr-value,.token.class-name,.token.keyword{color:#1990b8}.token.important,.token.regex{color:#e90}.language-css .token.string,.style .token.string{color:#a67f59;background:rgba(255,255,255,.5)}.token.important{font-weight:400}.token.bold{font-weight:700}.token.italic{font-style:italic}.token.entity{cursor:help}.namespace{opacity:.7}@media screen and (max-width:767px){pre[class*=language-]:after,pre[class*=language-]:before{bottom:14px;box-shadow:none}}.token.cr:before,.token.lf:before,.token.tab:not(:empty):before{color:#e0d7d1}pre[class*=language-].line-numbers{padding-left:0}pre[class*=language-].line-numbers code{padding-left:3.8em}pre[class*=language-].line-numbers .line-numbers-rows{left:0}pre[class*=language-][data-line]{padding-top:0;padding-bottom:0;padding-left:0}pre[data-line] code{position:relative;padding-left:4em}pre .line-highlight{margin-top:0}*/
+		/* http://prismjs.com/download.html?themes=prism-okaidia&languages=clike+javascript&plugins=line-numbers */
+		pre.line-numbers,pre.line-numbers>code{position:relative}code[class*=language-],pre[class*=language-]{color:#f8f8f2;background:0 0;text-shadow:0 1px rgba(0,0,0,.3);font-family:Consolas,Monaco,'Andale Mono','Ubuntu Mono',monospace;text-align:left;white-space:pre;word-spacing:normal;word-break:normal;word-wrap:normal;line-height:1.5;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-hyphens:none;-moz-hyphens:none;-ms-hyphens:none;hyphens:none}pre[class*=language-]{padding:1em;margin:.5em 0;overflow:auto;border-radius:.3em}:not(pre)>code[class*=language-],pre[class*=language-]{background:#272822}:not(pre)>code[class*=language-]{padding:.1em;border-radius:.3em;white-space:normal}.token.cdata,.token.comment,.token.doctype,.token.prolog{color:#708090}.token.punctuation{color:#f8f8f2}.namespace{opacity:.7}.token.constant,.token.deleted,.token.property,.token.symbol,.token.tag{color:#f92672}.token.boolean,.token.number{color:#ae81ff}.token.attr-name,.token.builtin,.token.char,.token.inserted,.token.selector,.token.string{color:#a6e22e}.language-css .token.string,.style .token.string,.token.entity,.token.operator,.token.url,.token.variable{color:#f8f8f2}.token.atrule,.token.attr-value,.token.function{color:#e6db74}.token.keyword{color:#66d9ef}.token.important,.token.regex{color:#fd971f}.token.bold,.token.important{font-weight:700}.token.italic{font-style:italic}.token.entity{cursor:help}pre.line-numbers{padding-left:3.8em;counter-reset:linenumber}.line-numbers .line-numbers-rows{position:absolute;pointer-events:none;top:0;font-size:100%;left:-3.8em;width:3em;letter-spacing:-1px;border-right:1px solid #999;-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none}.line-numbers-rows>span{pointer-events:none;display:block;counter-increment:linenumber}.line-numbers-rows>span:before{content:counter(linenumber);color:#999;display:block;padding-right:.8em;text-align:right}
 	</style>
 
 	<script defer src="js/jquery.js"></script>
@@ -892,7 +905,10 @@
                         <li class="active"><a href="#main-slider"><i class="fa fa-home fa-1g"></i></a></li>
                         <li><a href="#features">Features</a></li>
 						<li><a href="#examples">Examples</a></li>
-						<li><a href="#documentation">Documentation</a></li>
+						<li>
+							<a href="#documentation" class="hidden-xs hidden-sm">Documentation</a>
+							<a href="#documentation" class="visible-xs visible-sm hidden-md hidden-lg">Docs</a>
+						</li>
                         <li><a href="#download">Download</a></li>
 						<li><a href="#contact">Sites / Media</a></li>
                     </ul>
@@ -1035,15 +1051,29 @@
 	                    <div class="col-lg-6 col-md-12 col-sm-12">
 							<h4>Get List Items</h4>
 <pre><code class="language-javascript">sprLib.list('Employees')
-.getItems({
-    listCols: ['Id', 'Name', 'Hire_x0020_Date'],
-    queryFilter: 'Id eq 99',
-    queryOrderby: 'Name'
+.getItems(
+    ['Id', 'Name', 'Manager/Id', 'Manager/Title']
+)
+.then(function(arrData){
+    console.table(arrData);
 })
-.then(function(arrData){ console.table(arrData); })
-.catch(function(errMsg){ console.error(errMsg);  });
+.catch(function(errMsg){ console.error(errMsg); });
 </code></pre>
 						</div>
+						<div class="col-lg-6 col-md-12 col-sm-12">
+							<h4>Results</h4>
+<div class="codeResult">.---------------------------------------------------.
+| Id  |     Name     |           Manager            |
+|-----|--------------|------------------------------|
+| 440 | Mark Kent    | {"Id":1,"Title":"Brent Ely"} |
+| 441 | Clark Prince | {"Id":1,"Title":"Brent Ely"} |
+| 442 | Diana Lord   | {"Id":1,"Title":"Brent Ely"} |
+| 447 | Barry Allen  | {"Id":1,"Title":"Brent Ely"} |
+| 448 | Steve Kent   | {"Id":1,"Title":"Brent Ely"} |
+'---------------------------------------------------'</div>
+						</div>
+					</div>
+					<div class="row text-left">
 						<div class="col-lg-6 col-md-12 col-sm-12">
 							<h4>User Information</h4>
 <pre><code class="language-javascript">sprLib.user().info()
@@ -1056,6 +1086,18 @@
 .catch(function(errMsg){ console.error(errMsg);  });
 </code></pre>
 						</div>
+						<div class="col-lg-6 col-md-12 col-sm-12">
+							<h4>Results</h4>
+<div class="codeResult">User Id....... 901
+User Title.... Brent Ely
+User Email.... brent@testco.onmicrosoft.com
+User LoginName i:0#.f|membership|brent@testco.onmicrosoft.com</div>
+						</div>
+					</div>
+
+<!-- -->
+
+					<div class="row text-left">
 						<div class="col-lg-6 col-md-12 col-sm-12">
 							<h4>REST Calls</h4>
 <pre><code class="language-javascript">sprLib.rest({
@@ -1070,6 +1112,18 @@
 });
 </code></pre>
 						</div>
+						<div class="col-lg-6 col-md-12 col-sm-12">
+							<h4>Results</h4>
+<div class="codeResult">.-------------------------------------------------.
+|         Title          |       LoginName        |
+|------------------------|------------------------|
+| Dev Site Owners        | Dev Site Owners        |
+| Dev Site Visitors      | Dev Site Visitors      |
+| Excel Services Viewers | Excel Services Viewers |
+'-------------------------------------------------'</div>
+						</div>
+					</div>
+					<div class="row text-left">
 						<div class="col-lg-6 col-md-12 col-sm-12">
 							<h4>CRUD Operations</h4>
 <pre><code class="language-javascript">var item = { Name:'Marty McFly', HireDate:new Date() };
@@ -1088,12 +1142,26 @@ Promise.resolve()
     console.log('Ran entire CRUD chain!');
 });
 </code></pre>
+
+						</div>
+						<div class="col-lg-6 col-md-12 col-sm-12">
+							<h4>Results</h4>
+<div class="codeResult">Promises easily chain async calls:
+
+Created item!
+
+Updated item!
+
+Deleted item!
+
+Ran entire CRUD chain!
+</div>
 						</div>
 					</div>
 
 					<div class="row text-left">
 	                    <div class="col-lg-12 col-md-12 col-sm-12">
-							<h3>Sample Code: Form Popualtion/Data Binding</h3>
+							<h3>Sample Code: Form Population/Data Binding</h3>
 							<ul>
 								<li>Implementing Angular for SharePoint is a lot of work.</li>
 								<li>Instead, use an Angular-like binding syntax to quickly populate web forms and html elements like tables</li>
@@ -1103,7 +1171,7 @@ Promise.resolve()
 					<div class="row text-left">
 						<div class="col-lg-12 col-md-12 col-sm-12">
 							<h4>Various Elements</h4>
-<pre><code class="language-javascript">&lt;body&gt;
+<pre><code class="language-html">&lt;body&gt;
     &lt;select data-sprlib='{ "list":"Employees", "value":"Id", "text":"Name" }'&gt;&lt;/select&gt;
 
     &lt;input type="text" data-sprlib='{ "list":"Departments", "value":"Title" }' placeholder="Departments.Title"&gt;&lt;/input&gt;
