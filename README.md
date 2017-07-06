@@ -2,8 +2,10 @@
 
 # SpRestLib
 
-## JavaScript Library for SharePoint Web Services / REST Library
-Simplify SharePoint REST/Web Service interaction to a few lines of code. Easily read items, perform CRUD operations, execute REST calls, gather user/group information and populate form elements. Enables rapid development of apps for SharePoint (SharePoint Add-ins) using the SharePoint App Model.
+## JavaScript Library for SharePoint REST Web Services
+Enables rapid development of SharePoint Apps/Add-ins using the JavaScript SharePoint App Model. This
+library provides a clean, concise API that simplifies async REST interaction. Easily read/write List
+items (CRUD), execute REST calls, and gather user/group information.
 
 ### Features:
 * Simple  - Most REST/Web Service interaction can be done in a couple of lines of code
