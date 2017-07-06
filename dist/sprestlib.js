@@ -39,8 +39,8 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 
 (function(){
 	// APP VERSION/BUILD
-	var APP_VER = "0.12.0-beta";
-	var APP_BLD = "20170704";
+	var APP_VER = "0.12.0";
+	var APP_BLD = "20170705";
 	var DEBUG = false; // (verbose mode/lots of logging. FIXME:remove prior to v1.0.0)
 	// APP FUNCTIONALITY
 	var APP_FILTEROPS = {
@@ -1381,7 +1381,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 			inOpt = inOpt || {};
 			inOpt.cache = inOpt.cache || false;
 			inOpt.type  = inOpt.restType || inOpt.type || "GET";
-			inOpt.url   = (inOpt.restUrl  || inOpt.url  || APP_OPTS.baseUrl).replace(/\"/g, "'");
+			inOpt.url   = (inOpt.restUrl || inOpt.url || APP_OPTS.baseUrl).replace(/\"/g, "'");
 			//
 			inOpt.spArrData = [];
 

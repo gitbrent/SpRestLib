@@ -1,6 +1,6 @@
 {
   "name": "sprestlib",
-  "description": "JavaScript Library for SharePoint Web Services/REST API",
+  "description": "JavaScript Library for SharePoint REST Web Services",
   "main": [
     "dist/sprestlib.js"
   ],

@@ -1,11 +1,11 @@
 {
 	"name": "sprestlib",
-	"version": "0.12.0-beta",
+	"version": "0.12.0",
 	"author": {
 		"name": "Brent Ely",
 		"url": "https://github.com/gitbrent/"
 	},
-	"description": "JavaScript Library for SharePoint Web Services/REST API",
+	"description": "JavaScript Library for SharePoint REST Web Services",
 	"homepage": "https://gitbrent.github.io/SpRestLib/",
 	"license": "MIT",
 	"dependencies": {
