@@ -1,12 +1,10 @@
 # Change Log
 
-## [v0.12.0](https://github.com/gitbrent/sprestlib/tree/v0.12.0) (2017-07-xx)
+## [v0.12.0](https://github.com/gitbrent/sprestlib/tree/v0.12.0) (2017-07-05)
 [Full Changelog](https://github.com/gitbrent/sprestlib/compare/v0.11.0...v0.12.0)
 
 **Fixed Bugs:**
-- Lots of code cleanup and some bug fixes
-
-
+- Lots of code cleanup and bug fixes
 
 ## [v0.11.0](https://github.com/gitbrent/sprestlib/tree/v0.11.0) (2017-06-25)
 [Full Changelog](https://github.com/gitbrent/sprestlib/compare/v0.10.0...v0.11.0)
@@ -17,7 +15,7 @@
 **Implemented Enhancements:**
 - Added `baseUrl` method to List API to dynamically set baseUrl on a per-call basis
 - Added `cache`, `contentType` and `type`='POST' options to `rest()` API
-- Added ability to get user info by `Title` or `Email`
+- Added ability to get user info by `title` or `email`
 - Added new `.recycle()` List method
 - Added sprestlib.bundle.js file (using gulp)
 - Added bower support
