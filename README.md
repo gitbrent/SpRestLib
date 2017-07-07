@@ -43,20 +43,20 @@ items (CRUD), execute REST calls, and gather user/group information.
 - [Method Reference](#method-reference)
   - [List/Library Methods (`SPList`)](#listlibrary-methods-splist)
     - [BaseURL](#baseurl)
+    - [Get Items](#get-items)
+      - [Options](#options)
+      - [listCols Object](#listcols-object)
+      - [listCols dataFunc Option](#listcols-datafunc-option)
+      - [Sample Code](#sample-code)
     - [Create Item](#create-item)
     - [Update Item](#update-item)
     - [Delete Item](#delete-item)
     - [Recycle Item](#recycle-item)
     - [Get List Column Properties](#get-list-column-properties)
       - [Column Properties](#column-properties)
-      - [Sample Code](#sample-code)
+      - [Sample Code](#sample-code-1)
     - [Get List Info](#get-list-info)
       - [List Properties](#list-properties)
-      - [Sample Code](#sample-code-1)
-    - [Get Items](#get-items)
-      - [Options](#options)
-      - [listCols Object](#listcols-object)
-      - [listCols dataFunc Option](#listcols-datafunc-option)
       - [Sample Code](#sample-code-2)
   - [REST API Methods](#rest-api-methods)
     - [Options](#options-1)
@@ -163,6 +163,105 @@ Example:
 ```javascript
 sprLib.list('Employees').baseUrl('/sites/HumanResources/devtest/')
 ```
+
+
+### Get Items
+Syntax:  
+`sprLib.list(listName|listGUID).getItems()`
+
+Returns:
+* Array of objects containing name/value pairs
+* `__metadata` is always included in the results array (to enable further operations, use of Etag, etc.)
+
+#### Options
+| Option        | Type     | Required? | Description           | Possible Values / Returns           |
+| :------------ | :------- | :-------- | :-------------------- | :---------------------------------- |
+| `listCols`    | array *OR* object |  | column names to be returned | array of column names *OR* object (see below) |
+| `cache`       | boolean  | `false`   | cache settings        | Ex:`cache: true` |
+| `queryFilter` | string   |           | query filter          | utilizes OData style [Query Operators](https://msdn.microsoft.com/en-us/library/office/fp142385.aspx#Anchor_7) |
+| `queryLimit`  | string   |           | max items to return   | 1-*N* |
+| `queryOrderby`| string   |           | column(s) to order by | Ex:`queryOrderby:Name` |
+| `fetchAppend` | boolean  | `false`   | return append text    | `true` or `false` |
+
+NOTE: Omitting `listCols` will result in all List columns being returned (mimics SharePoint default behavior)
+
+#### listCols Object
+| Option       | Type     | Required? | Description           | Possible Values / Return Values     |
+| :----------- | :------- | :-------- | :-------------------- | :---------------------------------- |
+| `dataName`   | string   |           | the column name       | the fixed, back-end REST column name (use [Get List Column Properties](#get-list-column-properties)) |
+| `dispName`   | string   |           | the name to use when displaying results in table headers, etc. |  |
+| `dateFormat` | string   |           | format to use when returning/displaying date | `INTL`, `INTLTIME`, `YYYYMMDD`, `ISO`, `US` |
+| `dataFunc`   | function |           | function to use for returning a result | use a custom function to transform the query result (see below) |
+
+#### listCols dataFunc Option
+There are many times where you'll need more than a simple column value.  For example, I often provide a link to the InfoPath
+form so users can edit the item directly.
+
+The `dataFunc` option allows you access to the entire result set and to return any type of value.  See sample below where
+"editLink" is created.
+
+#### Sample Code
+```javascript
+// EX: Simple array of column names
+sprLib.list('Employees')
+.getItems(
+    ['Id', 'Name', 'Badge_x0020_Number']
+)
+.then(function(arrData){
+    console.table(arrData);
+})
+.catch(function(errMsg){ console.error(errMsg) });
+
+// Result:
+/*
+.---------------------------------------------------------.
+|   __metadata    | Id  |    Name    | Badge_x0020_Number |
+|-----------------|-----|------------|--------------------|
+| [object Object] | 253 | Hal Jordan |              12345 |
+'---------------------------------------------------------'
+*/
+```
+
+```javascript
+// EX: Using 'listCols' option with array of column names
+sprLib.list('Employees').getItems({
+    listCols: ['Name', 'Badge_x0020_Number', 'Hire_x0020_Date']
+})
+.then(function(arrData){ console.table(arrData) })
+.catch(function(errMsg){ console.error(errMsg) });
+```
+
+```javascript
+// EX: Using 'listCols' option to name our columns
+// EX: Using 'dataFunc' option to return a dynamic, generated value (an html link)
+// EX: Using query options: filter, order, limit
+sprLib.list('Employees').getItems({
+    listCols: {
+        empId:    { dataName:'Id'                 },
+        badgeNum: { dataName:'Badge_x0020_Number' },
+        editLink: { dataFunc:function(objItem){ return '<a href="/sites/dev/Lists/Employees/DispForm.aspx?ID='+objItem.Id+'">View Emp</a>' } }
+    },
+    queryFilter:  'Salary gt 100000',
+    queryOrderby: 'Hire_x0020_Date',
+    queryLimit:   5
+})
+.then(function(arrData){ console.table(arrData) })
+.catch(function(errMsg){ console.error(errMsg) });
+
+// RESULT:
+/*
+.-------------------------------------------------------------------------------------------.
+| empId | badgeNum |                                editLink                                |
+|-------|----------|------------------------------------------------------------------------|
+|   334 |  1497127 | <a href="/sites/dev/Lists/Employees/DispForm.aspx?ID=334">View Emp</a> |
+|   339 |  1497924 | <a href="/sites/dev/Lists/Employees/DispForm.aspx?ID=339">View Emp</a> |
+|   350 |  1497927 | <a href="/sites/dev/Lists/Employees/DispForm.aspx?ID=350">View Emp</a> |
+|   354 |  1497928 | <a href="/sites/dev/Lists/Employees/DispForm.aspx?ID=354">View Emp</a> |
+|   367 |  1497929 | <a href="/sites/dev/Lists/Employees/DispForm.aspx?ID=367">View Emp</a> |
+'-------------------------------------------------------------------------------------------'
+*/
+```
+
 
 
 ### Create Item
@@ -330,103 +429,6 @@ sprLib.list('Employees').info().then(function(data){ console.table(data) });
 |-------------------|--------------|----------------------|-------------|-------------------|---------------|--------|--------------------------------------|-----------|-----------|
 | true              |          100 | 2016-08-21T20:48:43Z |             | true              | false         | false  | 8fda2799-dbbc-a420-9869-df87b08b09c1 |        25 | Employees |
 '-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------'
-*/
-```
-
-### Get Items
-Syntax:  
-`sprLib.list(listName|listGUID).getItems()`
-
-Returns:
-* Array of objects containing name/value pairs
-* `__metadata` is always included in the results array (to enable further operations, use of Etag, etc.)
-
-#### Options
-| Option        | Type     | Required? | Description           | Possible Values / Returns           |
-| :------------ | :------- | :-------- | :-------------------- | :---------------------------------- |
-| `listCols`    | array *OR* object |  | column names to be returned | array of column names *OR* object (see below) |
-| `cache`       | boolean  | `false`   | cache settings        | Ex:`cache: true` |
-| `queryFilter` | string   |           | query filter          | utilizes OData style [Query Operators](https://msdn.microsoft.com/en-us/library/office/fp142385.aspx#Anchor_7) |
-| `queryLimit`  | string   |           | max items to return   | 1-*N* |
-| `queryOrderby`| string   |           | column(s) to order by | Ex:`queryOrderby:Name` |
-| `fetchAppend` | boolean  | `false`   | return append text    | `true` or `false` |
-
-NOTE: Omitting `listCols` will result in all List columns being returned (mimics SharePoint default behavior)
-
-#### listCols Object
-| Option       | Type     | Required? | Description           | Possible Values / Return Values     |
-| :----------- | :------- | :-------- | :-------------------- | :---------------------------------- |
-| `dataName`   | string   |           | the column name       | the fixed, back-end REST column name (use [Get List Column Properties](#get-list-column-properties)) |
-| `dispName`   | string   |           | the name to use when displaying results in table headers, etc. |  |
-| `dateFormat` | string   |           | format to use when returning/displaying date | `INTL`, `INTLTIME`, `YYYYMMDD`, `ISO`, `US` |
-| `dataFunc`   | function |           | function to use for returning a result | use a custom function to transform the query result (see below) |
-
-#### listCols dataFunc Option
-There are many times where you'll need more than a simple column value.  For example, I often provide a link to the InfoPath
-form so users can edit the item directly.
-
-The `dataFunc` option allows you access to the entire result set and to return any type of value.  See sample below where
-"editLink" is created.
-
-#### Sample Code
-```javascript
-// EX: Simple array of column names
-sprLib.list('Employees')
-.getItems(
-    ['Id', 'Name', 'Badge_x0020_Number']
-)
-.then(function(arrData){
-    console.table(arrData);
-})
-.catch(function(errMsg){ console.error(errMsg) });
-
-// Result:
-/*
-.---------------------------------------------------------.
-|   __metadata    | Id  |    Name    | Badge_x0020_Number |
-|-----------------|-----|------------|--------------------|
-| [object Object] | 253 | Hal Jordan |              12345 |
-'---------------------------------------------------------'
-*/
-```
-
-```javascript
-// EX: Using 'listCols' option with array of column names
-sprLib.list('Employees').getItems({
-    listCols: ['Name', 'Badge_x0020_Number', 'Hire_x0020_Date']
-})
-.then(function(arrData){ console.table(arrData) })
-.catch(function(errMsg){ console.error(errMsg) });
-```
-
-```javascript
-// EX: Using 'listCols' option to name our columns
-// EX: Using 'dataFunc' option to return a dynamic, generated value (an html link)
-// EX: Using query options: filter, order, limit
-sprLib.list('Employees').getItems({
-    listCols: {
-        empId:    { dataName:'Id'                 },
-        badgeNum: { dataName:'Badge_x0020_Number' },
-        editLink: { dataFunc:function(objItem){ return '<a href="/sites/dev/Lists/Employees/DispForm.aspx?ID='+objItem.Id+'">View Emp</a>' } }
-    },
-    queryFilter:  'Salary gt 100000',
-    queryOrderby: 'Hire_x0020_Date',
-    queryLimit:   5
-})
-.then(function(arrData){ console.table(arrData) })
-.catch(function(errMsg){ console.error(errMsg) });
-
-// RESULT:
-/*
-.-------------------------------------------------------------------------------------------.
-| empId | badgeNum |                                editLink                                |
-|-------|----------|------------------------------------------------------------------------|
-|   334 |  1497127 | <a href="/sites/dev/Lists/Employees/DispForm.aspx?ID=334">View Emp</a> |
-|   339 |  1497924 | <a href="/sites/dev/Lists/Employees/DispForm.aspx?ID=339">View Emp</a> |
-|   350 |  1497927 | <a href="/sites/dev/Lists/Employees/DispForm.aspx?ID=350">View Emp</a> |
-|   354 |  1497928 | <a href="/sites/dev/Lists/Employees/DispForm.aspx?ID=354">View Emp</a> |
-|   367 |  1497929 | <a href="/sites/dev/Lists/Employees/DispForm.aspx?ID=367">View Emp</a> |
-'-------------------------------------------------------------------------------------------'
 */
 ```
 
