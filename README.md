@@ -175,8 +175,16 @@ Returns: Object with key/value pairs
 Example:
 ```javascript
 sprLib.list('Employees')
-.create({ Name:'Marty McFly', Badge_x0020_Number:12345, Hire_x0020_Date:new Date() })
-.then(function(objItem){ console.log('New Item:'); console.table(objItem); })
+.create({
+    Name: 'Marty McFly',
+	Badge_x0020_Number: 12345,
+	Hire_x0020_Date: new Date(),
+	Active: true
+})
+.then(function(objItem){
+    console.log('New Item:');
+    console.table(objItem);
+})
 .catch(function(strErr){ console.error(strErr); });
 ```
 
@@ -196,13 +204,13 @@ Example:
 ```javascript
 sprLib.list('Employees')
 .update({
-  ID: 99,
-  Name: 'Marty McFly',
-  Active: false
+    ID: 99,
+    Name: 'Marty McFly',
+    Active: false
 })
 .then(function(objItem){
-  console.log('Updated Item:');
-  console.table(objItem);
+    console.log('Updated Item:');
+    console.table(objItem);
 })
 .catch(function(strErr){ console.error(strErr); });
 ```
@@ -225,7 +233,9 @@ Example:
 ```javascript
 sprLib.list('Employees')
 .delete(99)
-.then(function(intId){ console.log('Deleted Item:'+intId); })
+.then(function(intId){
+    console.log('Deleted Item:'+intId);
+})
 .catch(function(strErr){ console.error(strErr); });
 ```
 
@@ -244,7 +254,9 @@ Example:
 ```javascript
 sprLib.list('Employees')
 .recycle(99)
-.then(function(intId){ console.log('Recycled Item:'+intId); })
+.then(function(intId){
+    console.log('Recycled Item:'+intId);
+})
 .catch(function(strErr){ console.error(strErr); });
 ```
 
@@ -257,9 +269,9 @@ Syntax:
 Returns: Array of columns with name value pairs of property values
 
 #### Column Properties
-| Property       | Type     | Description                  |
-| :------------- | :------- | :--------------------------- |
-| `dispName`     | string   | display name                 |
+| Property       | Type     | Description                                |
+| :------------- | :------- | :----------------------------------------- |
+| `dispName`     | string   | display name                               |
 | `dataName`     | string   | internal name - used in REST queries and in `listCols` arguments |
 | `dataType`     | string   | column type - values: `Boolean`, `Calculated`, `Currency`, `DateTime`, `Note`, `Number`, `Text`  |
 | `defaultValue` | boolean  | the default value (if any)                 |
@@ -294,18 +306,18 @@ Syntax:
 Returns: Array of list properties and their values
 
 #### List Properties
-| Property             | Type     | Description                  |
-| :------------------- | :------- | :--------------------------- |
+| Property             | Type     | Description                                             |
+| :------------------- | :------- | :------------------------------------------------------ |
 | `AllowContentTypes`  | boolean  | Whether `Allow management of content types?` is enabled |
 | `BaseTemplate`       | integer  | [SPListTemplateType](https://msdn.microsoft.com/en-us/library/microsoft.sharepoint.splisttemplatetype.aspx) SP Base Template ID number - ex: `100` |
-| `Created`            | date     | Date the List/Library was created |
-| `Description`        | boolean  | List/Library `Description` |
-| `EnableAttachments`  | boolean  | Whether users can attach files to items in this list |
-| `ForceCheckout`      | boolean  | Whether Force checkout is enabled |
-| `Hidden`             | boolean  | Whether List is hidden |
-| `Id`                 | GUID     | The SP GUID of the List |
-| `ItemCount`          | number   | The number of Items in the List |
-| `Title`              | string   | The Title of the List/Library |
+| `Created`            | date     | Date the List/Library was created                       |
+| `Description`        | boolean  | List/Library `Description`                              |
+| `EnableAttachments`  | boolean  | Whether users can attach files to items in this list    |
+| `ForceCheckout`      | boolean  | Whether Force checkout is enabled                       |
+| `Hidden`             | boolean  | Whether List is hidden                                  |
+| `Id`                 | GUID     | The SP GUID of the List                                 |
+| `ItemCount`          | number   | The number of Items in the List                         |
+| `Title`              | string   | The Title of the List/Library                           |
 
 #### Sample Code
 ```javascript
@@ -360,8 +372,12 @@ The `dataFunc` option allows you access to the entire result set and to return a
 ```javascript
 // EX: Simple array of column names
 sprLib.list('Employees')
-.getItems(['Id', 'Name', 'Badge_x0020_Number'])
-.then(function(arrData){ console.table(arrData) })
+.getItems(
+    ['Id', 'Name', 'Badge_x0020_Number']
+)
+.then(function(arrData){
+    console.table(arrData);
+})
 .catch(function(errMsg){ console.error(errMsg) });
 
 // Result:
