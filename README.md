@@ -598,7 +598,9 @@ NOTE: SpRestLib will refresh the token automatically as needed during CRUD opera
 
 
 **************************************************************************************************
-# Lets Talk Async Operations: ES6 Promises vs Callbacks
+# Async Operations via Promises vs Callbacks
+
+## Lets Talk Async Operations: ES6 Promises vs Callbacks
 
 All of the SpRestLib methods return JavaScript Promises, which provide two main benefits:
 * No more callback functions
@@ -610,18 +612,18 @@ operations.
 
 All major browsers (and Node.js) now fully support ES6 Promises, so keep reading to see them in action.
 
-## tl;dr
+### tl;dr
 **Promises can be chained using `then()` or grouped using `Promise.all()` so callbacks and queue management
 are a thing of the past.**
 
-## Async Chaining
+### Async Chaining
 * Promises can be chained so they execute in the order shown only after the previous one has completed
 
-Example Logic:  
+#### Example Logic
 * SpRestLib methods return a Promise, meaning the "return sprestlib" calls below cause the subsequent `.then()` to wait for that method's REST call to return a result
 * That's all you need to code to enable chaining of asynchronous operations without any callback functions or queue management!
 
-Example Code:
+#### Example Code
 ```javascript
 var item = { Name:'Marty McFly', Hire_x0020_Date:new Date() };
 Promise.resolve()
@@ -631,14 +633,14 @@ Promise.resolve()
 .then(function(item){ console.log('Success! An item navigated the entire CRUD chain!'); });
 ```
 
-## Async Grouping
+### Async Grouping
 * Promises can be grouped using `.all()` meaning each of them must complete before `.then()` is executed.
 
-Example Logic:  
+#### Example Logic
 * This example requires that both the user info and user group queries complete before we move on
 * The old AJAX callback method model required a lot more code to do the same thing!
 
-Example Code:
+#### Example Code
 ```javascript
 Promise.all([ sprLib.user().info(), sprLib.user().groups() ])
 .then(function(arrResults){
