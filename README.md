@@ -177,9 +177,9 @@ Example:
 sprLib.list('Employees')
 .create({
     Name: 'Marty McFly',
-	Badge_x0020_Number: 12345,
-	Hire_x0020_Date: new Date(),
-	Active: true
+    Badge_x0020_Number: 12345,
+    Hire_x0020_Date: new Date(),
+    Active: true
 })
 .then(function(objItem){
     console.log('New Item:');
