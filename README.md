@@ -42,9 +42,7 @@ items (CRUD), execute REST calls, and gather user/group information.
   - [Utility](#utility)
 - [Method Reference](#method-reference)
   - [List/Library Methods (`SPList`)](#listlibrary-methods-splist)
-    - [List/Library API Options](#listlibrary-api-options)
-    - [List/Library API Operations](#listlibrary-api-operations)
-    - [Dynamically Setting Base Url](#dynamically-setting-base-url)
+    - [BaseURL](#baseurl)
     - [Create Item](#create-item)
     - [Update Item](#update-item)
     - [Delete Item](#delete-item)
@@ -151,31 +149,28 @@ var sprLib = require("sprestlib");
 # Method Reference
 
 ## List/Library Methods (`SPList`)
-
-### List/Library API Options
-
-Sometimes you will need to query various subsites, etc. so just having the baseUrl set at the library-level is insufficient.
-In these cases, you can dynamically set a baseUrl for a List by using the `baseUrl()` method, then use any List method afterwards.
-`sprLib.baseUrl(url)`
-
-### List/Library API Operations
 Lists can be accessed by either their name or their GUID:  
-`sprLib.list(ListName)` or `sprLib.list(ListGUID)`
 
-### Dynamically Setting Base Url
+Syntax: `sprLib.list(listName)` or `sprLib.list(listGUID)`
 
-Syntax:
-`sprLib.list(listName|listGUID).baseUrl('/sites/HR/dev')`
+### BaseURL
+By default, the library defaults to the local directory.  There are occasions where operations would be pointed to other
+locations - reading from a subsite, etc. - and that can be done easily be setting the baseUrl at the list-level.
+
+Syntax: `sprLib.list(listName).baseUrl(urlPath)`
+
+Example:
+```javascript
+sprLib.list('Employees').baseUrl('/sites/HumanResources/devtest/')
+```
+
 
 ### Create Item
-Syntax:
-`sprLib.list(listName|listGUID).create(itemObject)`
+Syntax: `sprLib.list(listName|listGUID).create(itemObject)`
 
-Options:
-An object with internal name/value pairs to be inserted
+Options: An object with internal name/value pairs to be inserted
 
-Returns:
-Object with key/value pairs
+Returns: Object with key/value pairs
 
 Example:
 ```javascript
@@ -184,6 +179,7 @@ sprLib.list('Employees')
 .then(function(objItem){ console.log('New Item:'); console.table(objItem); })
 .catch(function(strErr){ console.error(strErr); });
 ```
+
 
 ### Update Item
 Syntax:
@@ -199,10 +195,18 @@ The object provided
 Example:
 ```javascript
 sprLib.list('Employees')
-.update({ __metadata:{ etag:10 }, ID:99, Name:'Marty (nobody calls me chicken) McFly' })
-.then(function(objItem){ console.log('Updated Item:'); console.table(objItem); })
+.update({
+  ID: 99,
+  Name: 'Marty McFly',
+  Active: false
+})
+.then(function(objItem){
+  console.log('Updated Item:');
+  console.table(objItem);
+})
 .catch(function(strErr){ console.error(strErr); });
 ```
+
 
 ### Delete Item
 Syntax:
@@ -224,6 +228,7 @@ sprLib.list('Employees')
 .then(function(intId){ console.log('Deleted Item:'+intId); })
 .catch(function(strErr){ console.error(strErr); });
 ```
+
 
 ### Recycle Item
 Syntax:
