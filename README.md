@@ -72,8 +72,8 @@ items (CRUD), execute REST calls, and gather user/group information.
     - [Data Binding Options](#data-binding-options)
       - [Examples](#examples-1)
   - [Utility Methods](#utility-methods)
-- [Async Operations via Promises vs Callbacks](#async-operations-via-promises-vs-callbacks)
-  - [Lets Talk Async Operations: ES6 Promises vs Callbacks](#lets-talk-async-operations-es6-promises-vs-callbacks)
+- [Async Operations via Promises](#async-operations-via-promises)
+  - [(New) ES6/JS2015 Promises vs (Old) Callbacks](#new-es6js2015-promises-vs-old-callbacks)
     - [tl;dr](#tldr)
     - [Async Chaining](#async-chaining)
       - [Example Logic](#example-logic)
@@ -441,7 +441,7 @@ Use the `sprLib.rest()` interface to GET or PORT to any of the dozens of availab
 The available REST service endpoints can add Users to Groups, create columns in a List/Library, enumerate site properties
 and other super useful functions.
 
-*Get Results*
+**Get Results**  
 Calling the SharePoint REST APIs directly via AJAX calls will return results in different forms (some are `data.d` while others are `data.d.results`)
 whereas SpRestLib always returns consistent results in the form of array of objects with name/value pairs.
 
@@ -624,11 +624,11 @@ NOTE: SpRestLib will refresh the token automatically as needed during CRUD opera
 
 
 **************************************************************************************************
-# Async Operations via Promises vs Callbacks
+# Async Operations via Promises
 
-## Lets Talk Async Operations: ES6 Promises vs Callbacks
+## (New) ES6/JS2015 Promises vs (Old) Callbacks
 
-All of the SpRestLib methods return JavaScript Promises, which provide two main benefits:
+SpRestLib asynchronous methods return Promises, which provide two main benefits:
 * No more callback functions
 * No more managing async operations
 
@@ -677,6 +677,8 @@ Promise.all([ sprLib.user().info(), sprLib.user().groups() ])
 });
 ```
 
+
+
 **************************************************************************************************
 # Issues / Suggestions
 
@@ -684,12 +686,16 @@ Please file issues or suggestions on the [issues page on GitHub](https://github.
 
 When reporting issues, please include a code snippet or a link demonstrating the problem.
 
+
+
 **************************************************************************************************
 # Special Thanks
 
 * [Marc D Anderson](http://sympmarc.com/) - SpRestLib is built in the spirit of the late, great `SPServices` library
 * Microsoft - for the SharePoint.com developer account
 * Everyone who submitted an Issue or Pull Request
+
+
 
 **************************************************************************************************
 # License
