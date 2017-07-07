@@ -34,15 +34,16 @@ items (CRUD), execute REST calls, and gather user/group information.
     - [Include Bundle Script](#include-bundle-script)
     - [Install With Bower](#install-with-bower)
   - [Node.js](#nodejs)
-- [Methods](#methods)
+- [Method Overview](#method-overview)
   - [List/Library](#listlibrary)
   - [REST API](#rest-api)
   - [User Info/Groups](#user-infogroups)
   - [Form Population](#form-population)
   - [Utility](#utility)
-- [API Reference](#api-reference)
-  - [Options](#options)
-  - [List/Library Operations (`SPList`)](#listlibrary-operations-splist)
+- [Method Reference](#method-reference)
+  - [List/Library Methods (`SPList`)](#listlibrary-methods-splist)
+    - [List/Library API Options](#listlibrary-api-options)
+    - [List/Library API Operations](#listlibrary-api-operations)
     - [Dynamically Setting Base Url](#dynamically-setting-base-url)
     - [Create Item](#create-item)
     - [Update Item](#update-item)
@@ -55,24 +56,24 @@ items (CRUD), execute REST calls, and gather user/group information.
       - [List Properties](#list-properties)
       - [Sample Code](#sample-code-1)
     - [Get Items](#get-items)
-      - [Options](#options-1)
+      - [Options](#options)
       - [listCols Object](#listcols-object)
       - [listCols dataFunc Option](#listcols-datafunc-option)
       - [Sample Code](#sample-code-2)
-- [REST Calls](#rest-calls)
-  - [Options](#options-2)
-  - [Examples](#examples)
-- [User Info/Groups](#user-infogroups-1)
-  - [Options](#options-3)
-  - [Get User Information (`SPUser`)](#get-user-information-spuser)
-    - [Sample Code](#sample-code-3)
-  - [Get User Groups (`SPGroup`)](#get-user-groups-spgroup)
-    - [Sample Code](#sample-code-4)
-- [Form Binding](#form-binding)
-  - [Data Binding Types](#data-binding-types)
-  - [Data Binding Options](#data-binding-options)
-  - [Examples](#examples-1)
-- [Utility](#utility-1)
+  - [REST API Methods](#rest-api-methods)
+    - [Options](#options-1)
+    - [Examples](#examples)
+  - [User Info/Group Methods](#user-infogroup-methods)
+    - [Options](#options-2)
+    - [Get User Information (`SPUser`)](#get-user-information-spuser)
+      - [Sample Code](#sample-code-3)
+    - [Get User Groups (`SPGroup`)](#get-user-groups-spgroup)
+      - [Sample Code](#sample-code-4)
+  - [Form Binding](#form-binding)
+    - [Data Binding Types](#data-binding-types)
+    - [Data Binding Options](#data-binding-options)
+      - [Examples](#examples-1)
+  - [Utility Methods](#utility-methods)
 - [Lets Talk Async Operations: ES6 Promises vs Callbacks](#lets-talk-async-operations-es6-promises-vs-callbacks)
   - [tl;dr](#tldr)
   - [Async Chaining](#async-chaining)
@@ -144,7 +145,7 @@ var sprLib = require("sprestlib");
 **************************************************************************************************
 # Method Reference
 
-## List/Library API Methods (`SPList`)
+## List/Library Methods (`SPList`)
 
 ### List/Library API Options
 
@@ -161,7 +162,7 @@ Lists can be accessed by either their name or their GUID:
 Syntax:
 `sprLib.list(listName|listGUID).baseUrl('/sites/HR/dev')`
 
-#### Create Item
+### Create Item
 Syntax:
 `sprLib.list(listName|listGUID).create(itemObject)`
 
@@ -406,14 +407,16 @@ sprLib.list('Employees').getItems({
 
 
 **************************************************************************************************
-# REST Calls
+## REST API Methods
 Returns the results of a given REST call to any [SharePoint REST API](https://msdn.microsoft.com/en-us/library/office/dn268594.aspx)
 
-While SpRestLib provides lots of common web service functionality, there are many times you will
-need to execute ad-hoc REST calls.  Using the `sprLib.rest()` interface, any of the REST API endpoints
-can be called in an easy way.
+Use the `sprLib.rest()` interface to GET or PORT to any of the dozens of available SP REST API Endpoints.
 
-Normally, calling the SharePoint REST APIs can return results in different forms (some are `data.d` while others are `data.d.results`)
+The available REST service endpoints can add Users to Groups, create columns in a List/Library, enumerate site properties
+and other super useful functions.
+
+*Get Results*
+Calling the SharePoint REST APIs directly via AJAX calls will return results in different forms (some are `data.d` while others are `data.d.results`)
 whereas SpRestLib always returns consistent results in the form of array of objects with name/value pairs.
 
 Syntax
@@ -421,7 +424,7 @@ Syntax
 
 Returns: Array of objects containing name/value pairs
 
-## Options
+### Options
 | Option        | Type    | Default     | Description           | Possible Values / Returns           |
 | :------------ | :------ | :---------- | :-------------------- | :---------------------------------- |
 | `url`         | string  | current url | REST API endpoint     | full or relative url. See: [SharePoint REST API](https://msdn.microsoft.com/en-us/library/office/dn268594.aspx) |
@@ -434,7 +437,7 @@ Returns: Array of objects containing name/value pairs
 | `queryLimit`  | string  | `1000`      | max items to return   | 1-5000. Ex:`queryLimit: 5000` |
 | `queryOrderby`| string  |             | column(s) to order by | Ex:`queryOrderby: Name` |
 
-## Examples
+### Examples
 ```javascript
 // EX: Get site group info
 sprLib.rest({
@@ -469,19 +472,19 @@ sprLib.rest({
 
 
 **************************************************************************************************
-# User Info/Groups
+## User Info/Group Methods
 Omitting options will return information about the current user, otherwise, the specified user is returned.  
 `sprLib.user()`  
 `sprLib.user(options)`
 
-## Options
+### Options
 | Option   | Type     | Required? | Description           | Possible Values / Returns                             |
 | :------- | :------- | :-------- | :-------------------- | :---------------------------------------------------- |
 | `id`     | number   |           | user id               | user id to query. Ex: `{id:99}`                       |
 | `email`  | string   |           | user email address    | user email to query. Ex: `{email:'brent@github.com'}` |
 | `title`  | string   |           | user title            | user title to query. Ex: `{title:'Brent Ely'}`        |
 
-## Get User Information (`SPUser`)
+### Get User Information (`SPUser`)
 Syntax:
 `sprLib.user().info()`  
 `sprLib.user(options).groups()`
@@ -490,7 +493,7 @@ Returns: Object with name/value pairs containing information about the SharePoin
 
 Note: *Uses the basic SP User service (not the Enterprise licensed User Profile service)*
 
-### Sample Code
+#### Sample Code
 ```javascript
 // EXAMPLE: Get current user info
 sprLib.user().info()
@@ -510,14 +513,14 @@ sprLib.user({ email:'brent@microsoft.com' }).info()
 */
 ```
 
-## Get User Groups (`SPGroup`)
+### Get User Groups (`SPGroup`)
 Syntax:
 `sprLib.user().groups()`  
 `sprLib.user(options).groups()`
 
 Returns: Array of objects containing the user's SharePoint groups [SPGroup](https://msdn.microsoft.com/en-us/library/microsoft.sharepoint.spgroup.aspx)
 
-### Sample Code
+#### Sample Code
 ```javascript
 sprLib.user().groups()
 .then(function(arrGroups){ console.table(arrGroups) });
@@ -536,7 +539,7 @@ sprLib.user().groups()
 
 
 **************************************************************************************************
-# Form Binding
+## Form Binding
 Perform control/form binding with an AngluarJS-like syntax made especially for SharePoint Web Services.
 
 Many different HTML tags can be populated by adding an `data-sprlib` property to many HTML element types.
@@ -544,14 +547,14 @@ Many different HTML tags can be populated by adding an `data-sprlib` property to
 Syntax:
 `<tag data-sprlib='{ options }'>`
 
-## Data Binding Types
+### Data Binding Types
 
 The following HTML element tags can be populated:
 * select: populates 1+ options
 * static element (span, p, etc.): populates a single plain text value
 * table: a table or tbody can be populates with 1+ columns
 
-## Data Binding Options
+### Data Binding Options
 | Option        | Type    | Required? | Description             | Possible Values / Returns           |
 | :------------ | :------ | :-------- | :---------------------- | :---------------------------------- |
 | `list`        | string  | yes       | List or Library name    |   |
@@ -562,7 +565,7 @@ The following HTML element tags can be populated:
 | `tablesorter` | string  |           | whether to add jQuery TableFilter to table |   |
 | `options`     | string  |           | table/tbody options     | `showBusySpinner` |
 
-## Examples
+#### Examples
 ```html
 <!-- select -->
 <select data-sprlib='{ "list":"Employees", "value":"Id", "text":"Name" }'></select>
@@ -581,7 +584,7 @@ The following HTML element tags can be populated:
 
 
 **************************************************************************************************
-# Utility
+## Utility Methods
 Refreshes the SharePoint page security digest token.  
 `sprLib.renewSecurityToken()`
 
