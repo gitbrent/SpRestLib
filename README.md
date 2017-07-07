@@ -114,7 +114,7 @@ var sprLib = require("sprestlib");
 ```
 
 **************************************************************************************************
-# Methods
+# Method Overview
 
 ## List/Library
 * `sprLib.list(listName).getItems(options)` - Returns an array of item objects using a variety of possible options
@@ -142,23 +142,26 @@ var sprLib = require("sprestlib");
 * `sprLib.renewSecurityToken()` - Refreshes the SharePoint page security digest token
 
 **************************************************************************************************
-# API Reference
+# Method Reference
 
-## Options
+## List/Library API Methods (`SPList`)
+
+### List/Library API Options
+
+Sometimes you will need to query various subsites, etc. so just having the baseUrl set at the library-level is insufficient.
+In these cases, you can dynamically set a baseUrl for a List by using the `baseUrl()` method, then use any List method afterwards.
 `sprLib.baseUrl(url)`
 
-## List/Library Operations (`SPList`)
+### List/Library API Operations
 Lists can be accessed by either their name or their GUID:  
 `sprLib.list(ListName)` or `sprLib.list(ListGUID)`
 
 ### Dynamically Setting Base Url
-Sometimes you will need to query various subsites, etc. so just having the baseUrl set at the library-level is insufficient.
-In these cases, you can dynamically set a baseUrl for a List by using the `baseUrl()` method, then use any List method afterwards.
 
 Syntax:
 `sprLib.list(listName|listGUID).baseUrl('/sites/HR/dev')`
 
-### Create Item
+#### Create Item
 Syntax:
 `sprLib.list(listName|listGUID).create(itemObject)`
 
