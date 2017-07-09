@@ -1,12 +1,10 @@
 # Change Log
 
-## [v0.13.0](https://github.com/gitbrent/sprestlib/tree/v0.13.0) (2017-07-xx)
-[Full Changelog](https://github.com/gitbrent/sprestlib/compare/v0.12.0...v0.13.0)
+## [v1.0.0](https://github.com/gitbrent/sprestlib/tree/v1.0.0) (2017-07-xx)
+[Full Changelog](https://github.com/gitbrent/sprestlib/compare/v0.12.0...v1.0.0)
 
-**Fixed Bugs:**
-
-
-
+**Implemented Enhancements:**
+- Last bit of cleanup work to arrive at v1.0.0
 
 ## [v0.12.0](https://github.com/gitbrent/sprestlib/tree/v0.12.0) (2017-07-05)
 [Full Changelog](https://github.com/gitbrent/sprestlib/compare/v0.11.0...v0.12.0)

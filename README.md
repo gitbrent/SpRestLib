@@ -628,7 +628,7 @@ NOTE: SpRestLib will refresh the token automatically as needed during CRUD opera
 **************************************************************************************************
 # Async Operations via Promises
 
-## (New) ES6/JS2015 Promises vs (Old) Callbacks
+## (New) ES6/ES2015 Promises vs (Old) Callbacks
 
 SpRestLib asynchronous methods return Promises, which provide two main benefits:
 * No more callback functions

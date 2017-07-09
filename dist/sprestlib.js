@@ -31,7 +31,10 @@
 DEVLIST:
  - Add `$skip` (https://sharepoint.stackexchange.com/questions/45719/paging-using-rest-odata-with-sp-2013)
  - @see: https://dev.office.com/sharepoint/docs/sp-add-ins/use-odata-query-operations-in-sharepoint-rest-requests#page-through-returned-items
- - Add `Intl` (i18n) support (its supported in IE11!!) - Date and Currency formats are awesome (can we add Direction for our R->L users too?)
+ - Only working SOLN is to get '__next' URI from results (or store prev ID and construct a similar URI using code)
+ - Very ugly and not worth holidng 1.0 for
+
+ - Add `Intl` (i18n) support (its supported in IE11!!) - Date and Currency formats are awesome (add Direction for our R->L users too?)
 */
 
 // Detect Node.js
@@ -39,9 +42,9 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 
 (function(){
 	// APP VERSION/BUILD
-	var APP_VER = "0.13.0-beta";
-	var APP_BLD = "20170706";
-	var DEBUG = false; // (verbose mode/lots of logging. FIXME:remove prior to v1.0.0)
+	var APP_VER = "1.0.0-beta";
+	var APP_BLD = "20170709";
+	var DEBUG = false; // (verbose mode/lots of logging)
 	// APP FUNCTIONALITY
 	var APP_FILTEROPS = {
 		"eq" : "==",
@@ -88,6 +91,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 	// -----------------------------
 	// USER-CONFIGURABLE: UI OPTIONS
 	// -----------------------------
+	// TODO: i18n work
 	var APP_OPTS = {
 		baseUrl:         '..',
 		busySpinnerHtml: '<div class="sprlib-spinner"><div class="sprlib-bounce1"></div><div class="sprlib-bounce2"></div><div class="sprlib-bounce3"></div></div>',
@@ -475,8 +479,8 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 		});
 	}
 
-	// TODO: Validate/Update 20161231
-	function doParseFormFieldsIntoJson(inModel, inEleId) {
+	function doParseFormIntoJson(inModel, inEleId) {
+		// TODO: Validate/Update/Document for post-1.0.0
 		var objReturn = {
 			jsonSpData: {},
 			jsonFormat: {}
@@ -613,7 +617,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 		// FIRST-2: Set vars
 		var guidRegex = /^[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}$/i;
 		var _newList = {};
-		// NOTE: DESIGN: Accept [ListName] or [ListGUID]
+		// NOTE: DESIGN: Accept either [ListName] or [ListGUID]
 		var _urlBase = APP_OPTS.baseUrl + "/_api/lists" + ( guidRegex.test(inName) ? "(guid'"+ inName +"')" : "/getbytitle('"+ inName.replace(/\s/gi,'%20') +"')" );
 		var _urlRest = "/_api/lists" + ( guidRegex.test(inName) ? "(guid'"+ inName +"')" : "/getbytitle('"+ inName.replace(/\s/gi,'%20') +"')" );
 
@@ -1395,7 +1399,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 			};
 			// Add `data` if included
 			if ( inOpt.data ) objAjaxQuery.data = inOpt.data;
-			// Add `context-type` for POST if none exists
+			// Add default `context-type` for POST if none was specified
 			if ( objAjaxQuery.type == 'POST' && !objAjaxQuery.headers.contentType ) objAjaxQuery.headers['content-type'] = 'application/json;odata=verbose';
 
 			// STEP 3: Construct Base URL: `url` can be presented in many different forms...
@@ -1437,13 +1441,13 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 				}
 
 				// D: Add maxrows as default in SP2013 is a paltry 100 rows
-				objAjaxQuery.url += '&$top=' + ( inOpt.queryLimit ? inOpt.queryLimit : APP_OPTS.maxRows );
+				if ( inOpt.url.indexOf('$top') == -1 ) objAjaxQuery.url += '&$top=' + ( inOpt.queryLimit ? inOpt.queryLimit : APP_OPTS.maxRows );
 
 				// E: Add expand (if any)
 				if ( strExpands ) objAjaxQuery.url += '&$expand=' + strExpands;
 
 				// F: Add filter (if any)
-				else if ( inOpt.queryFilter ) objAjaxQuery.url += '&$filter=' + ( inOpt.queryFilter.indexOf('%') == -1 ? encodeURI(inOpt.queryFilter) : inOpt.queryFilter );
+				if ( inOpt.queryFilter ) objAjaxQuery.url += '&$filter=' + ( inOpt.queryFilter.indexOf('%') == -1 ? encodeURI(inOpt.queryFilter) : inOpt.queryFilter );
 
 				// G: Add orderby (if any)
 				if ( inOpt.queryOrderby ) objAjaxQuery.url += '&$orderby=' + inOpt.queryOrderby;
@@ -1533,7 +1537,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 		});
 	}
 
-	// API: SITE (TODO: FUTURE:)
+	// API: SITE (TODO: FUTURE: Post-1.0.0)
 	sprLib.site = function site(inUrl) {
 		return new Promise(function(resolve, reject) {
 			// TODO: POST-1.0:
@@ -1679,11 +1683,12 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 		return newUser;
 	}
 
-	// API: UTILITY
+	// API: UTILITY: Token
 	sprLib.renewSecurityToken = function renewSecurityToken(){
 		return doRenewDigestToken();
 	}
 
+	// API: UTILITY: Library Version
 	sprLib.version = function version(){
 		return APP_VER;
 	}
