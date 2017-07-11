@@ -43,7 +43,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 (function(){
 	// APP VERSION/BUILD
 	var APP_VER = "1.0.0-beta";
-	var APP_BLD = "20170709";
+	var APP_BLD = "20170710";
 	var DEBUG = false; // (verbose mode/lots of logging)
 	// APP FUNCTIONALITY
 	var APP_FILTEROPS = {
@@ -619,7 +619,6 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 		var _newList = {};
 		// NOTE: DESIGN: Accept either [ListName] or [ListGUID]
 		var _urlBase = APP_OPTS.baseUrl + "/_api/lists" + ( guidRegex.test(inName) ? "(guid'"+ inName +"')" : "/getbytitle('"+ inName.replace(/\s/gi,'%20') +"')" );
-		var _urlRest = "/_api/lists" + ( guidRegex.test(inName) ? "(guid'"+ inName +"')" : "/getbytitle('"+ inName.replace(/\s/gi,'%20') +"')" );
 
 		/**
 		* Used after `.create()` if no {type} was provided (enables us to continue using the object in subsequnt operations)
@@ -627,7 +626,9 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 		*/
 		function getMetaType() {
 			return new Promise(function(resolve, reject) {
-				sprLib.rest({ url:_urlRest+"?$select=ListItemEntityTypeFullName" })
+				sprLib.rest({
+					url: _urlBase+"?$select=ListItemEntityTypeFullName"
+				})
 				.then(function(result){
 					if (result && Array.isArray(result) && result.length == 1) resolve( {"type":result[0].ListItemEntityTypeFullName } );
 					else reject('Invalid result!');
@@ -648,8 +649,11 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 		*/
 		_newList.baseUrl = function(strUrl) {
 			if ( strUrl && strUrl.toString().length > 0 ) {
-				_urlBase = strUrl + (strUrl.substring(strUrl.length-2,1) == "/" ? '' : '/') + "_api/lists" + ( guidRegex.test(inName) ? "(guid'"+ inName +"')" : "/getbytitle('"+ inName.replace(/\s/gi,'%20') +"')" );
+				_urlBase = strUrl + (strUrl.substring(strUrl.length-1,strUrl.length) == "/" ? '' : '/') + "_api/lists" + ( guidRegex.test(inName) ? "(guid'"+ inName +"')" : "/getbytitle('"+ inName.replace(/\s/gi,'%20') +"')" );
 				return _newList;
+			}
+			else {
+				return ( _urlBase && _urlBase.indexOf('/_api') > -1 ? _urlBase.substring(0, _urlBase.indexOf('/_api')) : _urlBase );
 			}
 		};
 
@@ -663,17 +667,15 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 			// https://msdn.microsoft.com/en-us/library/microsoft.sharepoint.client.fieldtype.aspx
 			// https://msdn.microsoft.com/en-us/library/office/jj245826.aspx#properties
 			return new Promise(function(resolve, reject) {
-				var arrColumns = [];
-
-				$.ajax({
-					url    : _urlBase+"?$select=Fields&$expand=Fields",
-					type   : "GET",
-					cache  : false,
-					headers: {"Accept":"application/json;odata=verbose"}
+				sprLib.rest({
+					url: _urlBase+"?$select=Fields&$expand=Fields"
 				})
-				.done(function(data,textStatus){
+				.then(function(arrData){
+					var arrColumns = [];
+
 					// STEP 1: Gather fields
-					(data.d.Fields.results || []).forEach(function(result,i){
+					( arrData && arrData[0] && arrData[0].Fields && arrData[0].Fields.results ? arrData[0].Fields.results : [] )
+					.forEach(function(result,i){
 						// DESIGN: Only capture "user" columns (FYI: Type=17 are `Calculated` cols)
 						if (
 							result.InternalName == 'ID'
@@ -698,8 +700,8 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 					// STEP 2: Resolve Promise
 					resolve( arrColumns );
 				})
-				.fail(function(jqXHR,textStatus,errorThrown){
-					reject( parseErrorMessage(jqXHR, textStatus, errorThrown) );
+				.catch(function(strErr){
+					reject( strErr );
 				});
 			});
 		}
@@ -711,11 +713,11 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 		*/
 		_newList.info = function() {
 			return new Promise(function(resolve, reject) {
-				var strUrl = _urlRest + "?$select=AllowContentTypes,BaseTemplate,Created,Description,EnableAttachments,ForceCheckout,Hidden,Id,ItemCount,Title";
-
-				sprLib.rest({ url:strUrl })
-				.then(function(data){
-					resolve(data[0]);
+				sprLib.rest({
+					url: _urlBase+"?$select=AllowContentTypes,BaseTemplate,Created,Description,EnableAttachments,ForceCheckout,Hidden,Id,ItemCount,Title"
+				})
+				.then(function(arrData){
+					resolve( (arrData && arrData.length > 0 ? arrData[0] : []) );
 				})
 				.catch(function(strErr){
 					reject( strErr );
@@ -1355,7 +1357,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 		return _newList;
 	};
 
-	// API: REST (direct/ad-hoc interface)
+	// API: REST (Runs internal AJAX ops *and* provides direct/ad-hoc interface to users)
 	/**
 	* Execute an ad-hoc REST query to one of many endpoints
 	*
@@ -1392,7 +1394,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 			// STEP 2: Setup vars
 			var strExpands = "";
 			var objAjaxQuery = {
-				url    : "",
+				url    : inOpt.url,
 				type   : inOpt.type,
 				cache  : inOpt.cache,
 				headers: { "Accept":"application/json;odata=verbose", "X-RequestDigest":$("#__REQUESTDIGEST").val() }
@@ -1409,6 +1411,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 			else if ( inOpt.url.indexOf('/')     == 0 && !inOpt.queryCols )	objAjaxQuery.url = inOpt.url;
 			else if ( inOpt.url.indexOf('http')  == 0 &&  inOpt.queryCols )	objAjaxQuery.url = inOpt.url + "?$select=";
 			else if ( inOpt.url.indexOf('http')  == 0 && !inOpt.queryCols )	objAjaxQuery.url = inOpt.url;
+			// else: any relative URLs wouldve been set at `objAjaxQuery` init above
 
 			// STEP 4: Continue building URL: Some REST API calls can contain select columns (`queryCols`)
 			if ( objAjaxQuery.url.indexOf('$select') > -1 ) {
@@ -1517,7 +1520,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 					});
 				}
 				// data.d or data is an {}: { listTitle:'Game Systems', numberOfItems:25 }
-				else if ( data.d || data ) {
+				else if ( (data.d || data) && typeof (data.d || data) === 'object' ) {
 					var objRow = {};
 
 					$.each((data.d || data), function(key,result){
@@ -1595,7 +1598,9 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 				.done(function(data, textStatus) {
 					// A: Gather user data
 					var objUser = {};
-					$.each((data.d.results ? data.d.results[0] : data.d), function(key,result){ objUser[key] = result; });
+					$.each((data && data.d && data.d.results ? data.d.results[0] : (data && data.d ? data.d : [])), function(key,result){
+						objUser[key] = result;
+					});
 
 					// B: Resolve results
 					resolve( objUser );
@@ -1627,7 +1632,9 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 					var arrGroups = [];
 
 					// A: Gather groups
-					( data.d.results ? data.d.results[0].Groups.results : data.d.Groups.results )
+					( data.d.results && data.d.results[0] && data.d.results[0].Groups
+						? data.d.results[0].Groups.results : (data && data.d && data.d.Groups ? data.d.Groups.results : [])
+					)
 					.forEach(function(group,idx){
 						arrGroups.push({
 							Id: group.Id,
@@ -1677,7 +1684,6 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 		http://siteurl/_api/SP.UserProfiles.PeopleManager/GetUserProfilePropertyFor(accountName=@v,propertyName='LastName')?@v='i:0%23.f|membership|brent@siteurl.onmicrosoft.com'
 		http://siteurl/_api/SP.UserProfiles.PeopleManager/GetMyProperties?$select=PictureUrl,AccountName
 		*/
-
 
 		// LAST: Return this List to enable chaining
 		return newUser;
