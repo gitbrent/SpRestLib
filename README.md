@@ -42,7 +42,7 @@ items (CRUD), execute REST calls, and gather user/group information.
   - [Utility](#utility)
 - [Method Reference](#method-reference)
   - [List/Library Methods (`SPList`)](#listlibrary-methods-splist)
-    - [BaseURL](#baseurl)
+    - [BaseUrl](#baseurl)
     - [Get Items](#get-items)
       - [Options](#options)
       - [listCols Object](#listcols-object)
@@ -73,7 +73,7 @@ items (CRUD), execute REST calls, and gather user/group information.
       - [Examples](#examples-1)
   - [Utility Methods](#utility-methods)
 - [Async Operations via Promises](#async-operations-via-promises)
-  - [(New) ES6/JS2015 Promises vs (Old) Callbacks](#new-es6js2015-promises-vs-old-callbacks)
+  - [(New) ES6/ES2015 Promises vs (Old) Callbacks](#new-es6es2015-promises-vs-old-callbacks)
     - [tl;dr](#tldr)
     - [Async Chaining](#async-chaining)
       - [Example Logic](#example-logic)
@@ -153,7 +153,7 @@ Lists can be accessed by either their name or their GUID:
 
 Syntax: `sprLib.list(listName)` or `sprLib.list(listGUID)`
 
-### BaseURL
+### BaseUrl
 By default, the library defaults to the local directory.  There are occasions where operations would be pointed to other
 locations - reading from a subsite, etc. - and that can be done easily be setting the baseUrl at the list-level.
 
@@ -372,7 +372,7 @@ Returns: Array of columns with name value pairs of property values
 | :------------- | :------- | :----------------------------------------- |
 | `dispName`     | string   | display name                               |
 | `dataName`     | string   | internal name - used in REST queries and in `listCols` arguments |
-| `dataType`     | string   | column type - values: `Boolean`, `Calculated`, `Currency`, `DateTime`, `Note`, `Number`, `Text`  |
+| `dataType`     | string   | column type (FieldTypeKind) values: `Boolean`, `Calculated`, `Currency`, `DateTime`, `Note`, `Number`, `Text` |
 | `defaultValue` | boolean  | the default value (if any)                 |
 | `isAppend`     | boolean  | is this an append text column?             |
 | `isNumPct`     | boolean  | is this a percentage number column?        |
