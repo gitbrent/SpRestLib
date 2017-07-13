@@ -2,7 +2,7 @@
  * NAME: qunit-test.js
  * DESC: tests for qunit-test.html (coded to my O365 Dev Site - YMMV)
  * AUTH: https://github.com/gitbrent/
- * DATE: Jul 02, 2017
+ * DATE: Jul 10, 2017
  *
  * HOWTO: Generate text tables for README etc.:
  * sprLib.list('Employees').getItems(['Id', 'Name', 'Badge_x0020_Number']).then(function(arrData){ console.log(getAsciiTableStr(arrData)) });
@@ -12,6 +12,7 @@
  */
 
 const RESTROOT = '/sites/dev';
+const RESTDEMO = '/sites/demo';
 //
 const ARR_NAMES_FIRST = ['Jack','Mark','CutiePie','Steve','Barry','Clark','Diana','Star','Luke','Captain'];
 const ARR_NAMES_LAST  = ['Septiceye','Iplier','Martzia','Rodgers','Allen','Kent','Prince','Lord','Skywalker','Marvel'];
@@ -96,6 +97,40 @@ QUnit.module( "LIST > COLS and INFO Methods" );
 		});
 	});
 
+	// TEST: Using `baseUrl`
+	['Empty', 'Reports', '23846527-218a-43a2-b5c1-7b55b6feb1a3']
+	.forEach(function(list,idx){
+		QUnit.test(`sprLib.list('${list}').baseUrl('${RESTDEMO}').cols()`, function(assert){
+			var done = assert.async();
+			// TEST:
+			sprLib.list(list).baseUrl(RESTDEMO).cols()
+			.then(function(arrColObjs){
+				assert.ok( arrColObjs.length > 0		,"Pass: arrColObjs.length = " + arrColObjs.length );
+				assert.ok( Object.keys(arrColObjs[0])	,"Pass: Object.keys().... = " + Object.keys(arrColObjs[0]).toString() );
+				//
+				let table = new AsciiTable();
+				if (arrColObjs.length > 0) table.setHeading( Object.keys(arrColObjs[0]) );
+				$.each(arrColObjs,function(idx,obj){ let vals = []; $.each(obj, function(key,val){ vals.push(val) }); table.addRow(vals); });
+				assert.ok( table.toString(), `RESULTS:\n${table.toString()}`);
+				//
+				done();
+			});
+		});
+
+		QUnit.test(`sprLib.list('${list}').baseUrl('${RESTDEMO}').info()`, function(assert){
+			var done = assert.async();
+			// TEST:
+			sprLib.list(list).baseUrl(RESTDEMO).info()
+			.then(function(objInfo){
+				assert.ok( objInfo.Id		     , "Pass: Id....... = " + objInfo.Id );
+				assert.ok( objInfo.Created	     , "Pass: Created.. = " + objInfo.Created );
+				assert.ok( objInfo.ItemCount >= 0, "Pass: ItemCount = " + objInfo.ItemCount );
+				assert.ok( objInfo.Title	     , "Pass: Title.... = " + objInfo.Title );
+				done();
+			});
+		});
+	});
+
 	// NON-EXISTANT LIST: COLS
 	QUnit.test(`sprLib.list('BADLISTNAME').cols()`, function(assert){
 		var done = assert.async();
@@ -145,9 +180,21 @@ QUnit.module( "LIST > COLS and INFO Methods" );
 QUnit.module( "LIST > BASEURL Methods" );
 // ================================================================================================
 {
-	// TODO: Set baseUrl (pos/neg) see if we get sprLib.list back!
-	var sprGood = sprLib.list('Employees').baseUrl(RESTROOT);
-	var sprJunk = sprLib.list('Employees').baseUrl('BADLISTNAME');
+	QUnit.test(`sprLib.list('Empty').baseUrl('${RESTROOT}')`, function(assert){
+		var sprResult = sprLib.list('Employees').baseUrl(RESTROOT);
+		//
+		assert.ok( sprResult							, "Pass: sprResult.............................. = "+ sprResult );
+		assert.ok( typeof sprResult === 'object'		, "Pass: typeof sprResult === 'object'.......... = "+ typeof sprResult );
+		assert.ok( typeof sprResult.cols === 'function'	, "Pass: typeof sprResult.cols === 'function'... = "+ typeof sprResult.cols );
+		assert.ok( sprResult.baseUrl() == RESTROOT		, "Pass: sprResult.baseUrl() == RESTROOT........ = "+ sprResult.baseUrl() );
+	});
+
+	QUnit.test(`sprLib.list('Empty').baseUrl() VS!`, function(assert){
+		var sprHas = sprLib.list('Employees').baseUrl('/sites/demo/').baseUrl();
+		var sprNot = sprLib.list('Employees').baseUrl('/sites/demo').baseUrl();
+		//
+		assert.ok( sprHas == sprNot, "Pass: sprHas == sprNot : '"+ sprHas +"' == '"+ sprNot+ "'" );
+	});
 }
 
 // ================================================================================================
@@ -888,6 +935,30 @@ QUnit.module( "USER Methods" );
 					$.each(arrGroups,function(idx,obj){ let vals = []; $.each(obj, function(key,val){ vals.push(val) }); table.addRow(vals); });
 					assert.ok( table.toString(), `RESULTS:\n${table.toString()}`);
 					//
+					done();
+				});
+			});
+		});
+
+		[ {id:999}, {email:'junk@email.com'}, {title:'totally not a real name'} ]
+		.forEach(function(param,idx){
+			QUnit.test('sprLib.user('+ JSON.stringify(param) +').info()', function(assert){
+				var done = assert.async();
+				// TEST:
+				sprLib.user(param).info()
+				.then(function(objUser){
+					assert.ok( typeof objUser === 'object', "Pass: objUser is object type: " + typeof objUser );
+					assert.ok( Object.keys(objUser).length == 0	,"Pass: keys.length == 0 - " + Object.keys(objUser).length );
+					done();
+				});
+			});
+
+			QUnit.test('sprLib.user('+ JSON.stringify(param) +').groups()', function(assert){
+				var done = assert.async();
+				// TEST:
+				sprLib.user(param).groups()
+				.then(function(arrGroups){
+					assert.ok( arrGroups.length == 0, "arrGroups length == 0: "+ arrGroups.length );
 					done();
 				});
 			});
