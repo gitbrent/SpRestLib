@@ -1560,14 +1560,16 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 	sprLib.user = function user(inOpt) {
 		// STEP 1: Variables
 		var newUser = {};
-		var strDynUrl = "";
+		var strDynUrl = APP_OPTS.baseUrl+"/_api/Web/CurrentUser?";
 
 		// STEP 2: Build query URL based on whether its current user (no parameter) or a passed in object
-		// NOTE: Use CurrentUser service as it is included in SP-Foundation and will work for everyone (Users will need SP-Enterprise for UserProfiles service to work)
-		if      ( !inOpt         ) strDynUrl = APP_OPTS.baseUrl+"/_api/Web/CurrentUser?";
-		else if ( inOpt['id']    ) strDynUrl = APP_OPTS.baseUrl+"/_api/Web/GetUserById("+ inOpt['id'] +")?";
-		else if ( inOpt['email'] ) strDynUrl = APP_OPTS.baseUrl+"/_api/web/siteusers?$filter=Email%20eq%20%27"+ inOpt['email'] +"%27&";
-		else if ( inOpt['title'] ) strDynUrl = APP_OPTS.baseUrl+"/_api/web/siteusers?$filter=Title%20eq%20%27"+ inOpt['title'] +"%27&";
+		// NOTE: Use CurrentUser service as it is included in SP-Foundation and will work for everyone
+		// ....: (Users will need SP-Enterprise for UserProfiles service to work)
+		// NOTE: `_api/Web/GetUserById()` for non-existant users results in a heinous error 500 that chokes $.ajax.fail(),
+		// ....: so dont use it, or check user id with `siteusers?$filter` first!
+		if      ( inOpt && inOpt['id']    ) strDynUrl = APP_OPTS.baseUrl+"/_api/Web/siteusers?$filter=Id%20eq%20"+       inOpt['id']    +"&";
+		else if ( inOpt && inOpt['email'] ) strDynUrl = APP_OPTS.baseUrl+"/_api/web/siteusers?$filter=Email%20eq%20%27"+ inOpt['email'] +"%27&";
+		else if ( inOpt && inOpt['title'] ) strDynUrl = APP_OPTS.baseUrl+"/_api/web/siteusers?$filter=Title%20eq%20%27"+ inOpt['title'] +"%27&";
 
 		/**
 		* Get user info: (`Id`, `Email`, `IsSiteAdmin`, `LoginName`, `PrincipalType`, `Title`)
@@ -1596,13 +1598,14 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 					headers: {"Accept":"application/json; odata=verbose"}
 				})
 				.done(function(data, textStatus) {
-					// A: Gather user data
 					var objUser = {};
+
+					// A: Gather user data
 					$.each((data && data.d && data.d.results ? data.d.results[0] : (data && data.d ? data.d : [])), function(key,result){
 						objUser[key] = result;
 					});
 
-					// B: Resolve results
+					// B: Resolve results - if user was not found, an empty object is the correct result
 					resolve( objUser );
 				})
 				.fail(function(jqXHR, textStatus, errorThrown) {
