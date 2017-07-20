@@ -43,7 +43,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 (function(){
 	// APP VERSION/BUILD
 	var APP_VER = "1.0.0-beta";
-	var APP_BLD = "20170710";
+	var APP_BLD = "20170719";
 	var DEBUG = false; // (verbose mode/lots of logging)
 	// APP FUNCTIONALITY
 	var APP_FILTEROPS = {
@@ -624,7 +624,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 		* Used after `.create()` if no {type} was provided (enables us to continue using the object in subsequnt operations)
 		* Used internally when users send CRUD methods objects without `__metadata.type`
 		*/
-		function getMetaType() {
+		function getListItemType() {
 			return new Promise(function(resolve, reject) {
 				sprLib.rest({
 					url: _urlBase+"?$select=ListItemEntityTypeFullName"
@@ -713,8 +713,12 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 		*/
 		_newList.info = function() {
 			return new Promise(function(resolve, reject) {
+				var strFields = 'Id,AllowContentTypes,BaseTemplate,BaseType,Created,Description,DraftVersionVisibility,'
+					+ 'EnableAttachments,EnableFolderCreation,EnableVersioning,ForceCheckout,Hidden,ItemCount,'
+					+ 'LastItemDeletedDate,LastItemModifiedDate,LastItemUserModifiedDate,ListItemEntityTypeFullName,Title';
+
 				sprLib.rest({
-					url: _urlBase+"?$select=AllowContentTypes,BaseTemplate,Created,Description,EnableAttachments,ForceCheckout,Hidden,Id,ItemCount,Title"
+					url: _urlBase+"?$select="+strFields
 				})
 				.then(function(arrData){
 					resolve( (arrData && arrData.length > 0 ? arrData[0] : []) );
@@ -1124,23 +1128,26 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 		*/
 		_newList.create = function(jsonData) {
 			return new Promise(function(resolve, reject) {
-				// A: Param check
-				if ( !jsonData || typeof jsonData !== 'object' ) reject("{jsonData} expected");
-				try { test = JSON.stringify(jsonData) } catch(ex) { reject("JSON.stringify({jsonData}) failed") }
+				// FIRST: Param checks
+				if ( !jsonData || Array.isArray(jsonData) || typeof jsonData !== 'object' || Object.keys(jsonData).length == 0 ) reject("JSON data expected! Ex: `{Name:'Brent'}`");
+				try { var test = JSON.stringify(jsonData) } catch(ex) { reject("`JSON.stringify(jsonData)` failed! Send valid JSON Please. Ex: `{'Name':'Brent'}`") }
 
-				// B: Create item
+				// STEP 1: Param Setup
+				// B: DESIGN/OPTION: If no etag is provided, consider it a force (a faux {OPTION})
+				jsonData.__metadata = jsonData.__metadata || {};
+				// Ensure we dont pass an etag
+				delete jsonData.__metadata.etag;
+
+				// STEP 2: Create item
 				Promise.resolve()
 				.then(function(){
-					// A: Keep going if we have a `type` value
-					if ( jsonData.__metadata && jsonData.__metadata.type ) return;
-					// B: Else, fetch metadata before continuing
-					return getMetaType();
+					return ( jsonData.__metadata.type ? null : getListItemType() );
 				})
 				.then(function(objMetadata){
 					// 1: Add __metadata if provided
 					if ( objMetadata && objMetadata.type ) jsonData.__metadata = objMetadata;
 
-					// 2: Do insert
+					// 2: Create item
 					$.ajax({
 						type       : "POST",
 						url        : _urlBase+"/items",
@@ -1174,12 +1181,6 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 				.catch(function(err){ reject(err) });
 			});
 		};
-		/* TEST
-		sprLib.list('Employees')
-		.create( { __metadata:{type:"SP.Data.EmployeesListItem"}, Name:'sprLib.list.insert test'} )
-		.then( function(newItem){ console.table(newItem) } )
-		.catch( function(err){ console.error(err) } );
-		*/
 
 		/**
 		* Update an existing item in a SP List/Library
@@ -1201,60 +1202,57 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 		_newList.update = function(jsonData) {
 			return new Promise(function(resolve, reject) {
 				// FIRST: Param checks
-				if ( !jsonData || typeof jsonData !== 'object' ) reject("{jsonData} expected");
-				if ( !jsonData['ID'] && !jsonData['Id'] && !jsonData['iD'] && !jsonData['id'] ) reject("{jsonData}['Id'] expected");
-				try { test = JSON.stringify(jsonData) } catch(ex) { reject("JSON.stringify(`jsonData`) failed") }
+				if ( !jsonData || Array.isArray(jsonData) || typeof jsonData !== 'object' || Object.keys(jsonData).length == 0 ) reject("JSON data expected! Ex: `{Name:'Brent'}`");
+				if ( !jsonData['ID'] && !jsonData['Id'] && !jsonData['iD'] && !jsonData['id'] ) reject("JSON data must have an `ID` value! Ex: `{Id:99}`");
+				try { var test = JSON.stringify(jsonData) } catch(ex) { reject("`JSON.stringify(jsonData)` failed! Send valid JSON Please. Ex: `{'Name':'Brent'}`") }
 
-				// STEP 1: Determine SP.Type if needed
-				// TODO: for all CRUD ops: `__metadata` is *OPTIONAL* (if not incld, then get List Metadta (TODO: internal func for this))
-				//if ( !jsonData.__metadata ) { promise.getMeta,then()... continue below }
-
-				// STEP 2: Set our `Id` value (users may send an of 4 different cases), then remove as its nt updateable
+				// STEP 1: Param Setup
+				// A: Set our `Id` value (users may send an of 4 different cases), then remove as ID is not updateable in SP
 				var itemId = jsonData['ID'] || jsonData['Id'] || jsonData['iD'] || jsonData['id'];
 				delete jsonData.ID; delete jsonData.Id; delete jsonData.iD; delete jsonData.id;
-
-				// STEP 3: Build headers
-				// DESIGN/OPTION: If no etag is provided, consider it a force (a faux {OPTION})
-				var objHeaders = {
-					"X-HTTP-Method"  : "MERGE",
-					"Accept"         : "application/json;odata=verbose",
-					"X-RequestDigest": $("#__REQUESTDIGEST").val(),
-					"IF-MATCH"       : ( jsonData.__metadata && jsonData.__metadata.etag ? jsonData.__metadata.etag : "*" )
-				};
-
-				// STEP 4: Clean-up data
+				// B: DESIGN/OPTION: If no etag is provided, consider it a force (a faux {OPTION})
+				jsonData.__metadata = jsonData.__metadata || {};
+				// Ensure we dont pass junk as etag or SP will error
 				if ( jsonData.__metadata.etag == "" || jsonData.__metadata.etag == null ) delete jsonData.__metadata.etag;
 
-				// STEP 5: Update item
-				$.ajax({
-					type       : "POST",
-					url        : _urlBase+"/items("+ itemId +")",
-					data       : JSON.stringify(jsonData),
-					contentType: "application/json;odata=verbose",
-					headers    : objHeaders
+				// STEP 2: Update item
+				Promise.resolve()
+				.then(function(){
+					return ( jsonData.__metadata.type ? null : getListItemType() );
 				})
-				.done(function(data, textStatus){
-					// A: SP doesnt return anything for Merge/Update, so return original jsonData object so users can chain, etc.
-					// Populate both 'Id' and 'ID' to mimic SP2013
-					jsonData.ID = itemId; jsonData.Id = itemId;
+				.then(function(objMetadata){
+					// 1: Add `__metadata.type` if needed
+					if ( objMetadata && objMetadata.type ) jsonData.__metadata.type = objMetadata.type;
 
-					// B: Increment etag (if one was provided, otherwise, we cant know what it is without querying for it!)
-					if ( jsonData.__metadata.etag ) jsonData.__metadata.etag = '"'+ (Number(jsonData.__metadata.etag.replace(/[\'\"]+/gi, ''))+1) +'"';
+					// 2: Update item
+					sprLib.rest({
+						type   : "POST",
+						url    : _urlBase +"/items("+ itemId +")",
+						data   : JSON.stringify(jsonData),
+						headers: {
+							"X-HTTP-Method"  : "MERGE",
+							"Accept"         : "application/json;odata=verbose",
+							"X-RequestDigest": $("#__REQUESTDIGEST").val(),
+							"IF-MATCH"       : ( jsonData.__metadata.etag ? jsonData.__metadata.etag : "*" )
+						}
+					})
+					.then(function(arrData){
+						// A: SP doesnt return anything for Merge/Update, so return original jsonData object so users can chain, etc.
+						// Populate both 'Id' and 'ID' to mimic SP2013
+						jsonData.ID = itemId; jsonData.Id = itemId;
 
-					// LAST: Return item
-					resolve( jsonData );
-				})
-				.fail(function(jqXHR, textStatus, errorThrown){
-					reject( parseErrorMessage(jqXHR, textStatus, errorThrown) );
+						// B: Increment etag (if one was provided, otherwise, we cant know what it is without querying for it!)
+						if ( jsonData.__metadata.etag ) jsonData.__metadata.etag = '"'+ (Number(jsonData.__metadata.etag.replace(/[\'\"]+/gi, ''))+1) +'"';
+
+						// LAST: Return item
+						resolve( jsonData );
+					})
+					.catch(function(strErr){
+						reject( strErr );
+					});
 				});
 			});
 		};
-		/* TEST
-		sprLib.list('Employees')
-		.update({ __metadata:{type:"SP.Data.EmployeesListItem"}, id:1, Name:'updated by sprLib.list().update()' })
-		.then( function(objItem){ console.table(objItem) } )
-		.catch( function(err){ console.error(err) } );
-		*/
 
 		/**
 		* Delete an item from a SP List/Library
@@ -1278,40 +1276,46 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 		_newList.delete = function(jsonData) {
 			return new Promise(function(resolve,reject) {
 				// FIRST: Param checks
-				if ( !jsonData || typeof jsonData !== 'object' ) reject("{jsonData} expected");
-				if ( !jsonData['ID'] && !jsonData['Id'] && !jsonData['iD'] && !jsonData['id'] ) reject("{jsonData}['Id'] expected");
-				try { test = JSON.stringify(jsonData) } catch(ex) { reject("JSON.stringify(`jsonData`) failed") }
+				if ( !jsonData || Array.isArray(jsonData) || typeof jsonData !== 'object' || Object.keys(jsonData).length == 0 ) reject("JSON data expected! Ex: `{Name:'Brent'}`");
+				if ( !jsonData['ID'] && !jsonData['Id'] && !jsonData['iD'] && !jsonData['id'] ) reject("JSON data must have an `ID` value! Ex: `{Id:99}`");
+				try { var test = JSON.stringify(jsonData) } catch(ex) { reject("`JSON.stringify(jsonData)` failed! Send valid JSON Please. Ex: `{'Name':'Brent'}`") }
 
-				// STEP 1: Determine SP.Type if needed
-				// TODO: for all CRUD ops: `__metadata` is *OPTIONAL* (if not incld, then get List Metadta (TODO: internal func for this))
-				//if ( !jsonData.__metadata ) { promise.getMeta,then()... continue below }
-
-				// STEP 2: Set our `Id` value (users may send an of 4 different cases), then remove as its nt updateable
+				// STEP 1: Param Setup
+				// A: Set our `Id` value (users may send an of 4 different cases), then remove as ID is not updateable in SP
 				var itemId = jsonData['ID'] || jsonData['Id'] || jsonData['iD'] || jsonData['id'];
 				delete jsonData.ID; delete jsonData.Id; delete jsonData.iD; delete jsonData.id;
+				// B: DESIGN/OPTION: If no etag is provided, consider it a force (a faux {OPTION})
+				jsonData.__metadata = jsonData.__metadata || {};
+				// Ensure we dont pass junk as etag or SP will error
+				if ( jsonData.__metadata.etag == "" || jsonData.__metadata.etag == null ) delete jsonData.__metadata.etag;
 
-				// STEP 3: Build headers
-				// DESIGN/OPTION: If no etag is provided, consider it a force (a fuax {OPTION})
-				var objHeaders = {
-					"X-HTTP-Method"  : "MERGE",
-					"Accept"         : "application/json; odata=verbose",
-					"X-RequestDigest": $("#__REQUESTDIGEST").val(),
-					"IF-MATCH"       : ( jsonData.__metadata && jsonData.__metadata.etag ? jsonData.__metadata.etag : "*" )
-				};
+				// STEP 2: Update item
+				Promise.resolve()
+				.then(function(){
+					return ( jsonData.__metadata.type ? null : getListItemType() );
+				})
+				.then(function(objMetadata){
+					// 1: Add `__metadata.type` if needed
+					if ( objMetadata && objMetadata.type ) jsonData.__metadata.type = objMetadata.type;
 
-				// STEP 4: Delete item
-				$.ajax({
-					type       : "DELETE",
-					url        : _urlBase+"/items("+ itemId +")",
-					contentType: "application/json;odata=verbose",
-					headers    : objHeaders
-				})
-				.done(function(data, textStatus){
-					// SP doesnt return anything for Deletes, but we return id
-					resolve( itemId );
-				})
-				.fail(function(jqXHR, textStatus, errorThrown){
-					reject( parseErrorMessage(jqXHR, textStatus, errorThrown) );
+					// 2: Update item
+					sprLib.rest({
+						type   : "DELETE",
+						url    : _urlBase +"/items("+ itemId +")",
+						headers: {
+							"X-HTTP-Method"  : "MERGE",
+							"Accept"         : "application/json;odata=verbose",
+							"X-RequestDigest": $("#__REQUESTDIGEST").val(),
+							"IF-MATCH"       : ( jsonData.__metadata.etag ? jsonData.__metadata.etag : "*" )
+						}
+					})
+					.then(function(){
+						// SP doesnt return anything for Deletes, but SpRestLib returns ID
+						resolve( itemId );
+					})
+					.catch(function(strErr){
+						reject( strErr );
+					});
 				});
 			});
 		};
@@ -1331,24 +1335,24 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 		*
 		* @return {number} Return the `id` just deleted.
 		*/
-		_newList.recycle = function(inArg) {
+		_newList.recycle = function(itemId) {
 			return new Promise(function(resolve,reject) {
-				if ( !inArg || typeof inArg.toString() !== 'string' ) reject("{id} expected");
+				// FIRST: Param checks
+				if ( !itemId || typeof itemId.toString() !== 'string' ) reject("ID expected! Ex: `recycle(99)`");
 
 				// STEP 1: Recycle item
-				$.ajax({
-					type       : "POST",
-					url        : _urlBase+"/items("+ inArg.toString() +")/recycle()",
-					contentType: "application/json;odata=verbose",
+				sprLib.rest({
+					type   : "POST",
+					url    : _urlBase +"/items("+ itemId.toString() +")/recycle()",
 					headers    : { "Accept":"application/json; odata=verbose", "X-RequestDigest":$("#__REQUESTDIGEST").val() }
 				})
-				.done(function(data, textStatus){
+				.then(function(){
 					// SP returns the item guid for Recycle operations
 					// EX: {"d":{"Recycle":"ed504e3d-f8ab-4dd4-bb22-6ddaa78bd117"}}
-					resolve( Number(inArg) );
+					resolve( Number(itemId) );
 				})
-				.fail(function(jqXHR, textStatus, errorThrown){
-					reject( parseErrorMessage(jqXHR, textStatus, errorThrown) );
+				.catch(function(strErr){
+					reject( strErr );
 				});
 			});
 		};
@@ -1397,7 +1401,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 				url    : inOpt.url,
 				type   : inOpt.type,
 				cache  : inOpt.cache,
-				headers: { "Accept":"application/json;odata=verbose", "X-RequestDigest":$("#__REQUESTDIGEST").val() }
+				headers: inOpt.headers || { "Accept":"application/json;odata=verbose", "X-RequestDigest":$("#__REQUESTDIGEST").val() }
 			};
 			// Add `data` if included
 			if ( inOpt.data ) objAjaxQuery.data = inOpt.data;
@@ -1520,7 +1524,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 					});
 				}
 				// data.d or data is an {}: { listTitle:'Game Systems', numberOfItems:25 }
-				else if ( (data.d || data) && typeof (data.d || data) === 'object' ) {
+				else if ( (data && data.d ? data.d : (data ? data : false)) && typeof (data.d || data) === 'object' ) {
 					var objRow = {};
 
 					$.each((data.d || data), function(key,result){
