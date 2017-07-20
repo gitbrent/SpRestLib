@@ -19,7 +19,7 @@ const ARR_NAMES_LAST  = ['Septiceye','Iplier','Martzia','Rodgers','Allen','Kent'
 //
 var gNewEmpItem = -1;
 var gTestUserId = 9;
-var gUpdateItem = { Id:0 };
+//var gUpdateItem = { Id:0 };
 
 function getAsciiTableStr(arrayResults) {
 	var arrColHeadings = [];
@@ -231,53 +231,68 @@ QUnit.module( "LIST > ITEM CRUD Methods" );
 		var done = assert.async();
 
 		// PREP:
-		sprLib.list('Employees')
-		.getItems({ listCols:'Id', queryOrderby:'Modified', queryLimit:1 })
-		.then(function(data){ gUpdateItem = data[0]; })
-		.then(function(){
+		sprLib.list('Employees').getItems({ listCols:'Id', queryOrderby:'Modified', queryLimit:1 })
+		.then(function(data){
 			// TEST:
 			sprLib.list('Employees')
 			.update({
-				__metadata: { type:"SP.Data.EmployeesListItem", etag:gUpdateItem.__metadata.etag },
-				Id:         gUpdateItem.Id,
+				__metadata: { type:"SP.Data.EmployeesListItem", etag:data[0].__metadata.etag },
+				Id:         data[0].Id,
 				Name:       'updated by sprLib.list().update() with etag'
 			})
 			.then(function(objItem){
 				assert.ok( (objItem.Name), "Updated! Name: '" + objItem.Name + "'");
+				done();
+			})
+			.catch(function(err){
+				assert.ok( (false), err );
 				done();
 			});
 		});
 	});
 	QUnit.test("sprLib.list().update() 2: with etag [null]    ", function(assert){
 		var done = assert.async();
-		// TEST:
-		sprLib.list('Employees')
-		.update({
-			__metadata: { type:"SP.Data.EmployeesListItem", etag:null },
-			id:         gUpdateItem.Id,
-			Name:       'updated by sprLib.list().update() with etag:null'
-		})
-		.then(function(objItem){
-			assert.ok( (objItem.Name), "Updated! Name: '" + objItem.Name + "'");
-			done();
-		})
-		.catch(function(err){
-			assert.ok( (false), err );
-			done();
+		// PREP:
+		sprLib.list('Employees').getItems({ listCols:'Id', queryOrderby:'Modified', queryLimit:1 })
+		.then(function(data){
+			// TEST:
+			sprLib.list('Employees')
+			.update({
+				__metadata: { type:"SP.Data.EmployeesListItem", etag:null },
+				id:         data[0].Id,
+				Name:       'updated by sprLib.list().update() with etag:null'
+			})
+			.then(function(objItem){
+				assert.ok( (objItem.Name), "Updated! Name: '" + objItem.Name + "'");
+				done();
+			})
+			.catch(function(err){
+				assert.ok( (false), err );
+				done();
+			});
 		});
 	});
 	QUnit.test("sprLib.list().update() 3: no etag (aka: force)", function(assert){
 		var done = assert.async();
-		// TEST:
-		sprLib.list('Employees')
-		.update({
-			__metadata: { type:"SP.Data.EmployeesListItem" },
-			id:         gUpdateItem.Id,
-			Name:       'updated by sprLib.list().update() w/o etag'
-		})
-		.then(function(objItem){
-			assert.ok( (objItem.Name), "Updated! Name: '" + objItem.Name + "'");
-			done();
+
+		// PREP:
+		sprLib.list('Employees').getItems({ listCols:'Id', queryOrderby:'Modified', queryLimit:1 })
+		.then(function(data){
+			// TEST:
+			sprLib.list('Employees')
+			.update({
+				__metadata: { type:"SP.Data.EmployeesListItem" },
+				id:         data[0].Id,
+				Name:       'updated by sprLib.list().update() w/o etag'
+			})
+			.then(function(objItem){
+				assert.ok( (objItem.Name), "Updated! Name: '" + objItem.Name + "'");
+				done();
+			})
+			.catch(function(errorMessage){
+				assert.ok( (false), errorMessage );
+				done();
+			});
 		});
 	});
 
@@ -372,15 +387,110 @@ QUnit.module( "LIST > ITEM CRUD Methods" );
 		//
 		var item = { Name:'Marty McFly', ManagerId:gTestUserId, Hire_x0020_Date:new Date() };
 		Promise.resolve()
-		.then(function()    { return sprLib.list('Employees').create(item); })
-		.then(function(item){ return sprLib.list('Employees').update(item); })
-		.then(function(item){ return sprLib.list('Employees').delete(item); })
+		.then(function(){
+			return sprLib.list('Employees').create(item);
+		})
 		.then(function(item){
+			assert.ok( (true), "Success! create worked" );
+			if (!item.Mentored_x0020_Team_x0020_MemberId) { delete item.Mentored_x0020_Team_x0020_MemberId; delete item.Mentored_x0020_Team_x0020_MemberStringId; }
+			return sprLib.list('Employees').update(item);
+		})
+		.then(function(item){
+			assert.ok( (true), "Success! update worked" );
+			if (!item.Mentored_x0020_Team_x0020_MemberId) { delete item.Mentored_x0020_Team_x0020_MemberId; delete item.Mentored_x0020_Team_x0020_MemberStringId; }
+			return sprLib.list('Employees').delete(item);
+		})
+		.then(function(item){
+			assert.ok( (true), "Success! delete worked" );
 			assert.ok( (true), "Success! An item navigated the entire CRUD chain!" );
 			done();
 		})
 		.catch(function(err){
 			assert.ok( (false), err );
+			done();
+		});
+	});
+
+	// API CHECK
+	QUnit.test("sprLib.list().create(): w/o `__metadata`", function(assert){
+		var done = assert.async();
+
+		sprLib.list('Employees')
+		.create({
+			Title: 'QUnit: sprLib.list().create() 10'
+		})
+		.then(function(objItem){
+			assert.ok( (objItem.Title), "objItem.Title: '" + objItem.Title + "'");
+			done();
+		})
+		.catch(function(errorMessage){
+			assert.ok( (false), errorMessage );
+			done();
+		});
+	});
+	QUnit.test("sprLib.list().update(): w/o `__metadata`", function(assert){
+		var done = assert.async();
+
+		sprLib.list('Employees').getItems({ listCols:'Id', queryOrderby:'Modified', queryLimit:1 })
+		.then(function(data){
+			sprLib.list('Employees')
+			.update({
+				ID:    data[0].Id,
+				Title: 'QUnit: sprLib.list().update() 11'
+			})
+			.then(function(objItem){
+				assert.ok( (objItem.Title), "objItem.Title: '" + objItem.Title + "'");
+				done();
+			})
+			.catch(function(errorMessage){
+				assert.ok( (false), errorMessage );
+				done();
+			});
+		});
+	});
+
+	// JUNK TESTS:
+	QUnit.test("sprLib.list().create() JUNK TESTS", function(assert){
+		var done = assert.async();
+
+		sprLib.list('Employees').getItems({ listCols:'Id', queryOrderby:'Modified', queryLimit:1 })
+		.then(function(data){
+			[null, undefined, {}, [], ['ID'], {etag:null}, {type:null}, {ID:null}].forEach(function(json,idx){
+				var done = assert.async();
+				//
+				sprLib.list('Employees')
+				.create(json)
+				.then(function(objItem){
+					assert.ok( (false), "this should not have succeeded! "+ JSON.parse(objItem));
+					done();
+				})
+				.catch(function(errorMessage){
+					assert.ok( (true), "Test Failed [passed]. INPUT: "+ json +" - OUTPUT: "+errorMessage );
+					done();
+				});
+			});
+			done();
+		});
+	});
+	QUnit.test("sprLib.list().update() JUNK TESTS", function(assert){
+		var done = assert.async();
+
+		sprLib.list('Employees').getItems({ listCols:'Id', queryOrderby:'Modified', queryLimit:1 })
+		.then(function(data){
+			[null, undefined, {}, [], ['ID'], {etag:null}, {type:null}, {ID:0}].forEach(function(json,idx){
+				var done = assert.async();
+				//
+				sprLib.list('Employees')
+				.update(json)
+				.then(function(objItem){
+					assert.ok( (false), "this should not have succeeded!");
+					done();
+				})
+				.catch(function(errorMessage){
+					assert.ok( (true), "Test Failed [passed]. INPUT: "+ json +" - OUTPUT: "+errorMessage );
+					done();
+				});
+			});
 			done();
 		});
 	});
