@@ -1014,8 +1014,10 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 									else if ( col.dataName && col.dataName.indexOf('/') > -1 ) {
 										// A: Split lookup info object/field
 										arrCol = col.dataName.split('/');
-										// B: Some lookup results come with their own metadata - ditch it
+										// B: Remove extraneous metadata
 										if ( result[arrCol[0]].__metadata ) delete result[arrCol[0]].__metadata;
+										// B: Same for deferred. NOTE: Multi-Person fields return only a `{__deferred:{uri:'http...'}}` result when field is empty (ugh!)
+										if ( result[arrCol[0]].__deferred ) delete result[arrCol[0]].__deferred;
 										// C: Capture value
 										// CASE 1: `dataName` was used - in this case return the actual field user asked for
 										// Detect use of names listCols by comparing key to dataName
@@ -1025,6 +1027,9 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 										// We want to return a *single* object with these 2 elements, so they can be derefereced using 'Manger.Title' etc.
 										// Capture any-and-all columns returned (aside from removal of above)
 										else colVal = result[arrCol[0]];
+
+										// D: Value clean-up (things like empty multi-person fields may end up being `{}`)
+										if ( typeof colVal === 'object' && !Array.isArray(colVal) && Object.keys(colVal).length == 0 ) colVal = [];
 									}
 									else if ( col.dataName ) {
 										colVal = result[col.dataName];
