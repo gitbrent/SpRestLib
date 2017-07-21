@@ -1582,7 +1582,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 		// STEP 2: Build query URL based on whether its current user (no parameter) or a passed in object
 		// NOTE: Use CurrentUser service as it is included in SP-Foundation and will work for everyone
 		// ....: (Users will need SP-Enterprise for UserProfiles service to work)
-		// NOTE: `_api/Web/GetUserById()` for non-existant users results in a heinous error 500 that chokes $.ajax.fail(),
+		// NOTE: `_api/Web/GetUserById()` for non-existant users results in a heinous error 500 that chokes jQuery.ajax.fail(),
 		// ....: so dont use it, or check user id with `siteusers?$filter` first!
 		if      ( inOpt && inOpt['id']    ) strDynUrl = APP_OPTS.baseUrl+"/_api/Web/siteusers?$filter=Id%20eq%20"+       inOpt['id']    +"&";
 		else if ( inOpt && inOpt['email'] ) strDynUrl = APP_OPTS.baseUrl+"/_api/web/siteusers?$filter=Email%20eq%20%27"+ inOpt['email'] +"%27&";
@@ -1642,19 +1642,17 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 		*/
 		newUser.groups = function() {
 			return new Promise(function(resolve, reject) {
-				$.ajax({
-					url    : strDynUrl + "$select=Groups/Id,Groups/Title,Groups/Description,Groups/LoginName,Groups/OwnerTitle&$expand=Groups",
+				sprLib.rest({
 					type   : "GET",
+					url    : strDynUrl + "$select=Groups/Id,Groups/Title,Groups/Description,Groups/LoginName,Groups/OwnerTitle&$expand=Groups",
 					cache  : false,
-					headers: {"Accept":"application/json; odata=verbose"}
+					headers: { "Accept":"application/json;odata=verbose" }
 				})
-				.done(function(data, textStatus) {
+				.then(function(arrData){
 					var arrGroups = [];
 
 					// A: Gather groups
-					( data.d.results && data.d.results[0] && data.d.results[0].Groups
-						? data.d.results[0].Groups.results : (data && data.d && data.d.Groups ? data.d.Groups.results : [])
-					)
+					( arrData && arrData[0] && arrData[0].Groups && arrData[0].Groups.results ? arrData[0].Groups.results : [] )
 					.forEach(function(group,idx){
 						arrGroups.push({
 							Id: group.Id,
@@ -1668,8 +1666,8 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 					// B: Resolve results
 					resolve( arrGroups );
 				})
-				.fail(function(jqXHR, textStatus, errorThrown) {
-					reject( parseErrorMessage(jqXHR, textStatus, errorThrown) );
+				.catch(function(strErr){
+					reject( strErr );
 				});
 			});
 		}
