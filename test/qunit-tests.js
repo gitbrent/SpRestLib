@@ -2,7 +2,7 @@
  * NAME: qunit-test.js
  * DESC: tests for qunit-test.html (coded to my O365 Dev Site - YMMV)
  * AUTH: https://github.com/gitbrent/
- * DATE: Jul 10, 2017
+ * DATE: Jul 20, 2017
  *
  * HOWTO: Generate text tables for README etc.:
  * sprLib.list('Employees').getItems(['Id', 'Name', 'Badge_x0020_Number']).then(function(arrData){ console.log(getAsciiTableStr(arrData)) });
@@ -19,7 +19,6 @@ const ARR_NAMES_LAST  = ['Septiceye','Iplier','Martzia','Rodgers','Allen','Kent'
 //
 var gNewEmpItem = -1;
 var gTestUserId = 9;
-//var gUpdateItem = { Id:0 };
 
 function getAsciiTableStr(arrayResults) {
 	var arrColHeadings = [];
