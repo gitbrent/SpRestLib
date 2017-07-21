@@ -43,7 +43,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 (function(){
 	// APP VERSION/BUILD
 	var APP_VER = "1.0.0-beta";
-	var APP_BLD = "20170719";
+	var APP_BLD = "20170720";
 	var DEBUG = false; // (verbose mode/lots of logging)
 	// APP FUNCTIONALITY
 	var APP_FILTEROPS = {
@@ -1153,34 +1153,42 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 					if ( objMetadata && objMetadata.type ) jsonData.__metadata = objMetadata;
 
 					// 2: Create item
-					$.ajax({
-						type       : "POST",
-						url        : _urlBase+"/items",
-						data       : JSON.stringify(jsonData),
-						contentType: "application/json;odata=verbose",
-						headers    : { "Accept":"application/json; odata=verbose", "X-RequestDigest":$("#__REQUESTDIGEST").val() }
+					sprLib.rest({
+						type   : "POST",
+						url    : _urlBase +"/items",
+						data   : JSON.stringify(jsonData),
+						headers: { "Accept":"application/json;odata=verbose", "X-RequestDigest":$("#__REQUESTDIGEST").val() }
 					})
-					.done(function(data, textStatus){
-						// Remove any columns that have a value of `{__deferred:''}`
-						// They're empty anyway, plus future operations with this item would fail, eg: insert.
-						$.each(data.d, function(key,val){ if ( val && typeof val === 'object' && val.__deferred ) delete data.d[key] });
+					.then(function(arrData){
+						if ( arrData && arrData[0] ) {
+							// A: Populate new ID (both 'Id' and 'ID' to mimic SP)
+							jsonData.Id = arrData[0].Id;
+							jsonData.ID = arrData[0].ID;
+
+							// B: Populate metadata
+							jsonData.__metadata = jsonData.__metadata || arrData[0].__metadata || {};
+							jsonData.__metadata.etag = jsonData.__metadata.etag || arrData[0].__metadata.etag;
+						}
+						else {
+							jsonData = null;
+						}
 
 						// LAST: Return new item
-						resolve( data.d );
+						resolve( jsonData );
 					})
-					.fail(function(jqXHR, textStatus, errorThrown){
+					.catch(function(strErr){
 						// TODO: Is there way to do this without a retryCnt??, otherwise: add,increment,clear
 						/*
-							try {
-							var strErrCode = jqXHR.status.toString();
-							var strErrText = "("+ jqXHR.status +") "+ textStatus +": "+ errorThrown;
-							var strSpeCode = $.parseJSON(jqXHR.responseText).error['code'].split(',')[0];
+						try {
+						var strErrCode = jqXHR.status.toString();
+						var strErrText = "("+ jqXHR.status +") "+ textStatus +": "+ errorThrown;
+						var strSpeCode = $.parseJSON(jqXHR.responseText).error['code'].split(',')[0];
 
-							// CASE '403': SP2013-2016 Expired Token error: Microsoft.SharePoint.SPException (-2130575252): "X-RequestDigest expired form digest"
-							if ( strErrCode == '403' && strSpeCode == '-2130575252' ) doRenewDigestToken();
+						// CASE '403': SP2013-2016 Expired Token error: Microsoft.SharePoint.SPException (-2130575252): "X-RequestDigest expired form digest"
+						if ( strErrCode == '403' && strSpeCode == '-2130575252' ) doRenewDigestToken();
 						} catch(ex) {}
 						*/
-						reject( parseErrorMessage(jqXHR, textStatus, errorThrown) );
+						reject( strErr );
 					});
 				})
 				.catch(function(err){ reject(err) });
@@ -1244,7 +1252,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 					.then(function(arrData){
 						// A: SP doesnt return anything for Merge/Update, so return original jsonData object so users can chain, etc.
 						// Populate both 'Id' and 'ID' to mimic SP2013
-						jsonData.ID = itemId; jsonData.Id = itemId;
+						jsonData.Id = itemId; jsonData.ID = itemId;
 
 						// B: Increment etag (if one was provided, otherwise, we cant know what it is without querying for it!)
 						if ( jsonData.__metadata.etag ) jsonData.__metadata.etag = '"'+ (Number(jsonData.__metadata.etag.replace(/[\'\"]+/gi, ''))+1) +'"';
