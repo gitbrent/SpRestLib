@@ -680,7 +680,7 @@ QUnit.module( "LIST > ITEM GET Methods" );
 				depsArr:  { dataName:'Departments_x0020_Supported/Id' }
 			},
 			queryLimit: 1,
-			queryOrderby: "Modified desc"
+			queryFilter: 'Utilization_x0020_Pct gt 0'
 		})
 		.then(function(arrayResults){
 			assert.ok( Object.keys(arrayResults[0]).length == 4, "arrayResults[0] has length == 4: "+ Object.keys(arrayResults[0]).length );
@@ -701,7 +701,7 @@ QUnit.module( "LIST > ITEM GET Methods" );
 		.getItems({
 			listCols: ['Name', 'Manager/Title', 'Departments_x0020_Supported/Id'],
 			queryLimit: 1,
-			queryOrderby: "Modified desc"
+			queryFilter: "Utilization_x0020_Pct gt 0"
 		})
 		.then(function(arrayResults){
 			assert.ok( Object.keys(arrayResults[0]).length == 4                  , "arrayResults[0] has length == 4: "+ Object.keys(arrayResults[0]).length );
@@ -725,7 +725,7 @@ QUnit.module( "LIST > ITEM GET Methods" );
 		.getItems({
 			listCols: ['Name', 'Departments_x0020_Supported/Id', 'Departments_x0020_Supported/Title'],
 			queryLimit: 1,
-			queryOrderby: "Modified desc"
+			queryFilter: "Utilization_x0020_Pct gt 0"
 		})
 		.then(function(arrayResults){
 			assert.ok( Object.keys(arrayResults[0]).length == 3, "arrayResults[0] has length == 3: "+ Object.keys(arrayResults[0]).length );
