@@ -216,8 +216,9 @@ QUnit.module( "LIST > ITEM CRUD Methods" );
 				Salary:							12345.49,
 				Utilization_x0020_Pct:			1.0,
 				Extension:						(1234+idx).toString(),
-				Comments:						'New employee created',
-				Active_x003f_:					true
+				Comments:							'New employee created',
+				Mentored_x0020_Team_x0020_MemberId:	{ results:[9] },
+				Active_x003f_:						true
 			})
 			.then(function(newObj){
 				assert.ok( (newObj.Id), "Created! Id: " + newObj.Id );
@@ -680,7 +681,7 @@ QUnit.module( "LIST > ITEM GET Methods" );
 				depsArr:  { dataName:'Departments_x0020_Supported/Id' }
 			},
 			queryLimit: 1,
-			queryFilter: 'Utilization_x0020_Pct gt 0'
+			queryFilter: "Departments_x0020_Supported ne null"
 		})
 		.then(function(arrayResults){
 			assert.ok( Object.keys(arrayResults[0]).length == 4, "arrayResults[0] has length == 4: "+ Object.keys(arrayResults[0]).length );
@@ -701,7 +702,7 @@ QUnit.module( "LIST > ITEM GET Methods" );
 		.getItems({
 			listCols: ['Name', 'Manager/Title', 'Departments_x0020_Supported/Id'],
 			queryLimit: 1,
-			queryFilter: "Utilization_x0020_Pct gt 0"
+			queryFilter: "Departments_x0020_Supported ne null"
 		})
 		.then(function(arrayResults){
 			assert.ok( Object.keys(arrayResults[0]).length == 4                  , "arrayResults[0] has length == 4: "+ Object.keys(arrayResults[0]).length );
@@ -725,7 +726,7 @@ QUnit.module( "LIST > ITEM GET Methods" );
 		.getItems({
 			listCols: ['Name', 'Departments_x0020_Supported/Id', 'Departments_x0020_Supported/Title'],
 			queryLimit: 1,
-			queryFilter: "Utilization_x0020_Pct gt 0"
+			queryFilter: "Departments_x0020_Supported ne null"
 		})
 		.then(function(arrayResults){
 			assert.ok( Object.keys(arrayResults[0]).length == 3, "arrayResults[0] has length == 3: "+ Object.keys(arrayResults[0]).length );
@@ -746,7 +747,43 @@ QUnit.module( "LIST > ITEM GET Methods" );
 		});
 	});
 
-	QUnit.test("sprLib.getItems() 12: `queryFilter` using: `Id` + `eq`", function(assert){
+	// NOTE: Promise.all()
+	QUnit.test("sprLib.getItems() 12: `listCols` with column array: Multi-Person (`EMail`, `Title`)", function(assert){
+		var done = assert.async();
+		// TEST:
+		Promise.all([
+			sprLib.list('Employees').getItems({
+				listCols: ['Name', 'Mentored_x0020_Team_x0020_Member/ID', 'Mentored_x0020_Team_x0020_Member/Title'],
+				queryLimit: 1,
+				queryFilter: "Mentored_x0020_Team_x0020_Member ne null"
+			}),
+			sprLib.list('Employees').getItems({
+				listCols: ['Name', 'Mentored_x0020_Team_x0020_Member/ID', 'Mentored_x0020_Team_x0020_Member/Title'],
+				queryLimit: 1,
+				queryFilter: "Mentored_x0020_Team_x0020_Member eq null"
+			})
+		])
+		.then(function(arrayResults){
+			var res1 = arrayResults[0];
+			assert.ok( Object.keys(res1[0]).length == 3, "res1[0] has length == 3: "+ Object.keys(res1[0]).length );
+			assert.ok( !isNaN(res1[0].Mentored_x0020_Team_x0020_Member[0].ID), "res1[0].Mentored_x0020_Team_x0020_Member[0].ID is a number: "+ res1[0].Mentored_x0020_Team_x0020_Member[0].ID );
+			assert.ok( (res1[0].Mentored_x0020_Team_x0020_Member[0].Title), "res1[0].Mentored_x0020_Team_x0020_Member[0].Title exists: "+ res1[0].Mentored_x0020_Team_x0020_Member[0].Title );
+			assert.ok( getAsciiTableStr(res1), `RESULTS:\n${getAsciiTableStr(res1)}`);
+
+			var res2 = arrayResults[1];
+			assert.ok( Object.keys(res2[0]).length == 3, "res2[0] has length == 3: "+ Object.keys(res2[0]).length );
+			assert.ok( (res2[0].Mentored_x0020_Team_x0020_Member.length == 0), "res1[0].Mentored_x0020_Team_x0020_Member.length == 0: "+ res1[0].Mentored_x0020_Team_x0020_Member.length );
+			assert.ok( getAsciiTableStr(res2), `RESULTS:\n${getAsciiTableStr(res2)}`);
+
+			done();
+		})
+		.catch(function(errorMessage){
+			assert.ok( (false), errorMessage );
+			done();
+		});
+	});
+
+	QUnit.test("sprLib.getItems() 13: `queryFilter` using: `Id` + `eq`", function(assert){
 		var done = assert.async();
 		// TEST:
 		Promise.resolve()
@@ -774,7 +811,7 @@ QUnit.module( "LIST > ITEM GET Methods" );
 		});
 	});
 
-	QUnit.test("sprLib.getItems() 13: `queryFilter` using: `Name` + `eq` with single-quote", function(assert){
+	QUnit.test("sprLib.getItems() 14: `queryFilter` using: `Name` + `eq` with single-quote", function(assert){
 		var done = assert.async();
 		// TEST:
 		Promise.resolve()
@@ -802,7 +839,7 @@ QUnit.module( "LIST > ITEM GET Methods" );
 		});
 	});
 
-	QUnit.test("sprLib.getItems() 14: `queryFilter` using: `Name` + `eq` with double-quote", function(assert){
+	QUnit.test("sprLib.getItems() 15: `queryFilter` using: `Name` + `eq` with double-quote", function(assert){
 		var done = assert.async();
 		// TEST:
 		Promise.resolve()
@@ -830,7 +867,7 @@ QUnit.module( "LIST > ITEM GET Methods" );
 		});
 	});
 
-	QUnit.test("sprLib.getItems() 15: `queryLimit` test", function(assert){
+	QUnit.test("sprLib.getItems() 16: `queryLimit` test", function(assert){
 		var done = assert.async();
 		// TEST:
 		sprLib.list('Employees')
@@ -847,7 +884,7 @@ QUnit.module( "LIST > ITEM GET Methods" );
 		});
 	});
 
-	QUnit.test("sprLib.getItems() 16: `queryOrderby` (asc) test", function(assert){
+	QUnit.test("sprLib.getItems() 17: `queryOrderby` (asc) test", function(assert){
 		var done = assert.async();
 		// TEST:
 		sprLib.list('Employees')
@@ -867,7 +904,7 @@ QUnit.module( "LIST > ITEM GET Methods" );
 		});
 	});
 
-	QUnit.test("sprLib.getItems() 16: `queryOrderby` (desc) test", function(assert){
+	QUnit.test("sprLib.getItems() 18: `queryOrderby` (desc) test", function(assert){
 		var done = assert.async();
 		// TEST:
 		sprLib.list('Employees')
