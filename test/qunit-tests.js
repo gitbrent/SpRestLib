@@ -17,7 +17,6 @@ const RESTDEMO = '/sites/demo';
 const ARR_NAMES_FIRST = ['Jack','Mark','CutiePie','Steve','Barry','Clark','Diana','Star','Luke','Captain'];
 const ARR_NAMES_LAST  = ['Septiceye','Iplier','Martzia','Rodgers','Allen','Kent','Prince','Lord','Skywalker','Marvel'];
 //
-var gNewEmpItem = -1;
 var gTestUserId = 9;
 
 function getAsciiTableStr(arrayResults) {
@@ -203,25 +202,38 @@ QUnit.module( "LIST > ITEM CRUD Methods" );
 	QUnit.test("sprLib.list().create()", function(assert){
 		[1,2,3,4].forEach(function(done,idx){
 			done = assert.async();
-			sprLib.list('Employees').create({
-				__metadata:						{ type:"SP.Data.EmployeesListItem" },
-				Name:							ARR_NAMES_FIRST[(Math.floor(Math.random()*9)+1)]+' '+ARR_NAMES_LAST[(Math.floor(Math.random()*9)+1)],
-				ManagerId:						gTestUserId,
-				Departments_x0020_SupportedId:	{ results:[1,2,3] },
-				Site_x0020_Link:				{ Url:'https://github.com/', Description:'GitHub Site' },
-				Badge_x0020_Number:				Math.round(new Date().getTime() / 1000000),
-				Job_x0020_GradeId:				(idx+1),
-				Hire_x0020_Date:				new Date(2017, idx, 1),
-				Salary:							12345.49,
-				Utilization_x0020_Pct:			1.0,
-				Extension:						(1234+idx).toString(),
-				Comments:							'New employee created',
+			//
+			var json = {
+				__metadata:							{ type:"SP.Data.EmployeesListItem" },
+				Name:								ARR_NAMES_FIRST[(Math.floor(Math.random()*9)+1)]+' '+ARR_NAMES_LAST[(Math.floor(Math.random()*9)+1)],
+				ManagerId:							gTestUserId,
+				Departments_x0020_SupportedId:		{ results:[1,2,3] },
 				Mentored_x0020_Team_x0020_MemberId:	{ results:[9] },
+				Site_x0020_Link:					{ Url:'https://github.com/', Description:'GitHub Site' },
+				Badge_x0020_Number:					Math.round(new Date().getTime() / 1000000),
+				Job_x0020_GradeId:					(idx+1),
+				Hire_x0020_Date:					new Date(2017, idx, 1),
+				Salary:								12345.49,
+				Utilization_x0020_Pct:				1.0,
+				Extension:							(1234+idx).toString(),
+				Comments:							'New employee created',
 				Active_x003f_:						true
-			})
+			};
+			var keys = Object.keys(json);
+
+			sprLib.list('Employees').create(json)
 			.then(function(newObj){
-				assert.ok( (newObj.Id), "Created! Id: " + newObj.Id );
-				gNewEmpItem = newObj.Id;
+				assert.ok( (newObj.Id), "New Id: " + newObj.Id );
+				assert.ok( (newObj.ID), "New ID: " + newObj.ID );
+				assert.ok( (newObj.__metadata.etag), "New etag: " + newObj.__metadata.etag );
+				assert.ok( ( keys.length+2 == Object.keys(newObj).length ), "Object.keys().lengths equal: " + Object.keys(newObj).length );
+				assert.ok( true, "INPUT.: "+ keys.sort().toString() );
+				assert.ok( true, "OUTPUT: "+ Object.keys(newObj).sort().toString() );
+				assert.ok( getAsciiTableStr([json]), `RESULTS:\n${getAsciiTableStr([json])}` );
+				assert.ok( getAsciiTableStr([newObj]), `RESULTS:\n${getAsciiTableStr([newObj])}` );
+				assert.ok( true, "..." );
+				assert.ok( true, ".." );
+				assert.ok( true, "." );
 				done();
 			});
 		});
