@@ -174,24 +174,24 @@ Returns:
 * `__metadata` is always included in the results array (to enable further operations, use of Etag, etc.)
 
 #### Options
-| Option        | Type     | Required? | Description           | Possible Values / Returns           |
+| Option        | Type     | Default   | Description           | Possible Values / Returns           |
 | :------------ | :------- | :-------- | :-------------------- | :---------------------------------- |
 | `listCols`    | array *OR* object |  | column names to be returned | array of column names *OR* object (see below) |
 | `cache`       | boolean  | `false`   | cache settings        | Ex:`cache: true` |
 | `queryFilter` | string   |           | query filter          | utilizes OData style [Query Operators](https://msdn.microsoft.com/en-us/library/office/fp142385.aspx#Anchor_7) |
 | `queryLimit`  | string   |           | max items to return   | 1-*N* |
 | `queryOrderby`| string   |           | column(s) to order by | Ex:`queryOrderby:Name` |
-| `fetchAppend` | boolean  | `false`   | return append text    | `true` or `false` |
 
 NOTE: Omitting `listCols` will result in all List columns being returned (mimics SharePoint default behavior)
 
 #### listCols Object
-| Option       | Type     | Required? | Description           | Possible Values / Return Values     |
-| :----------- | :------- | :-------- | :-------------------- | :---------------------------------- |
-| `dataName`   | string   |           | the column name       | the fixed, back-end REST column name (use [Get List Column Properties](#get-list-column-properties)) |
-| `dispName`   | string   |           | the name to use when displaying results in table headers, etc. |  |
-| `dateFormat` | string   |           | format to use when returning/displaying date | `INTL`, `INTLTIME`, `YYYYMMDD`, `ISO`, `US` |
-| `dataFunc`   | function |           | function to use for returning a result | use a custom function to transform the query result (see below) |
+| Option        | Type     | Default   | Description           | Possible Values / Return Values     |
+| :------------ | :------- | :-------- | :-------------------- | :---------------------------------- |
+| `dataName`    | string   |           | the column name       | the fixed, back-end REST column name (use [Get List Column Properties](#get-list-column-properties)) |
+| `dispName`    | string   |           | the name to use when displaying results in table headers, etc. |  |
+| `dateFormat`  | string   |           | format to use when returning/displaying date | `INTL`, `INTLTIME`, `YYYYMMDD`, `ISO`, `US` |
+| `dataFunc`    | function |           | function to use for returning a result | use a custom function to transform the query result (see below) |
+| `getVersions` | boolean  | `false`   | return append text versions in array | `true` or `false` |
 
 #### listCols dataFunc Option
 There are many times where you'll need more than a simple column value.  For example, I often provide a link to the InfoPath
@@ -233,32 +233,32 @@ sprLib.list('Employees').getItems({
 
 ```javascript
 // EX: Using 'listCols' option to name our columns
+// EX: Using 'getVersions' to gather all "Append Text"/Versioned Text into an array
 // EX: Using 'dataFunc' option to return a dynamic, generated value (an html link)
 // EX: Using query options: filter, order, limit
 sprLib.list('Employees').getItems({
     listCols: {
-        empId:    { dataName:'Id'                 },
-        badgeNum: { dataName:'Badge_x0020_Number' },
-        editLink: { dataFunc:function(objItem){ return '<a href="/sites/dev/Lists/Employees/DispForm.aspx?ID='+objItem.Id+'">View Emp</a>' } }
+        empId:      { dataName:'ID' },
+        badgeNum:   { dataName:'Badge_x0020_Number' },
+		appendText: { dataName:'Versioned_x0020_Comments', getVersions:true },
+        editLink:   { dataFunc:function(objItem){ return '<a href="/sites/dev/Lists/Employees/DispForm.aspx?ID='+objItem.ID+'">View Emp</a>' } }
     },
     queryFilter:  'Salary gt 100000',
     queryOrderby: 'Hire_x0020_Date',
-    queryLimit:   5
+    queryLimit:   3
 })
 .then(function(arrData){ console.table(arrData) })
 .catch(function(errMsg){ console.error(errMsg) });
 
 // RESULT:
 /*
-.-------------------------------------------------------------------------------------------.
-| empId | badgeNum |                                editLink                                |
-|-------|----------|------------------------------------------------------------------------|
-|   334 |  1497127 | <a href="/sites/dev/Lists/Employees/DispForm.aspx?ID=334">View Emp</a> |
-|   339 |  1497924 | <a href="/sites/dev/Lists/Employees/DispForm.aspx?ID=339">View Emp</a> |
-|   350 |  1497927 | <a href="/sites/dev/Lists/Employees/DispForm.aspx?ID=350">View Emp</a> |
-|   354 |  1497928 | <a href="/sites/dev/Lists/Employees/DispForm.aspx?ID=354">View Emp</a> |
-|   367 |  1497929 | <a href="/sites/dev/Lists/Employees/DispForm.aspx?ID=367">View Emp</a> |
-'-------------------------------------------------------------------------------------------'
+.--------------------------------------------------------------------------------------------------------------------------------.
+| empId | badgeNum |            appendText              |                                editLink                                |
+|-------|----------|------------------------------------|------------------------------------------------------------------------|
+|   334 |  1497127 | ["20170624:Update","20170601:New"] | <a href="/sites/dev/Lists/Employees/DispForm.aspx?ID=334">View Emp</a> |
+|   339 |  1497924 | ["Not here yet", "Emp created"]    | <a href="/sites/dev/Lists/Employees/DispForm.aspx?ID=334">View Emp</a> |
+|   350 |  1497927 | ["Vice President promotion"]       | <a href="/sites/dev/Lists/Employees/DispForm.aspx?ID=334">View Emp</a> |
+'--------------------------------------------------------------------------------------------------------------------------------'
 */
 ```
 
