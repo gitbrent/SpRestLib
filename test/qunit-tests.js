@@ -935,6 +935,85 @@ QUnit.module( "LIST > ITEM GET Methods" );
 		});
 	});
 
+	QUnit.test("sprLib.getItems() 19: Promise.all/Multi-Test: APPEND TEXT", function(assert){
+		var done = assert.async();
+
+		sprLib.list('Employees').getItems({ listCols:'ID', queryOrderby:'Modified', queryLimit:1 })
+		.then(function(arrResults){
+			return sprLib.list('Employees')
+			.update({
+				__metadata: { type:"SP.Data.EmployeesListItem" },
+				ID: arrResults[0].ID,
+				Versioned_x0020_Comments: (new Date().toISOString() + ': adding version to history')
+			});
+		})
+		.then(function(objItem){
+			return sprLib.list('Employees')
+			.update({
+				__metadata: { type:"SP.Data.EmployeesListItem" },
+				ID:   objItem.ID,
+				Comments: null,
+				Name: 'Adding post-Comments change to clear Comments value in this version'
+			});
+		})
+		.then(function(objItem){
+			// SETUP TEST: Set/Verify empty comment in newest version so history tests below will have easily verifiable results
+			assert.ok( true, "Setup Test:\n------------------" );
+			assert.ok( (!objItem.Comments), 'Comments is ""/null : '+ objItem.Comments );
+
+			// TEST:
+			Promise.all([
+				sprLib.list('Employees').getItems({
+					listCols: ['ID', 'Versioned_x0020_Comments', 'Mentored_x0020_Team_x0020_Member/Title'],
+					queryLimit: 10,
+					queryOrderby: "Modified desc"
+				}),
+				sprLib.list('Employees').getItems({
+					listCols: {
+						appendText: { dataName:'Versioned_x0020_Comments', getVersions:true }
+					},
+					fetchAppend: true,
+					queryLimit: 10,
+					queryOrderby: "Modified desc"
+				}),
+				sprLib.list('Employees').getItems({
+					listCols: {
+						Versioned_x0020_Comments: { dataName:'Versioned_x0020_Comments', getVersions:true }
+					},
+					queryLimit: 10,
+					queryOrderby: "Modified desc"
+				})
+			])
+			.then(function(arrayResults){
+				var result = arrayResults[0];
+				assert.ok( true, "Negative Test: getVersions=false\n------------------" );
+				assert.ok( Object.keys(result[0]).length == 4, "result[0] has length == 4: "+ Object.keys(result[0]).length );
+				assert.ok( (true), "result[0].Versioned_x0020_Comments: "+ result[0].Versioned_x0020_Comments );
+				assert.ok( getAsciiTableStr(result), `RESULTS:\n${getAsciiTableStr(result)}` );
+
+				var result = arrayResults[1];
+				assert.ok( true, "TEST: getVersions with keyname-1\n------------------" );
+				assert.ok( Object.keys(result[0]).length == 2, "result[0] has length == 2: "+ Object.keys(result[0]).length );
+				assert.ok( (true), "result[0].appendText: "+ result[0].appendText );
+				assert.ok( getAsciiTableStr(result), `RESULTS:\n${getAsciiTableStr(result)}` );
+
+				var result = arrayResults[2];
+				assert.ok( true, "TEST: getVersions with keyname-2\n------------------" );
+				assert.ok( Object.keys(result[0]).length == 2, "result[0] has length == 2: "+ Object.keys(result[0]).length );
+				assert.ok( (true), "result[0].Versioned_x0020_Comments: "+ result[0].Versioned_x0020_Comments );
+				assert.ok( (true), "result[0].VC is Array(): "+ Array.isArray(result[0].Versioned_x0020_Comments) );
+				assert.ok( getAsciiTableStr(result), `RESULTS:\n${getAsciiTableStr(result)}` );
+
+				done();
+			})
+		})
+		.catch(function(errorMessage){
+			assert.ok( (false), errorMessage );
+			done();
+		});
+	});
+
+
 	// JUNK TESTS:
 	QUnit.test("sprLib.getItems() 99: Junk/Empty .list() param test", function(assert){
 		['', [], [''], ['',''], {}].forEach(function(data,idx){
