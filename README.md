@@ -240,7 +240,7 @@ sprLib.list('Employees').getItems({
     listCols: {
         empId:      { dataName:'ID' },
         badgeNum:   { dataName:'Badge_x0020_Number' },
-		appendText: { dataName:'Versioned_x0020_Comments', getVersions:true },
+        appendText: { dataName:'Versioned_x0020_Comments', getVersions:true },
         editLink:   { dataFunc:function(objItem){ return '<a href="/sites/dev/Lists/Employees/DispForm.aspx?ID='+objItem.ID+'">View Emp</a>' } }
     },
     queryFilter:  'Salary gt 100000',
