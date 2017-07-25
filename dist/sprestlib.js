@@ -43,8 +43,8 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 (function(){
 	// APP VERSION/BUILD
 	var APP_VER = "1.0.0-beta";
-	var APP_BLD = "20170720";
-	var DEBUG = false; // (verbose mode/lots of logging)
+	var APP_BLD = "20170724";
+	var DEBUG = true; // (verbose mode/lots of logging)
 	// APP FUNCTIONALITY
 	var APP_FILTEROPS = {
 		"eq" : "==",
@@ -799,8 +799,10 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 				inObj = inObj || {};
 				// Deal with garbage here instead of in parse
 				if ( inObj == '' || inObj == [] ) inObj = {};
-				// `$filter` only accepts single quote (%27) - double-quote (%22) will fail
+				// Handle: `$filter` only accepts single quote (%27), double-quote (%22) will fail, so transform if needed
 				if ( inObj.queryFilter ) inObj.queryFilter = inObj.queryFilter.replace(/\"/gi,"'");
+
+				// TODO: check for dupe col names! ['Name','Name']
 
 				// STEP 2: Parse options/cols / Set Internal Arrays
 				{
@@ -861,45 +863,6 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 
 				// STEP 3: Start data fetch Promise chain
 				Promise.resolve()
-				.then(function(){
-					// PERF: Only query metadata when user requested append-text
-					if ( !inObj.fetchAppend ) return Promise.resolve();
-
-					// Fetch LIST metadata
-					return new Promise(function(resolve, reject) {
-						// STEP 1: Query SharePoint
-						$.ajax({
-							url: _urlBase+"?$select=Fields/Title,Fields/InternalName,Fields/CanBeDeleted,Fields/TypeAsString,Fields/SchemaXml,Fields/AppendOnly&$expand=Fields",
-							type: "GET",
-							cache: false,
-							headers: {"Accept":"application/json; odata=verbose"}
-						})
-						.done(function(data,textStatus){
-							// A: Get list GUID for use in XML query
-							listGUID = data.d.__metadata.id.split("guid'").pop().replace(/\'\)/g,'');
-
-							// B: Gather field metadata
-							(data.d.Fields.results || []).forEach(function(result,i){
-								for (var key in inObj.listCols) {
-									// DESIGN: inObj.listCols[key].dataName is *NOT REQD*
-									if ( inObj.listCols[key].dataName && inObj.listCols[key].dataName.split('/')[0] == result.InternalName ) {
-										inObj.listCols[key].dataType = result.TypeAsString;
-										inObj.listCols[key].dispName = ( inObj.listCols[key].dispName || result.Title ); // Fallback to SP.Title ("Display Name"]
-										inObj.listCols[key].isAppend = ( result.AppendOnly || false );
-										inObj.listCols[key].isNumPct = ( result.SchemaXml.toLowerCase().indexOf('percentage="true"') > -1 );
-									}
-								}
-							});
-							if (DEBUG) console.table( inObj.listCols );
-
-							// STEP 2: Resolve Promise
-							resolve();
-						})
-						.fail(function(jqXHR,textStatus,errorThrown){
-							reject({ 'jqXHR':jqXHR, 'textStatus':textStatus, 'errorThrown':errorThrown });
-						});
-					});
-				})
 				.then(function(){
 					return new Promise(function(resolve, reject) {
 						var objAjaxQuery = {
@@ -973,16 +936,21 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 							arrResults.forEach(function(result,idx){
 								// B.1: Create row object
 								var objRow = {};
-								var objId = 0;
+								var intID = 0;
 
 								// B.2: Capture `Id` and `__metadata` (if any)
 								if ( result.__metadata ) {
 									// Capture metadata
 									objRow['__metadata'] = result.__metadata;
 
-									// Capture this item's `Id` by parsing metadata (to avoid adding "Id," to the $select)
-									if ( result.__metadata.uri && result.__metadata.uri.indexOf('/Items(') > -1 ) {
-										objId = Number(result.__metadata.uri.split('/Items(').pop().replace(')',''));
+									// Grab item `ID` and list `GUID` if possible
+									if ( result.__metadata.uri ) {
+										if ( result.__metadata.uri.indexOf('/Items(') > -1 ) {
+											intID = Number(result.__metadata.uri.split('/Items(').pop().replace(')',''));
+										}
+										if ( !listGUID && result.__metadata.uri.indexOf("guid'") > -1 ) {
+											listGUID = result.__metadata.uri.split("guid'").pop().split("')/")[0];
+										}
 									}
 								}
 
@@ -1046,15 +1014,19 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 									else {
 										objRow[key] = ( APP_OPTS.cleanColHtml && col.listDataType == 'string' ? colVal.replace(/<div(.|\n)*?>/gi,'').replace(/<\/div>/gi,'') : colVal );
 									}
+
+									// B.3.3: Handle `getVersions`
+									// Results of an append-text query is an array of Note versions in desc order
+									if ( col.getVersions ) objRow[key] = [];
 								});
 
 								// 4: Set data
 								// 4.A: Result row
 								inObj.spArrData.push( objRow );
 								// 4.B: Create data object if we have ID (for lookups w/o spArrData.filter)
-								if ( objId ) {
-									inObj.spObjData[objId] = objRow;
-									inObj.spObjMeta[objId] = ( result.__metadata || {} );
+								if ( intID ) {
+									inObj.spObjData[intID] = objRow;
+									inObj.spObjMeta[intID] = ( result.__metadata || {} );
 								}
 							});
 
@@ -1067,33 +1039,39 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 					});
 				})
 				.then(function(){
-					var arrAppendColDatanames = [];
+					var arrAppendCols = [], arrAppendColNames = [];
 
-					// STEP 1: Check for any append cols that need to be queried
-					// Append cols were captured by `fetchAppend:true` option
-					$.each(inObj.listCols, function(key,col){ if ( col.isAppend ) arrAppendColDatanames.push( col.dataName ); });
+					// STEP 1: Gather any append cols that need to be queried
+					$.each(inObj.listCols, function(key,col){
+						if ( col.getVersions ) {
+							col.keyName = key; // Store this column's key to avoid complex (slow) filtering below when we need to save by this key name
+							arrAppendCols.push( col );
+							arrAppendColNames.push( col.dataName );
+						}
+					});
 
 					// STEP 2: Get data for any found cols
-					if ( arrAppendColDatanames.length ) {
+					if ( listGUID && arrAppendCols.length ) {
 						// STEP 1: Query SharePoint
 						// Convert our dataName array into a comma-delim string, then replace ',' with '%20' and our query string is constrcuted!
 						$.ajax({
 							url: APP_OPTS.baseUrl +"/_vti_bin/owssvr.dll?Cmd=Display&List="
 								+ "%7B"+ listGUID +"%7D"+"&XMLDATA=TRUE&IncludeVersions=TRUE"
-								+ '&Query=ID%20'+ arrAppendColDatanames.toString().replace(/\,/g,'%20') +'%20'
+								+ '&Query=ID%20'+ arrAppendColNames.toString().replace(/\,/g,'%20') +'%20'
 								+ "&SortField=Modified&SortDir=ASC"
 						})
 						.done(function(result,textStatus){
 							// Query is order by oldest->newest, so always capture the result and the last one captured will always be the most recent
 							$(result).find("z\\:row, row").each(function(i,row){
-								arrAppendColDatanames.forEach(function(dataName,idx){
-									var itemId = $(row).attr("ows_ID");
+								arrAppendCols.forEach(function(objCol,idx){
+									var intID = $(row).attr("ows_ID");
 
-									if ( $(row).attr("ows_"+dataName) ) {
-										// A: Set array data
-										inObj.spArrData.filter(function(item){ return item.Id == itemId })[0][dataName] = $(row).attr("ows_"+dataName);
-										// B: Set object data
-										if ( inObj.spObjData[itemId] ) inObj.spObjData[itemId][dataName] = $(row).attr("ows_"+dataName);
+									// NOTE: LOGIC: Versions doesnt filter like getItems, so we may get many more items than our dataset has
+									if ( inObj.spObjData[intID] && $(row).attr("ows_"+objCol.dataName) ) {
+										// Add this version to result array
+										inObj.spObjData[intID][objCol.keyName].push( $(row).attr("ows_"+objCol.dataName) );
+										// TODO: instead of strings, return { modifiedBy:'author', modified:'{ISODATE}', version:'blah' }
+										// TODO: implement my new logic that uses orderBy ASC, then uses arr to compare versions for 100% accuracy
 									}
 								});
 							});
@@ -1221,7 +1199,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 
 				// STEP 1: Param Setup
 				// A: Set our `Id` value (users may send an of 4 different cases), then remove as ID is not updateable in SP
-				var itemId = jsonData['ID'] || jsonData['Id'] || jsonData['iD'] || jsonData['id'];
+				var intID = jsonData['ID'] || jsonData['Id'] || jsonData['iD'] || jsonData['id'];
 				delete jsonData.ID; delete jsonData.Id; delete jsonData.iD; delete jsonData.id;
 				// B: DESIGN/OPTION: If no etag is provided, consider it a force (a faux {OPTION})
 				jsonData.__metadata = jsonData.__metadata || {};
@@ -1240,7 +1218,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 					// 2: Update item
 					sprLib.rest({
 						type   : "POST",
-						url    : _urlBase +"/items("+ itemId +")",
+						url    : _urlBase +"/items("+ intID +")",
 						data   : JSON.stringify(jsonData),
 						headers: {
 							"X-HTTP-Method"  : "MERGE",
@@ -1252,7 +1230,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 					.then(function(arrData){
 						// A: SP doesnt return anything for Merge/Update, so return original jsonData object so users can chain, etc.
 						// Populate both 'Id' and 'ID' to mimic SP2013
-						jsonData.Id = itemId; jsonData.ID = itemId;
+						jsonData.Id = intID; jsonData.ID = intID;
 
 						// B: Increment etag (if one was provided, otherwise, we cant know what it is without querying for it!)
 						if ( jsonData.__metadata.etag ) jsonData.__metadata.etag = '"'+ (Number(jsonData.__metadata.etag.replace(/[\'\"]+/gi, ''))+1) +'"';
@@ -1295,7 +1273,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 
 				// STEP 1: Param Setup
 				// A: Set our `Id` value (users may send an of 4 different cases), then remove as ID is not updateable in SP
-				var itemId = jsonData['ID'] || jsonData['Id'] || jsonData['iD'] || jsonData['id'];
+				var intID = jsonData['ID'] || jsonData['Id'] || jsonData['iD'] || jsonData['id'];
 				delete jsonData.ID; delete jsonData.Id; delete jsonData.iD; delete jsonData.id;
 				// B: DESIGN/OPTION: If no etag is provided, consider it a force (a faux {OPTION})
 				jsonData.__metadata = jsonData.__metadata || {};
@@ -1314,7 +1292,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 					// 2: Update item
 					sprLib.rest({
 						type   : "DELETE",
-						url    : _urlBase +"/items("+ itemId +")",
+						url    : _urlBase +"/items("+ intID +")",
 						headers: {
 							"X-HTTP-Method"  : "MERGE",
 							"Accept"         : "application/json;odata=verbose",
@@ -1324,7 +1302,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 					})
 					.then(function(){
 						// SP doesnt return anything for Deletes, but SpRestLib returns ID
-						resolve( itemId );
+						resolve( intID );
 					})
 					.catch(function(strErr){
 						reject( strErr );
@@ -1348,21 +1326,21 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 		*
 		* @return {number} Return the `id` just deleted.
 		*/
-		_newList.recycle = function(itemId) {
+		_newList.recycle = function(intID) {
 			return new Promise(function(resolve,reject) {
 				// FIRST: Param checks
-				if ( !itemId || typeof itemId.toString() !== 'string' ) reject("ID expected! Ex: `recycle(99)`");
+				if ( !intID || typeof intID.toString() !== 'string' ) reject("ID expected! Ex: `recycle(99)`");
 
 				// STEP 1: Recycle item
 				sprLib.rest({
 					type   : "POST",
-					url    : _urlBase +"/items("+ itemId.toString() +")/recycle()",
+					url    : _urlBase +"/items("+ intID.toString() +")/recycle()",
 					headers    : { "Accept":"application/json; odata=verbose", "X-RequestDigest":$("#__REQUESTDIGEST").val() }
 				})
 				.then(function(){
 					// SP returns the item guid for Recycle operations
 					// EX: {"d":{"Recycle":"ed504e3d-f8ab-4dd4-bb22-6ddaa78bd117"}}
-					resolve( Number(itemId) );
+					resolve( Number(intID) );
 				})
 				.catch(function(strErr){
 					reject( strErr );
@@ -1608,25 +1586,26 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 				}
 
 				// B:
-				$.ajax({
+				sprLib.rest({
 					url    : strDynUrl + "$select=Id,Title,Email,LoginName,IsSiteAdmin,PrincipalType",
+					headers: { "Accept":"application/json;odata=verbose" },
 					type   : "GET",
-					cache  : false,
-					headers: {"Accept":"application/json; odata=verbose"}
+					cache  : false
 				})
-				.done(function(data, textStatus) {
+				.then(function(arrData){
 					var objUser = {};
 
-					// A: Gather user data
-					$.each((data && data.d && data.d.results ? data.d.results[0] : (data && data.d ? data.d : [])), function(key,result){
-						objUser[key] = result;
+					// A: Gather user properties
+					( arrData && Array.isArray(arrData) && arrData[0] && Object.keys(arrData[0]).length > 0 ? Object.keys(arrData[0]) : [] )
+					.forEach(function(key,idx){
+						objUser[key] = arrData[0][key];
 					});
 
 					// B: Resolve results - if user was not found, an empty object is the correct result
 					resolve( objUser );
 				})
-				.fail(function(jqXHR, textStatus, errorThrown) {
-					reject( parseErrorMessage(jqXHR, textStatus, errorThrown) );
+				.catch(function(strErr){
+					reject( strErr );
 				});
 			});
 		}
@@ -1643,10 +1622,10 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 		newUser.groups = function() {
 			return new Promise(function(resolve, reject) {
 				sprLib.rest({
-					type   : "GET",
 					url    : strDynUrl + "$select=Groups/Id,Groups/Title,Groups/Description,Groups/LoginName,Groups/OwnerTitle&$expand=Groups",
-					cache  : false,
-					headers: { "Accept":"application/json;odata=verbose" }
+					headers: { "Accept":"application/json;odata=verbose" },
+					type   : "GET",
+					cache  : false
 				})
 				.then(function(arrData){
 					var arrGroups = [];
