@@ -913,10 +913,8 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 						}
 
 						// STEP 3: Send AJAX REST query
-						$.ajax(objAjaxQuery)
-						.done(function(data,textStatus){
-							var arrResults = data.d.results || data || [];
-
+						sprLib.rest(objAjaxQuery)
+						.then(function(arrResults){
 							// A: Add all cols is none provided (aka:"fetch all")
 							if ( (!inObj.listCols || Object.keys(inObj.listCols).length == 0) && arrResults.length > 0 ) {
 								var objListCols = {};
@@ -1033,8 +1031,8 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 							// LAST:
 							resolve();
 						})
-						.fail(function(jqXHR,textStatus,errorThrown){
-							reject({ 'jqXHR':jqXHR, 'textStatus':textStatus, 'errorThrown':errorThrown });
+						.catch(function(strErr){
+							reject( strErr );
 						});
 					});
 				})
@@ -1054,52 +1052,54 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 					if ( listGUID && arrAppendCols.length ) {
 						// STEP 1: Query SharePoint
 						// Convert our dataName array into a comma-delim string, then replace ',' with '%20' and our query string is constrcuted!
-						$.ajax({
+						sprLib.rest({
 							url: APP_OPTS.baseUrl +"/_vti_bin/owssvr.dll?Cmd=Display&List="
 								+ "%7B"+ listGUID +"%7D"+"&XMLDATA=TRUE&IncludeVersions=TRUE"
 								+ "&Query=ID%20"+ arrAppendColNames.toString().replace(/\,/g,'%20') +"%20"
 								+ "Modified%20Editor%20"
 								+ "&SortField=Modified&SortDir=ASC"
 						})
-						.done(function(result,textStatus){
-							// Query is order by oldest->newest, so always capture the result and the last one captured will always be the most recent
-							$(result).find("z\\:row, row").each(function(i,row){
-								arrAppendCols.forEach(function(objCol,idx){
-									var intID = $(row).attr("ows_ID");
-									var prvComm = "";
+						.then(function(result){
+							if ( result && result[0] && result[0].documentElement ) {
+								// Query is order by oldest->newest, so always capture the result and the last one captured will always be the most recent
+								$(result[0].documentElement).find("z\\:row, row").each(function(i,row){
+									arrAppendCols.forEach(function(objCol,idx){
+										var intID = $(row).attr("ows_ID");
+										var prvComm = "";
 
-									// NOTE: LOGIC: Versions doesnt filter like getItems, so we may get many more items than our dataset has
-									if ( inObj.spObjData[intID] && $(row).attr("ows_"+objCol.dataName) ) {
-										var rowNote = ($(row).attr('ows_'+objCol.dataName) || '');
-										if ( rowNote ) {
-											if ( rowNote != prvComm ) {
-												inObj.spObjData[intID][objCol.keyName].push({
-													verDate: new Date($(row).attr('ows_Modified')).toISOString(),
-													verName: $(row).attr('ows_Editor').substring($(row).attr('ows_Editor').indexOf("#")+1),
-													verText: rowNote
-												});
-												prvComm = rowNote;
-											}
-											else {
-												// When note content is the same, replace the previous version
-												// (so author and date are correct - older ones are ModifiedBy folks who Modified *OTHER* fields! - oldest is true author!)
-												inObj.spObjData[intID][objCol.keyName].pop();
-												inObj.spObjData[intID][objCol.keyName].push({
-													verDate: new Date($(row).attr('ows_Modified')).toISOString(),
-													verName: $(row).attr('ows_Editor').substring($(row).attr('ows_Editor').indexOf("#")+1),
-													verText: rowNote
-												});
+										// NOTE: LOGIC: Versions doesnt filter like getItems, so we may get many more items than our dataset has
+										if ( inObj.spObjData[intID] && $(row).attr("ows_"+objCol.dataName) ) {
+											var rowNote = ($(row).attr('ows_'+objCol.dataName) || '');
+											if ( rowNote ) {
+												if ( rowNote != prvComm ) {
+													inObj.spObjData[intID][objCol.keyName].push({
+														verDate: new Date($(row).attr('ows_Modified')).toISOString(),
+														verName: $(row).attr('ows_Editor').substring($(row).attr('ows_Editor').indexOf("#")+1),
+														verText: rowNote
+													});
+													prvComm = rowNote;
+												}
+												else {
+													// When note content is the same, replace the previous version
+													// (so author and date are correct - older ones are ModifiedBy folks who Modified *OTHER* fields! - oldest is true author!)
+													inObj.spObjData[intID][objCol.keyName].pop();
+													inObj.spObjData[intID][objCol.keyName].push({
+														verDate: new Date($(row).attr('ows_Modified')).toISOString(),
+														verName: $(row).attr('ows_Editor').substring($(row).attr('ows_Editor').indexOf("#")+1),
+														verText: rowNote
+													});
+												}
 											}
 										}
-									}
+									});
 								});
-							});
+							}
 
 							// LAST: Return List data
 							resolve(inObj.spArrData);
 						})
-						.fail(function(jqXHR,textStatus,errorThrown){
-							reject({ 'jqXHR':jqXHR, 'textStatus':textStatus, 'errorThrown':errorThrown });
+						.catch(function(strErr){
+							reject( strErr );
 						});
 					}
 					else {
