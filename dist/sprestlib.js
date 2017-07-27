@@ -43,8 +43,8 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 (function(){
 	// APP VERSION/BUILD
 	var APP_VER = "1.0.0-beta";
-	var APP_BLD = "20170724";
-	var DEBUG = true; // (verbose mode/lots of logging)
+	var APP_BLD = "20170726";
+	var DEBUG = false; // (verbose mode/lots of logging)
 	// APP FUNCTIONALITY
 	var APP_FILTEROPS = {
 		"eq" : "==",
@@ -1005,7 +1005,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 									}
 
 									// B.3.2: Set value for this key
-									// NOTE: Not all values can be taken at return value (dates->Date objects, etc.), so convert when needed
+									// If dataType is known, then convert
 									if ( col.dataType == 'DateTime' ) {
 										objRow[key] = new Date(colVal);
 									}
@@ -1406,7 +1406,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 			inOpt.spArrData = [];
 
 			// STEP 2: Setup vars
-			var strExpands = "";
+			var arrExpands = [], strExpands = "";
 			var objAjaxQuery = {
 				url    : inOpt.url,
 				type   : inOpt.type,
@@ -1425,11 +1425,11 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 			else if ( inOpt.url.indexOf('/')     == 0 && !inOpt.queryCols )	objAjaxQuery.url = inOpt.url;
 			else if ( inOpt.url.indexOf('http')  == 0 &&  inOpt.queryCols )	objAjaxQuery.url = inOpt.url + "?$select=";
 			else if ( inOpt.url.indexOf('http')  == 0 && !inOpt.queryCols )	objAjaxQuery.url = inOpt.url;
-			// else: any relative URLs wouldve been set at `objAjaxQuery` init above
+			// else: any relative URLs would have been set at `objAjaxQuery` init above
 
 			// STEP 4: Continue building URL: Some REST API calls can contain select columns (`queryCols`)
 			if ( objAjaxQuery.url.indexOf('$select') > -1 ) {
-				// `listCols` can be: string, array of strings, or objects
+				// `queryCols` can be: string, array of strings, or objects
 				// A: Convert single string column into an array for use below
 				if ( typeof inOpt.queryCols === 'string' ) inOpt.queryCols = [ inOpt.queryCols ];
 
@@ -1446,14 +1446,20 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 
 				// C: Add columns
 				if ( inOpt.queryCols && typeof inOpt.queryCols === 'object' ) {
+					// A: Add columns
 					$.each(inOpt.queryCols, function(key,col){
 						if ( !col.dataName ) return; // Skip columns without a 'dataName' key
-						// A:
+						// 1:
 						if ( objAjaxQuery.url.substring(objAjaxQuery.url.length-1) == '=' ) objAjaxQuery.url += col.dataName;
 						else objAjaxQuery.url += ( objAjaxQuery.url.lastIndexOf(',') == objAjaxQuery.url.length-1 ? col.dataName : ','+col.dataName );
-						// B:
-						// FIXME: this allows adding same col name - use `arrExpands`-style from getItems
-						if ( col.dataName.indexOf('/') > -1 ) strExpands += ( strExpands == '' ? col.dataName.substring(0,col.dataName.indexOf('/')) : ','+col.dataName.substring(0,col.dataName.indexOf('/')) );
+						// 2:
+						if ( col.dataName.indexOf('/') > -1 ) {
+							var strFieldName = col.dataName.substring(0, col.dataName.indexOf('/'));
+							if ( arrExpands.indexOf(strFieldName) == -1 ) {
+								arrExpands.push( strFieldName );
+								strExpands += (strExpands == '' ? '' : ',') + strFieldName;
+							}
+						}
 					});
 				}
 
@@ -1510,10 +1516,24 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 								}
 								// Handle Lookup/Person/Url/etc. Ex: 'Manager/Title'
 								else if ( col.dataName && col.dataName.indexOf('/') > -1 ) {
+									// A: Split lookup info object/field
 									arrCol = col.dataName.split('/');
-									if ( result[ arrCol[0] ].__metadata ) delete result[ arrCol[0] ].__metadata;
+									// B: Remove extraneous metadata
+									if ( result[arrCol[0]].__metadata ) delete result[arrCol[0]].__metadata;
+									// B: Same for deferred. NOTE: Multi-Person fields return only a `{__deferred:{uri:'http...'}}` result when field is empty (ugh!)
+									if ( result[arrCol[0]].__deferred ) delete result[arrCol[0]].__deferred;
+									// C: Capture value
+									// CASE 1: `dataName` was used - in this case return the actual field user asked for
+									// Detect use of names listCols by comparing key to dataName
+									if ( key != arrCol[0] && key != col.dataName ) colVal = result[arrCol[0]][arrCol[1]];
+									// CASE 2: Other - in this case return the complete object (Ex: { Title:'Manager' })
+									// IMPORTANT: This de facto returns all the *other* fields queried. Eg: 'Manager/Id' and 'Manager/Title' were in cols
+									// We want to return a *single* object with these 2 elements, so they can be derefereced using 'Manger.Title' etc.
 									// Capture any-and-all columns returned (aside from removal of above)
-									colVal = result[ arrCol[0] ];
+									else colVal = result[arrCol[0]];
+
+									// D: Value clean-up (things like empty multi-person fields may end up being `{}`)
+									if ( typeof colVal === 'object' && !Array.isArray(colVal) && Object.keys(colVal).length == 0 ) colVal = [];
 								}
 								else if ( col.dataName ) {
 									arrCol = col.dataName.split('/');
@@ -1523,7 +1543,6 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 								// DESIGN: Not all values can be taken at return value - things like dates have to be turned into actual Date objects
 								if ( col.dataType == 'DateTime' ) objRow[key] = new Date(colVal);
 								else objRow[key] = ( APP_OPTS.cleanColHtml && col.listDataType == 'string' ? colVal.replace(/<div(.|\n)*?>/gi,'').replace(/<\/div>/gi,'') : colVal );
-								// TODO-1.0: ^^ results like 'Account/Title' will be created above (!)
 							});
 						}
 						else {
