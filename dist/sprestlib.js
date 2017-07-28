@@ -1784,9 +1784,9 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 
 	// API: NODEJS: Setup
 	sprLib.nodeConfig = function nodeConfig(inOpts){
-		// TODO: reality check, etc.
-		APP_OPTS.nodeCookie = inOpts.cookie;
-		APP_OPTS.nodeServer = inOpts.server;
+		inOpts = (inOpts && typeof inOpts === 'object' ? inOpts : {});
+		APP_OPTS.nodeCookie = inOpts.cookie || '';
+		APP_OPTS.nodeServer = inOpts.server || '';
 	}
 
 	/* ===============================================================================================
