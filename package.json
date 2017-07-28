@@ -9,6 +9,7 @@
 	"homepage": "https://gitbrent.github.io/SpRestLib/",
 	"license": "MIT",
 	"dependencies": {
+		"https": ">=1.0.0",
 		"jquery-node": ">=0.2.0",
 		"promise": ">=6.1.0"
 	},
