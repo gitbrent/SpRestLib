@@ -43,7 +43,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 (function(){
 	// APP VERSION/BUILD
 	var APP_VER = "1.0.0-beta";
-	var APP_BLD = "20170726";
+	var APP_BLD = "20170727";
 	var DEBUG = false; // (verbose mode/lots of logging)
 	// APP FUNCTIONALITY
 	var APP_FILTEROPS = {
@@ -100,7 +100,9 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 		language:        'en',
 		maxRetries:      5,
 		maxRows:         1000,
-		retryAfter:      1000
+		retryAfter:      1000,
+		nodeServer:      '',
+		nodeCookie:      ''
 	};
 	var APP_CSS = {
 		updatingBeg: { 'background-color':'#e2e9ec' },
@@ -1477,12 +1479,58 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 			}
 
 			// STEP 5: Execute REST call
-			$.ajax(objAjaxQuery)
-			.done(function(data,textStatus){
-				var arrResults = [];
+			Promise.resolve()
+			.then(function(){
+				return new Promise(function(resolve, reject) {
+					if ( NODEJS ) {
+						objAjaxQuery.headers["Cookie"] = APP_OPTS.nodeCookie;
+						delete objAjaxQuery.headers["X-RequestDigest"];
+						var options = {
+							hostname: APP_OPTS.nodeServer,
+							path:     objAjaxQuery.url,
+							method:   objAjaxQuery.type,
+							headers:  objAjaxQuery.headers
+						};
+						var request = https.request(options, function(res){
+							var rawData = '';
+							res.setEncoding('utf8');
+							res.on('data', function(chunk){ rawData += chunk; });
+							res.on('end', function(){
+								resolve(rawData);
+								// TODO: bad URL is returned as
+								/*
+								<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN""http://www.w3.org/TR/html4/strict.dtd">
+								<HTML><HEAD><TITLE>Bad Request</TITLE>
+								<META HTTP-EQUIV="Content-Type" Content="text/html; charset=us-ascii"></HEAD>
+								<BODY><h2>Bad Request - Invalid URL</h2>
+								<hr><p>HTTP Error 400. The request URL is invalid.</p>
+								</BODY></HTML>
+								*/
+							});
+							res.on('error', function(e){
+								// TODO: 20170628: renewSecurityToken when detected
+								// TODO: ? reject( parseErrorMessage(jqXHR, textStatus, errorThrown) + "\n\nURL used: " + objAjaxQuery.url );
+								reject(e);
+							});
+						});
+						request.end();
+					}
+					else {
+						$.ajax(objAjaxQuery)
+						.done(function(data,textStatus){
+							resolve(data);
+						})
+						.fail(function(jqXHR,textStatus,errorThrown){
+							// TODO: 20170628: renewSecurityToken when detected
+							reject( parseErrorMessage(jqXHR, textStatus, errorThrown) + "\n\nURL used: " + objAjaxQuery.url );
+						});
+					}
+				});
+			})
+			.then(function(data){
+				data = ( typeof data === 'string' && data.indexOf('{') == 0 ? JSON.parse(data) : data );
 
 				// A: Depending upon which REST endpoint used, SP can return results in various ways... (!)
-
 				// data.d.results is an [] of {}: [ {Title:'Brent Ely', Email:'Brent.Ely@microsoft.com'}, {}, {} ]
 				// NOTE: Test for results being object because SP can return an entire HTML page as a result in some error cases.
 				if ( data && data.d && data.d.results && typeof data.d.results === 'object' ) {
@@ -1566,9 +1614,9 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 				// C:
 				resolve( inOpt.spArrData );
 			})
-			.fail(function(jqXHR,textStatus,errorThrown){
+			.catch(function(strErr){
 				// TODO: 20170628: renewSecurityToken when detected
-				reject( parseErrorMessage(jqXHR, textStatus, errorThrown) + "\n\nURL used: " + objAjaxQuery.url );
+				reject(strErr);
 			});
 		});
 	}
@@ -1734,6 +1782,13 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 		return APP_VER;
 	}
 
+	// API: NODEJS: Setup
+	sprLib.nodeConfig = function nodeConfig(inOpts){
+		// TODO: reality check, etc.
+		APP_OPTS.nodeCookie = inOpts.cookie;
+		APP_OPTS.nodeServer = inOpts.server;
+	}
+
 	/* ===============================================================================================
 	|
 	#######           ######                          #
@@ -1759,6 +1814,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 if ( NODEJS ) {
 	// A: Load 2 depdendencies
 	var $ = require("jquery-node");
+	var https = require('https');
 
 	// B: Export module
 	module.exports = sprLib;
