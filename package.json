@@ -10,7 +10,7 @@
 	"license": "MIT",
 	"dependencies": {
 		"https": ">=1.0.0",
-		"jquery-node": ">=0.2.0",
+		"jquery-node": "^0.3.0",
 		"promise": ">=6.1.0"
 	},
 	"main": "dist/sprestlib.js",
