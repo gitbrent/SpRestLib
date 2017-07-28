@@ -22,14 +22,15 @@ if (process.argv.length < 4) {
 // SETUP: Load sprestlib and show version to verify everything loaded correctly
 // ============================================================================
 var https = require('https'); // this Library is the basis for the remote auth solution
-var sprLib = require('../dist/sprestlib.js'); // for LOCAL TESTING
 //var sprLib = require("sprestlib");
+var sprLib = require('../dist/sprestlib.js'); // for LOCAL TESTING
 
 // Lets go
-console.log(`Starting demo...`);
-console.log(` * sprestlib version: ${sprLib.version()}\n`); // Loaded okay?
+console.log('\nStarting demo...');
+console.log('================================================================================');
+console.log(`> SpRestLib version: ${sprLib.version()}\n`); // Loaded okay?
 
-// Office365 SETUP
+// Office365/On-Prem/Hosted Vars
 var SP_USER = process.argv[2];
 var SP_PASS = process.argv[3];
 var SP_URL  = process.argv[4];
@@ -152,8 +153,8 @@ Promise.resolve()
 	//return sprLib.list('Employees').cols();
 })
 .then(function(objUser){
-	console.log('sprLib.user().info()');
-	console.log('--------------------');
+	console.log('\nTEST 1: sprLib.user().info()');
+	console.log('----------------------------');
 	//console.log(objUser);
 	console.log('Id.........: '+ objUser.Id);
 	console.log('Title......: '+ objUser.Title);
@@ -161,8 +162,8 @@ Promise.resolve()
 	console.log('Email......: '+ objUser.Email);
   })
 .then(function(){
-	console.log(' ');
-	console.log('... Node Demo Complete.');
+	console.log('\n================================================================================');
+	console.log('...demo complete.\n');
 })
 .catch(function(strErr){
 	console.error('\n!!! ERROR !!!');
