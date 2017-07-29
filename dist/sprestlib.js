@@ -43,7 +43,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 (function(){
 	// APP VERSION/BUILD
 	var APP_VER = "1.0.0-beta";
-	var APP_BLD = "20170727";
+	var APP_BLD = "20170728";
 	var DEBUG = false; // (verbose mode/lots of logging)
 	// APP FUNCTIONALITY
 	var APP_FILTEROPS = {
@@ -54,7 +54,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 		"lt" : "<",
 		"lte": "<="
 	};
-	// APP MESSAGE STRINGS (i18n Internationalization)
+	// APP MESSAGE STRINGS (Internationalization)
 	var APP_STRINGS = {
 		"de": {
 			"false" : "Nein",
@@ -87,22 +87,22 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 			"true"  : "真実"
 		}
 	};
+	// GLOBAL VARS
+	var gRetryCounter = 0;
 
-	// -----------------------------
 	// USER-CONFIGURABLE: UI OPTIONS
 	// -----------------------------
-	// TODO: i18n work
 	var APP_OPTS = {
 		baseUrl:         '..',
 		busySpinnerHtml: '<div class="sprlib-spinner"><div class="sprlib-bounce1"></div><div class="sprlib-bounce2"></div><div class="sprlib-bounce3"></div></div>',
 		cleanColHtml:    true,
 		currencyChar:    '$',
 		language:        'en',
-		maxRetries:      5,
+		maxRetries:      2,
 		maxRows:         1000,
-		retryAfter:      1000,
+		nodeCookie:      '',
 		nodeServer:      '',
-		nodeCookie:      ''
+		retryAfter:      1000
 	};
 	var APP_CSS = {
 		updatingBeg: { 'background-color':'#e2e9ec' },
@@ -197,7 +197,9 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 			// Use SP.js UpdateFormDigest function if available
 			// @see http://www.wictorwilen.se/sharepoint-2013-how-to-refresh-the-request-digest-value-in-javascript
 			// UpdateFormDigest() is syncronous per this SharePoint MVP, so just run and return
-			UpdateFormDigest(_spPageContextInfo.webServerRelativeUrl, _spFormDigestRefreshInterval);
+			// DEFAULT: UpdateFormDigest(_spPageContextInfo.webServerRelativeUrl, _spFormDigestRefreshInterval);
+			// Use a very short refresh interval to force token renewal (otherwise, unless it's been 30 min or whatever, no new token will be provided by SP)
+			UpdateFormDigest(_spPageContextInfo.webServerRelativeUrl, 10);
 			resolve();
 		});
 	}
@@ -1176,17 +1178,6 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 						resolve( jsonData );
 					})
 					.catch(function(strErr){
-						// TODO: Is there way to do this without a retryCnt??, otherwise: add,increment,clear
-						/*
-						try {
-						var strErrCode = jqXHR.status.toString();
-						var strErrText = "("+ jqXHR.status +") "+ textStatus +": "+ errorThrown;
-						var strSpeCode = $.parseJSON(jqXHR.responseText).error['code'].split(',')[0];
-
-						// CASE '403': SP2013-2016 Expired Token error: Microsoft.SharePoint.SPException (-2130575252): "X-RequestDigest expired form digest"
-						if ( strErrCode == '403' && strSpeCode == '-2130575252' ) doRenewDigestToken();
-						} catch(ex) {}
-						*/
 						reject( strErr );
 					});
 				})
@@ -1615,8 +1606,28 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 				resolve( inOpt.spArrData );
 			})
 			.catch(function(strErr){
-				// TODO: 20170628: renewSecurityToken when detected
-				reject(strErr);
+				// ROBUST: Renew token when needed (use `gRetryCounter` to prevent race condition)
+				// CASE '403': SP2013-2016 Expired Token error: Microsoft.SharePoint.SPException (-2130575252): "X-RequestDigest expired form digest"
+				// var strErrCode = jqXHR.status.toString();
+				// var strSpeCode = $.parseJSON(jqXHR.responseText).error['code'].split(',')[0];
+				// INFO: ( strErrCode == '403' && strSpeCode == '-2130575252' )
+				if ( !NODEJS && strErr.indexOf('(403)') > -1 && gRetryCounter <= APP_OPTS.maxRetries ) {
+					Promise.resolve()
+					.then(function(){
+						return sprLib.renewSecurityToken();
+					})
+					.then(function(){
+						if (DEBUG) console.log('err-403: token renewed');
+						// Some operations (ex: CRUD) will include the token value in header. It must be refreshed as well (or the new tolem is pointless!)
+						if ( inOpt.headers && inOpt.headers['X-RequestDigest'] ) inOpt.headers['X-RequestDigest'] = $("#__REQUESTDIGEST").val();
+						gRetryCounter++;
+						sprLib.rest(inOpt);
+					});
+				}
+				else {
+					gRetryCounter = 0;
+					reject(strErr);
+				}
 			});
 		});
 	}
