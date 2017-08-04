@@ -510,6 +510,7 @@ Omitting options will return information about the current user, otherwise, the 
 | :------- | :------- | :-------- | :-------------------- | :---------------------------------------------------- |
 | `id`     | number   |           | user id               | user id to query. Ex: `{id:99}`                       |
 | `email`  | string   |           | user email address    | user email to query. Ex: `{email:'brent@github.com'}` |
+| `login`  | string   |           | user login name       | user loginName to query. Ex: `{login:'i:0#.f|membership|brent@github.com'}` |
 | `title`  | string   |           | user title            | user title to query. Ex: `{title:'Brent Ely'}`        |
 
 ### Get User Information (`SPUser`)
