@@ -43,7 +43,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 (function(){
 	// APP VERSION/BUILD
 	var APP_VER = "1.0.0-beta";
-	var APP_BLD = "20170728";
+	var APP_BLD = "20170803";
 	var DEBUG = false; // (verbose mode/lots of logging)
 	// APP FUNCTIONALITY
 	var APP_FILTEROPS = {
@@ -1659,9 +1659,10 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 		// ....: (Users will need SP-Enterprise for UserProfiles service to work)
 		// NOTE: `_api/Web/GetUserById()` for non-existant users results in a heinous error 500 that chokes jQuery.ajax.fail(),
 		// ....: so dont use it, or check user id with `siteusers?$filter` first!
-		if      ( inOpt && inOpt['id']    ) strDynUrl = APP_OPTS.baseUrl+"/_api/Web/siteusers?$filter=Id%20eq%20"+       inOpt['id']    +"&";
-		else if ( inOpt && inOpt['email'] ) strDynUrl = APP_OPTS.baseUrl+"/_api/web/siteusers?$filter=Email%20eq%20%27"+ inOpt['email'] +"%27&";
-		else if ( inOpt && inOpt['title'] ) strDynUrl = APP_OPTS.baseUrl+"/_api/web/siteusers?$filter=Title%20eq%20%27"+ inOpt['title'] +"%27&";
+		if      ( inOpt && inOpt['id']    ) strDynUrl = APP_OPTS.baseUrl+"/_api/Web/siteusers?$filter=Id%20eq%20"+           inOpt['id']    +"&";
+		else if ( inOpt && inOpt['email'] ) strDynUrl = APP_OPTS.baseUrl+"/_api/web/siteusers?$filter=Email%20eq%20%27"+     inOpt['email'] +"%27&";
+		else if ( inOpt && inOpt['login'] ) strDynUrl = APP_OPTS.baseUrl+"/_api/web/siteusers?$filter=LoginName%20eq%20%27"+ inOpt['login'].replace(/#/g,'%23') +"%27&";
+		else if ( inOpt && inOpt['title'] ) strDynUrl = APP_OPTS.baseUrl+"/_api/web/siteusers?$filter=Title%20eq%20%27"+     inOpt['title'] +"%27&";
 
 		/**
 		* Get user info: (`Id`, `Email`, `IsSiteAdmin`, `LoginName`, `PrincipalType`, `Title`)
@@ -1677,7 +1678,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 		newUser.info = function() {
 			return new Promise(function(resolve, reject) {
 				// A: Handle case when options have empty//null/undef params
-				if ( inOpt && !inOpt['id'] && !inOpt['email'] && !inOpt['title'] ) {
+				if ( inOpt && !inOpt['id'] && !inOpt['email'] && !inOpt['login'] && !inOpt['title'] ) {
 					resolve( {} );
 					return;
 				}
