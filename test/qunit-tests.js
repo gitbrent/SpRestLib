@@ -2,7 +2,7 @@
  * NAME: qunit-test.js
  * DESC: tests for qunit-test.html (coded to my O365 Dev Site - YMMV)
  * AUTH: https://github.com/gitbrent/
- * DATE: Jul 20, 2017
+ * DATE: Aug 07, 2017
  *
  * HOWTO: Generate text tables for README etc.:
  * sprLib.list('Employees').getItems(['Id', 'Name', 'Badge_x0020_Number']).then(function(arrData){ console.log(getAsciiTableStr(arrData)) });
@@ -1145,7 +1145,7 @@ QUnit.module( "USER Methods" );
 	sprLib.user().info()
 	.then(function(objUser){ gObjCurrUser = objUser })
 	.then(function(){
-		['', {id:gObjCurrUser.Id}, {title:gObjCurrUser.Title}, {email:gObjCurrUser.Email}]
+		[ {id:gObjCurrUser.Id}, {email:gObjCurrUser.Email}, {login:gObjCurrUser.LoginName}, {title:gObjCurrUser.Title} ]
 		.forEach(function(param,idx){
 			QUnit.test('sprLib.user('+ JSON.stringify(param) +').info()', function(assert){
 				var done = assert.async();
@@ -1177,7 +1177,7 @@ QUnit.module( "USER Methods" );
 			});
 		});
 
-		[ {id:999}, {email:'junk@email.com'}, {title:'totally not a real name'} ]
+		[ '', {}, {id:999}, {email:'junk@email.com'}, {login:'totally not a real login'}, {title:'totally not a real name'} ]
 		.forEach(function(param,idx){
 			QUnit.test('sprLib.user('+ JSON.stringify(param) +').info()', function(assert){
 				var done = assert.async();
@@ -1195,7 +1195,7 @@ QUnit.module( "USER Methods" );
 				// TEST:
 				sprLib.user(param).groups()
 				.then(function(arrGroups){
-					assert.ok( arrGroups.length == 0, "arrGroups length == 0: "+ arrGroups.length );
+					assert.ok( arrGroups.length == 0, "arrGroups length == 0: "+ arrGroups.length +" - "+ arrGroups.toString() );
 					done();
 				});
 			});
