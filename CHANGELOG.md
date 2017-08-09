@@ -1,9 +1,11 @@
 # Change Log
 
-## [v1.0.0](https://github.com/gitbrent/sprestlib/tree/v1.0.0) (2017-07-xx)
+## [v1.0.0](https://github.com/gitbrent/sprestlib/tree/v1.0.0) (2017-08-xx)
 [Full Changelog](https://github.com/gitbrent/sprestlib/compare/v0.12.0...v1.0.0)
 
 **Implemented Enhancements:**
+- Added ability to lookup users by `login`
+- Node connectivity to SharePoint (Office 365) works now
 - Last bit of cleanup work to arrive at v1.0.0
 
 ## [v0.12.0](https://github.com/gitbrent/sprestlib/tree/v0.12.0) (2017-07-05)
