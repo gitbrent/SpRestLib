@@ -305,7 +305,7 @@ var sprLib = require("sprestlib");
 </ul>
 <pre><code class="language-javascript">sprLib.list('Employees').getItems({
     listCols: {
-		id:       { dataName:'Id'                 },
+        id:       { dataName:'Id'                 },
         empName:  { dataName:'Name'               },
         badgeNum: { dataName:'Badge_x0020_Number' },
         editLink: { dataFunc:function(objItem){ return '&lt;a href="../DispForm.aspx?ID='+objItem.Id +'"&gt;View Item&lt;/a&gt;' } }
@@ -327,6 +327,31 @@ var sprLib = require("sprestlib");
 | [object Object] | 291 | Hal Jordan  |  1496451 | &lt;a href="../DispForm.aspx?ID=291"&gt;View Item&lt;/a&gt; |
 | [object Object] | 292 | Barry Allen |  1496452 | &lt;a href="../DispForm.aspx?ID=292"&gt;View Item&lt;/a&gt; |
 '--------------------------------------------------------------------------------------------------'
+</code></pre>
+</div>
+
+<h4>Get complete versioned history for an Append Text/Versioned Multiline Text Field</h4>
+<ul>
+	<li>Using <code>getVersions</code> option to get the append text/versioned history for a column</li>
+</ul>
+<pre><code class="language-javascript">sprLib.list('Employees').getItems({
+    listCols: {
+        id:         { dataName:'Id' },
+        appendText: { dataName:'Versioned_x0020_Comments', getVersions:true }
+    },
+    queryFilter: 'ID eq 99'
+})
+.then(function(arrData){ console.table(arrData) })
+.catch(function(errMsg){ console.error(errMsg) });
+</code></pre>
+
+<h4>Results</h4>
+<div class="result">
+<pre><code>.------------------------------------------------------------------------------------------------------------------------------.
+|   __metadata    | id  |                                              appendText                                              |
+|-----------------|-----|------------------------------------------------------------------------------------------------------|
+| [object Object] | 287 | [{"verDate":"2017-07-24T03:49:58.000Z","verName":"Brent Ely","verText":"adding version to history"}] |
+'------------------------------------------------------------------------------------------------------------------------------'
 </code></pre>
 </div>
 					</div>
