@@ -72,6 +72,9 @@ items (CRUD), execute REST calls, and gather user/group information.
     - [Data Binding Options](#data-binding-options)
       - [Examples](#examples-1)
   - [Utility Methods](#utility-methods)
+- [Node.js and SharePoint Online](#nodejs-and-sharepoint-online)
+  - [Connect To Office 365/SharePoint Online With Node.js](#connect-to-office-365sharepoint-online-with-nodejs)
+    - [Demo](#demo)
 - [Async Operations via Promises](#async-operations-via-promises)
   - [(New) ES6/ES2015 Promises vs (Old) Callbacks](#new-es6es2015-promises-vs-old-callbacks)
     - [tl;dr](#tldr)
@@ -623,6 +626,22 @@ after 30 minutes (by default).
 This method allows the refresh of this value, which can be useful in certain cases.
 
 NOTE: SpRestLib will refresh the token automatically as needed during CRUD operations.
+
+
+
+
+
+**************************************************************************************************
+# Node.js and SharePoint Online
+
+## Connect To Office 365/SharePoint Online With Node.js
+
+SpRestLib can be utilized via Node.js to perform powerful operations, generate reports, etc.
+
+### Demo
+See the `example` directory for a complete, working demo of connecting to SharePoint Online.
+
+
 
 
 
