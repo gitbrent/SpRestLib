@@ -1186,6 +1186,39 @@ Ran entire CRUD chain!
 </code></pre>
 						</div>
 					</div>
+
+					<div class="row text-left"><br><br></div>
+					<div class="row text-left">
+	                    <div class="col-lg-12 col-md-12 col-sm-12">
+							<h3>Node.js Integration: Connect to SharePoint Online using Node.js</h3>
+							<ul>
+								<li>Connect to Office 365/SharePoint Online</li>
+								<li>Complete working Node demo available (see SpRestLib/example)</li>
+							</ul>
+						</div>
+					</div>
+<pre><code class="language-bash">[brent@macbook 22:26:35] ~/Documents/GitHub/SpRestLib/example
+$ node nodejs-demo.js [spUsername] [spPassword] [spHostUrl]
+
+Starting demo...
+================================================================================
+> SpRestLib version: 1.0.0
+
+ * STEP 1/2: Auth into login.microsoftonline.com ...
+ * STEP 2/2: Auth into SharePoint ...
+ * SUCCESS!! Authenticated into "sample.sharepoint.com"
+
+TEST 1: sprLib.user().info()
+----------------------------
+Id.........: 99
+Title......: Brent Ely
+LoginName..: i:0#.f|membership|gitbrent@sample.onmicrosoft.com
+Email......: gitbrent@sample.onmicrosoft.com
+
+================================================================================
+...demo complete.
+</code></pre>
+
                 </div>
 				<!--
                 <ul class="portfolio-filter hidden-xs">
