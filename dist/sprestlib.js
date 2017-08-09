@@ -43,7 +43,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 (function(){
 	// APP VERSION/BUILD
 	var APP_VER = "1.0.0-beta";
-	var APP_BLD = "20170803";
+	var APP_BLD = "20170808";
 	var DEBUG = false; // (verbose mode/lots of logging)
 	// APP FUNCTIONALITY
 	var APP_FILTEROPS = {
@@ -1677,8 +1677,8 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 		*/
 		newUser.info = function() {
 			return new Promise(function(resolve, reject) {
-				// A: Handle case when options have empty//null/undef params
-				if ( inOpt && !inOpt['id'] && !inOpt['email'] && !inOpt['login'] && !inOpt['title'] ) {
+				// A: Handle case when options have empty/null/undef params
+				if ( inOpt == '' || (inOpt && !inOpt['id'] && !inOpt['email'] && !inOpt['login'] && !inOpt['title']) ) {
 					resolve( {} );
 					return;
 				}
@@ -1719,6 +1719,13 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 		*/
 		newUser.groups = function() {
 			return new Promise(function(resolve, reject) {
+				// A: Handle case when options have empty/null/undef params
+				if ( inOpt == '' || (inOpt && !inOpt['id'] && !inOpt['email'] && !inOpt['login'] && !inOpt['title']) ) {
+					resolve( [] );
+					return;
+				}
+
+				// B:
 				sprLib.rest({
 					url    : strDynUrl + "$select=Groups/Id,Groups/Title,Groups/Description,Groups/LoginName,Groups/OwnerTitle&$expand=Groups",
 					headers: { "Accept":"application/json;odata=verbose" },
