@@ -43,7 +43,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 (function(){
 	// APP VERSION/BUILD
 	var APP_VER = "1.1.0-beta";
-	var APP_BLD = "20170808";
+	var APP_BLD = "20170822";
 	var DEBUG = false; // (verbose mode/lots of logging)
 	// APP FUNCTIONALITY
 	var APP_FILTEROPS = {
@@ -1110,8 +1110,8 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 						resolve(inObj.spArrData);
 					}
 				})
-				.catch(function(objErr){
-					reject( parseErrorMessage(objErr.jqXHR, objErr.textStatus, objErr.errorThrown) );
+				.catch(function(strErr){
+					reject( strErr );
 				});
 			});
 		}
