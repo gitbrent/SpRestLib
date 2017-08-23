@@ -1487,21 +1487,28 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 							res.setEncoding('utf8');
 							res.on('data', function(chunk){ rawData += chunk; });
 							res.on('end', function(){
-								resolve(rawData);
-								// TODO: bad URL is returned as
-								/*
-								<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN""http://www.w3.org/TR/html4/strict.dtd">
-								<HTML><HEAD><TITLE>Bad Request</TITLE>
-								<META HTTP-EQUIV="Content-Type" Content="text/html; charset=us-ascii"></HEAD>
-								<BODY><h2>Bad Request - Invalid URL</h2>
-								<hr><p>HTTP Error 400. The request URL is invalid.</p>
-								</BODY></HTML>
-								*/
+								// NOTE: SP errors come here, not `res.on(error)`, so check for errors!
+								if ( rawData.indexOf('HTTP Error') > -1 ) {
+									/* EX: bad URL is returned as
+										<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN""http://www.w3.org/TR/html4/strict.dtd">
+										<HTML><HEAD><TITLE>Bad Request</TITLE>
+										<META HTTP-EQUIV="Content-Type" Content="text/html; charset=us-ascii"></HEAD>
+										<BODY><h2>Bad Request - Invalid URL</h2>
+										<hr><p>HTTP Error 400. The request URL is invalid.</p>
+										</BODY></HTML>
+									*/
+									reject();
+								}
+								else if ( rawData.indexOf('Microsoft.SharePoint.SPException') > -1 ) {
+									// EX: {"error":{"code":"-1, Microsoft.SharePoint.SPException","message":{"lang":"en-US","value":"The field or property 'ColDoesntExist' does not exist."}}}
+									reject( JSON.parse(rawData).error.message.value + "\n\nURL used: " + objAjaxQuery.url );
+								}
+								else {
+									resolve(rawData);
+								}
 							});
 							res.on('error', function(e){
-								// TODO: 20170628: renewSecurityToken when detected
-								// TODO: ? reject( parseErrorMessage(jqXHR, textStatus, errorThrown) + "\n\nURL used: " + objAjaxQuery.url );
-								reject(e);
+								reject( JSON.parse(rawData).error.message.value + "\n\nURL used: " + objAjaxQuery.url );
 							});
 						});
 						request.end();

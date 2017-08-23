@@ -150,7 +150,6 @@ Promise.resolve()
 
 	// C: Now run all the sprLib API calls you want
 	return sprLib.user().info();
-	//return sprLib.list('Employees').cols();
 })
 .then(function(objUser){
 	console.log('\nTEST 1: sprLib.user().info()');
@@ -160,7 +159,18 @@ Promise.resolve()
 	console.log('Title......: '+ objUser.Title);
 	console.log('LoginName..: '+ objUser.LoginName);
 	console.log('Email......: '+ objUser.Email);
-  })
+
+	return sprLib.list('Site Assets').info();
+})
+.then(function(objInfo){
+	console.log("\nTEST 2: sprLib.list('Site Assets').info()");
+	console.log('-------------------------------------------');
+	console.log('Created....: '+ objInfo.Created);
+	console.log('ItemCount..: '+ objInfo.ItemCount);
+
+	// NEGATIVE-TEST: (check for error msg response)
+	//return sprLib.list('Site Assets').getItems({ listCols:['ColDoesntExist'] });
+})
 .then(function(){
 	console.log('\n================================================================================');
 	console.log('...demo complete.\n');
