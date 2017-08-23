@@ -5,6 +5,8 @@
 
 **Implemented Enhancements:**
 **Fixed Bugs:**
+- Fixed bug in error messages introduced in last release
+- Fixed error handling in Node.js
 
 
 
