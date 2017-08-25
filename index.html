@@ -943,14 +943,14 @@
 					<h3>
 						SpRestLib simplifies development of Apps for SharePoint (SharePoint Add-ins) <br class="hidden-xs hidden-sm">using the JavaScript SharePoint Web Services Model.
 					</h3>
-					<h4 style="color:#c7c7c7; margin-top:20px;">
+					<h4 style="color:#c1c1c1; margin-top:20px;">
 						Enables rapid development of entire SharePoint applications or simple web-part features with plain JavaScript (not CSOM/JSOM).
 					</h4>
 				</div>
 				<div class="center">
 					<h2>Features</h2>
 				</div>
-                <div class="row">
+                <div class="row gap">
                     <div class="col-lg-4 col-md-6 col-sm-6">
                         <div class="center">
 							<i class="fa fa-key fa-2x icon-md icon-color3"></i>
@@ -999,6 +999,92 @@
                         </div>
                     </div>
                 </div>
+				<div class="row">
+					<div class="col-lg-12 col-md-12 col-sm-12">
+						<h3>Stop Writing the Same Web Services Code Over-and-Over</h3>
+						<p>Interacting with the SharePoint services API via REST - getting list items, looking up users and groups, creating/modifying libraries - is
+						a verbose activity.</p>
+						<p>It's worth having a library just to have clean code and avoid writing the same thing over and over.</p>
+					</div>
+				</div>
+				<div class="row gap">
+					<div class="col-lg-6 col-md-12 col-sm-12">
+						<h3>jQuery Ajax Code</h3>
+<pre><code class="language-javascript">$.ajax({
+	url: "/_api/web/lists/getbytitle('Projects')/items?$select=Id,Title",
+	method: "GET",
+	headers: { "Accept": "application/json; odata=verbose" },
+	success: function (data) {
+		console.log(data.d.results);
+	},
+	error: function (data) {
+		console.error("Error: "+ data);
+	}
+});
+</code></pre>
+					</div>
+					<div class="col-lg-6 col-md-12 col-sm-12">
+						<h3>SpRestLib Code</h3>
+<pre><code class="language-javascript">sprLib.list('Projects').getItems(['Id','Title'])
+.then( arrItems => console.log(arrItems) )
+.catch( strErr => console.error(strErr) );
+</code></pre>
+					</div>
+				</div>
+				<div class="row">
+					<div class="col-lg-12 col-md-12 col-sm-12">
+						<h3>Asyncronous Chaining</h3>
+						<p>Promises provide an even bigger advantage: Clean, concise code free of callbacks.
+						No need to nest queries - lots of queries can be chained and still be easily read/maintained.</p>
+						<p>If you've ever had to gather data from multiple lists and/or deal with lookup depedencies, you know how awful
+						callbacks and managing them can be.  So forget that - it's a snap to do complex REST queries with SpRestLib and ES6 Promises.</p>
+					</div>
+				</div>
+				<div class="row gap">
+					<div class="col-lg-6 col-md-12 col-sm-12">
+						<h3>Nexted Ajax</h3>
+<pre><code class="language-javascript">// Query 1: User
+$.ajax({
+	url: "/_api/Web/CurrentUser?$select=Id",
+	method: "GET",
+	headers: { "Accept": "application/json; odata=verbose" },
+	success: function (data) {
+		// Query 2: Projects
+		$.ajax({
+			url: "/_api/web/lists/getbytitle('Projects')/items?$select=Id&$filter=Owner/Id%20eq%20"+data.Id,
+			method: "GET",
+			headers: { "Accept": "application/json; odata=verbose" },
+			success: function (data) {
+				console.log('You own '+ data.d.results.length +' Project items.');
+			},
+			error: function (data) {
+				alert("Error: "+ data);
+			}
+		});
+	},
+	error: function (data) {
+		alert("Error: "+ data);
+	}
+});
+</code></pre>
+					</div>
+					<div class="col-lg-6 col-md-12 col-sm-12">
+						<h3>Promise Chain</h3>
+<pre><code class="language-javascript">sprLib.user().info()
+.then(function(objUser){
+	return sprLib.list('Projects').getItems({
+		listCols: ['Id','Title'], queryFilter: 'Owner/Id eq ' + objUser.Id
+	});
+})
+.then(function(arrItems){
+	console.log('You own '+ arrItems.length +' Project items.');
+})
+.catch(function(strErr){
+	console.error(strErr);
+});
+</code></pre>
+					</div>
+				</div>
 			</div>
 		</div>
     </section>
@@ -1010,7 +1096,7 @@
                     <h2>Examples</h2>
                     <p class="lead">SpRestLib does the heavy-lifting for you!</p>
 					<div>
-						<h4 style="color:#c7c7c7">
+						<h4 style="color:#c1c1c1">
 							Stop wriiting whole blocks of Ajax REST queries, callbacks, error handlers and async queues.
 							You can do the same amount of work faster in much less code with the SpRestLib web services library.
 							<br>
@@ -1344,11 +1430,11 @@ Email......: gitbrent@sample.onmicrosoft.com
 <pre><code class="language-html">&lt;script lang="javascript" src="https://yourhost.com/subsite/SiteAssets/js/jquery.min.js"&gt;&lt;/script&gt;
 &lt;script lang="javascript" src="https://yourhost.com/subsite/SiteAssets/js/sprestlib.js"&gt;&lt;/script&gt;
 </code></pre>
-<i style="color:#c7c7c7">IE11 support requires you include a Promises polyfill as well (one is included in the 'libs' folder)</i>
+<i style="color:#c1c1c1">IE11 support requires you include a Promises polyfill as well (one is included in the 'libs' folder)</i>
 
 								<h4>Include Bundle Script</h4>
 								<pre><code class="language-html">&lt;script lang="javascript" src="https://yourhost.com/subsite/SiteAssets/js/sprestlib.bundle.js"&gt;&lt;/script&gt;</code></pre>
-								<i style="color:#c7c7c7">Bundle includes all required libraries (SpRestLib + jQuery and Promises)</i>
+								<i style="color:#c1c1c1">Bundle includes all required libraries (SpRestLib + jQuery and Promises)</i>
 
 								<h4>Install With Bower</h4>
 								<pre><code class="language-bash">bower install sprestlib</code></pre>
