@@ -43,7 +43,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 (function(){
 	// APP VERSION/BUILD
 	var APP_VER = "1.1.0-beta";
-	var APP_BLD = "20170822";
+	var APP_BLD = "20170827";
 	var DEBUG = false; // (verbose mode/lots of logging)
 	// APP FUNCTIONALITY
 	var APP_FILTEROPS = {
@@ -984,9 +984,10 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 									else if ( col.dataName && col.dataName.indexOf('/') > -1 ) {
 										// A: Split lookup info object/field
 										arrCol = col.dataName.split('/');
-										// B: Remove extraneous metadata
+										// B: Remove extraneous `__metadata`
 										if ( result[arrCol[0]].__metadata ) delete result[arrCol[0]].__metadata;
-										// B: Same for deferred. NOTE: Multi-Person fields return only a `{__deferred:{uri:'http...'}}` result when field is empty (ugh!)
+										// B: Same for `__deferred`.
+										// NOTE: Empty Multi-Person returns `{__deferred:{uri:'http...'}}` (ugh!)
 										if ( result[arrCol[0]].__deferred ) delete result[arrCol[0]].__deferred;
 										// C: Capture value
 										// CASE 1: `dataName` was used - in this case return the actual field user asked for
@@ -998,8 +999,8 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 										// Capture any-and-all columns returned (aside from removal of above)
 										else colVal = result[arrCol[0]];
 
-										// D: Value clean-up (things like empty multi-person fields may end up being `{}`)
-										if ( typeof colVal === 'object' && !Array.isArray(colVal) && Object.keys(colVal).length == 0 ) colVal = [];
+										// D: Fix result if needed: Empty person fields will be `{__proto__:{}}` at this point
+										if ( typeof colVal === 'object' && !Array.isArray(colVal) && Object.keys(colVal).length == 0 ) colVal = null;
 									}
 									else if ( col.dataName ) {
 										colVal = result[col.dataName];
@@ -1526,11 +1527,13 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 				});
 			})
 			.then(function(data){
+				// A: Parse if needed
 				data = ( typeof data === 'string' && data.indexOf('{') == 0 ? JSON.parse(data) : data );
 
-				// A: Depending upon which REST endpoint used, SP can return results in various ways... (!)
-				// data.d.results is an [] of {}: [ {Title:'Brent Ely', Email:'Brent.Ely@microsoft.com'}, {}, {} ]
-				// NOTE: Test for results being object because SP can return an entire HTML page as a result in some error cases.
+				// B: Iterate over results
+				// NOTE: Depending upon which REST endpoint used, SP can return results in various forms (!)
+				// EX..: data.d.results is an [] of {}: [ {Title:'Brent Ely', Email:'Brent.Ely@microsoft.com'}, {}, {} ]
+				// NOTE: Ensure results are an object because SP can return an entire HTML page as a result in some error cases.
 				if ( data && data.d && data.d.results && typeof data.d.results === 'object' ) {
 					$.each(data.d.results, function(key,result){
 						var objRow = {};
@@ -1545,11 +1548,11 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 								// Handle LookupMulti columns
 								if ( col.dataName && col.dataName.indexOf('/') > -1 && result[col.dataName.split('/')[0]].results ) {
 									// A:
-									// NOTE: `listCols` can have "Dept/Id" and "Dept/Title", but SP only returns *ONE* result
-									// ....: So, skip any subsequnt listCol once results have been captured
+									// NOTE: `listCols` can have "Dept/Id" and "Dept/Title", but SP only returns *ONE* result with both vals
+									// ....: So, skip any subsequent listCol's once results have been captured
 									if ( objRow[key] ) return;
 
-									// B: Default for this column type is empty array
+									// B: Default for this column type is empty array as multi-lookup returns an array of `results`
 									colVal = [];
 
 									// C: Add any results
@@ -1618,7 +1621,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 				// var strErrCode = jqXHR.status.toString();
 				// var strSpeCode = $.parseJSON(jqXHR.responseText).error['code'].split(',')[0];
 				// INFO: ( strErrCode == '403' && strSpeCode == '-2130575252' )
-				if ( !NODEJS && strErr.indexOf('(403)') > -1 && gRetryCounter <= APP_OPTS.maxRetries ) {
+				if ( !NODEJS && typeof strErr == 'string' && strErr.indexOf('(403)') > -1 && gRetryCounter <= APP_OPTS.maxRetries ) {
 					Promise.resolve()
 					.then(function(){
 						return sprLib.renewSecurityToken();
