@@ -730,26 +730,46 @@ QUnit.module( "LIST > ITEM GET Methods" );
 		});
 	});
 
-	QUnit.test("sprLib.getItems() 11: `listCols` with column array: Multi-Lookup test with 2 fields (`Id`, `Title`)", function(assert){
+	// NOTE: Promise.all()
+	QUnit.test("sprLib.getItems() 11: `listCols` with column array: Multi-Lookup two fields (`Id`, `Title`)", function(assert){
 		var done = assert.async();
 		// TEST:
-		sprLib.list('Employees')
-		.getItems({
-			listCols: ['Name', 'Departments_x0020_Supported/Id', 'Departments_x0020_Supported/Title'],
-			queryLimit: 1,
-			queryFilter: "Departments_x0020_Supported ne null"
-		})
+		Promise.all([
+			sprLib.list('Employees')
+			.getItems({
+				listCols: ['Name', 'Departments_x0020_Supported/Id', 'Departments_x0020_Supported/Title'],
+				queryLimit: 1,
+				queryFilter: "Departments_x0020_Supported ne null"
+			})
+			,sprLib.list('Employees')
+			.getItems({
+				listCols: ['Name', 'Departments_x0020_Supported/Id', 'Departments_x0020_Supported/Title'],
+				queryLimit: 1,
+				queryFilter: "Departments_x0020_Supported eq null"
+			})
+		])
 		.then(function(arrayResults){
-			assert.ok( Object.keys(arrayResults[0]).length == 3, "arrayResults[0] has length == 3: "+ Object.keys(arrayResults[0]).length );
+			var res1 = arrayResults[0];
+			assert.ok( Object.keys(res1[0]).length == 3, "res1[0] has length == 3: "+ Object.keys(res1[0]).length );
 			assert.ok(
-				!isNaN( arrayResults[0].Departments_x0020_Supported[0].Id ),
-				"arrayResults[0].Departments_x0020_Supported[0].Id is a number: "+ arrayResults[0].Departments_x0020_Supported[0].Id
+				!isNaN( res1[0].Departments_x0020_Supported[0].Id ),
+				"res1[0].Departments_x0020_Supported[0].Id is a number: "+ res1[0].Departments_x0020_Supported[0].Id
 			);
 			assert.ok(
-				(arrayResults[0].Departments_x0020_Supported[0].Title),
-				"arrayResults[0].Departments_x0020_Supported[0].Title exists: "+ arrayResults[0].Departments_x0020_Supported[0].Title
+				(res1[0].Departments_x0020_Supported[0].Title),
+				"res1[0].Departments_x0020_Supported[0].Title exists: "+ res1[0].Departments_x0020_Supported[0].Title
 			);
-			assert.ok( getAsciiTableStr(arrayResults), `RESULTS:\n${getAsciiTableStr(arrayResults)}`);
+			assert.ok( getAsciiTableStr(res1), `RESULTS:\n${getAsciiTableStr(res1)}`);
+
+			// Empty Multi-Lookup fields should be an empty array `[]`
+			var res2 = arrayResults[1];
+			assert.ok( Object.keys(res2[0]).length == 3, "res2[0] has length == 3: "+ Object.keys(res2[0]).length );
+			assert.ok(
+				(Array.isArray(res2[0].Departments_x0020_Supported) && res2[0].Departments_x0020_Supported.length == 0),
+				"res2[0].Departments_x0020_Supported == []: "+ res2[0].Departments_x0020_Supported
+			);
+			assert.ok( getAsciiTableStr(res2), `RESULTS:\n${getAsciiTableStr(res2)}`);
+
 			done();
 		})
 		.catch(function(errorMessage){
@@ -759,7 +779,7 @@ QUnit.module( "LIST > ITEM GET Methods" );
 	});
 
 	// NOTE: Promise.all()
-	QUnit.test("sprLib.getItems() 12: `listCols` with column array: Multi-Person (`EMail`, `Title`)", function(assert){
+	QUnit.test("sprLib.getItems() 12: `listCols` with column array: Multi-Person two fields (`ID`, `Title`)", function(assert){
 		var done = assert.async();
 		// TEST:
 		Promise.all([
@@ -781,9 +801,10 @@ QUnit.module( "LIST > ITEM GET Methods" );
 			assert.ok( (res1[0].Mentored_x0020_Team_x0020_Member[0].Title), "res1[0].Mentored_x0020_Team_x0020_Member[0].Title exists: "+ res1[0].Mentored_x0020_Team_x0020_Member[0].Title );
 			assert.ok( getAsciiTableStr(res1), `RESULTS:\n${getAsciiTableStr(res1)}`);
 
+			// Empty Person/Lookup fields should be null
 			var res2 = arrayResults[1];
 			assert.ok( Object.keys(res2[0]).length == 3, "res2[0] has length == 3: "+ Object.keys(res2[0]).length );
-			assert.ok( (res2[0].Mentored_x0020_Team_x0020_Member.length == 0), "res1[0].Mentored_x0020_Team_x0020_Member.length == 0: "+ res1[0].Mentored_x0020_Team_x0020_Member.length );
+			assert.ok( (res2[0].Mentored_x0020_Team_x0020_Member == null), "res2[0].Mentored_x0020_Team_x0020_Member == null: "+ res2[0].Mentored_x0020_Team_x0020_Member );
 			assert.ok( getAsciiTableStr(res2), `RESULTS:\n${getAsciiTableStr(res2)}`);
 
 			done();
