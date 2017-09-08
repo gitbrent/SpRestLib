@@ -1,7 +1,7 @@
 /*
  * NAME: nodejs-demo.js
  * AUTH: Brent Ely (https://github.com/gitbrent/)
- * DATE: Jul 27, 2017
+ * DATE: Sep 07, 2017
  * DESC: Demonstrate SpRestLib on Node.js
  * REQS: Node 4.x + `npm install sprestlib`
  * EXEC: `node nodejs-demo.js (sp-username) (sp-password) {sp-hostUrl}`
@@ -164,7 +164,7 @@ Promise.resolve()
 })
 .then(function(objInfo){
 	console.log("\nTEST 2: sprLib.list('Site Assets').info()");
-	console.log('-------------------------------------------');
+	console.log('-----------------------------------------');
 	console.log('Created....: '+ objInfo.Created);
 	console.log('ItemCount..: '+ objInfo.ItemCount);
 
