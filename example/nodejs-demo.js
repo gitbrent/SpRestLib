@@ -11,9 +11,6 @@
  * - https://github.com/s-KaiNet/node-spoauth
 */
 
-// ============================================================================
-var fs = require('fs');
-
 // Required Args
 // =============
 if (process.argv.length < 4) {
@@ -24,6 +21,7 @@ if (process.argv.length < 4) {
 
 // SETUP: Load sprestlib and show version to verify everything loaded correctly
 // ============================================================================
+var fs = require('fs');
 var https = require('https'); // this Library is the basis for the remote auth solution
 var sprLib;
 if (fs.existsSync('../dist/sprestlib.js')) {
