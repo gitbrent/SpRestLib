@@ -1808,7 +1808,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 
 	// API: UTILITY: Library Version
 	sprLib.version = function version(){
-		return APP_VER;
+		return APP_VER+'-'+APP_BLD;
 	}
 
 	// API: NODEJS: Setup
