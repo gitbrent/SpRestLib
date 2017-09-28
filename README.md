@@ -119,6 +119,7 @@ npm install sprestlib
 
 var sprLib = require("sprestlib");
 ```
+* Desktop: Compatible with Electron applications.
 
 **************************************************************************************************
 # Method Overview

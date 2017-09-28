@@ -1841,10 +1841,13 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 
 // [Node.js] support
 if ( NODEJS ) {
-	// A: Load 2 depdendencies
-	var $ = require("jquery-node");
-	var https = require('https');
+	// A: Set vars
+	var isElectron = require("is-electron");
 
-	// B: Export module
+	// B: Load depdendencies
+	var $ = require("jquery-node");
+	var https = require("https");
+
+	// C: Export module
 	module.exports = sprLib;
 }
