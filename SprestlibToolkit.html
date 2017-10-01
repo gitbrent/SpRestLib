@@ -1,0 +1,949 @@
+<!DOCTYPE html>
+<html lang="en-us">
+<head>
+	<!-- HOWTO / FAQ / SETUP
+		1) Add this file (SprestlibToolkit.html) to your 'SiteAssets' library
+		2) Create a new Page named 'SprestlibToolkit' (SP will add the '.aspx' at the end)
+		3) Add a Content Editor Web Part to the new page and point it to '../SiteAssets/SprestlibToolkit.html'
+		4) Press the Save page button (top-left)
+		5) The SprestlibToolkit.aspx page is ready to go!
+		!!!==>> Check the img folder for screencaps of the SharePoint setup! <<==!!!
+	-->
+	<meta charset="utf-8">
+	<meta name="author"      content="https://github.com/gitbrent/">
+	<meta name="website"     content="https://github.com/gitbrent/SpRestLib/">
+	<meta name="keywords"    content="SpRestLib, JavaScript, js-sharepoint, OData, REST, SharePoint 2013, SP2013, SharePoint 2016, SP2016, SharePoint Online">
+	<meta name="description" content="Content Editor Webpart: SpRestLib SharePoint Toolkit">
+	<meta name="revised"     content="Sep 30, 2017">
+
+	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300">
+	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:700">
+	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto+Mono">
+	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:400">
+
+	<style>
+		.ms-webpartPage-root { border-spacing: 0px; }
+		#divBody {
+			font-family: 'Open Sans','Segoe UI','Helvetica Neue',sans-serif;
+			color: #696969;
+			margin: -10px 30px 10px 30px;
+		}
+		#divBody div { box-sizing: border-box; }
+		.bigTitle { font-family:'Roboto'; font-size:36px; color:#0088cc; margin:15px 0 10px 0; }
+		.bigSubtitle { font-family:'Roboto'; font-size:16px; color:#c7c7c7; margin:10px 0 20px 0; }
+		.sectionTitle, .subTitle { font-family:'Roboto'; font-size:18px; color:#0088cc; margin:20px 0 10px 0; cursor: pointer; }
+		.bigger { font-size:1.1em; }
+		.arrow {
+			display: inline-block;
+			height: 12px; width: 12px;
+			border-top: 3px solid #0085C3; border-right: 3px solid #0085C3;
+			margin-right: 10px;
+			cursor: pointer;
+			transition: all .25s ease;
+			transform: rotate(45deg);
+		}
+		.arrow.active {
+			transform: rotate(135deg);
+			margin-bottom: 3px;
+		}
+
+		#tabSubsites tbody td:nth-child(1) { min-width: 250px; }
+		#tabSubsites tbody td:nth-child(3) { white-space: nowrap; }
+		#tabSubsites tbody td:nth-child(4) { white-space: nowrap; }
+		div.modernTable > div { vertical-align: top; }
+		div.modernTable span { font-size: 24px; }
+
+		.iconYes {
+			width:  32px; min-width:  32px;
+			height: 32px; min-height: 32px;
+			background: url('data:image/png;base64,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');
+		}
+		.iconFail {
+			width:  32px; min-width:  32px;
+			height: 32px; min-height: 32px;
+			background: url('data:image/png;base64,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');
+		}
+		.iconInfo {
+			width:  32px; min-width:  32px;
+			height: 32px; min-height: 32px;
+			background: url('data:image/png;base64,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');
+		}
+		.iconQues {
+			width:  32px; min-width:  32px;
+			height: 32px; min-height: 32px;
+			background: url('data:image/png;base64,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');
+		}
+
+		/* FLEXBOX TABS */
+		.flexTabs {
+			width: 100%;
+			margin: 20px 0 10px 0;
+			font-family: Roboto, "Segoe UI", Helvetica, Arial, sans-serif;
+			border: 1px solid #d5d5d5;
+			box-shadow: 0px 4px 10px -5px rgba(0,0,0,0.5);
+			border-radius: 5px;
+		}
+		.flexTabs > ul {
+			display: flex;
+			flex-wrap: wrap;
+			list-style-type: none;
+			background: #FAFAFA;
+			margin: 0 !important; -webkit-margin-before: 0;  -moz-margin-before: 0;  -ms-margin-before: 0;
+			padding: 0 !important;
+			border-bottom: 1px solid #d5d5d5;
+			border-radius: 5px 5px 0 0;
+		}
+		.flexTabs > ul > li {
+			flex: 1 1 auto;
+			cursor: pointer;
+			text-shadow: 2px 2px #efefef;
+			text-align: center;
+			white-space: nowrap;
+			display: inline-block; list-style-type:none;
+			padding: 15px 10px;
+			font-size: 14px;
+			color: #a7a7a7;
+			text-transform: uppercase;
+			border-bottom: 3px solid #FAFAFA;
+			-webkit-user-select: none;
+			   -moz-user-select: none;
+				-ms-user-select: none;
+					user-select: none;
+		}
+		.flexTabs > ul > li.active {
+			font-weight: bold;
+			text-shadow: none;
+			color: #0088CC;
+			border-bottom: 3px solid #0088cc;
+		}
+		.flexTabs > div {
+			display: none;
+			margin: 0;
+			padding: 20px;
+			background: white;
+			border-radius: 0 0 5px 5px;
+		}
+		.flexTabs > div.active { display: block; }
+		.flexTabs > div > .subTitle:first-child { margin-top: 0; }
+		.flexTabs > p { font-size: 14px; margin-bottom: 15px; }
+
+		.flex {
+			display: flex;
+			flex-wrap: nowrap;
+		}
+		.flex > div {
+			flex: 1 1 auto;
+			text-align: left;
+		}
+
+		div.divTable { display: table; box-sizing: border-box; width: 100%; font-size: 12px; }
+		div.divTable > div { display: table-cell; padding:10px; vertical-align: top; }
+		div.divTable .subTitle { margin: 0 0 10px 0; }
+		div.divTable label { display: block; margin-bottom: 3px; color:#bcbcbc; }
+
+		/*-*/
+		div.divTableRows { display:table; box-sizing:border-box; width:100%; font-size:12px; border: 1px solid #d7e7f7; }
+		div.divTableRows > div { display: table-row; }
+		div.divTableRows > div > div { display: table-cell; padding: 5px 10px; vertical-align: middle; background: #f2f9fc; }
+
+		/* */
+		#tabSetup .divTableRows {
+			min-width: 200px;
+			font-size: 14px;
+			border: 1px solid #d7e7f7;
+		}
+		#tabSetup .divTableRows > div > div { padding: 15px; background: #f2f9fc; }
+		#tabSetup .divTableRows > div > div:first-child { width:1%; }
+
+		/*-*/
+		#divBody table { width:100%; margin: 10px 0; border-collapse: collapse; }
+		#divBody table th { padding: 10px 20px; background-color: #e6e9e9; border-right: 1px solid white; border-bottom: 1px solid white; font-weight: bold; }
+		#divBody table td { padding: 10px 20px; background-color: #f6f9f9; border-right: 1px solid white; }
+
+		#sandboxMessage {
+			margin: 0 0 10px 0;
+			padding: 10px;
+			background: #fffccc;
+			color: #3a3a3a;
+			font-family: 'Open Sans',Helvetica,Arial,sans-serif;
+			font-size: 16px;
+			text-align: center;
+		}
+
+		/*-*/
+		.flatBtn {
+			display: inline-block;
+			font-family: Arial,Verdana,sans-serif;
+			font-size: 12px !important;
+			color: #ffffff !important;
+			border: 0 !important;
+			padding: 10px;
+			margin: 0;
+			white-space: nowrap;
+			text-decoration: none;
+			text-transform: uppercase;
+			border-radius: 4px;
+			box-sizing: border-box;
+			cursor: pointer;
+			box-shadow: 0 2px 0 #c7c7c7;
+		}
+		.flatBtn-green,	.flatBtn-green:hover	{ background-color: #27AE60 !important; }
+		.flatBtn-blue,	.flatBtn-blue:hover		{ background-color: #3498DB !important; }
+
+		/* ===== Tables ===== */
+		.modernTable {
+			/*font-family: "Open Sans","Segoe UI";*/
+			display: table;
+			width: 100%;
+			margin: 0; padding: 0;
+			color: rgb(0,149,221);
+			background: rgb(242,249,252);
+			border: 1px #e7e7f7 solid;
+			border-radius: 5px;
+			box-sizing: border-box;
+		}
+		.modernTable > div {
+			display: table-cell;
+			padding: 10px 0 10px 20px;
+			vertical-align: middle;
+		}
+		.modernTable > div:last-child {
+			padding-right: 20px;
+		}
+		.modernTable div select {
+			width: 100%;
+		}
+		div.modernTable div.cellTitle, .modernTable div.cellTitle {
+			font-size: 16px;
+			margin: -2px 0 4px 0;
+			white-space: nowrap;
+		}
+		.modernTable label {
+			display: block;
+			white-space: nowrap;
+			text-transform: uppercase;
+			color: #bfcfdf;
+			font-size: 11px;
+			margin-bottom: 3px;
+		}
+
+		/* sprestlib.css */
+		.sprlib-spinner { display: block; text-align: center; height: 16px; }
+		.sprlib-spinner > div {
+			display: inline-block;
+			animation: sprlib-sk-bouncedelay 1.4s infinite ease-in-out both;
+			width:16px; height:16px;
+			background-color: #40b0df; border-radius: 100%; border: 3px solid #f2f9fc;
+		}
+		.sprlib-spinner .sprlib-bounce1 { animation-delay: -0.32s; }
+		.sprlib-spinner .sprlib-bounce2 { animation-delay: -0.16s; }
+		@keyframes sprlib-sk-bouncedelay { 0%, 80%, 100% {  transform: scale(0); } 40% { transform: scale(1.0); } }
+
+		/* tablesorter.css */
+		table.tablesorter {
+			text-align: left;
+			background-color: white;
+			margin: 10px 0px 15px 0px;
+			font-size: 12px;
+			width: 100%;
+		}
+		table.tablesorter thead tr th, table.tablesorter tfoot tr th {
+			background-color: #e6EEEE;
+			border: 1px solid #FFF;
+			font-size: 8pt;
+			padding: 4px;
+		}
+		table.tablesorter thead tr .header {
+			background-image: url(https://cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.29.0/css/images/white-unsorted.gif); /* bg.gif */
+			background-repeat: no-repeat;
+			background-position: center right;
+			cursor: pointer;
+		}
+		table.tablesorter tbody td {
+			color: #3D3D3D;
+			padding: 4px;
+			background-color: #FFF;
+			border: 1px solid #f2f9fc;
+			vertical-align: top;
+		}
+		table.tablesorter tbody tr.odd td {
+			background-color:#F0F0F6;
+		}
+		table.tablesorter thead tr .headerSortUp {
+			background-image: url(https://cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.29.0/css/images/white-asc.gif);
+		}
+		table.tablesorter thead tr .headerSortDown {
+			background-image: url(https://cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.29.0/css/images/white-desc.gif);
+		}
+		table.tablesorter thead tr .headerSortDown, table.tablesorter thead tr .headerSortUp { background-color: #8dbdd8; }
+	</style>
+
+	<script type="text/javascript" src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+	<script type="text/javascript" src="https://cdn.rawgit.com/gitbrent/SpRestLib/v1.1.0/dist/sprestlib.bundle.js"></script>
+	<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.29.0/js/jquery.tablesorter.min.js"></script>
+	<!-- NOTE: If you prefer not to/cannot use CDNs, simply uncomment the lines below and comment the CDN lines above -->
+	<!--
+	<script type="text/javascript" src="../SiteAssets/js/jquery.min.js"></script>
+	<script type="text/javascript" src="../SiteAssets/js/jquery.tablesorter.min.js"></script>
+	<script type="text/javascript" src="../SiteAssets/js/sprestlib.bundle.js"></script>
+	-->
+
+	<script type="text/javascript">
+		// APP
+		const APP_VER = '1.0.0';
+		const APP_REL = '20170930';
+		// JQUERY
+		$.ajaxSetup({ cache:false, maxRetries:2, timeout:30000 });
+		// CONSTANTS
+		const HTML_SPINNER = '<div class="sprlib-spinner"><div class="sprlib-bounce1"></div><div class="sprlib-bounce2"></div><div class="sprlib-bounce3"></div></div>';
+		const STR_EMPTY = '<span style="color:#ccc; font-style:italic;">(empty)</span>';
+		const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+		// GLOBAL VARS
+		var gArrAjaxResults = [];
+		var gObjMapNameToId = {};
+		var gObjSubsites = {};
+
+		// ==================================================================================================================
+
+		// Helpers
+		{
+			/**
+			 * Return a JS Date object adjusted for local machine Timezone
+			 * NOTE: This function ASSUMES times passed to it are in GMT!
+			 *
+			 * @param {string} inStrDate: SP date format (eg: '2016-08-08T18:21:18Z')
+			 * @param {string} inType:    Format style ['US', 'DATE', 'YYYYMMDD', 'INTLTIME', 'INTL', 'ISO']
+			 */
+			function getDateStrFromISO(inStrDate, inType){
+				// REALITY-CHECK:
+				if ( inStrDate == null ) return '';
+				if ( typeof inStrDate !== 'string' ) { throw('getDateStrFromISO: bad date'); }
+
+				var strFinalDate = "";
+				var dtcomps = inStrDate.replace(/\D/g," ").split(" ");
+				dtcomps[1]--;
+				var dateLocal = new Date(Date.UTC(dtcomps[0],dtcomps[1],dtcomps[2],dtcomps[3],dtcomps[4],dtcomps[5]));
+				var dateMM = dateLocal.getMonth() + 1; var dateDD = dateLocal.getDate(); var dateYY = dateLocal.getFullYear();
+				var h = dateLocal.getHours(); var m = dateLocal.getMinutes(); var s = dateLocal.getSeconds();
+				//
+				if (inType == "US") {
+					strFinalDate = (dateMM<=9 ? '0' + dateMM : dateMM) + "/" + (dateDD<=9 ? '0' + dateDD : dateDD) + "/" + dateYY
+							+ " " + (h<=9 ? '0' + h : h) + ":" + (m<=9 ? '0' + m : m) + ":" + (s<=9 ? '0' + s : s);
+				}
+				else if (inType == "DATE") {
+					strFinalDate = (dateMM<=9 ? '0' + dateMM : dateMM) + "/" + (dateDD<=9 ? '0' + dateDD : dateDD) + "/" + dateYY;
+				}
+				else if (inType == "TIME") {
+					strFinalDate = (h<=9 ? '0' + h : h) + ":" + (m<=9 ? '0' + m : m) + ":" + (s<=9 ? '0' + s : s);
+				}
+				else if (inType == "YYYYMMDD") {
+					strFinalDate = dateYY +"-"+ (dateMM<=9 ? '0' + dateMM : dateMM) +"-"+ (dateDD<=9 ? '0' + dateDD : dateDD) + " "
+							+ (h<=9 ? '0' + h : h) + ":" + (m<=9 ? '0' + m : m) + ":" + (s<=9 ? '0' + s : s);
+				}
+				else if (inType == "INTLTIME") {
+					strFinalDate = MONTHS[dateLocal.getMonth()] + " " + (dateDD<=9 ? '0' + dateDD : dateDD) + ", " + dateYY + " "
+							+ (h<=9 ? '0' + h : h) + ":" + (m<=9 ? '0' + m : m) + ":" + (s<=9 ? '0' + s : s);
+				}
+				else if (inType == "INTL") {
+					strFinalDate = MONTHS[dateLocal.getMonth()] + " " + (dateDD<=9 ? '0' + dateDD : dateDD) + ", " + dateYY;
+				}
+				else if (inType == "ISO") {
+					// EX: 2016-05-05T15:27:02.893Z
+					strFinalDate = dateYY +"-"+ (dateMM<=9 ? '0' + dateMM : dateMM) +"-"+ (dateDD<=9 ? '0' + dateDD : dateDD)
+								+"T"+ (h<=9 ? '0' + h : h) + ":" + (m<=9 ? '0' + m : m) + ":" + (s<=9 ? '0' + s : s) + ".000Z";
+				}
+
+				if ( strFinalDate && (strFinalDate.indexOf("NaN") > -1 || strFinalDate.indexOf("undefined") > -1) ) return '';
+				return strFinalDate;
+			}
+		}
+
+		// ==================================================================================================================
+
+		function getSiteInfo() {
+			var arrPromises = [];
+
+			// STEP 1: Root site data header
+			Promise.resolve()
+			.then(() => {
+				return sprLib.rest({ url:'_api/web', queryCols:['Title','Description','Url'] });
+			})
+			.then(arrResults => {
+				$('#SiteName').html( arrResults[0].Title || STR_EMPTY );
+				$('#SiteDesc').html( arrResults[0].Description || STR_EMPTY );
+
+				return sprLib.rest({ url:'_api/site/usage', queryCols:['Usage/Storage','Usage/StoragePercentageUsed'] });
+			})
+			.then(arrResults => {
+				$('#UsageTot').text( (arrResults[0].Usage.Storage / (1024*1024*1024)).toFixed(2) + ' GB');
+				$('#UsagePct').text( (arrResults[0].Usage.StoragePercentageUsed * 100).toFixed(2) + '%');
+
+				return sprLib.rest({
+					url: '_api/web/webs',
+					queryCols: {
+						Id:			{ dataName:'Id'						,dispName:'Id'                 },
+						Name:		{ dataName:'Title'					,dispName:'Subsite Name'       },
+						Url:		{ dataName:'Url'					,dispName:'Site Url'           },
+						Created:	{ dataName:'Created'				,dispName:'Date Created'       },
+						Modified:	{ dataName:'LastItemModifiedDate'	,dispName:'Date Last Modified' },
+					}
+				});
+			})
+			.then(arrResults => {
+				arrResults.forEach(function(site,idx){
+					// A: Capture base subsite data
+					gObjSubsites[site.Id] = site;
+
+					// B: Create mapping so we can store usage results as they come back
+					gObjMapNameToId[site.Name] = site.Id;
+
+					// C: OTHER-DATA: Subsite Owner Group Id
+					arrPromises.push(
+						sprLib.rest({ url:site.Url+'/_api/web/AssociatedOwnerGroup', objCols:'Id' })
+						.then(arrResults => {
+							sprLib.rest({ url:site.Url+'/_api/web/SiteGroups/GetById('+ arrResults[0].Id +')/Users', queryCols:['Title','Email'] })
+							.then(arrResults => {
+								gObjSubsites[site.Id].GroupOwners = [];
+								arrResults.forEach((result,idx) => { gObjSubsites[site.Id].GroupOwners += result.Email + '; '; });
+							});
+						})
+					);
+				});
+
+				// D: Get Site Owners
+				Promise.all(arrPromises)
+				.then(() => {
+					getStorman();
+				});
+			})
+			.catch(strErr => console.error(strErr));
+		}
+
+		function getSubsites() {
+			// STEP 1:
+			$.ajax({
+				url: "../_api/web/webs?$select=Id,Title,Url,Description,Created,Language,LastItemModifiedDate,IsMultilingual&$top=5000",
+				type: "GET",
+				headers: { "Accept":"application/json; odata=verbose" }
+			})
+			.done(function(data,textStatus){
+				$.each(data.d.results, function(i,result){
+					gObjSubsites[result.Id] = {
+						Title:			result.Title,
+						Url:			result.Url,
+						UrlHtml:		'<a href="'+result.Url+'">'+ result.Url.substring(result.Url.lastIndexOf('/')+1) +'</a>',
+						Created:		result.Created,
+						Modified:		result.LastItemModifiedDate,
+						GroupOwners:	[]
+					};
+
+					gArrAjaxResults.push( 'group'+result.Id );
+					getOwnersGroupMembers( result.Id );
+				});
+
+				// LAST:
+				doneAjaxCalls('getSubsites');
+			})
+			.fail(function(jqXHR,textStatus,errorThrown){
+				var strErr = "(" + jqXHR.status + ") " + textStatus + "/" + errorThrown;
+				try { strErr = $.parseJSON(jqXHR.responseText).error['message'].value; } catch(ex) { }
+				$('#bodyCont').prepend(strErr);
+			});
+		}
+
+		function getSiteMembers(groupID) {
+			// STEP 1:
+			$.ajax({
+				url: gObjSubsites[groupID].Url + '/_api/web/AssociatedOwnerGroup?$select=Id',
+				type: "GET",
+				headers: { "Accept":"application/json; odata=verbose" }
+			})
+			.done(function(data,textStatus) {
+				// STEP 2:
+				$.ajax({
+					url: gObjSubsites[groupID].Url + '/_api/web/SiteGroups/GetById('+ data.d.Id +')/Users?$select=Title,Email',
+					type: "GET",
+					headers: { "Accept":"application/json; odata=verbose" }
+				})
+				.done(function(data,textStatus) {
+					$.each(data.d.results, function(i,result){
+						gObjSubsites[groupID].GroupOwners += result.Email + '; ';
+					});
+					//
+					doneAjaxCalls('group'+groupID);
+				})
+				.fail(function(jqXHR,textStatus,errorThrown) {
+					var strErr = "(" + jqXHR.status + ") " + textStatus + "/" + errorThrown;
+					try { strErr = $.parseJSON(jqXHR.responseText).error['message'].value; } catch(ex) { }
+					$('#bodyCont').prepend(strErr);
+				});
+			})
+			.fail(function(jqXHR,textStatus,errorThrown) {
+				var strErr = "(" + jqXHR.status + ") " + textStatus + "/" + errorThrown;
+				try { strErr = $.parseJSON(jqXHR.responseText).error['message'].value; } catch(ex) { }
+				$('#bodyCont').prepend(strErr);
+			});
+		}
+
+		function getStorman() {
+			// NOTE: Scraping storman is the only option! (no csom/jsom/rest API exists in SP2013/SP2016) - Load and scrape each storman page!
+			var urlStormanBase = location.href.substring(0, location.href.toLowerCase().indexOf('sitepages/')).toLowerCase();
+
+			// STEP 1: Create callback
+			$('#scraper').on('load', function(){
+				// Check for errors
+				// TODO: "500 INTERNAL SERVER ERROR"
+				if ( $('#scraper').contents().find('#onetidUserRptrTable').length > 0 ) {
+					// A: How many storman pages are there? (EX: "(Page1/4)Next")
+					var intPages = Number( $('#scraper').contents().find('#onetidUserRptrTable').next('table').find('tbody tr td').text().replace(/\s/gi,'').split('/')[1].split(')')[0] );
+
+					// B: Load an iframe for each storman page, then parse
+					for (var idx=0; idx<intPages; idx++) {
+						gArrAjaxResults.push('iframe'+idx);
+						$('#scraper').after('<iframe id="iframe'+idx+'" class="jsTemp" src="" frameborder="0" width="1" height="1" style="display:none"></iframe>');
+						$('#iframe'+idx).prop('src', urlStormanBase+'_layouts/15/storman.aspx?root=&OrderBy=0&Asc=0&Page='+idx);
+						$('#iframe'+idx).on('load', function(){
+							// A:
+							var strCellSite = "", strCellUsed = "", strCellPrct = "";
+
+							// B:
+							$(this).contents().find('#onetidUserRptrTable tbody tr').each(function(i,row){
+								strCellSite = $.trim( $(row).find('td:nth-child(2) a').text() );
+								strCellUsed = $.trim( $(row).find('td:nth-child(3)  ').text() );
+								strCellPrct = $.trim( $(row).find('td:nth-child(4)  ').text() );
+
+								// Recalc all sizes to be MB
+								strCellUsed.replace('< ', '').replace('<', '');
+								if ( strCellUsed.indexOf('GB') > -1 ) {
+									strCellUsed = (Number(strCellUsed.split(' ')[0]) * 1024).toFixed(1);
+								}
+								else if ( strCellUsed.indexOf('KB') > -1 ) {
+									strCellUsed = (Number(strCellUsed.split(' ')[0]) / 1024).toFixed(1);
+								}
+								else {
+									strCellUsed = strCellUsed.split(' ')[0];
+								}
+
+								if ( strCellSite && gObjMapNameToId[strCellSite] ) {
+									gObjSubsites[ gObjMapNameToId[strCellSite] ].UsedSize = strCellUsed;
+									gObjSubsites[ gObjMapNameToId[strCellSite] ].UsedPct  = strCellPrct;
+								}
+							});
+
+							// C:
+							doneAjaxCalls('iframe'+idx);
+						});
+					}
+				}
+				else {
+					console.error('scraper didnt load');
+				}
+			});
+			// TODO: on('error')
+
+			// STEP 2: Load storman report
+			$('#scraper').prop('src', urlStormanBase+'_layouts/15/storman.aspx?root=&OrderBy=0&Asc=0&Page=0');
+		}
+
+		function doShowData() {
+			// STEP 1: Add data rows
+			$.each(gObjSubsites, function(id,site){
+				var row = $('<tr/>');
+
+				row.append('<td>'+ site.Name +'</td>');
+				row.append('<td><a href="'+site.Url+'">'+ site.Url.substring(site.Url.lastIndexOf('/')+1) +'</a></td>');
+				row.append('<td class="center">'+ site.UsedSize +'</td>');
+				row.append('<td class="center">'+ site.UsedPct +'</td>');
+				row.append('<td class="nowrap">'+ getDateStrFromISO(site.Created,'INTL') +'</td>');
+				row.append('<td class="nowrap">'+ getDateStrFromISO(site.Modified,'INTL') +'</td>');
+				row.append('<td class="dmyExcelWrap">'+ site.GroupOwners +'</td>');
+
+				$('#tabSubsites tbody').append( row );
+			});
+
+			// STEP 2:
+			if ( $.tablesorter ) $('#tabSubsites').tablesorter({ sortList:[[0,0]] }); // Sort by (Col#/Asc=0,Desc=1)
+			// TODO: tablesorter isnt working - it runs, but no result (Style broken?)
+
+			// STEP 3:
+			$('#tabSubsites tfoot tr').hide();
+		}
+
+		// ==================================================================================================================
+
+		function handleListChange() {
+			// A: Clear results
+			$('#tab1-ListInfo table').remove();
+			$('#tab1-ListCols table').remove();
+			// B: Return if nothing selected
+			if ( !$('#selSiteLists').val() ) return;
+
+			// LIST INFO:
+			$('#tab1-ListInfo pre code').text( 'sprLib.list(\''+ $('#selSiteLists').val() +'\').info()' );
+			sprLib.list($('#selSiteLists').val()).info()
+			.then(function(objInfo){
+				var $table = $('<table><tbody></tbody></table>');
+				Object.keys(objInfo).forEach(function(key,idx){
+					$table.find('tbody').append('<tr><th>'+ key +'</th>'+'<td>'+ objInfo[key] +'</td></tr>');
+				});
+				$('#tab1-ListInfo').append( $table );
+			})
+			.catch(function(errMsg){
+				$('$tab1-ListInfo .tableRows').after( '<table><tbody><tr><td>'+errMsg+'</td></tr></tbody></table>' );
+			});
+
+			// LIST COLS:
+			$('#tab1-ListCols pre code').text( 'sprLib.list(\''+ $('#selSiteLists').val() +'\').cols()' );
+			sprLib.list($('#selSiteLists').val()).cols()
+			.then(function(arrColObjs){
+				var $table = $('<table><thead><tr></tr></thead><tbody></tbody></table>');
+
+				if ( arrColObjs.length ) $.each(arrColObjs[0],function(key,val){ $table.find('thead tr').append('<th>'+key+'</th>') });
+
+				arrColObjs.forEach(function(obj,idx){
+					let $row = $('<tr/>');
+					$.each(obj,function(key,val){ $row.append('<td>'+val+'</td>') });
+					$table.find('tbody').append( $row );
+				});
+
+				$('#tab1-ListCols').append( $table );
+			})
+			.catch(function(errMsg){
+				$('$tab1-ListCols .tableRows').after( '<table><tbody><tr><td>'+errMsg+'</td></tr></tbody></table>' );
+			});
+		}
+
+		// ==================================================================================================================
+
+		function execCodeAndShowResults(eleCode, eleData) {
+			var SKIP_META = true;
+
+			// A:
+			$('#'+eleData).html( HTML_SPINNER );
+
+			// B:
+			Promise.resolve()
+			.then(function(){ return eval( $('#'+eleCode).text() ) })
+			.then(function(arrItems){
+				if ( arrItems && !Array.isArray(arrItems) ) {
+					$('#'+eleData).html( arrItems );
+					return;
+				}
+				else if ( !arrItems || arrItems.length == 0 ) {
+					$('#'+eleData).html( '(No results returned)' );
+					return;
+				}
+
+				var arrColHeadings = [];
+				Object.keys(arrItems[0]).forEach(function(key,idx){
+					if ( SKIP_META && key == '__metadata' ) return;
+					if ( typeof key === 'object' ) Object.keys(key).forEach(function(key,idx){ arrColHeadings.push(key) });
+					else arrColHeadings.push(key);
+				});
+
+				var table = new AsciiTable().setHeading( arrColHeadings );
+				arrItems.forEach(function(obj,idx){
+					var vals = [];
+					$.each(obj, function(key,val){
+						if ( SKIP_META && key == '__metadata' ) return;
+						vals.push( ( typeof val === 'object' && key != '__metadata' ? JSON.stringify(val) : val ) );
+					});
+					table.addRow(vals);
+				});
+
+				// Show
+				$('#'+eleData).html( (arrItems && arrItems.length > 0 ? table.toString() : '(No results)') );
+			})
+			.catch(function(strErr){
+				$('#'+eleData).html( '<h2 style="color:red">ERROR</h2>'+strErr );
+			});
+		}
+
+		function doPageLoad() {
+			// STEP 1: HTML Setup
+			document.title = "SpRestLib SharePoint Toolkit";
+
+			// TAB: Setup
+			{
+				// SP: Datetime Stamp
+				$('#spDateTime').text( new Date().toLocaleString() );
+
+				// JS.A: jQuery
+				if ( typeof jQuery !== 'undefined' ) {
+					$('#libChkJquery').append( '<div class="iconYes"></div>' );
+				}
+				else {
+					$('#libChkJquery').append('oops - go check <script> tag ');
+				}
+
+				// JS.B: jQuery-tablesorter
+				if ( typeof $.tablesorter !== 'undefined' ) {
+					$('#libChkTsorter').append( '<div class="iconYes"></div>' );
+					var baseUrl = sprLib.baseUrl();
+
+					// Make human readable when relative directory returned
+					if ( baseUrl == ".." ) {
+						baseUrl = location.href.substring(0, location.href.lastIndexOf('/'));
+						baseUrl = baseUrl.substring(0, baseUrl.lastIndexOf('/'));
+
+						$('#spVersion').text( sprLib.version() );
+					}
+					$('#spBaseUrl').text( baseUrl );
+				}
+				else {
+					$('#libChkTsorter').append('<div class="iconFail"></div><br>oops - go check <script> tag ');
+				}
+
+				// JS.C: SpRestLib
+				if ( typeof sprLib !== 'undefined' ) {
+					$('#libChkSprLib').append( '<div class="iconYes"></div>' );
+					var baseUrl = sprLib.baseUrl();
+
+					// Make human readable when relative directory returned
+					if ( baseUrl == ".." ) {
+						baseUrl = location.href.substring(0, location.href.lastIndexOf('/'));
+						baseUrl = baseUrl.substring(0, baseUrl.lastIndexOf('/'));
+
+						$('#spVersion').text( sprLib.version() );
+					}
+					$('#spBaseUrl').text( baseUrl );
+				}
+				else {
+					$('#libChkSprLib').append( '<div class="iconFail"></div><br>oops - go check <script> tag ' );
+					$('#spBaseUrl').text( '(n/a)' );
+
+					// Halt execution
+					return;
+				}
+
+				// LAST: Remove loading images
+				$('#tabSetup .iconQues').remove();
+			}
+
+			// TAB: Site Info
+			{
+				getSiteInfo();
+			}
+
+			// TAB: List Tools
+			{
+				// Populate <select> with List names
+				sprLib.rest({ restUrl:'/_api/web/lists/' })
+				.then(function(arrayListObjs){
+					arrayListObjs
+					.sort(function(a,b){return (a.Title > b.Title) ? 1 : ((b.Title > a.Title) ? -1 : 0);} )
+					.forEach(function(obj,idx){
+						if ( !obj.Hidden ) $('#selSiteLists').append('<option value="'+ obj.Title +'">'+ obj.Title +'</option>');
+					});
+					$('#contListSelect .sprlib-spinner').remove();
+				});
+			}
+
+			// TAB: User/Groups Tools
+			{
+				var user1Code = "sprLib.user().info()\n"
+					+ ".then(function(objUser){\n"
+					+ "    $.each(objUser,function(key,val){\n"
+					+ "        if (typeof val !== 'object') $('#user1Html table tbody').append('<tr><th>'+ key +'</th><td>'+ val +'</td></tr>');\n"
+					+ "    });\n"
+					+ '});';
+				$('#user1Code pre code').text( user1Code );
+				eval(user1Code);
+
+				var user2Code = "sprLib.user().groups()\n"
+					+ '.then(function(arrGroups){\n'
+					+ "    arrGroups.forEach(function(objGroup,idx){\n"
+					+ "        $('#user2Html table tbody').append('<tr><td>'+ objGroup.Id +'</td><td>'+ objGroup.Title +'</td></tr>');\n"
+					+ "    });\n"
+					+ '});';
+				$('#user2Code pre code').text( user2Code );
+				eval(user2Code);
+			}
+		}
+
+		// TODO: Stop using this old method!! move to Promise before checkin
+		function doneAjaxCalls(strAjaxGroup) {
+			// STEP 1: Remove completed op from working array
+			gArrAjaxResults.splice( $.inArray(strAjaxGroup,gArrAjaxResults), 1 );
+
+			// STEP 2:
+			if ( gArrAjaxResults.length == 0 ) doShowData();
+		}
+
+		// ==================================================================================================================
+		window.onload = function(){ doPageLoad(); SetFullScreenMode(true); }
+	</script>
+</head>
+<body>
+	<iframe id="scraper" style="display:none"></iframe>
+
+	<div id="divBody">
+		<div class="bigTitle"><a href="https://github.com/GitBrent/SpRestLib" target="_blank">SpRestLib</a> SharePoint Toolkit</div>
+		<div class="bigSubtitle">Useful Tools for SharePoint Developers, Admins and SCAs.</div>
+
+		<div id="navTabs" class="flexTabs">
+			<ul>
+				<li onclick="$('#navTabs').find('> div, li').removeClass('active'); $(this).addClass('active'); $('#tabSetup').addClass('active');" class="active">Setup</li>
+				<li onclick="$('#navTabs').find('> div, li').removeClass('active'); $(this).addClass('active'); $('#tabSite').addClass('active');">Site Info</li>
+				<li onclick="$('#navTabs').find('> div, li').removeClass('active'); $(this).addClass('active'); $('#tabList').addClass('active');">List Compare</li>
+				<li onclick="$('#navTabs').find('> div, li').removeClass('active'); $(this).addClass('active'); $('#tabUser').addClass('active');">Users and Groups</li>
+			</ul>
+
+			<div id="tabSetup" data-tab="Setup" class="active">
+				<div class="subTitle">Welcome!</div>
+				<div class="bigger">
+					Let's check your setup and show you how SpRestLib is configured.
+					<ul>
+						<li>If everything below looks okay, then all the functionality in the demo tabs are ready to explore.</li>
+						<li>Please check the <a href="https://github.com/gitbrent/SpRestLib">GitHub Project Site</a> for setup
+						and configuration FAQs and full documentation.</li>
+					</ul>
+				</div>
+
+				<div class="flex">
+					<div data-name="col1" style="flex:1 1 auto; margin-right:50px;">
+						<div class="subTitle">JavaScript Library Check</div>
+						<div class="divTableRows">
+							<div>
+								<div id="libChkJquery"><div class="iconQues"></div></div><div>jQuery loaded?</div>
+							</div>
+							<div>
+								<div id="libChkTsorter"><div class="iconQues"></div></div><div>TableSorter loaded?</div>
+							</div>
+							<div>
+								<div id="libChkSprLib"><div class="iconQues"></div></div><div>SpRestLib loaded?</div>
+							</div>
+						</div>
+					</div>
+					<div data-name="col2" style="flex:2 1 auto;">
+						<div class="subTitle">SharePoint Environment / Configuration</div>
+						<div class="divTableRows">
+							<div>
+								<div><div class="iconInfo"></div></div><div>SpRestLib Base URL</div><div id="spBaseUrl"></div>
+							</div>
+							<div>
+								<div><div class="iconInfo"></div></div><div>SpRestLib Version</div><div id="spVersion">?</div>
+							</div>
+							<div>
+								<div><div class="iconInfo"></div></div><div>Current Date/Time</div><div id="spDateTime"></div>
+							</div>
+						</div>
+					</div>
+				</div>
+				<p>
+			</div>
+
+			<div id="tabSite" data-tab="Site Info">
+				<div class="subTitle">Site Collection Information</div>
+				<div class="flex">
+					<div>
+						Click to load data. It's not loaded by default as each site has to be scanned
+						Also note: storman has no API (csom,jsom,rest), so the usage is gathering by loading each site's storman and parsing it
+					</div>
+					<div>
+						<button type="button" class="flatBtn flatBtn-blue">Load Subsite Usage</button>
+					</div>
+				</div>
+
+				<div class="subTitle" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
+					<div class="arrow active"></div>Site Info
+				</div>
+
+				<div class="modernTable">
+					<div><label>Site Name</label><span id="SiteName"></span></div>
+					<div><label>Site Description</label><span id="SiteDesc"></span></div>
+					<div style="width:10%; text-align:center;"><label>Total Storage Used</label><span id="UsageTot"></span></div>
+					<div style="width:10%; text-align:center;"><label>Percent Storage Used</label><span id="UsagePct"></span></div>
+				</div>
+
+				<div class="sectionTitle">Subsite Report</div>
+				<table id="tabSubsites" class="tabModern">
+					<thead>
+						<tr>
+							<th>Subsite Name</th>
+							<th>Subsite URL</th>
+							<th>Total Size (MB)</th>
+							<th>Used %</th>
+							<th>Created</th>
+							<th>Last Modified</th>
+							<th>Owners Group Members</th>
+						</tr>
+					</thead>
+					<tbody></tbody>
+					<tfoot>
+						<tr>
+							<td colspan="7" style="text-align:center; border:1px solid #f1f1f1;">
+								<div class="sprlib-spinner"><div class="sprlib-bounce1"></div><div class="sprlib-bounce2"></div><div class="sprlib-bounce3"></div></div>
+							</td>
+						</tr>
+					</tfoot>
+				</table>
+			</div>
+
+			<div id="tabList" data-tab="List Tools">
+				<div class="subTitle">List/Library Compare</div>
+				<p>
+					Here are all the Lists/Libraries found on this site:<br>
+					Select one and try some CRUD ops!
+				</p>
+
+				<div id="contListSelect" class="divTable" style="width:auto; margin-bottom:20px;">
+					<div class="th">
+						Site Lists/Libraries
+					</div>
+					<div>
+						<div class="sprlib-spinner"><div class="sprlib-bounce1"></div><div class="sprlib-bounce2"></div><div class="sprlib-bounce3"></div></div>
+						<select id="selSiteLists" onchange="handleListChange()">
+							<option value="">Select...</option>
+						</select>
+						<span>(only non-hidden Lists/Libraries are shown)</span>
+					</div>
+				</div>
+
+				<div id="tab1-ListInfo" style="margin-bottom:20px;">
+					<div class="subTitle">List Information</div>
+					<div><pre><code class="language-javascript">sprLib.list('listName').info()</code></pre></div>
+				</div>
+
+				<div id="tab1-ListCols" style="margin-bottom:20px;">
+					<div class="subTitle">List Columns</div>
+					<div><pre><code class="language-javascript">sprLib.list('listName').cols()</code></pre></div>
+				</div>
+			</div>
+
+			<div id="tabUser" data-tab="Users and Groups Tools">
+				<div class="subTitle">User Methods</div>
+				<p>
+					Get User Information (Title, Email, etc.) and User Groups (which SP Groups they belong to).
+				</p>
+
+				<div class="subTitle">User Information</div>
+				<div>
+					<div id="user1Code"><pre><code class="language-javascript"></code></pre></div>
+					<div id="user1Html" style="margin-bottom:20px">
+						<table>
+							<tbody></tbody>
+						</table>
+					</div>
+				</div>
+
+				<div class="subTitle">User Groups</div>
+				<div>
+					<div id="user2Code"><pre><code class="language-javascript"></code></pre></div>
+					<div id="user2Html" style="margin-bottom:20px">
+						<table>
+							<thead>
+								<tr>
+									<th style="width:10%">Group ID</th>
+									<th style="width:90%">Group Title</th>
+								</tr>
+							</thead>
+							<tbody></tbody>
+						</table>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</body>
+</html>
