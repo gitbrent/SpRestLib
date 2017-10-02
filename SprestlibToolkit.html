@@ -291,15 +291,14 @@
 	<script type="text/javascript">
 		// APP
 		const APP_VER = '1.0.0';
-		const APP_REL = '20170930';
-		// JQUERY
-		$.ajaxSetup({ cache:false, maxRetries:2, timeout:30000 });
-		// CONSTANTS
+		const APP_REL = '20171001';
+		// CONSTANTS: UI/LOGIC
 		const HTML_SPINNER = '<div class="sprlib-spinner"><div class="sprlib-bounce1"></div><div class="sprlib-bounce2"></div><div class="sprlib-bounce3"></div></div>';
 		const STR_EMPTY = '<span style="color:#ccc; font-style:italic;">(empty)</span>';
 		const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+		// COMSTANTS: APP
+		const MAXSITES = 50;
 		// GLOBAL VARS
-		var gArrAjaxResults = [];
 		var gObjMapNameToId = {};
 		var gObjSubsites = {};
 
@@ -361,145 +360,80 @@
 		// ==================================================================================================================
 
 		function getSiteInfo() {
-			var arrPromises = [];
-
 			// STEP 1: Root site data header
 			Promise.resolve()
 			.then(() => {
-				return sprLib.rest({ url:'_api/web', queryCols:['Title','Description','Url'] });
+				return sprLib.rest({ url:'_api/web', queryCols:['Title','Description','Url'], queryLimit:MAXSITES });
 			})
-			.then(arrResults => {
-				$('#SiteName').html( arrResults[0].Title || STR_EMPTY );
-				$('#SiteDesc').html( arrResults[0].Description || STR_EMPTY );
+			.then(arrSite => {
+				$('#SiteName').html( arrSite[0].Title || STR_EMPTY );
+				$('#SiteDesc').html( arrSite[0].Description || STR_EMPTY );
 
 				return sprLib.rest({ url:'_api/site/usage', queryCols:['Usage/Storage','Usage/StoragePercentageUsed'] });
 			})
-			.then(arrResults => {
-				$('#UsageTot').text( (arrResults[0].Usage.Storage / (1024*1024*1024)).toFixed(2) + ' GB');
-				$('#UsagePct').text( (arrResults[0].Usage.StoragePercentageUsed * 100).toFixed(2) + '%');
+			.then(arrUsage => {
+				$('#UsageTot').text( (arrUsage[0].Usage.Storage / (1024*1024*1024)).toFixed(2) + ' GB');
+				$('#UsagePct').text( (arrUsage[0].Usage.StoragePercentageUsed * 100).toFixed(2) + '%');
 
 				return sprLib.rest({
 					url: '_api/web/webs',
 					queryCols: {
-						Id:			{ dataName:'Id'						,dispName:'Id'                 },
-						Name:		{ dataName:'Title'					,dispName:'Subsite Name'       },
-						Url:		{ dataName:'Url'					,dispName:'Site Url'           },
-						Created:	{ dataName:'Created'				,dispName:'Date Created'       },
-						Modified:	{ dataName:'LastItemModifiedDate'	,dispName:'Date Last Modified' },
+						Id:				{ dataName:'Id'						,dispName:'Id'					},
+						Name:			{ dataName:'Title'					,dispName:'Subsite Name'		},
+						Url:			{ dataName:'Url'					,dispName:'Site Url'			},
+						Created:		{ dataName:'Created'				,dispName:'Date Created'		},
+						Modified:		{ dataName:'LastItemModifiedDate'	,dispName:'Date Last Modified'	},
+						Language:		{ dataName:'Language'				,dispName:'Language'			},
+						IsMultilang:	{ dataName:'IsMultilingual'			,dispName:'Is Multilingual?'	},
 					}
 				});
 			})
-			.then(arrResults => {
-				arrResults.forEach(function(site,idx){
-					// A: Capture base subsite data
+			.then(arrSubsites => {
+				arrSubsites.forEach(function(site,idx){
+					// A: Capture base subsite object
 					gObjSubsites[site.Id] = site;
 
 					// B: Create mapping so we can store usage results as they come back
 					gObjMapNameToId[site.Name] = site.Id;
 
 					// C: OTHER-DATA: Subsite Owner Group Id
-					arrPromises.push(
-						sprLib.rest({ url:site.Url+'/_api/web/AssociatedOwnerGroup', objCols:'Id' })
-						.then(arrResults => {
-							sprLib.rest({ url:site.Url+'/_api/web/SiteGroups/GetById('+ arrResults[0].Id +')/Users', queryCols:['Title','Email'] })
-							.then(arrResults => {
-								gObjSubsites[site.Id].GroupOwners = [];
-								arrResults.forEach((result,idx) => { gObjSubsites[site.Id].GroupOwners += result.Email + '; '; });
-							});
-						})
-					);
-				});
-
-				// D: Get Site Owners
-				Promise.all(arrPromises)
-				.then(() => {
-					getStorman();
+					Promise.resolve()
+					.then(() => {
+						return sprLib.rest({ url:site.Url+'/_api/web/AssociatedOwnerGroup', objCols:'Id' });
+					})
+					.then(arrOwnerId => {
+						return sprLib.rest({ url:site.Url+'/_api/web/SiteGroups/GetById('+ arrOwnerId[0].Id +')/Users', queryCols:['Title','Email'] });
+					})
+					.then(arrGroups => {
+						site.GroupOwners = [];
+						arrGroups.forEach((result,idx) => { site.GroupOwners += result.Email+'; '; });
+					});
 				});
 			})
+			.then(() => getStorman())
 			.catch(strErr => console.error(strErr));
 		}
 
-		function getSubsites() {
-			// STEP 1:
-			$.ajax({
-				url: "../_api/web/webs?$select=Id,Title,Url,Description,Created,Language,LastItemModifiedDate,IsMultilingual&$top=5000",
-				type: "GET",
-				headers: { "Accept":"application/json; odata=verbose" }
-			})
-			.done(function(data,textStatus){
-				$.each(data.d.results, function(i,result){
-					gObjSubsites[result.Id] = {
-						Title:			result.Title,
-						Url:			result.Url,
-						UrlHtml:		'<a href="'+result.Url+'">'+ result.Url.substring(result.Url.lastIndexOf('/')+1) +'</a>',
-						Created:		result.Created,
-						Modified:		result.LastItemModifiedDate,
-						GroupOwners:	[]
-					};
-
-					gArrAjaxResults.push( 'group'+result.Id );
-					getOwnersGroupMembers( result.Id );
-				});
-
-				// LAST:
-				doneAjaxCalls('getSubsites');
-			})
-			.fail(function(jqXHR,textStatus,errorThrown){
-				var strErr = "(" + jqXHR.status + ") " + textStatus + "/" + errorThrown;
-				try { strErr = $.parseJSON(jqXHR.responseText).error['message'].value; } catch(ex) { }
-				$('#bodyCont').prepend(strErr);
-			});
-		}
-
-		function getSiteMembers(groupID) {
-			// STEP 1:
-			$.ajax({
-				url: gObjSubsites[groupID].Url + '/_api/web/AssociatedOwnerGroup?$select=Id',
-				type: "GET",
-				headers: { "Accept":"application/json; odata=verbose" }
-			})
-			.done(function(data,textStatus) {
-				// STEP 2:
-				$.ajax({
-					url: gObjSubsites[groupID].Url + '/_api/web/SiteGroups/GetById('+ data.d.Id +')/Users?$select=Title,Email',
-					type: "GET",
-					headers: { "Accept":"application/json; odata=verbose" }
-				})
-				.done(function(data,textStatus) {
-					$.each(data.d.results, function(i,result){
-						gObjSubsites[groupID].GroupOwners += result.Email + '; ';
-					});
-					//
-					doneAjaxCalls('group'+groupID);
-				})
-				.fail(function(jqXHR,textStatus,errorThrown) {
-					var strErr = "(" + jqXHR.status + ") " + textStatus + "/" + errorThrown;
-					try { strErr = $.parseJSON(jqXHR.responseText).error['message'].value; } catch(ex) { }
-					$('#bodyCont').prepend(strErr);
-				});
-			})
-			.fail(function(jqXHR,textStatus,errorThrown) {
-				var strErr = "(" + jqXHR.status + ") " + textStatus + "/" + errorThrown;
-				try { strErr = $.parseJSON(jqXHR.responseText).error['message'].value; } catch(ex) { }
-				$('#bodyCont').prepend(strErr);
-			});
-		}
-
 		function getStorman() {
+			var arriFrameLoads = [];
+
 			// NOTE: Scraping storman is the only option! (no csom/jsom/rest API exists in SP2013/SP2016) - Load and scrape each storman page!
 			var urlStormanBase = location.href.substring(0, location.href.toLowerCase().indexOf('sitepages/')).toLowerCase();
 
-			// STEP 1: Create callback
+			// STEP 1: Create callbacks
 			$('#scraper').on('load', function(){
-				// Check for errors
+				// TODO: Check for errors - page will load (read: $(scraper).error() isnt called), so check here - dont assumce everything is fine
 				// TODO: "500 INTERNAL SERVER ERROR"
 				if ( $('#scraper').contents().find('#onetidUserRptrTable').length > 0 ) {
 					// A: How many storman pages are there? (EX: "(Page1/4)Next")
+					// TODO: #I18N: We'll want to know what "Page" is in Simplified Chinese, etc. - dep. upon users lang
 					var intPages = Number( $('#scraper').contents().find('#onetidUserRptrTable').next('table').find('tbody tr td').text().replace(/\s/gi,'').split('/')[1].split(')')[0] );
 
 					// B: Load an iframe for each storman page, then parse
+					// TODO: create/use MAXSITES - stop at like 50 (or 4 pages of storman)) in cases where sites are _huge_ we dont want to run iFrames for that amount or even loop - thats just too much work in principle.
+					//for (var idx=0; idx<(intPages&&idx<MAXSITES); idx++) {
 					for (var idx=0; idx<intPages; idx++) {
-						gArrAjaxResults.push('iframe'+idx);
+						arriFrameLoads.push('iframe'+idx);
 						$('#scraper').after('<iframe id="iframe'+idx+'" class="jsTemp" src="" frameborder="0" width="1" height="1" style="display:none"></iframe>');
 						$('#iframe'+idx).prop('src', urlStormanBase+'_layouts/15/storman.aspx?root=&OrderBy=0&Asc=0&Page='+idx);
 						$('#iframe'+idx).on('load', function(){
@@ -531,7 +465,8 @@
 							});
 
 							// C:
-							doneAjaxCalls('iframe'+idx);
+							arriFrameLoads.splice(arriFrameLoads.indexOf('iframe'+idx), 1);
+							if ( arriFrameLoads.length == 0 ) showSiteInfo();
 						});
 					}
 				}
@@ -539,13 +474,15 @@
 					console.error('scraper didnt load');
 				}
 			});
-			// TODO: on('error')
+			$('#scraper').on('error', function(){
+				console.error('scraper didnt load');
+			});
 
 			// STEP 2: Load storman report
 			$('#scraper').prop('src', urlStormanBase+'_layouts/15/storman.aspx?root=&OrderBy=0&Asc=0&Page=0');
 		}
 
-		function doShowData() {
+		function showSiteInfo() {
 			// STEP 1: Add data rows
 			$.each(gObjSubsites, function(id,site){
 				var row = $('<tr/>');
@@ -614,50 +551,6 @@
 		}
 
 		// ==================================================================================================================
-
-		function execCodeAndShowResults(eleCode, eleData) {
-			var SKIP_META = true;
-
-			// A:
-			$('#'+eleData).html( HTML_SPINNER );
-
-			// B:
-			Promise.resolve()
-			.then(function(){ return eval( $('#'+eleCode).text() ) })
-			.then(function(arrItems){
-				if ( arrItems && !Array.isArray(arrItems) ) {
-					$('#'+eleData).html( arrItems );
-					return;
-				}
-				else if ( !arrItems || arrItems.length == 0 ) {
-					$('#'+eleData).html( '(No results returned)' );
-					return;
-				}
-
-				var arrColHeadings = [];
-				Object.keys(arrItems[0]).forEach(function(key,idx){
-					if ( SKIP_META && key == '__metadata' ) return;
-					if ( typeof key === 'object' ) Object.keys(key).forEach(function(key,idx){ arrColHeadings.push(key) });
-					else arrColHeadings.push(key);
-				});
-
-				var table = new AsciiTable().setHeading( arrColHeadings );
-				arrItems.forEach(function(obj,idx){
-					var vals = [];
-					$.each(obj, function(key,val){
-						if ( SKIP_META && key == '__metadata' ) return;
-						vals.push( ( typeof val === 'object' && key != '__metadata' ? JSON.stringify(val) : val ) );
-					});
-					table.addRow(vals);
-				});
-
-				// Show
-				$('#'+eleData).html( (arrItems && arrItems.length > 0 ? table.toString() : '(No results)') );
-			})
-			.catch(function(strErr){
-				$('#'+eleData).html( '<h2 style="color:red">ERROR</h2>'+strErr );
-			});
-		}
 
 		function doPageLoad() {
 			// STEP 1: HTML Setup
@@ -759,15 +652,6 @@
 				$('#user2Code pre code').text( user2Code );
 				eval(user2Code);
 			}
-		}
-
-		// TODO: Stop using this old method!! move to Promise before checkin
-		function doneAjaxCalls(strAjaxGroup) {
-			// STEP 1: Remove completed op from working array
-			gArrAjaxResults.splice( $.inArray(strAjaxGroup,gArrAjaxResults), 1 );
-
-			// STEP 2:
-			if ( gArrAjaxResults.length == 0 ) doShowData();
 		}
 
 		// ==================================================================================================================
