@@ -131,6 +131,7 @@
 		.flex {
 			display: flex;
 			flex-wrap: nowrap;
+			margin-bottom: 20px;
 		}
 		.flex > div {
 			flex: 1 1 auto;
@@ -531,15 +532,16 @@
 					});
 				});
 			})
-			.then(() => getStorman())
 			.catch(strErr => console.error(strErr));
 		}
 
 		function getStorman() {
 			var arriFrameLoads = [];
-
 			// NOTE: Scraping storman is the only option! (no csom/jsom/rest API exists in SP2013/SP2016) - Load and scrape each storman page!
 			var urlStormanBase = location.href.substring(0, location.href.toLowerCase().indexOf('sitepages/')).toLowerCase();
+
+			// STEP 1: UI
+			$('tabSubsites tr.busy').show();
 
 			// STEP 1: Create callbacks
 			$('#scraper').on('load', function(){
@@ -623,7 +625,7 @@
 			if ( $.tablesorter ) $('#tabSubsites').tablesorter({ sortList:[[0,0]] }); // Sort by (Col#/Asc=0,Desc=1)
 
 			// STEP 3:
-			$('#tabSubsites tfoot tr').hide();
+			$('#tabSubsites tr.busy').hide();
 		}
 
 		// ==================================================================================================================
@@ -841,19 +843,16 @@
 				<div class="subTitle">Site Collection Information</div>
 				<div class="flex">
 					<div>
-						Click to load data. It's not loaded by default as each site has to be scanned
-						Also note: storman has no API (csom,jsom,rest), so the usage is gathering by loading each site's storman and parsing it
+						Click to load subiste information and storage data.<br>
+						It is not loaded by default as each site has to be scanned and can be resource intensive.<br>
+						(NOTE: storman has no API - csom, jsom, or REST - so the usage is gathering by loading each site's storman and parsing it)
 					</div>
-					<div>
-						<button type="button" class="flatBtn flatBtn-blue">Load Subsite Usage</button>
+					<div style="vertical-align:top; text-align:right;">
+						<button type="button" class="flatBtn flatBtn-blue" onclick="getStorman()">Load Subsite Info</button>
 					</div>
 				</div>
 
-				<div class="subTitle" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
-					<div class="arrow active"></div>Site Info
-				</div>
-
-				<div class="modernTable">
+				<div class="modernTable" data-info="Site Info Table">
 					<div style="width:5%; vertical-align:middle; padding:5px;"><img id="siteLogo" style="max-height:50px; max-width:100px;"></span></div>
 					<div style="width:25%"><label>Site Name</label><span id="SiteName"></span></div>
 					<div style="width:15%; text-align:center;"><label>Storage Used</label><span id="UsageTot"></span></div>
@@ -862,8 +861,18 @@
 					<div style="width:20%; text-align:center;"><label>Last Modified</label><span id="DateMod"></span></div>
 				</div>
 
-				<div class="sectionTitle">Subsite Report</div>
-				<table id="tabSubsites" class="tabModern">
+				<div class="subTitle" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
+					<div class="arrow active"></div>Lists &amp; Libraries
+				</div>
+				<div class="contTabSubsites">
+					TODO: Show Lists, Libraries: name, date, item count, (uniquePerms?)
+				</div>
+
+				<div class="subTitle" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
+					<div class="arrow"></div>Subsites
+				</div>
+				<div class="contTabSubsites" style="display:none">
+					<table id="tabSubsites" class="tabModern">
 					<thead>
 						<tr>
 							<th>Subsite Name</th>
@@ -877,13 +886,14 @@
 					</thead>
 					<tbody></tbody>
 					<tfoot>
-						<tr>
+						<tr class="busy" style="display:none">
 							<td colspan="7" style="text-align:center; border:1px solid #f1f1f1;">
 								<div class="sprlib-spinner"><div class="sprlib-bounce1"></div><div class="sprlib-bounce2"></div><div class="sprlib-bounce3"></div></div>
 							</td>
 						</tr>
 					</tfoot>
 				</table>
+				</div>
 			</div>
 
 			<div id="navtabList" data-tab="List Tools">
