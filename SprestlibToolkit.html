@@ -16,8 +16,7 @@
 	<meta name="description" content="Content Editor Webpart: SpRestLib SharePoint Toolkit">
 	<meta name="revised"     content="Sep 30, 2017">
 
-	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300">
-	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:700">
+	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:100">
 	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto+Mono">
 	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:400">
 
@@ -29,9 +28,9 @@
 			margin: -10px 30px 10px 30px;
 		}
 		#divBody div { box-sizing: border-box; }
-		.bigTitle { font-family:'Roboto'; font-size:36px; color:#0088cc; margin:15px 0 10px 0; }
-		.bigSubtitle { font-family:'Roboto'; font-size:16px; color:#c7c7c7; margin:10px 0 20px 0; }
-		.sectionTitle, .subTitle { font-family:'Roboto'; font-size:18px; color:#0088cc; margin:20px 0 10px 0; cursor: pointer; }
+		.bigTitle { font-family:'Open Sans','Segoe UI'; font-size:36px; color:#0088cc; margin:15px 0 10px 0; }
+		.bigSubtitle { font-family:'Open Sans','Segoe UI'; font-size:16px; color:#c7c7c7; margin:10px 0 20px 0; }
+		.sectionTitle, .subTitle { font-family:'Open Sans','Segoe UI'; font-size:18px; color:#0088cc; margin:20px 0 10px 0; cursor: pointer; }
 		.bigger { font-size:1.1em; }
 		.arrow {
 			display: inline-block;
@@ -50,8 +49,10 @@
 		#tabSubsites tbody td:nth-child(1) { min-width: 250px; }
 		#tabSubsites tbody td:nth-child(3) { white-space: nowrap; }
 		#tabSubsites tbody td:nth-child(4) { white-space: nowrap; }
-		div.modernTable > div { vertical-align: top; }
-		div.modernTable span { font-size: 24px; }
+
+		#navtabSite div.modernTable > div { vertical-align: top; }
+		#navtabSite div.modernTable span { font-family: Roboto; font-size: 24px; }
+		#navtabSite #DateCre, #navtabSite #DateMod { white-space: nowrap; }
 
 		.iconYes {
 			width:  32px; min-width:  32px;
@@ -78,7 +79,7 @@
 		.flexTabs {
 			width: 100%;
 			margin: 20px 0 10px 0;
-			font-family: Roboto, "Segoe UI", Helvetica, Arial, sans-serif;
+			font-family: "Segoe UI", "Open Sans", Helvetica, Arial, sans-serif;
 			border: 1px solid #d5d5d5;
 			box-shadow: 0px 4px 10px -5px rgba(0,0,0,0.5);
 			border-radius: 5px;
@@ -147,13 +148,13 @@
 		div.divTableRows > div > div { display: table-cell; padding: 5px 10px; vertical-align: middle; background: #f2f9fc; }
 
 		/* */
-		#tabSetup .divTableRows {
+		#navtabSetup .divTableRows {
 			min-width: 200px;
 			font-size: 14px;
 			border: 1px solid #d7e7f7;
 		}
-		#tabSetup .divTableRows > div > div { padding: 15px; background: #f2f9fc; }
-		#tabSetup .divTableRows > div > div:first-child { width:1%; }
+		#navtabSetup .divTableRows > div > div { padding: 15px; background: #f2f9fc; }
+		#navtabSetup .divTableRows > div > div:first-child { width:1%; }
 
 		/*-*/
 		.flatBtn {
@@ -175,7 +176,7 @@
 		.flatBtn-green,	.flatBtn-green:hover	{ background-color: #27AE60 !important; }
 		.flatBtn-blue,	.flatBtn-blue:hover		{ background-color: #3498DB !important; }
 
-		/* ===== Tables ===== */
+		/* ===== */
 		.modernTable {
 			/*font-family: "Open Sans","Segoe UI";*/
 			display: table;
@@ -211,6 +212,7 @@
 			font-size: 11px;
 			margin-bottom: 3px;
 		}
+		.modernTable .size { text-align: right; padding-right: 20px !important; }
 
 		/* sprestlib.css */
 		.sprlib-spinner { display: block; text-align: center; height: 16px; }
@@ -347,14 +349,14 @@
 		.tabModern > tbody > tr > th {
 			vertical-align: top;
 			text-align: left;
-			padding: 6px 10px;
+			padding: 8px 10px;
 			background: #f2f9fc;
 			color: #0088cc;
 			box-sizing: border-box;
 		}
 		.tabModern > tbody > tr > td {
 			text-align: left;
-			padding: 6px 10px;
+			padding: 8px 10px;
 			background: white;
 			box-sizing: border-box;
 		}
@@ -389,7 +391,7 @@
 	<script type="text/javascript">
 		// APP
 		const APP_VER = '1.0.0';
-		const APP_REL = '20171001';
+		const APP_REL = '20171002';
 		// CONSTANTS: UI/LOGIC
 		const HTML_SPINNER = '<div class="sprlib-spinner"><div class="sprlib-bounce1"></div><div class="sprlib-bounce2"></div><div class="sprlib-bounce3"></div></div>';
 		const STR_EMPTY = '<span style="color:#ccc; font-style:italic;">(empty)</span>';
@@ -462,14 +464,24 @@
 			// STEP 1: Root site data header
 			Promise.resolve()
 			.then(() => {
-				return sprLib.rest({ url:'_api/web', queryCols:['Title','Description','Url'], queryLimit:MAXSITES });
+				return sprLib.rest({
+					url:'_api/web',
+					queryCols:['Title','Description','Url','Created','LastItemModifiedDate','SiteLogoUrl'],
+					queryLimit:MAXSITES
+				});
 			})
 			.then(arrSite => {
 				if (MODE_VERBOSE) { console.log('arrSite[0]:'); console.table(arrSite[0]); }
 
-				$('#SiteName').html( arrSite[0].Title || STR_EMPTY );
-				$('#SiteDesc').html( arrSite[0].Description || STR_EMPTY );
+				// A: Show site info
+				if ( arrSite[0].SiteLogoUrl ) $('#siteLogo').prop('src', arrSite[0].SiteLogoUrl);
+				else $('#siteLogo').hide().parent('div').css('padding','0').css('width','1px');
 
+				$('#SiteName').html( arrSite[0].Title || STR_EMPTY );
+				$('#DateCre').text( getDateStrFromISO(arrSite[0].Created,'INTL') );
+				$('#DateMod').text( getDateStrFromISO(arrSite[0].LastItemModifiedDate,'INTL') );
+
+				// B: Next
 				return sprLib.rest({ url:'_api/site/usage', queryCols:['Usage/Storage','Usage/StoragePercentageUsed'] });
 			})
 			.then(arrUsage => {
@@ -515,7 +527,7 @@
 					.then(arrGroups => {
 						if (MODE_VERBOSE) { console.log('arrGroups:'); console.table(arrGroups); }
 						site.GroupOwners = [];
-						arrGroups.forEach((result,idx) => { site.GroupOwners += result.Email+'; '; });
+						arrGroups.forEach((result,idx) => { site.GroupOwners += (result.Email ? result.Email+'; ' : ''); });
 					});
 				});
 			})
@@ -598,10 +610,10 @@
 
 				row.append('<td>'+ site.Name +'</td>');
 				row.append('<td><a href="'+site.Url+'">'+ site.Url.substring(site.Url.lastIndexOf('/')+1) +'</a></td>');
-				row.append('<td class="center">'+ site.UsedSize +'</td>');
+				row.append('<td class="size">'+ site.UsedSize +'</td>');
 				row.append('<td class="center">'+ site.UsedPct +'</td>');
-				row.append('<td class="nowrap">'+ getDateStrFromISO(site.Created,'INTL') +'</td>');
-				row.append('<td class="nowrap">'+ getDateStrFromISO(site.Modified,'INTL') +'</td>');
+				row.append('<td class="nowctr">'+ getDateStrFromISO(site.Created,'INTL') +'</td>');
+				row.append('<td class="nowctr">'+ getDateStrFromISO(site.Modified,'INTL') +'</td>');
 				row.append('<td class="dmyExcelWrap">'+ site.GroupOwners +'</td>');
 
 				$('#tabSubsites tbody').append( row );
@@ -609,7 +621,6 @@
 
 			// STEP 2:
 			if ( $.tablesorter ) $('#tabSubsites').tablesorter({ sortList:[[0,0]] }); // Sort by (Col#/Asc=0,Desc=1)
-			// TODO: tablesorter isnt working - it runs, but no result (Style broken?)
 
 			// STEP 3:
 			$('#tabSubsites tfoot tr').hide();
@@ -719,7 +730,7 @@
 				}
 
 				// LAST: Remove loading images
-				$('#tabSetup .iconQues').remove();
+				$('#navtabSetup .iconQues').remove();
 			}
 
 			// TAB: Site Info
@@ -776,13 +787,13 @@
 
 		<div id="navTabs" class="flexTabs">
 			<ul>
-				<li onclick="$('#navTabs').find('> div, li').removeClass('active'); $(this).addClass('active'); $('#tabSetup').addClass('active');" class="active">Setup</li>
-				<li onclick="$('#navTabs').find('> div, li').removeClass('active'); $(this).addClass('active'); $('#tabSite').addClass('active');">Site Info</li>
-				<li onclick="$('#navTabs').find('> div, li').removeClass('active'); $(this).addClass('active'); $('#tabList').addClass('active');">List Compare</li>
-				<li onclick="$('#navTabs').find('> div, li').removeClass('active'); $(this).addClass('active'); $('#tabUser').addClass('active');">Users and Groups</li>
+				<li onclick="$('#navTabs').find('> div, li').removeClass('active'); $(this).addClass('active'); $('#navtabSetup').addClass('active');" class="active">Setup</li>
+				<li onclick="$('#navTabs').find('> div, li').removeClass('active'); $(this).addClass('active'); $('#navtabSite').addClass('active');">Site Info</li>
+				<li onclick="$('#navTabs').find('> div, li').removeClass('active'); $(this).addClass('active'); $('#navtabList').addClass('active');">List Compare</li>
+				<li onclick="$('#navTabs').find('> div, li').removeClass('active'); $(this).addClass('active'); $('#navtabUser').addClass('active');">Users and Groups</li>
 			</ul>
 
-			<div id="tabSetup" data-tab="Setup" class="active">
+			<div id="navtabSetup" data-tab="Setup" class="active">
 				<div class="subTitle">Welcome!</div>
 				<div class="bigger">
 					Let's check your setup and show you how SpRestLib is configured.
@@ -826,7 +837,7 @@
 				<p>
 			</div>
 
-			<div id="tabSite" data-tab="Site Info">
+			<div id="navtabSite" data-tab="Site Info">
 				<div class="subTitle">Site Collection Information</div>
 				<div class="flex">
 					<div>
@@ -843,10 +854,12 @@
 				</div>
 
 				<div class="modernTable">
-					<div><label>Site Name</label><span id="SiteName"></span></div>
-					<div><label>Site Description</label><span id="SiteDesc"></span></div>
-					<div style="width:10%; text-align:center;"><label>Total Storage Used</label><span id="UsageTot"></span></div>
-					<div style="width:10%; text-align:center;"><label>Percent Storage Used</label><span id="UsagePct"></span></div>
+					<div style="width:5%; vertical-align:middle; padding:5px;"><img id="siteLogo" style="max-height:50px; max-width:100px;"></span></div>
+					<div style="width:25%"><label>Site Name</label><span id="SiteName"></span></div>
+					<div style="width:15%; text-align:center;"><label>Storage Used</label><span id="UsageTot"></span></div>
+					<div style="width:15%; text-align:center;"><label>Percent Used</label><span id="UsagePct"></span></div>
+					<div style="width:20%; text-align:center;"><label>Date Created</label><span id="DateCre"></span></div>
+					<div style="width:20%; text-align:center;"><label>Last Modified</label><span id="DateMod"></span></div>
 				</div>
 
 				<div class="sectionTitle">Subsite Report</div>
@@ -873,7 +886,7 @@
 				</table>
 			</div>
 
-			<div id="tabList" data-tab="List Tools">
+			<div id="navtabList" data-tab="List Tools">
 				<div class="subTitle">List/Library Compare</div>
 				<p>
 					Here are all the Lists/Libraries found on this site:<br>
@@ -904,7 +917,7 @@
 				</div>
 			</div>
 
-			<div id="tabUser" data-tab="Users and Groups Tools">
+			<div id="navtabUser" data-tab="Users and Groups Tools">
 				<div class="subTitle">User Methods</div>
 				<p>
 					Get User Information (Title, Email, etc.) and User Groups (which SP Groups they belong to).
