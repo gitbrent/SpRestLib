@@ -297,6 +297,7 @@
 		const STR_EMPTY = '<span style="color:#ccc; font-style:italic;">(empty)</span>';
 		const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 		// COMSTANTS: APP
+		const MODE_VERBOSE = window.location.href.toLowerCase().indexOf('mode=verbose') > -1; if (MODE_VERBOSE) { console.log('*** VERBOSE MODE ***'); }
 		const MAXSITES = 50;
 		// GLOBAL VARS
 		var gObjMapNameToId = {};
@@ -366,12 +367,16 @@
 				return sprLib.rest({ url:'_api/web', queryCols:['Title','Description','Url'], queryLimit:MAXSITES });
 			})
 			.then(arrSite => {
+				if (MODE_VERBOSE) { console.log('arrSite[0]:'); console.table(arrSite[0]); }
+
 				$('#SiteName').html( arrSite[0].Title || STR_EMPTY );
 				$('#SiteDesc').html( arrSite[0].Description || STR_EMPTY );
 
 				return sprLib.rest({ url:'_api/site/usage', queryCols:['Usage/Storage','Usage/StoragePercentageUsed'] });
 			})
 			.then(arrUsage => {
+				if (MODE_VERBOSE) { console.log('arrUsage[0]:'); console.table(arrUsage[0]); }
+
 				$('#UsageTot').text( (arrUsage[0].Usage.Storage / (1024*1024*1024)).toFixed(2) + ' GB');
 				$('#UsagePct').text( (arrUsage[0].Usage.StoragePercentageUsed * 100).toFixed(2) + '%');
 
@@ -389,7 +394,11 @@
 				});
 			})
 			.then(arrSubsites => {
+				if (MODE_VERBOSE) { console.log('arrSubsites:'); console.table(arrSubsites); }
+
 				arrSubsites.forEach(function(site,idx){
+					if (MODE_VERBOSE) { console.log('arrSubsites loop ('+idx+'): '+site.Name); }
+
 					// A: Capture base subsite object
 					gObjSubsites[site.Id] = site;
 
@@ -402,9 +411,11 @@
 						return sprLib.rest({ url:site.Url+'/_api/web/AssociatedOwnerGroup', objCols:'Id' });
 					})
 					.then(arrOwnerId => {
+						if (MODE_VERBOSE) { console.log('arrOwnerId[0]:'); console.log(arrOwnerId[0]); }
 						return sprLib.rest({ url:site.Url+'/_api/web/SiteGroups/GetById('+ arrOwnerId[0].Id +')/Users', queryCols:['Title','Email'] });
 					})
 					.then(arrGroups => {
+						if (MODE_VERBOSE) { console.log('arrGroups:'); console.table(arrGroups); }
 						site.GroupOwners = [];
 						arrGroups.forEach((result,idx) => { site.GroupOwners += result.Email+'; '; });
 					});
