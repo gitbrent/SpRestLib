@@ -2,7 +2,7 @@
  * NAME: qunit-test.js
  * DESC: tests for qunit-test.html (coded to my O365 Dev Site - YMMV)
  * AUTH: https://github.com/gitbrent/
- * DATE: Aug 07, 2017
+ * DATE: Oct 03, 2017
  *
  * HOWTO: Generate text tables for README etc.:
  * sprLib.list('Employees').getItems(['Id', 'Name', 'Badge_x0020_Number']).then(function(arrData){ console.log(getAsciiTableStr(arrData)) });
@@ -1072,6 +1072,27 @@ QUnit.module( "LIST > ITEM GET Methods" );
 QUnit.module( "REST Methods" );
 // ================================================================================================
 {
+	// REST
+	QUnit.test("sprLib.rest() ex: '_api/lists/getbytitle('Employees')/items' (relative URL)", function(assert){
+		var done = assert.async();
+		// TEST:
+		sprLib.rest({
+			url : "_api/lists/getbytitle('Employees')/items",
+			type: "GET",
+			queryCols: ['Id', 'Name', 'Manager/Title']
+		})
+		.then(function(arrayResults){
+			assert.ok( Object.keys(arrayResults[0]).length == 3, "arrayResults[0] has length == 3: "+ Object.keys(arrayResults[0]).length );
+			assert.ok( (arrayResults[0].Manager.Title), "arrayResults[0].Manager.Title exists: "+ arrayResults[0].Manager.Title );
+			assert.ok( getAsciiTableStr(arrayResults), `RESULTS:\n${getAsciiTableStr(arrayResults)}` );
+			done();
+		})
+		.catch(function(err){
+			assert.ok( (false), err );
+			done();
+		});
+	});
+
 	// REST
 	QUnit.test("sprLib.rest() ex: '/sites/dev/_api/lists/getbytitle('Employees')/items' with Manager/Title", function(assert){
 		var done = assert.async();
