@@ -380,8 +380,13 @@
 	</style>
 
 	<script type="text/javascript" src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
-	<script type="text/javascript" src="https://cdn.rawgit.com/gitbrent/SpRestLib/v1.1.0/dist/sprestlib.bundle.js"></script>
 	<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.29.0/js/jquery.tablesorter.min.js"></script>
+
+	<!-- DEBUG
+	<script type="text/javascript" src="https://cdn.rawgit.com/gitbrent/SpRestLib/v1.1.0/dist/sprestlib.bundle.js"></script>
+	-->
+	<script type="text/javascript" src="../SiteAssets/js/sprestlib.js"></script>
+
 	<!-- NOTE: If you prefer not to/cannot use CDNs, simply uncomment the lines below and comment the CDN lines above -->
 	<!--
 	<script type="text/javascript" src="../SiteAssets/js/jquery.min.js"></script>
@@ -401,44 +406,44 @@
 		const MODE_VERBOSE = window.location.href.toLowerCase().indexOf('mode=verbose') > -1; if (MODE_VERBOSE) { console.log('*** VERBOSE MODE ***'); }
 		const MAXSITES = 50;
 		const SP_LIST_TEMPLATE_TYPES = {
-			 -1: {name:'InvalidType', desc:'Not used.'},
-			100: {name:'GenericList', desc:'Custom list.'},
-			101: {name:'DocumentLibrary', desc:'Document library.'},
-			102: {name:'Survey', desc:'Survey.'},
-			103: {name:'Links', desc:'Links.'},
-			104: {name:'Announcements', desc:'Announcements.'},
-			105: {name:'Contacts', desc:'Contacts.'},
-			106: {name:'Events', desc:'Calendar.'},
-			107: {name:'Tasks', desc:'Tasks.'},
-			108: {name:'DiscussionBoard', desc:'Discussion board.'},
-			109: {name:'PictureLibrary', desc:'Picture library.'},
-			110: {name:'DataSources', desc:'Data sources for a site.'},
-			111: {name:'WebTemplateCatalog', desc:'Site template gallery.'},
-			112: {name:'UserInformation', desc:'User Information.'},
-			113: {name:'WebPartCatalog', desc:'Web Part gallery.'},
-			114: {name:'ListTemplateCatalog', desc:'List template gallery.'},
-			115: {name:'XMLForm', desc:'XML Form library.'},
-			116: {name:'MasterPageCatalog', desc:'Master Page gallery.'},
-			117: {name:'NoCodeWorkflows', desc:'No Code Workflows.'},
-			118: {name:'WorkflowProcess', desc:'Custom Workflow Process.'},
-			119: {name:'WebPageLibrary', desc:'Wiki Page Library.'},
-			120: {name:'CustomGrid', desc:'Custom grid for a list.'},
-			130: {name:'DataConnectionLibrary', desc:''},
-			140: {name:'WorkflowHistory', desc:'Workflow History.'},
-			150: {name:'GanttTasks', desc:'Project Tasks.'},
-			200: {name:'Meetings', desc:'Meeting Series (Meeting).'},
-			201: {name:'Agenda', desc:'Agenda (Meeting).'},
-			202: {name:'MeetingUser', desc:'Attendees (Meeting).'},
-			204: {name:'Decision', desc:'Decisions (Meeting).'},
-			207: {name:'MeetingObjective', desc:'Objectives (Meeting).'},
-			210: {name:'TextBox', desc:'Text Box (Meeting).'},
-			211: {name:'ThingsToBring', desc:'Things To Bring (Meeting).'},
-			212: {name:'HomePageLibrary', desc:'Workspace Pages (Meeting).'},
-			301: {name:'Posts', desc:'Posts (Blog).'},
-			302: {name:'Comments', desc:'Comments (Blog).'},
-			303: {name:'Categories', desc:'Categories (Blog).'},
-			1100: {name:'IssueTracking', desc:'Issue tracking.'},
-			1200: {name:'AdminTasks', desc:'Administrator Tasks.'}
+			 '-1': {name:'InvalidType', desc:'Not used.'},
+			'100': {name:'GenericList', desc:'Custom list.'},
+			'101': {name:'DocumentLibrary', desc:'Document library.'},
+			'102': {name:'Survey', desc:'Survey.'},
+			'103': {name:'Links', desc:'Links.'},
+			'104': {name:'Announcements', desc:'Announcements.'},
+			'105': {name:'Contacts', desc:'Contacts.'},
+			'106': {name:'Events', desc:'Calendar.'},
+			'107': {name:'Tasks', desc:'Tasks.'},
+			'108': {name:'DiscussionBoard', desc:'Discussion board.'},
+			'109': {name:'PictureLibrary', desc:'Picture library.'},
+			'110': {name:'DataSources', desc:'Data sources for a site.'},
+			'111': {name:'WebTemplateCatalog', desc:'Site template gallery.'},
+			'112': {name:'UserInformation', desc:'User Information.'},
+			'113': {name:'WebPartCatalog', desc:'Web Part gallery.'},
+			'114': {name:'ListTemplateCatalog', desc:'List template gallery.'},
+			'115': {name:'XMLForm', desc:'XML Form library.'},
+			'116': {name:'MasterPageCatalog', desc:'Master Page gallery.'},
+			'117': {name:'NoCodeWorkflows', desc:'No Code Workflows.'},
+			'118': {name:'WorkflowProcess', desc:'Custom Workflow Process.'},
+			'119': {name:'WebPageLibrary', desc:'Wiki Page Library.'},
+			'120': {name:'CustomGrid', desc:'Custom grid for a list.'},
+			'130': {name:'DataConnectionLibrary', desc:''},
+			'140': {name:'WorkflowHistory', desc:'Workflow History.'},
+			'150': {name:'GanttTasks', desc:'Project Tasks.'},
+			'200': {name:'Meetings', desc:'Meeting Series (Meeting).'},
+			'201': {name:'Agenda', desc:'Agenda (Meeting).'},
+			'202': {name:'MeetingUser', desc:'Attendees (Meeting).'},
+			'204': {name:'Decision', desc:'Decisions (Meeting).'},
+			'207': {name:'MeetingObjective', desc:'Objectives (Meeting).'},
+			'210': {name:'TextBox', desc:'Text Box (Meeting).'},
+			'211': {name:'ThingsToBring', desc:'Things To Bring (Meeting).'},
+			'212': {name:'HomePageLibrary', desc:'Workspace Pages (Meeting).'},
+			'301': {name:'Posts', desc:'Posts (Blog).'},
+			'302': {name:'Comments', desc:'Comments (Blog).'},
+			'303': {name:'Categories', desc:'Categories (Blog).'},
+			'1100': {name:'IssueTracking', desc:'Issue tracking.'},
+			'1200': {name:'AdminTasks', desc:'Administrator Tasks.'}
 		};
 		// GLOBAL VARS
 		var gObjMapNameToId = {};
@@ -502,36 +507,23 @@
 		// ==================================================================================================================
 
 		function getSiteInfo() {
-			// STEP 1: Root site data header
-			Promise.resolve()
-			.then(() => {
-				return sprLib.rest({
-					url:'_api/web',
-					queryCols:['Title','Description','Url','Created','LastItemModifiedDate','SiteLogoUrl'],
-					queryLimit:MAXSITES
-				});
-			})
-			.then(arrSite => {
-				if (MODE_VERBOSE) { console.log('arrSite[0]:'); console.table(arrSite[0]); }
-
-				// A: Show site info
-				if ( arrSite[0].SiteLogoUrl ) $('#siteLogo').prop('src', arrSite[0].SiteLogoUrl);
-				else $('#siteLogo').hide().parent('div').css('padding','0').css('width','1px');
-
-				$('#SiteName').html( arrSite[0].Title || STR_EMPTY );
-				$('#DateCre').text( getDateStrFromISO(arrSite[0].Created,'INTL') );
-				$('#DateMod').text( getDateStrFromISO(arrSite[0].LastItemModifiedDate,'INTL') );
-
-				// B: Next
-				return sprLib.rest({ url:'_api/site/usage', queryCols:['Usage/Storage','Usage/StoragePercentageUsed'] });
-			})
-			.then(arrUsage => {
-				if (MODE_VERBOSE) { console.log('arrUsage[0]:'); console.table(arrUsage[0]); }
-
-				$('#UsageTot').text( (arrUsage[0].Usage.Storage / (1024*1024*1024)).toFixed(2) + ' GB');
-				$('#UsagePct').text( (arrUsage[0].Usage.StoragePercentageUsed * 100).toFixed(2) + '%');
-
-				return sprLib.rest({
+			// PERF: Query all site info now
+			Promise.all([
+				sprLib.rest({
+					url: '_api/web',
+					queryCols: ['Title','Description','Url','Created','LastItemModifiedDate','SiteLogoUrl'],
+					queryLimit: MAXSITES
+				}),
+				sprLib.rest({
+					url: '_api/site/usage',
+					queryCols: ['Usage/Storage','Usage/StoragePercentageUsed']
+				}),
+				sprLib.rest({
+					url: '_api/web/lists',
+					queryCols: ['Title','BaseType','Created','EnableAttachments','EntityTypeName','Hidden','ItemCount','LastItemModifiedDate'],
+					queryLimit: 5000
+				}),
+				sprLib.rest({
 					url: '_api/web/webs',
 					queryCols: {
 						Id:				{ dataName:'Id'						,dispName:'Id'					},
@@ -542,35 +534,79 @@
 						Language:		{ dataName:'Language'				,dispName:'Language'			},
 						IsMultilang:	{ dataName:'IsMultilingual'			,dispName:'Is Multilingual?'	},
 					}
-				});
-			})
-			.then(arrSubsites => {
-				if (MODE_VERBOSE) { console.log('arrSubsites:'); console.table(arrSubsites); }
+				})
+			])
+			.then(arrAllArrays => {
+				// STEP 1: Dereference query results
+				var arrSite     = arrAllArrays[0];
+				var arrUsage    = arrAllArrays[1];
+				var arrLists    = arrAllArrays[2];
+				var arrSubsites = arrAllArrays[3];
 
-				arrSubsites.forEach(function(site,idx){
-					if (MODE_VERBOSE) { console.log('arrSubsites loop ('+idx+'): '+site.Name); }
+				// STEP 2: Site info
+				{
+					// A:
+					if (MODE_VERBOSE) { console.log('arrSite[0]:'); console.table(arrSite[0]); }
 
-					// A: Capture base subsite object
-					gObjSubsites[site.Id] = site;
+					// B: Show site info
+					if ( arrSite[0].SiteLogoUrl ) $('#siteLogo').prop('src', arrSite[0].SiteLogoUrl);
+					else $('#siteLogo').hide().parent('div').css('padding','0').css('width','1px');
+					$('#SiteName').html( arrSite[0].Title || STR_EMPTY );
+					$('#DateCre').text( getDateStrFromISO(arrSite[0].Created,'INTL') );
+					$('#DateMod').text( getDateStrFromISO(arrSite[0].LastItemModifiedDate,'INTL') );
+				}
 
-					// B: Create mapping so we can store usage results as they come back
-					gObjMapNameToId[site.Name] = site.Id;
+				// STEP 3: Usage
+				{
+					// A:
+					if (MODE_VERBOSE) { console.log('arrUsage[0]:'); console.table(arrUsage[0]); }
 
-					// C: OTHER-DATA: Subsite Owner Group Id
-					Promise.resolve()
-					.then(() => {
-						return sprLib.rest({ url:site.Url+'/_api/web/AssociatedOwnerGroup', objCols:'Id' });
-					})
-					.then(arrOwnerId => {
-						if (MODE_VERBOSE) { console.log('arrOwnerId[0]:'); console.log(arrOwnerId[0]); }
-						return sprLib.rest({ url:site.Url+'/_api/web/SiteGroups/GetById('+ arrOwnerId[0].Id +')/Users', queryCols:['Title','Email'] });
-					})
-					.then(arrGroups => {
-						if (MODE_VERBOSE) { console.log('arrGroups:'); console.table(arrGroups); }
-						site.GroupOwners = [];
-						arrGroups.forEach((result,idx) => { site.GroupOwners += (result.Email ? result.Email+'; ' : ''); });
+					// B: Show usage
+					$('#UsageTot').text( (arrUsage[0].Usage.Storage / (1024*1024*1024)).toFixed(2) +' GB');
+					$('#UsagePct').text( (arrUsage[0].Usage.StoragePercentageUsed * 100).toFixed(2) +'%');
+				}
+
+				// STEP 4: Lists/Libraries
+				{
+					if (MODE_VERBOSE) { console.log('arrLists:'); console.table(arrLists); }
+
+					// TODO:
+					// SP_LIST_TEMPLATE_TYPES
+					arrLists.forEach(function(site,idx){
+						let $row = '';
+						$('tabSiteLists tbody').append( $row );
 					});
-				});
+				}
+
+				// STEP 5: Subsites
+				{
+					if (MODE_VERBOSE) { console.log('arrSubsites:'); console.table(arrSubsites); }
+
+					arrSubsites.forEach(function(site,idx){
+						if (MODE_VERBOSE) { console.log('arrSubsites loop ('+idx+'): '+site.Name); }
+
+						// A: Capture base subsite object
+						gObjSubsites[site.Id] = site;
+
+						// B: Create mapping so we can store usage results as they come back
+						gObjMapNameToId[site.Name] = site.Id;
+
+						// C: OTHER-DATA: Subsite Owner Group Id
+						Promise.resolve()
+						.then(() => {
+							return sprLib.rest({ url:site.Url+'/_api/web/AssociatedOwnerGroup', objCols:'Id' });
+						})
+						.then(arrOwnerId => {
+							if (MODE_VERBOSE) { console.log('arrOwnerId[0]:'); console.log(arrOwnerId[0]); }
+							return sprLib.rest({ url:site.Url+'/_api/web/SiteGroups/GetById('+ arrOwnerId[0].Id +')/Users', queryCols:['Title','Email'] });
+						})
+						.then(arrGroups => {
+							if (MODE_VERBOSE) { console.log('arrGroups:'); console.table(arrGroups); }
+							site.GroupOwners = [];
+							arrGroups.forEach((result,idx) => { site.GroupOwners += (result.Email ? result.Email+'; ' : ''); });
+						});
+					});
+				}
 			})
 			.catch(strErr => console.error(strErr));
 		}
@@ -894,8 +930,28 @@
 				<div class="subTitle" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
 					<div class="arrow active"></div>Lists &amp; Libraries
 				</div>
-				<div class="contTabSubsites">
-					TODO: Show Lists, Libraries: name, date, item count, (uniquePerms?)
+				<div class="contTabSiteLists">
+					<table id="tabSiteLists" class="tabModern">
+						<thead>
+							<tr>
+								<th>List Name</th>
+								<th>List Type</th>
+								<th>Created</th>
+								<th>Item Count</th>
+								<th>Last Modified</th>
+								<th></th>
+								<th>Owners Group Members</th>
+							</tr>
+						</thead>
+						<tbody></tbody>
+						<tfoot>
+							<tr class="busy" style="display:none">
+								<td colspan="7" style="text-align:center; border:1px solid #f1f1f1;">
+									<div class="sprlib-spinner"><div class="sprlib-bounce1"></div><div class="sprlib-bounce2"></div><div class="sprlib-bounce3"></div></div>
+								</td>
+							</tr>
+						</tfoot>
+					</table>
 				</div>
 
 				<div class="subTitle" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
@@ -914,26 +970,26 @@
 					</div>
 
 					<table id="tabSubsites" class="tabModern">
-					<thead>
-						<tr>
-							<th>Subsite Name</th>
-							<th>Subsite URL</th>
-							<th>Total Size (MB)</th>
-							<th>Used %</th>
-							<th>Created</th>
-							<th>Last Modified</th>
-							<th>Owners Group Members</th>
-						</tr>
-					</thead>
-					<tbody></tbody>
-					<tfoot>
-						<tr class="busy" style="display:none">
-							<td colspan="7" style="text-align:center; border:1px solid #f1f1f1;">
-								<div class="sprlib-spinner"><div class="sprlib-bounce1"></div><div class="sprlib-bounce2"></div><div class="sprlib-bounce3"></div></div>
-							</td>
-						</tr>
-					</tfoot>
-				</table>
+						<thead>
+							<tr>
+								<th>Subsite Name</th>
+								<th>Subsite URL</th>
+								<th>Total Size (MB)</th>
+								<th>Used %</th>
+								<th>Created</th>
+								<th>Last Modified</th>
+								<th>Owners Group Members</th>
+							</tr>
+						</thead>
+						<tbody></tbody>
+						<tfoot>
+							<tr class="busy" style="display:none">
+								<td colspan="7" style="text-align:center; border:1px solid #f1f1f1;">
+									<div class="sprlib-spinner"><div class="sprlib-bounce1"></div><div class="sprlib-bounce2"></div><div class="sprlib-bounce3"></div></div>
+								</td>
+							</tr>
+						</tfoot>
+					</table>
 				</div>
 			</div>
 
