@@ -14,7 +14,7 @@
 	<meta name="website"     content="https://github.com/gitbrent/SpRestLib/">
 	<meta name="keywords"    content="SpRestLib, JavaScript, js-sharepoint, OData, REST, SharePoint 2013, SP2013, SharePoint 2016, SP2016, SharePoint Online">
 	<meta name="description" content="Content Editor Webpart: SpRestLib SharePoint Toolkit">
-	<meta name="revised"     content="Sep 30, 2017">
+	<meta name="revised"     content="Oct 04, 2017">
 
 	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:100">
 	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto+Mono">
@@ -29,7 +29,7 @@
 		}
 		#divBody div { box-sizing: border-box; }
 		.bigTitle { font-family:'Open Sans','Segoe UI'; font-size:36px; color:#0088cc; margin:15px 0 10px 0; }
-		.bigSubtitle { font-family:'Open Sans','Segoe UI'; font-size:16px; color:#c7c7c7; margin:10px 0 20px 0; }
+		.bigSubtitle { font-family:'Open Sans','Segoe UI'; font-size:14px; color:#c7c7c7; margin:10px 0 20px 0; }
 		.sectionTitle, .subTitle { font-family:'Open Sans','Segoe UI'; font-size:18px; color:#0088cc; margin:20px 0 10px 0; cursor: pointer; }
 		.bigger { font-size:1.1em; }
 		.arrow {
@@ -392,7 +392,7 @@
 	<script type="text/javascript">
 		// APP
 		const APP_VER = '1.0.0';
-		const APP_REL = '20171002';
+		const APP_REL = '20171003';
 		// CONSTANTS: UI/LOGIC
 		const HTML_SPINNER = '<div class="sprlib-spinner"><div class="sprlib-bounce1"></div><div class="sprlib-bounce2"></div><div class="sprlib-bounce3"></div></div>';
 		const STR_EMPTY = '<span style="color:#ccc; font-style:italic;">(empty)</span>';
@@ -400,6 +400,46 @@
 		// COMSTANTS: APP
 		const MODE_VERBOSE = window.location.href.toLowerCase().indexOf('mode=verbose') > -1; if (MODE_VERBOSE) { console.log('*** VERBOSE MODE ***'); }
 		const MAXSITES = 50;
+		const SP_LIST_TEMPLATE_TYPES = {
+			 -1: {name:'InvalidType', desc:'Not used.'},
+			100: {name:'GenericList', desc:'Custom list.'},
+			101: {name:'DocumentLibrary', desc:'Document library.'},
+			102: {name:'Survey', desc:'Survey.'},
+			103: {name:'Links', desc:'Links.'},
+			104: {name:'Announcements', desc:'Announcements.'},
+			105: {name:'Contacts', desc:'Contacts.'},
+			106: {name:'Events', desc:'Calendar.'},
+			107: {name:'Tasks', desc:'Tasks.'},
+			108: {name:'DiscussionBoard', desc:'Discussion board.'},
+			109: {name:'PictureLibrary', desc:'Picture library.'},
+			110: {name:'DataSources', desc:'Data sources for a site.'},
+			111: {name:'WebTemplateCatalog', desc:'Site template gallery.'},
+			112: {name:'UserInformation', desc:'User Information.'},
+			113: {name:'WebPartCatalog', desc:'Web Part gallery.'},
+			114: {name:'ListTemplateCatalog', desc:'List template gallery.'},
+			115: {name:'XMLForm', desc:'XML Form library.'},
+			116: {name:'MasterPageCatalog', desc:'Master Page gallery.'},
+			117: {name:'NoCodeWorkflows', desc:'No Code Workflows.'},
+			118: {name:'WorkflowProcess', desc:'Custom Workflow Process.'},
+			119: {name:'WebPageLibrary', desc:'Wiki Page Library.'},
+			120: {name:'CustomGrid', desc:'Custom grid for a list.'},
+			130: {name:'DataConnectionLibrary', desc:''},
+			140: {name:'WorkflowHistory', desc:'Workflow History.'},
+			150: {name:'GanttTasks', desc:'Project Tasks.'},
+			200: {name:'Meetings', desc:'Meeting Series (Meeting).'},
+			201: {name:'Agenda', desc:'Agenda (Meeting).'},
+			202: {name:'MeetingUser', desc:'Attendees (Meeting).'},
+			204: {name:'Decision', desc:'Decisions (Meeting).'},
+			207: {name:'MeetingObjective', desc:'Objectives (Meeting).'},
+			210: {name:'TextBox', desc:'Text Box (Meeting).'},
+			211: {name:'ThingsToBring', desc:'Things To Bring (Meeting).'},
+			212: {name:'HomePageLibrary', desc:'Workspace Pages (Meeting).'},
+			301: {name:'Posts', desc:'Posts (Blog).'},
+			302: {name:'Comments', desc:'Comments (Blog).'},
+			303: {name:'Categories', desc:'Categories (Blog).'},
+			1100: {name:'IssueTracking', desc:'Issue tracking.'},
+			1200: {name:'AdminTasks', desc:'Administrator Tasks.'}
+		};
 		// GLOBAL VARS
 		var gObjMapNameToId = {};
 		var gObjSubsites = {};
@@ -841,16 +881,6 @@
 
 			<div id="navtabSite" data-tab="Site Info">
 				<div class="subTitle">Site Collection Information</div>
-				<div class="flex">
-					<div>
-						Click to load subiste information and storage data.<br>
-						It is not loaded by default as each site has to be scanned and can be resource intensive.<br>
-						(NOTE: storman has no API - csom, jsom, or REST - so the usage is gathering by loading each site's storman and parsing it)
-					</div>
-					<div style="vertical-align:top; text-align:right;">
-						<button type="button" class="flatBtn flatBtn-blue" onclick="getStorman()">Load Subsite Info</button>
-					</div>
-				</div>
 
 				<div class="modernTable" data-info="Site Info Table">
 					<div style="width:5%; vertical-align:middle; padding:5px;"><img id="siteLogo" style="max-height:50px; max-width:100px;"></span></div>
@@ -872,6 +902,17 @@
 					<div class="arrow"></div>Subsites
 				</div>
 				<div class="contTabSubsites" style="display:none">
+					<div id="subsitesHeader" class="flex">
+						<div>
+							Click to load subiste information and storage data.<br>
+							It is not loaded by default as each site has to be scanned and can be resource intensive.<br>
+							(NOTE: storman has no API - csom, jsom, or REST - so the usage is gathering by loading each site's storman and parsing it)
+						</div>
+						<div style="vertical-align:top; text-align:right;">
+							<button type="button" class="flatBtn flatBtn-blue" onclick="getStorman()">Load Subsite Info</button>
+						</div>
+					</div>
+
 					<table id="tabSubsites" class="tabModern">
 					<thead>
 						<tr>
