@@ -40,11 +40,12 @@
 	-->
 	<script type="text/javascript" src="../SiteAssets/sprestlib/js/jquery.min.js"></script>
 	<script type="text/javascript" src="../SiteAssets/sprestlib/js/jquery.tablesorter.min.js"></script>
-	<script type="text/javascript" src="../SiteAssets/sprestlib/js/sprestlib.js"></script>
 	<script type="text/javascript" src="../SiteAssets/sprestlib/js/ascii-table.min.js"></script>
 	<script type="text/javascript" src="../SiteAssets/sprestlib/js/prism.min.js"></script>
 
 	<script type="text/javascript">
+		$.ajaxSetup({ cache:false });
+		var APP_BLD = 20171004;
 		var HTML_SPINNER = '<div class="sprlib-spinner"><div class="sprlib-bounce1"></div><div class="sprlib-bounce2"></div><div class="sprlib-bounce3"></div></div>';
 
 		// ==================================================================================================================
@@ -178,7 +179,7 @@
 					$('#libChkJquery').append( '<div class="iconYes"></div>' );
 				}
 				else {
-					$('#libChkJquery').append( 'oops - go check <script> tag ' );
+					$('#libChkJquery').append( 'oops - go check &lt;script&gt; tag ' );
 				}
 
 				// B: sprLib
@@ -207,7 +208,7 @@
 			// TAB: List CRUD
 			{
 				// Populate <select> with List names
-				sprLib.rest({ restUrl:'/_api/web/lists/' })
+				sprLib.rest({ restUrl:'_api/web/lists/' })
 				.then(function(arrayListObjs){
 					arrayListObjs
 					.sort(function(a,b){return (a.Title > b.Title) ? 1 : ((b.Title > a.Title) ? -1 : 0);} )
@@ -241,7 +242,7 @@
 
 			// TAB: REST API
 			{
-				var rest1Code = "sprLib.rest({ restUrl:'/_api/web/lists/' })\n"
+				var rest1Code = "sprLib.rest({ restUrl:'_api/web/lists/' })\n"
 					+ ".then(function(arrayListObjs){\n"
 					+ "    var table = new AsciiTable('Site Lists').setHeading(['BaseType','ItemCount','Title']);\n"
 					+ "    arrayListObjs.forEach(function(obj,idx){\n"
@@ -266,7 +267,10 @@
 		}
 
 		// ==================================================================================================================
-		$(document).ready(function(){ doPageLoad(); });
+		$(document).ready(function(){
+			// Dynamically load library as SP Online is *BAD* abut caching
+			$.getScript("../SiteAssets/sprestlib/js/sprestlib.js", function(){ doPageLoad(); });
+		});
 	</script>
 </head>
 <body>
