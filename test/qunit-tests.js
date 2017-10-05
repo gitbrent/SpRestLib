@@ -1072,18 +1072,19 @@ QUnit.module( "LIST > ITEM GET Methods" );
 QUnit.module( "REST Methods" );
 // ================================================================================================
 {
-	// REST
-	QUnit.test("sprLib.rest() ex: '_api/lists/getbytitle('Employees')/items' (relative URL)", function(assert){
+	QUnit.test("sprLib.rest() ex: '_api/lists/getbytitle('Employees')/items' [1:relative-url, 2:get]", function(assert){
 		var done = assert.async();
 		// TEST:
 		sprLib.rest({
-			url : "_api/lists/getbytitle('Employees')/items",
-			type: "GET",
-			queryCols: ['Id', 'Name', 'Manager/Title']
+			url: "_api/lists/getbytitle('Employees')/items",
+			queryCols: ['Id', 'Name', 'Manager/Title'],
+			queryLimit: 5,
+			type: "GET"
 		})
 		.then(function(arrayResults){
 			assert.ok( Object.keys(arrayResults[0]).length == 3, "arrayResults[0] has length == 3: "+ Object.keys(arrayResults[0]).length );
 			assert.ok( (arrayResults[0].Manager.Title), "arrayResults[0].Manager.Title exists: "+ arrayResults[0].Manager.Title );
+			assert.ok( arrayResults.length == 5, "arrayResults has length == 5: "+ arrayResults.length );
 			assert.ok( getAsciiTableStr(arrayResults), `RESULTS:\n${getAsciiTableStr(arrayResults)}` );
 			done();
 		})
@@ -1093,7 +1094,25 @@ QUnit.module( "REST Methods" );
 		});
 	});
 
-	// REST
+	QUnit.test("sprLib.rest() ex: '_api/lists/getbytitle('Employees')/items' [1:relative-url, 2:$select-not-cols]", function(assert){
+		var done = assert.async();
+		// TEST:
+		sprLib.rest({
+			url: "_api/lists/getbytitle('Employees')/items?$select=Id,Name,Manager/Title&$orderby=ID%20desc&$top=5&$expand=Manager"
+		})
+		.then(function(arrayResults){
+			// NOTE: Running your own select results in raw results - sprLib only parses `queryCols` (hence 5 col shere and "unparsed" Manager/Title)
+			assert.ok( Object.keys(arrayResults[0]).length == 5, "arrayResults[0] has length == 5: "+ Object.keys(arrayResults[0]).length );
+			assert.ok( arrayResults.length == 5, "arrayResults has length == 5: "+ arrayResults.length );
+			assert.ok( getAsciiTableStr(arrayResults), `RESULTS:\n${getAsciiTableStr(arrayResults)}` );
+			done();
+		})
+		.catch(function(err){
+			assert.ok( (false), err );
+			done();
+		});
+	});
+
 	QUnit.test("sprLib.rest() ex: '/sites/dev/_api/lists/getbytitle('Employees')/items' with Manager/Title", function(assert){
 		var done = assert.async();
 		// TEST:
@@ -1114,7 +1133,7 @@ QUnit.module( "REST Methods" );
 		});
 	});
 
-	// REST endpoints that return `data.d.results` [{}]
+	// TEST: endpoints that return `data.d.results` [{}]
 	QUnit.test("sprLib.rest() ex: '/_api/web/sitegroups'", function(assert){
 		var done = assert.async();
 		// TEST:
@@ -1141,8 +1160,8 @@ QUnit.module( "REST Methods" );
 		});
 	});
 
-	// REST endpoints that return `data.d` {}
-	QUnit.test("sprLib.rest() ex: '/_api/web/lists'", function(assert){
+	// TEST: endpoints that return `data.d` {}
+	QUnit.test("sprLib.rest() ex: '/_api/web/lists' [[using `?$select=col`]]", function(assert){
 		var done = assert.async();
 		// TEST:
 		sprLib.rest({ url:RESTROOT+'/_api/web/lists?$select=Title,ItemCount' })
