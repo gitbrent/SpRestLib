@@ -43,7 +43,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 (function(){
 	// APP VERSION/BUILD
 	var APP_VER = "1.2.0-beta";
-	var APP_BLD = "20170927";
+	var APP_BLD = "20171004";
 	var DEBUG = false; // (verbose mode/lots of logging)
 	// APP FUNCTIONALITY
 	var APP_FILTEROPS = {
@@ -87,11 +87,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 			"true"  : "真実"
 		}
 	};
-	// GLOBAL VARS
-	var gRetryCounter = 0;
-
 	// USER-CONFIGURABLE: UI OPTIONS
-	// -----------------------------
 	var APP_OPTS = {
 		baseUrl:         '..',
 		busySpinnerHtml: '<div class="sprlib-spinner"><div class="sprlib-bounce1"></div><div class="sprlib-bounce2"></div><div class="sprlib-bounce3"></div></div>',
@@ -109,6 +105,8 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 		updatingErr: { 'background-color':'#e2999c', 'color':'#fff' },
 		updatingEnd: { 'background-color':'', 'color':'' }
 	};
+	// GLOBAL VARS
+	var gRetryCounter = 0;
 
 	/* ===============================================================================================
 	|
@@ -622,7 +620,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 		var guidRegex = /^[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}$/i;
 		var _newList = {};
 		// NOTE: DESIGN: Accept either [ListName] or [ListGUID]
-		var _urlBase = APP_OPTS.baseUrl + "/_api/lists" + ( guidRegex.test(inName) ? "(guid'"+ inName +"')" : "/getbytitle('"+ inName.replace(/\s/gi,'%20') +"')" );
+		var _urlBase = "_api/lists" + ( guidRegex.test(inName) ? "(guid'"+ inName +"')" : "/getbytitle('"+ inName.replace(/\s/gi,'%20') +"')" );
 
 		/**
 		* Used after `.create()` if no {type} was provided (enables us to continue using the object in subsequnt operations)
@@ -858,6 +856,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 
 					// AJAX OPTIONS:
 					inObj.cache = inObj.cache || false;
+					// TODO: change 'false' to DEF_CACHE
 
 					// Add internal data objects
 					inObj.spArrData = [];
@@ -1058,7 +1057,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 						// STEP 1: Query SharePoint
 						// Convert our dataName array into a comma-delim string, then replace ',' with '%20' and our query string is constrcuted!
 						sprLib.rest({
-							url: APP_OPTS.baseUrl +"/_vti_bin/owssvr.dll?Cmd=Display&List="
+							url: "_vti_bin/owssvr.dll?Cmd=Display&List="
 								+ "%7B"+ listGUID +"%7D"+"&XMLDATA=TRUE&IncludeVersions=TRUE"
 								+ "&Query=ID%20"+ arrAppendColNames.toString().replace(/\,/g,'%20') +"%20"
 								+ "Modified%20Editor%20"
@@ -1413,21 +1412,19 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 			if ( objAjaxQuery.type == 'POST' && !objAjaxQuery.headers.contentType ) objAjaxQuery.headers['content-type'] = 'application/json;odata=verbose';
 
 			// STEP 3: Construct Base URL: `url` can be presented in many different forms...
-			if      ( inOpt.url.indexOf('/_api') == 0 )						objAjaxQuery.url = APP_OPTS.baseUrl + inOpt.url;
-			else if ( inOpt.url.indexOf('_api')  == 0 )						objAjaxQuery.url = APP_OPTS.baseUrl + "/" + inOpt.url;
-			else if ( inOpt.url.indexOf('/')     == 0 &&  inOpt.queryCols )	objAjaxQuery.url = inOpt.url + "?$select=";
-			else if ( inOpt.url.indexOf('/')     == 0 && !inOpt.queryCols )	objAjaxQuery.url = inOpt.url;
-			else if ( inOpt.url.indexOf('http')  == 0 &&  inOpt.queryCols )	objAjaxQuery.url = inOpt.url + "?$select=";
-			else if ( inOpt.url.indexOf('http')  == 0 && !inOpt.queryCols )	objAjaxQuery.url = inOpt.url;
-			// else: any relative URLs would have been set at `objAjaxQuery` init above
+			objAjaxQuery.url = (inOpt.url.toLowerCase().indexOf('http') == 0 || inOpt.url.indexOf('/') == 0 ? '' : APP_OPTS.baseUrl);
+			objAjaxQuery.url += ( (inOpt.url.indexOf('/') == 0 ? '' : '/') + inOpt.url );
 
-			// STEP 4: Continue building URL: Some REST API calls can contain select columns (`queryCols`)
-			if ( objAjaxQuery.url.indexOf('$select') > -1 ) {
+			// STEP 4: Continue building `url` when cols from either '$select' or `queryCols` options found
+			if ( inOpt.queryCols && objAjaxQuery.url.toLowerCase().indexOf('$select') == -1 ) {
+				// A: Start 'select query'
+				objAjaxQuery.url += "?$select=";
+
 				// `queryCols` can be: string, array of strings, or objects
 				// A: Convert single string column into an array for use below
 				if ( typeof inOpt.queryCols === 'string' ) inOpt.queryCols = [ inOpt.queryCols ];
 
-				// B: Build query object if `queryCols` array exists
+				// B: Build query object if `queryCols` array exists - create 'expands'
 				if ( inOpt.queryCols && Array.isArray(inOpt.queryCols) ) {
 					var objListCols = {};
 					inOpt.queryCols.forEach(function(colStr,i){
@@ -1470,7 +1467,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 				if ( inOpt.queryOrderby ) objAjaxQuery.url += '&$orderby=' + inOpt.queryOrderby;
 			}
 
-			// STEP 5: Execute REST call
+			// STEP 6: Execute REST call
 			Promise.resolve()
 			.then(function(){
 				return new Promise(function(resolve, reject) {
@@ -1533,7 +1530,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 				// B: Iterate over results
 				// NOTE: Depending upon which REST endpoint used, SP can return results in various forms (!)
 				// EX..: data.d.results is an [] of {}: [ {Title:'Brent Ely', Email:'Brent.Ely@microsoft.com'}, {}, {} ]
-				// NOTE: Ensure results are an object because SP can return an entire HTML page as a result in some error cases.
+				// NOTE: Ensure results are an object because SP will return an entire HTML page as a result in some error cases!
 				if ( data && data.d && data.d.results && typeof data.d.results === 'object' ) {
 					$.each(data.d.results, function(key,result){
 						var objRow = {};
@@ -1642,7 +1639,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 		});
 	}
 
-	// API: SITE (TODO: FUTURE: Post-1.0.0)
+	// API: SITE (TODO: FUTURE:)
 	sprLib.site = function site(inUrl) {
 		return new Promise(function(resolve, reject) {
 			// TODO: POST-1.0:
@@ -1662,17 +1659,17 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 	sprLib.user = function user(inOpt) {
 		// STEP 1: Variables
 		var newUser = {};
-		var strDynUrl = APP_OPTS.baseUrl+"/_api/Web/CurrentUser?";
+		var strDynUrl = "_api/Web/CurrentUser?";
 
 		// STEP 2: Build query URL based on whether its current user (no parameter) or a passed in object
 		// NOTE: Use CurrentUser service as it is included in SP-Foundation and will work for everyone
 		// ....: (Users will need SP-Enterprise for UserProfiles service to work)
 		// NOTE: `_api/Web/GetUserById()` for non-existant users results in a heinous error 500 that chokes jQuery.ajax.fail(),
 		// ....: so dont use it, or check user id with `siteusers?$filter` first!
-		if      ( inOpt && inOpt['id']    ) strDynUrl = APP_OPTS.baseUrl+"/_api/Web/siteusers?$filter=Id%20eq%20"+           inOpt['id']    +"&";
-		else if ( inOpt && inOpt['email'] ) strDynUrl = APP_OPTS.baseUrl+"/_api/web/siteusers?$filter=Email%20eq%20%27"+     inOpt['email'] +"%27&";
-		else if ( inOpt && inOpt['login'] ) strDynUrl = APP_OPTS.baseUrl+"/_api/web/siteusers?$filter=LoginName%20eq%20%27"+ inOpt['login'].replace(/#/g,'%23') +"%27&";
-		else if ( inOpt && inOpt['title'] ) strDynUrl = APP_OPTS.baseUrl+"/_api/web/siteusers?$filter=Title%20eq%20%27"+     inOpt['title'] +"%27&";
+		if      ( inOpt && inOpt['id']    ) strDynUrl = "_api/Web/siteusers?$filter=Id%20eq%20"+           inOpt['id']    +"&";
+		else if ( inOpt && inOpt['email'] ) strDynUrl = "_api/web/siteusers?$filter=Email%20eq%20%27"+     inOpt['email'] +"%27&";
+		else if ( inOpt && inOpt['login'] ) strDynUrl = "_api/web/siteusers?$filter=LoginName%20eq%20%27"+ inOpt['login'].replace(/#/g,'%23') +"%27&";
+		else if ( inOpt && inOpt['title'] ) strDynUrl = "_api/web/siteusers?$filter=Title%20eq%20%27"+     inOpt['title'] +"%27&";
 
 		/**
 		* Get user info: (`Id`, `Email`, `IsSiteAdmin`, `LoginName`, `PrincipalType`, `Title`)

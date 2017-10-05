@@ -1,14 +1,14 @@
 # Change Log
 
-## [v1.2.0](https://github.com/gitbrent/sprestlib/tree/v1.2.0) (2017-10-xx)
+## [v1.2.0](https://github.com/gitbrent/sprestlib/tree/v1.2.0) (2017-10-05)
 [Full Changelog](https://github.com/gitbrent/sprestlib/compare/v1.1.0...v1.2.0)
 
 **Implemented Enhancements:**
 - Added Electron compatibility
+- Moved Qunit and SpRestLib script loading to dynamic for demo and qunit pages.
 
-
-
-
+**Fixed Bugs:**
+- The sprLib.rest() method is not parsing queryCols correctly [\#1](https://github.com/gitbrent/sprestlib/issues/1) ([gitbrent](https://github.com/gitbrent))
 
 ## [v1.1.0](https://github.com/gitbrent/sprestlib/tree/v1.1.0) (2017-09-07)
 [Full Changelog](https://github.com/gitbrent/sprestlib/compare/v1.0.0...v1.1.0)
