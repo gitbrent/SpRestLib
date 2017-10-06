@@ -19,6 +19,7 @@
 	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:100">
 	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto+Mono">
 	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:400">
+	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inconsolata">
 
 	<style>
 		.ms-webpartPage-root { border-spacing: 0px; }
@@ -179,10 +180,9 @@
 
 		/* ===== */
 		.modernTable {
-			/*font-family: "Open Sans","Segoe UI";*/
 			display: table;
 			width: 100%;
-			margin: 0; padding: 0;
+			padding: 0;
 			color: rgb(0,149,221);
 			background: rgb(242,249,252);
 			border: 1px #e7e7f7 solid;
@@ -375,17 +375,52 @@
 		}
 		.tabModern.shadow { box-shadow:2px 2px 6px 2px #aaa; }
 		/* ----- */
-		.nowrap { white-space: nowrap; }
-		.nowctr { white-space: nowrap !important; text-align: center !important; }
+		td.code   { font-family: 'Inconsolata','Roboto Mono',monospace !important; white-space: pre !important; }
+		td.fixed  { font-family: 'Inconsolata','Roboto Mono',monospace !important; white-space: nowrap !important; }
+		td.right  { padding-right: 20px !important; text-align: right !important; }
+		td.nowctr { white-space: nowrap !important; text-align: center !important; }
+		td.nowrap { white-space: nowrap !important; }
+		/* ----- */
+		#tabSiteLists thead th:first-child { min-width:200px; }
+		/* ----- */
+		.switch {
+		  position: relative;
+		  display: inline-block;
+		  width: 36px;
+		  height: 20px;
+		}
+		.switch input { display:none; }
+		.slider {
+		  position: absolute;
+		  cursor: pointer;
+		  top: 0;
+		  left: 0;
+		  right: 0;
+		  bottom: 0;
+		  background-color: #ccc;
+		  -webkit-transition: .4s;
+		  transition: .4s;
+		}
+		.slider:before {
+		  position: absolute;
+		  content: "";
+		  height: 16px; width: 16px;
+		  left: 2px; bottom: 2px;
+		  background-color: white;
+		  transition: .4s; -webkit-transition: .4s;
+		}
+		input:focus   + .slider { box-shadow: 0 0 1px #58b3fb; }
+		input:checked + .slider { background-color: #58b3fb; }
+		input:checked + .slider:before { -webkit-transform:translateX(16px); -ms-transform:translateX(16px); transform:translateX(16px); }
+		.slider.round { border-radius: 20px; }
+		.slider.round:before { border-radius: 50%; }
 	</style>
 
 	<script type="text/javascript" src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
 	<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.29.0/js/jquery.tablesorter.min.js"></script>
-
 	<!-- DEBUG
 	<script type="text/javascript" src="https://cdn.rawgit.com/gitbrent/SpRestLib/v1.1.0/dist/sprestlib.bundle.js"></script>
 	-->
-	<script type="text/javascript" src="../SiteAssets/js/sprestlib.js"></script>
 
 	<!-- NOTE: If you prefer not to/cannot use CDNs, simply uncomment the lines below and comment the CDN lines above -->
 	<!--
@@ -395,9 +430,11 @@
 	-->
 
 	<script type="text/javascript">
+		// JQUERY
+		$.ajaxSetup({ cache:false });
 		// APP
 		const APP_VER = '1.0.0';
-		const APP_REL = '20171003';
+		const APP_REL = '20171005';
 		// CONSTANTS: UI/LOGIC
 		const HTML_SPINNER = '<div class="sprlib-spinner"><div class="sprlib-bounce1"></div><div class="sprlib-bounce2"></div><div class="sprlib-bounce3"></div></div>';
 		const STR_EMPTY = '<span style="color:#ccc; font-style:italic;">(empty)</span>';
@@ -405,6 +442,7 @@
 		// COMSTANTS: APP
 		const MODE_VERBOSE = window.location.href.toLowerCase().indexOf('mode=verbose') > -1; if (MODE_VERBOSE) { console.log('*** VERBOSE MODE ***'); }
 		const MAXSITES = 50;
+		// REF: https://msdn.microsoft.com/en-us/library/microsoft.sharepoint.splisttemplatetype.aspx
 		const SP_LIST_TEMPLATE_TYPES = {
 			 '-1': {name:'InvalidType', desc:'Not used.'},
 			'100': {name:'GenericList', desc:'Custom list.'},
@@ -428,9 +466,18 @@
 			'118': {name:'WorkflowProcess', desc:'Custom Workflow Process.'},
 			'119': {name:'WebPageLibrary', desc:'Wiki Page Library.'},
 			'120': {name:'CustomGrid', desc:'Custom grid for a list.'},
+			'121': {name:'SolutionCatalog', desc:'Solutions.'},
+			'122': {name:'NoCodePublic', desc:'No Code Public Workflow.'},
+			'123': {name:'ThemeCatalog', desc:'Themes.'},
+			'124': {name:'DesignCatalog', desc:'DesignCatalog.'},
+			'125': {name:'AppDataCatalog', desc:'AppDataCatalog.'},
 			'130': {name:'DataConnectionLibrary', desc:''},
 			'140': {name:'WorkflowHistory', desc:'Workflow History.'},
 			'150': {name:'GanttTasks', desc:'Project Tasks.'},
+			'151': {name:'HelpLibrary', desc:'Help Library.'},
+			'160': {name:'AccessRequest', desc:'Tasks with Timeline and Hierarchy.'},
+			'171': {name:'TasksWithTimelineAndHierarchy', desc:'.'},
+			'175': {name:'MaintenanceLogs', desc:'Maintenance Logs Library.'},
 			'200': {name:'Meetings', desc:'Meeting Series (Meeting).'},
 			'201': {name:'Agenda', desc:'Agenda (Meeting).'},
 			'202': {name:'MeetingUser', desc:'Attendees (Meeting).'},
@@ -442,8 +489,21 @@
 			'301': {name:'Posts', desc:'Posts (Blog).'},
 			'302': {name:'Comments', desc:'Comments (Blog).'},
 			'303': {name:'Categories', desc:'Categories (Blog).'},
+			'402': {name:'Facility', desc:'Facility.'},
+			'403': {name:'Whereabouts', desc:'Whereabouts.'},
+			'404': {name:'CallTrack', desc:'Call Track.'},
+			'405': {name:'Circulation', desc:'Circulation.'},
+			'420': {name:'Timecard', desc:'Timecard.'},
+			'421': {name:'Holidays', desc:'Holidays.'},
+			'499': {name:'IMEDic', desc:'IME (Input Method Editor) Dictionary.'},
+			'544': {name:'MicroFeed', desc:'MySite MicroFeed Persistent Storage List.'},
+			'600': {name:'ExternalList', desc:'External.'},
+			'700': {name:'MySiteDocumentLibrary', desc:'MySiteDocumentLibrary.'},
 			'1100': {name:'IssueTracking', desc:'Issue tracking.'},
-			'1200': {name:'AdminTasks', desc:'Administrator Tasks.'}
+			'1200': {name:'AdminTasks', desc:'Administrator Tasks.'},
+			'1220': {name:'HealthRules', desc:'Health Rules.'},
+			'1221': {name:'HealthReports', desc:'Health Reports.'},
+			'1230': {name:'DeveloperSiteDraftApps', desc:'Draft Apps library in Developer Site.'}
 		};
 		// GLOBAL VARS
 		var gObjMapNameToId = {};
@@ -520,7 +580,8 @@
 				}),
 				sprLib.rest({
 					url: '_api/web/lists',
-					queryCols: ['Title','BaseType','Created','EnableAttachments','EntityTypeName','Hidden','ItemCount','LastItemModifiedDate'],
+					queryCols: ['Title','BaseTemplate','Created','Description','EnableAttachments','EntityTypeName','ItemCount','LastItemModifiedDate'],
+					queryFilter: 'Hidden ne true',
 					queryLimit: 5000
 				}),
 				sprLib.rest({
@@ -570,12 +631,21 @@
 				{
 					if (MODE_VERBOSE) { console.log('arrLists:'); console.table(arrLists); }
 
-					// TODO:
-					// SP_LIST_TEMPLATE_TYPES
-					arrLists.forEach(function(site,idx){
-						let $row = '';
-						$('tabSiteLists tbody').append( $row );
+					// B:
+					arrLists.forEach(function(list,idx){
+						let $row = $('<tr/>');
+						$row.append('<td>'+ list.Title +'</td>');
+						$row.append('<td>'+ (SP_LIST_TEMPLATE_TYPES[list.BaseTemplate] ? SP_LIST_TEMPLATE_TYPES[list.BaseTemplate].name : list.BaseTemplate) +'</td>');
+						$row.append('<td><div class="showDesc">'+ list.Description +'</div></td>');
+						$row.append('<td class="nowctr">'+ getDateStrFromISO(list.Created,'INTL') +'</td>');
+						$row.append('<td class="nowctr">'+ getDateStrFromISO(list.LastItemModifiedDate,'INTL') +'</td>');
+						$row.append('<td class="right">'+ list.ItemCount +'</td>');
+						$row.append('<td class="right">'+ 'TODO' +'</td>');
+						$('#tabSiteLists tbody').append( $row );
 					});
+
+					// C: tablesorter
+					if ( $.tablesorter ) $('#tabSiteLists').tablesorter({ sortList:[[0,0]] });
 				}
 
 				// STEP 5: Subsites
@@ -853,7 +923,11 @@
 		}
 
 		// ==================================================================================================================
-		window.onload = function(){ doPageLoad(); SetFullScreenMode(true); }
+		$(document).ready(function(){
+			// Dynamically load library as SP Online is *BAD* abut caching
+			$.getScript("/sites/dev/SiteAssets/js/sprestlib.js", function(){ doPageLoad(); });
+		});
+		window.onload = function(){ SetFullScreenMode(true); };
 	</script>
 </head>
 <body>
@@ -927,6 +1001,18 @@
 					<div style="width:20%; text-align:center;"><label>Last Modified</label><span id="DateMod"></span></div>
 				</div>
 
+				<div class="modernTable">
+					<div>
+						<span style="font-size:18px; margin-right:5px;">Show Description:</span>
+						<div style="display:inline-block; vertical-align: middle;">
+							<label class="switch"><input type="checkbox" onchange="$('.showDesc').toggle()" checked><span class="slider round"></span></label>
+						</div>
+					</div>
+					<div>
+						<button type="button" class="flatBtn small flatBtn-blue">Export</button>
+					</div>
+				</div>
+
 				<div class="subTitle" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
 					<div class="arrow active"></div>Lists &amp; Libraries
 				</div>
@@ -934,13 +1020,13 @@
 					<table id="tabSiteLists" class="tabModern">
 						<thead>
 							<tr>
-								<th>List Name</th>
-								<th>List Type</th>
-								<th>Created</th>
-								<th>Item Count</th>
+								<th>Name</th>
+								<th>Type</th>
+								<th>Description</th>
+								<th>Create Date</th>
 								<th>Last Modified</th>
+								<th>Item Count</th>
 								<th></th>
-								<th>Owners Group Members</th>
 							</tr>
 						</thead>
 						<tbody></tbody>
