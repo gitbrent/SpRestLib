@@ -51,8 +51,10 @@
 		#tabSubsites tbody td:nth-child(3) { white-space: nowrap; }
 		#tabSubsites tbody td:nth-child(4) { white-space: nowrap; }
 
-		#navtabSite div.modernTable > div { vertical-align: top; }
-		#navtabSite div.modernTable span { font-family: Roboto; font-size: 24px; }
+		#navtabSite #boxInfo > div { vertical-align: top; }
+		#navtabSite #boxInfo span { font-family: Roboto; font-size: 24px; }
+		#navtabSite #boxOpts > div > span { margin-right:5px; }
+		.contSwitch { display:inline-block; vertical-align:middle; }
 		#navtabSite #DateCre, #navtabSite #DateMod { white-space: nowrap; }
 
 		.iconYes {
@@ -304,7 +306,6 @@
 		.tablesorter-default > tbody > tr > td.icon:last-child { border-bottom: 1px solid #F1F1F1; }
 		/* ----- */
 		.tabModern {
-			font-family: "Segoe UI",Verdana,Arial,sans-serif;
 			width: 100%;
 			border-collapse: collapse;
 			margin: 0px;
@@ -382,6 +383,7 @@
 		td.nowrap { white-space: nowrap !important; }
 		/* ----- */
 		#tabSiteLists thead th:first-child { min-width:200px; }
+		.showDesc { color:#a7a7a7; margin-top:5px; }
 		/* ----- */
 		.switch {
 		  position: relative;
@@ -439,7 +441,7 @@
 		const HTML_SPINNER = '<div class="sprlib-spinner"><div class="sprlib-bounce1"></div><div class="sprlib-bounce2"></div><div class="sprlib-bounce3"></div></div>';
 		const STR_EMPTY = '<span style="color:#ccc; font-style:italic;">(empty)</span>';
 		const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-		// COMSTANTS: APP
+		// CONSTANTS: APP
 		const MODE_VERBOSE = window.location.href.toLowerCase().indexOf('mode=verbose') > -1; if (MODE_VERBOSE) { console.log('*** VERBOSE MODE ***'); }
 		const MAXSITES = 50;
 		// REF: https://msdn.microsoft.com/en-us/library/microsoft.sharepoint.splisttemplatetype.aspx
@@ -471,6 +473,7 @@
 			'123': {name:'ThemeCatalog', desc:'Themes.'},
 			'124': {name:'DesignCatalog', desc:'DesignCatalog.'},
 			'125': {name:'AppDataCatalog', desc:'AppDataCatalog.'},
+			'126': {name:'AppFiles', desc:'App Files.'},
 			'130': {name:'DataConnectionLibrary', desc:''},
 			'140': {name:'WorkflowHistory', desc:'Workflow History.'},
 			'150': {name:'GanttTasks', desc:'Project Tasks.'},
@@ -503,11 +506,14 @@
 			'1200': {name:'AdminTasks', desc:'Administrator Tasks.'},
 			'1220': {name:'HealthRules', desc:'Health Rules.'},
 			'1221': {name:'HealthReports', desc:'Health Reports.'},
-			'1230': {name:'DeveloperSiteDraftApps', desc:'Draft Apps library in Developer Site.'}
+			'1230': {name:'DeveloperSiteDraftApps', desc:'Draft Apps library in Developer Site.'},
+			'3300': {name:'SharingLinks', desc:'Use this list to track documents which have internal or anonymous sharing links in the site.'},
+			'110102': {name:'ConvertedForms', desc:'List of user browser-enabled form templates on this site collection.'}
 		};
 		// GLOBAL VARS
 		var gObjMapNameToId = {};
 		var gObjSubsites = {};
+		// TODO: I18N internationalization ('Y' etc)
 
 		// ==================================================================================================================
 
@@ -580,8 +586,8 @@
 				}),
 				sprLib.rest({
 					url: '_api/web/lists',
-					queryCols: ['Title','BaseTemplate','Created','Description','EnableAttachments','EntityTypeName','ItemCount','LastItemModifiedDate'],
-					queryFilter: 'Hidden ne true',
+					queryCols: ['Title','BaseTemplate','Created','Description','EnableAttachments','EnableVersioning','EntityTypeName',
+						'ForceCheckout','Hidden','ItemCount','LastItemModifiedDate'],
 					queryLimit: 5000
 				}),
 				sprLib.rest({
@@ -633,14 +639,20 @@
 
 					// B:
 					arrLists.forEach(function(list,idx){
-						let $row = $('<tr/>');
-						$row.append('<td>'+ list.Title +'</td>');
+						let $row = $('<tr class="'+ (list.Hidden ? 'showHidn' : '') +'" style="'+ (list.Hidden && !$('#chkHidn').prop('checked') ? 'display:none' : '') +'"></tr>');
+
+						$row.append('<th><b>'+ list.Title +'</b>'
+							+ '<div class="showDesc"><span style="display:none">: </span>'+ list.Description +'</div>'
+							+ '</th>'
+						);
 						$row.append('<td>'+ (SP_LIST_TEMPLATE_TYPES[list.BaseTemplate] ? SP_LIST_TEMPLATE_TYPES[list.BaseTemplate].name : list.BaseTemplate) +'</td>');
-						$row.append('<td><div class="showDesc">'+ list.Description +'</div></td>');
 						$row.append('<td class="nowctr">'+ getDateStrFromISO(list.Created,'INTL') +'</td>');
 						$row.append('<td class="nowctr">'+ getDateStrFromISO(list.LastItemModifiedDate,'INTL') +'</td>');
-						$row.append('<td class="right">'+ list.ItemCount +'</td>');
-						$row.append('<td class="right">'+ 'TODO' +'</td>');
+						$row.append('<td class="nowctr">'+ list.ItemCount +'</td>');
+						$row.append('<td class="nowctr">'+ (list.EnableAttachments ? 'Y' : '') +'</td>');
+						$row.append('<td class="nowctr">'+ (list.EnableVersioning ? 'Y' : '') +'</td>');
+						$row.append('<td class="nowctr">'+ (list.ForceCheckout ? 'Y' : '') +'</td>');
+
 						$('#tabSiteLists tbody').append( $row );
 					});
 
@@ -991,8 +1003,7 @@
 
 			<div id="navtabSite" data-tab="Site Info">
 				<div class="subTitle">Site Collection Information</div>
-
-				<div class="modernTable" data-info="Site Info Table">
+				<div id="boxInfo" class="modernTable" data-info="Site Info Table">
 					<div style="width:5%; vertical-align:middle; padding:5px;"><img id="siteLogo" style="max-height:50px; max-width:100px;"></span></div>
 					<div style="width:25%"><label>Site Name</label><span id="SiteName"></span></div>
 					<div style="width:15%; text-align:center;"><label>Storage Used</label><span id="UsageTot"></span></div>
@@ -1000,12 +1011,17 @@
 					<div style="width:20%; text-align:center;"><label>Date Created</label><span id="DateCre"></span></div>
 					<div style="width:20%; text-align:center;"><label>Last Modified</label><span id="DateMod"></span></div>
 				</div>
-
-				<div class="modernTable">
+				<div id="boxOpts" class="modernTable" data-info="Site Info Table Options">
 					<div>
-						<span style="font-size:18px; margin-right:5px;">Show Description:</span>
-						<div style="display:inline-block; vertical-align: middle;">
+						<span>Show Description:</span>
+						<div class="contSwitch">
 							<label class="switch"><input type="checkbox" onchange="$('.showDesc').toggle()" checked><span class="slider round"></span></label>
+						</div>
+					</div>
+					<div>
+						<span>Show Hidden:</span>
+						<div class="contSwitch">
+							<label class="switch"><input id="chkHidn" type="checkbox" onchange="$('.showHidn').toggle()"><span class="slider round"></span></label>
 						</div>
 					</div>
 					<div>
@@ -1020,13 +1036,14 @@
 					<table id="tabSiteLists" class="tabModern">
 						<thead>
 							<tr>
-								<th>Name</th>
+								<th>Name / Description</th>
 								<th>Type</th>
-								<th>Description</th>
-								<th>Create Date</th>
-								<th>Last Modified</th>
-								<th>Item Count</th>
-								<th></th>
+								<th>Date Created</th>
+								<th>Date Modified</th>
+								<th>Total Items</th>
+								<th><abbr title="Are Attachments enabled?">Attachments?</abbr></th>
+								<th><abbr title="Is Versioning enabled?">Versioning?</abbr></th>
+								<th><abbr title="Force Checkout?">Force?</abbr></th>
 							</tr>
 						</thead>
 						<tbody></tbody>
