@@ -14,14 +14,15 @@
 	<meta name="website"     content="https://github.com/gitbrent/SpRestLib/">
 	<meta name="keywords"    content="SpRestLib, JavaScript, js-sharepoint, OData, REST, SharePoint 2013, SP2013, SharePoint 2016, SP2016, SharePoint Online">
 	<meta name="description" content="Content Editor Webpart: SpRestLib SharePoint Toolkit">
-	<meta name="revised"     content="Oct 04, 2017">
+	<meta name="revised"     content="Oct 06, 2017">
 
-	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:100">
+	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300">
 	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto+Mono">
 	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:400">
 	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inconsolata">
 
 	<style>
+		abbr { cursor: help; }
 		.ms-webpartPage-root { border-spacing: 0px; }
 		#divBody {
 			font-family: 'Open Sans','Segoe UI','Helvetica Neue',sans-serif;
@@ -29,9 +30,10 @@
 			margin: -10px 30px 10px 30px;
 		}
 		#divBody div { box-sizing: border-box; }
-		.bigTitle { font-family:'Open Sans','Segoe UI'; font-size:36px; color:#0088cc; margin:15px 0 10px 0; }
+		.bigTitle { font-family:'Roboto','Segoe UI Light'; font-size:36px; color:#0088cc; margin:15px 0 10px 0; }
 		.bigSubtitle { font-family:'Open Sans','Segoe UI'; font-size:14px; color:#c7c7c7; margin:10px 0 20px 0; }
 		.sectionTitle, .subTitle { font-family:'Open Sans','Segoe UI'; font-size:18px; color:#0088cc; margin:20px 0 10px 0; cursor: pointer; }
+		.sectionTitle.plain, .subTitle.plain { display: inline-block; cursor: default; }
 		.bigger { font-size:1.1em; }
 		.arrow {
 			display: inline-block;
@@ -46,14 +48,17 @@
 			transform: rotate(135deg);
 			margin-bottom: 3px;
 		}
+		#contSiteLogo { float:right; vertical-align:middle; margin-bottom:5px; }
+		#siteLogo { max-height:50px; max-width:100px; }
 
 		#tabSubsites tbody td:nth-child(1) { min-width: 250px; }
 		#tabSubsites tbody td:nth-child(3) { white-space: nowrap; }
 		#tabSubsites tbody td:nth-child(4) { white-space: nowrap; }
 
+		#navtabSite #boxInfo { margin-bottom: 20px; }
 		#navtabSite #boxInfo > div { vertical-align: top; }
-		#navtabSite #boxInfo span { font-family: Roboto; font-size: 24px; }
-		#navtabSite #boxOpts > div > span { margin-right:5px; }
+		#navtabSite #boxInfo span { font-family: Roboto; font-size: 22px; }
+		#navtabSite #boxOpts > div > span { margin-right:5px; vertical-align:middle; }
 		.contSwitch { display:inline-block; vertical-align:middle; }
 		#navtabSite #DateCre, #navtabSite #DateMod { white-space: nowrap; }
 
@@ -82,7 +87,7 @@
 		.flexTabs {
 			width: 100%;
 			margin: 20px 0 10px 0;
-			font-family: "Segoe UI", "Open Sans", Helvetica, Arial, sans-serif;
+			font-family: "Open Sans", "Segoe UI", Helvetica, Arial, sans-serif;
 			border: 1px solid #d5d5d5;
 			box-shadow: 0px 4px 10px -5px rgba(0,0,0,0.5);
 			border-radius: 5px;
@@ -140,6 +145,21 @@
 			flex: 1 1 auto;
 			text-align: left;
 		}
+		.modernFlex {
+			display: flex;
+			flex-wrap: nowrap;
+			margin-bottom: 20px;
+			color: rgb(0,149,221);
+			background: rgb(242,249,252);
+			border: 1px #e7e7f7 solid;
+			/*border-radius: 5px;*/
+		}
+		.modernFlex > div {
+			flex: 1 1 auto;
+			padding: 10px 20px;
+			text-align: center;
+			vertical-align: middle;
+		}
 
 		div.divTable { display: table; box-sizing: border-box; width: 100%; font-size: 12px; }
 		div.divTable > div { display: table-cell; padding:10px; vertical-align: top; }
@@ -157,7 +177,7 @@
 			font-size: 14px;
 			border: 1px solid #d7e7f7;
 		}
-		#navtabSetup .divTableRows > div > div { padding: 15px; background: #f2f9fc; }
+		#navtabSetup .divTableRows > div > div { padding: 10px 15px; background: #f2f9fc; }
 		#navtabSetup .divTableRows > div > div:first-child { width:1%; }
 
 		/*-*/
@@ -177,8 +197,37 @@
 			cursor: pointer;
 			box-shadow: 0 2px 0 #c7c7c7;
 		}
-		.flatBtn-green,	.flatBtn-green:hover	{ background-color: #27AE60 !important; }
-		.flatBtn-blue,	.flatBtn-blue:hover		{ background-color: #3498DB !important; }
+		.flatBtn.small {
+			padding: 5px 10px !important;
+			font-size: 11px !important;
+			box-shadow: none;
+		}
+		.flatBtn.shadow {
+			box-shadow: 0 2px 5px 0 rgba(0,0,0,0.4) !important; /* new, fall 2013 */
+		}
+		.flatBtn-blueDk,   .flatBtn-blueDk:hover	{ background-color: #1A76A5 !important; }
+		.flatBtn-blueMd,   .flatBtn-blueMd:hover	{ background-color: #199FD2 !important; }
+		.flatBtn-blueLt,   .flatBtn-blueLt:hover	{ background-color: #41B2DC !important; }
+		.flatBtn-red,      .flatBtn-red:hover		{ background-color: #DB2814 !important; }
+		.flatBtn-orange,   .flatBtn-orange:hover	{ background-color: #E78733 !important; }
+		.flatBtn-greenLt,  .flatBtn-greenLt:hover	{ background-color: #7AB800 !important; }
+		.flatBtn-green,    .flatBtn-green:hover		{ background-color: #27AE60 !important; }
+		.flatBtn-purple,   .flatBtn-purple:hover	{ background-color: #9B59B6 !important; }
+		.flatBtn-purpleDk, .flatBtn-purpleDk:hover	{ background-color: #8F44AD !important; }
+		.flatBtn-gray,     .flatBtn-gray:hover		{ background-color: #BBBBBB !important; }
+		.flatBtn-grayLt,   .flatBtn-grayLT:hover	{ background-color: #DDDDDD !important; }
+		.flatBtn-nsTeal,	.flatBtn-nsTeal:hover	{ background-color: #1ABC9C !important; }
+		.flatBtn-nsBlue,	.flatBtn-nsBlue:hover	{ background-color: #3498DB !important; }
+		.flatBtn-nsPurple,	.flatBtn-nsPurple:hover	{ background-color: #9B59B6 !important; }
+		.flatBtn-nsDark,	.flatBtn-nsDark:hover	{ background-color: #34495E !important; }
+		.flatBtn-nsYellow,	.flatBtn-nsYellow:hover	{ background-color: #F1C40F !important; }
+		.flatBtn-nsOrange,	.flatBtn-nsOrange:hover	{ background-color: #E67E22 !important; }
+		.flatBtn-nsRed,		.flatBtn-nsRed:hover	{ background-color: #E74C3C !important; }
+		.flatBtn-nsBlueLt,	.flatBtn-nsBlueLt:hover	{ background-color: #1FA6D5 !important; }
+		.flatBtn-nsBlueVL,	.flatBtn-nsBlueVL:hover	{ background-color: #93d4eb !important; }
+		.flatBtn-nsGrayVL,	.flatBtn-nsGrayVL:hover	{ background-color: #e6e6e6 !important; color: #b7b7b7 !important; }
+		.flatBtn-modTeal,   .flatBtn-modTeal:hover  { background-color: #64C8D7 !important; }
+		.flatBtn-modGray,   .flatBtn-modGray:hover  { background: linear-gradient(#fcfcfc, #eee) !important; color:#999 !important; border:1px solid #d5d5d5 !important; }
 
 		/* ===== */
 		.modernTable {
@@ -230,70 +279,29 @@
 		@keyframes sprlib-sk-bouncedelay { 0%, 80%, 100% {  transform: scale(0); } 40% { transform: scale(1.0); } }
 
 		/* tablesorter.css */
-		.tablesorter {
-			text-align: left;
-			background-color: white;
-			margin: 10px 0px 15px 0px;
-			font-size: 12px;
-			width: 100%;
-		}
-		.tablesorter thead tr th, .tablesorter tfoot tr th {
-			background-color: #e6EEEE;
-			border: 1px solid #FFF;
-			font-size: 8pt;
-			padding: 4px;
-		}
-		.tablesorter tbody td {
-			color: #3D3D3D;
-			padding: 4px;
-			background-color: #FFF;
-			border: 1px solid #f2f9fc;
-			vertical-align: top;
-		}
-		.tablesorter tbody tr.odd td {
-			background-color:#F0F0F6;
-		}
-		.tablesorter thead tr .headerSortUp {
-			background-image: url('data:image/gif;base64,R0lGODlhBwAEAIAAAP///////yH5BAEAAAEALAAAAAAHAAQAAAIHjGEJq8sOCwA7');
-		}
-		.tablesorter thead tr .headerSortDown {
-			background-image: url('data:image/gif;base64,R0lGODlhBwAEAIAAAP///////yH5BAEAAAEALAAAAAAHAAQAAAIIhA+BGWoNWSgAOw==');
-		}
-		.tablesorter thead tr .headerSortDown, .tablesorter thead tr .headerSortUp { background-color: #8dbdd8; }
-
-		/* Lighter blues */
-		/* Material Design: Light Blue #200 = #81D4FA */
-		/* Material Design: Light Blue #400 = #29B6F6 */
-		/*
-		.tablesorter-default thead .tablesorter-headerAsc      { background-color: #29B6F6 !important; }
-		.tablesorter-default thead .tablesorter-headerDesc     { background-color: #29B6F6 !important; }
-		.tablesorter-default thead .tablesorter-headerUnSorted { background-color: #81D4FA !important; }
-		*/
-		/* Lightest colors */
-		.tablesorter-default thead th {
+		.tablesorter thead th {
 			border-left: 1px white solid !important;
 			border-right: 1px white solid !important;
 			border-top: 1px #e7e7f3 solid !important;
 			border-bottom: 1px #e7e7f3 solid !important;
 		}
-		.tablesorter-default thead th:first-child { border-left:  1px #e7e7f3 solid !important; }
-		.tablesorter-default thead th:last-child  { border-right: 1px #e7e7f3 solid !important; }
-		.tablesorter-default thead .tablesorter-headerAsc      { background-color:#a9d4ef !important; color:#ffffff !important; background-image:url('data:image/gif;base64,R0lGODlhBwAEAIAAAP///////yH5BAEAAAEALAAAAAAHAAQAAAIHjGEJq8sOCwA7') !important; }
-		.tablesorter-default thead .tablesorter-headerDesc     { background-color:#a9d4ef !important; color:#ffffff !important; background-image:url('data:image/gif;base64,R0lGODlhBwAEAIAAAP///////yH5BAEAAAEALAAAAAAHAAQAAAIIhA+BGWoNWSgAOw==') !important; }
-		.tablesorter-default thead .tablesorter-headerUnSorted { background-color:#E5F2FA !important; color:#0090C0 !important; background-image:url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAcAAAAJCAYAAAD+WDajAAAAKElEQVR42mNgQAYTDvxnwApAEjCMUwJFATYJrCbgtYtoo4lzLQ5/AgB5EEnhsdUsjwAAAABJRU5ErkJggg==') !important; }
-		.tablesorter-default > tbody > tr > td { border: 1px #F1F1F1 solid !important; color:#696969 !important; }
+		.tablesorter thead th:first-child { border-left:  1px #e7e7f3 solid !important; }
+		.tablesorter thead th:last-child  { border-right: 1px #e7e7f3 solid !important; }
+		.tablesorter thead .header {
+			background-repeat: no-repeat;
+			background-position: right 8px center;
+			cursor: pointer;
+		}
+		.tablesorter thead .header         { background-color:#E5F2FA !important; color:#0090C0 !important; background-image:url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAcAAAAJCAYAAAD+WDajAAAAKElEQVR42mNgQAYTDvxnwApAEjCMUwJFATYJrCbgtYtoo4lzLQ5/AgB5EEnhsdUsjwAAAABJRU5ErkJggg==') !important; }
+		.tablesorter thead .headerSortDown { background-color:#a9d4ef !important; color:#ffffff !important; background-image:url('data:image/gif;base64,R0lGODlhBwAEAIAAAP///////yH5BAEAAAEALAAAAAAHAAQAAAIHjGEJq8sOCwA7') !important; }
+		.tablesorter thead .headerSortUp   { background-color:#a9d4ef !important; color:#ffffff !important; background-image:url('data:image/gif;base64,R0lGODlhBwAEAIAAAP///////yH5BAEAAAEALAAAAAAHAAQAAAIIhA+BGWoNWSgAOw') !important; }
+		.tablesorter > tbody > tr > td { border: 1px #F1F1F1 solid !important; color:#696969 !important; }
 		/* tablesorter - Make room for sort icons */
 		.tablesorter > thead > tr > th { padding: 6px 20px 6px 8px !important; }
 		.tablesorter > thead > tr > th.sorter-false { padding: 6px 8px !important; cursor: default; }
-		.tabModern > thead > tr > th.sorter-false { background-image: url("../SiteAssets/img/transparent.gif") !important; }
-		.tablesorter-default thead .tablesorter-header {
-			background-image: url('data:image/gif;base64,R0lGODlhBwAEAIAAAP///////yH5BAEAAAEALAAAAAAHAAQAAAIIhA+BGWoNWSgAOw==');
-			background-repeat: no-repeat;
-			background-position: right 10px center;
-			cursor: pointer;
-		}
+		.tabModern > thead > tr > th.sorter-false { background-image: url('data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7') !important; }
 		/* icon.checkbox cells in tbody */
-		.tablesorter-default > tbody > tr > td.icon {
+		.tablesorter > tbody > tr > td.icon {
 			width: 1%;
 			background: #f8fbff;
 			text-align: center;
@@ -303,12 +311,14 @@
 			padding: 0 4px;
 			vertical-align: middle;
 		}
-		.tablesorter-default > tbody > tr > td.icon:last-child { border-bottom: 1px solid #F1F1F1; }
-		/* ----- */
+		.tablesorter > tbody > tr > td.icon:last-child { border-bottom: 1px solid #F1F1F1; }
+
+		/* tabModern */
 		.tabModern {
 			width: 100%;
 			border-collapse: collapse;
 			margin: 0px;
+			font-size: 12px;
 		}
 		.tabModern > tbody > tr > th, .tabModern > tbody > tr > td { border: 1px #f1f1f1 solid; }
 		.tabModern th.icon {
@@ -354,7 +364,7 @@
 			padding: 8px 10px;
 			background: #f2f9fc;
 			color: #0088cc;
-			box-sizing: border-box;
+			border-bottom: 1px solid white !important;
 		}
 		.tabModern > tbody > tr > td {
 			text-align: left;
@@ -366,6 +376,7 @@
 			text-decoration: underline;
 		}
 		.tabModern > tfoot > tr > td { padding: 15px; text-align: center; }
+		.tabModern > tbody > tr > th > div { font-weight: normal; }
 		.tabModern td.gray { background: #f7f7f7; }
 		.tabModern td.blue { background: #E5F2FA; }
 		.tabModern th.tabModernSection, .tabModern td.tabModernSection {
@@ -385,23 +396,14 @@
 		#tabSiteLists thead th:first-child { min-width:200px; }
 		.showDesc { color:#a7a7a7; margin-top:5px; }
 		/* ----- */
-		.switch {
-		  position: relative;
-		  display: inline-block;
-		  width: 36px;
-		  height: 20px;
-		}
+		.switch { width: 36px; height: 20px; position: relative; display: inline-block; }
 		.switch input { display:none; }
 		.slider {
 		  position: absolute;
 		  cursor: pointer;
-		  top: 0;
-		  left: 0;
-		  right: 0;
-		  bottom: 0;
-		  background-color: #ccc;
-		  -webkit-transition: .4s;
-		  transition: .4s;
+		  top: 0; left: 0; right: 0; bottom: 0;
+		  background-color: #c7c7c7;
+		  transition: .4s; -webkit-transition: .4s;
 		}
 		.slider:before {
 		  position: absolute;
@@ -411,8 +413,8 @@
 		  background-color: white;
 		  transition: .4s; -webkit-transition: .4s;
 		}
-		input:focus   + .slider { box-shadow: 0 0 1px #58b3fb; }
-		input:checked + .slider { background-color: #58b3fb; }
+		input:focus   + .slider { box-shadow: 0 0 1px #92c0e0; }
+		input:checked + .slider { background-color: #92c0e0; }
 		input:checked + .slider:before { -webkit-transform:translateX(16px); -ms-transform:translateX(16px); transform:translateX(16px); }
 		.slider.round { border-radius: 20px; }
 		.slider.round:before { border-radius: 50%; }
@@ -420,9 +422,7 @@
 
 	<script type="text/javascript" src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
 	<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.29.0/js/jquery.tablesorter.min.js"></script>
-	<!-- DEBUG
-	<script type="text/javascript" src="https://cdn.rawgit.com/gitbrent/SpRestLib/v1.1.0/dist/sprestlib.bundle.js"></script>
-	-->
+	<script type="text/javascript" src="https://cdn.rawgit.com/gitbrent/SpRestLib/v1.2.0/dist/sprestlib.bundle.js"></script>
 
 	<!-- NOTE: If you prefer not to/cannot use CDNs, simply uncomment the lines below and comment the CDN lines above -->
 	<!--
@@ -436,7 +436,7 @@
 		$.ajaxSetup({ cache:false });
 		// APP
 		const APP_VER = '1.0.0';
-		const APP_REL = '20171005';
+		const APP_REL = '20171006-2258';
 		// CONSTANTS: UI/LOGIC
 		const HTML_SPINNER = '<div class="sprlib-spinner"><div class="sprlib-bounce1"></div><div class="sprlib-bounce2"></div><div class="sprlib-bounce3"></div></div>';
 		const STR_EMPTY = '<span style="color:#ccc; font-style:italic;">(empty)</span>';
@@ -502,12 +502,14 @@
 			'544': {name:'MicroFeed', desc:'MySite MicroFeed Persistent Storage List.'},
 			'600': {name:'ExternalList', desc:'External.'},
 			'700': {name:'MySiteDocumentLibrary', desc:'MySiteDocumentLibrary.'},
+			'701': {name:'', desc:'.'},
 			'1100': {name:'IssueTracking', desc:'Issue tracking.'},
 			'1200': {name:'AdminTasks', desc:'Administrator Tasks.'},
 			'1220': {name:'HealthRules', desc:'Health Rules.'},
 			'1221': {name:'HealthReports', desc:'Health Reports.'},
 			'1230': {name:'DeveloperSiteDraftApps', desc:'Draft Apps library in Developer Site.'},
 			'3300': {name:'SharingLinks', desc:'Use this list to track documents which have internal or anonymous sharing links in the site.'},
+			'4501': {name:'', desc:'.'},
 			'110102': {name:'ConvertedForms', desc:'List of user browser-enabled form templates on this site collection.'}
 		};
 		// GLOBAL VARS
@@ -568,6 +570,36 @@
 				if ( strFinalDate && (strFinalDate.indexOf("NaN") > -1 || strFinalDate.indexOf("undefined") > -1) ) return '';
 				return strFinalDate;
 			}
+
+			/**
+			 * Push table data to client as csv file.
+			 */
+			function exportTabData(inTabName) {
+				var data = '';
+		        var filename = 'sprLibToolkit_export_'+ new Date().toISOString().split('.')[0].replace(/\D/g,'') +'.csv';
+
+				// STEP 1: Compile data
+				$('#'+inTabName+' tr').each(function(idx,row){
+					$(row).find('th,td').each(function(idy,cell){ data += '"'+ $(cell).text().trim() + '",'; });
+					data = data.substring(0,data.length-1) + '\n';
+				});
+
+				// STEP 2: Export
+				var blob = new Blob([data], {type: "text/csv;charset=utf-8;"});
+				if ( navigator.msSaveBlob ) {
+					navigator.msSaveBlob(blob, filename);
+				}
+				else {
+					var link = document.createElement("a");
+					var url = URL.createObjectURL(blob);
+					link.setAttribute("href", url);
+					link.setAttribute("download", filename);
+					link.style = "visibility:hidden";
+					document.body.appendChild(link);
+					link.click();
+					document.body.removeChild(link);
+				}
+		    }
 		}
 
 		// ==================================================================================================================
@@ -586,7 +618,7 @@
 				}),
 				sprLib.rest({
 					url: '_api/web/lists',
-					queryCols: ['Title','BaseTemplate','Created','Description','EnableAttachments','EnableVersioning','EntityTypeName',
+					queryCols: ['Title','BaseTemplate','BaseType','Created','Description','EnableAttachments','EnableVersioning','EntityTypeName',
 						'ForceCheckout','Hidden','ItemCount','LastItemModifiedDate'],
 					queryLimit: 5000
 				}),
@@ -641,17 +673,19 @@
 					arrLists.forEach(function(list,idx){
 						let $row = $('<tr class="'+ (list.Hidden ? 'showHidn' : '') +'" style="'+ (list.Hidden && !$('#chkHidn').prop('checked') ? 'display:none' : '') +'"></tr>');
 
-						$row.append('<th><b>'+ list.Title +'</b>'
-							+ '<div class="showDesc"><span style="display:none">: </span>'+ list.Description +'</div>'
+						// TODO: list.Title is not the correct URL!!
+						$row.append('<th>'
+							+ '<a href="../Lists/'+ list.Title +'" target="_blank">'+ list.Title +'</a>'
+							+ (list.Description ? '<div class="showDesc"><span style="display:none">: </span>'+ list.Description +'</div>' : '')
 							+ '</th>'
 						);
-						$row.append('<td>'+ (SP_LIST_TEMPLATE_TYPES[list.BaseTemplate] ? SP_LIST_TEMPLATE_TYPES[list.BaseTemplate].name : list.BaseTemplate) +'</td>');
+						$row.append('<td>'+ (list.BaseType == 0 ? 'List' : 'Library') +'<span class="showTemp" style="display:none"> ('+ (SP_LIST_TEMPLATE_TYPES[list.BaseTemplate] ? SP_LIST_TEMPLATE_TYPES[list.BaseTemplate].name : list.BaseTemplate) +')</span></td>');
 						$row.append('<td class="nowctr">'+ getDateStrFromISO(list.Created,'INTL') +'</td>');
 						$row.append('<td class="nowctr">'+ getDateStrFromISO(list.LastItemModifiedDate,'INTL') +'</td>');
 						$row.append('<td class="nowctr">'+ list.ItemCount +'</td>');
 						$row.append('<td class="nowctr">'+ (list.EnableAttachments ? 'Y' : '') +'</td>');
-						$row.append('<td class="nowctr">'+ (list.EnableVersioning ? 'Y' : '') +'</td>');
-						$row.append('<td class="nowctr">'+ (list.ForceCheckout ? 'Y' : '') +'</td>');
+						$row.append('<td class="nowctr">'+ (list.EnableVersioning  ? 'Y' : '') +'</td>');
+						$row.append('<td class="nowctr">'+ (list.ForceCheckout     ? 'Y' : '') +'</td>');
 
 						$('#tabSiteLists tbody').append( $row );
 					});
@@ -699,9 +733,9 @@
 			var urlStormanBase = location.href.substring(0, location.href.toLowerCase().indexOf('sitepages/')).toLowerCase();
 
 			// STEP 1: UI
-			$('tabSubsites tr.busy').show();
+			$('#tabSubsites tr.busy').show();
 
-			// STEP 1: Create callbacks
+			// STEP 2: Create callbacks
 			$('#scraper').on('load', function(){
 				// TODO: Check for errors - page will load (read: $(scraper).error() isnt called), so check here - dont assumce everything is fine
 				// TODO: "500 INTERNAL SERVER ERROR"
@@ -759,58 +793,63 @@
 				console.error('scraper didnt load');
 			});
 
-			// STEP 2: Load storman report
+			// STEP 3: Load storman report
 			$('#scraper').prop('src', urlStormanBase+'_layouts/15/storman.aspx?root=&OrderBy=0&Asc=0&Page=0');
 		}
 
 		function showSiteInfo() {
-			// STEP 1: Add data rows
+			// STEP 1: Clear UI
+			$('#tabSubsites').trigger("destroy");
+			$('#tabSubsites tbody').empty();
+			$('#tabSubsites tr.busy').show();
+
+			// STEP 2: Populate table
 			$.each(gObjSubsites, function(id,site){
-				var row = $('<tr/>');
+				var $row = $('<tr/>');
 
-				row.append('<td>'+ site.Name +'</td>');
-				row.append('<td><a href="'+site.Url+'">'+ site.Url.substring(site.Url.lastIndexOf('/')+1) +'</a></td>');
-				row.append('<td class="size">'+ site.UsedSize +'</td>');
-				row.append('<td class="center">'+ site.UsedPct +'</td>');
-				row.append('<td class="nowctr">'+ getDateStrFromISO(site.Created,'INTL') +'</td>');
-				row.append('<td class="nowctr">'+ getDateStrFromISO(site.Modified,'INTL') +'</td>');
-				row.append('<td class="dmyExcelWrap">'+ site.GroupOwners +'</td>');
+				$row.append('<td>'+ site.Name +'</td>');
+				$row.append('<td><a href="'+site.Url+'">'+ site.Url.substring(site.Url.lastIndexOf('/')+1) +'</a></td>');
+				$row.append('<td class="size">'+ site.UsedSize +'</td>');
+				$row.append('<td class="center">'+ site.UsedPct +'</td>');
+				$row.append('<td class="nowctr">'+ getDateStrFromISO(site.Created,'INTL') +'</td>');
+				$row.append('<td class="nowctr">'+ getDateStrFromISO(site.Modified,'INTL') +'</td>');
+				$row.append('<td class="dmyExcelWrap">'+ site.GroupOwners +'</td>');
 
-				$('#tabSubsites tbody').append( row );
+				$('#tabSubsites tbody').append( $row );
 			});
 
-			// STEP 2:
-			if ( $.tablesorter ) $('#tabSubsites').tablesorter({ sortList:[[0,0]] }); // Sort by (Col#/Asc=0,Desc=1)
-
-			// STEP 3:
+			// STEP 3: Hide busy
 			$('#tabSubsites tr.busy').hide();
+
+			// STEP 4: TableSorter
+			if ( $.tablesorter ) $('#tabSubsites').tablesorter({ sortList:[[0,0]] }); // Sort by (Col#/Asc=0,Desc=1)
 		}
 
 		// ==================================================================================================================
 
 		function handleListChange() {
 			// A: Clear results
-			$('#tab1-ListInfo table').remove();
-			$('#tab1-ListCols table').remove();
+			$('#tabList-ListInfo table').remove();
+			$('#tabList-ListCols table').remove();
 			// B: Return if nothing selected
 			if ( !$('#selSiteLists').val() ) return;
 
 			// LIST INFO:
-			$('#tab1-ListInfo pre code').text( 'sprLib.list(\''+ $('#selSiteLists').val() +'\').info()' );
+			$('#tabList-ListInfo pre code').text( 'sprLib.list(\''+ $('#selSiteLists').val() +'\').info()' );
 			sprLib.list($('#selSiteLists').val()).info()
 			.then(function(objInfo){
 				var $table = $('<table><tbody></tbody></table>');
 				Object.keys(objInfo).forEach(function(key,idx){
 					$table.find('tbody').append('<tr><th>'+ key +'</th>'+'<td>'+ objInfo[key] +'</td></tr>');
 				});
-				$('#tab1-ListInfo').append( $table );
+				$('#tabList-ListInfo').append( $table );
 			})
 			.catch(function(errMsg){
-				$('$tab1-ListInfo .tableRows').after( '<table><tbody><tr><td>'+errMsg+'</td></tr></tbody></table>' );
+				$('$tabList-ListInfo .tableRows').after( '<table><tbody><tr><td>'+errMsg+'</td></tr></tbody></table>' );
 			});
 
 			// LIST COLS:
-			$('#tab1-ListCols pre code').text( 'sprLib.list(\''+ $('#selSiteLists').val() +'\').cols()' );
+			$('#tabList-ListCols pre code').text( 'sprLib.list(\''+ $('#selSiteLists').val() +'\').cols()' );
 			sprLib.list($('#selSiteLists').val()).cols()
 			.then(function(arrColObjs){
 				var $table = $('<table><thead><tr></tr></thead><tbody></tbody></table>');
@@ -823,10 +862,10 @@
 					$table.find('tbody').append( $row );
 				});
 
-				$('#tab1-ListCols').append( $table );
+				$('#tabList-ListCols').append( $table );
 			})
 			.catch(function(errMsg){
-				$('$tab1-ListCols .tableRows').after( '<table><tbody><tr><td>'+errMsg+'</td></tr></tbody></table>' );
+				$('$tabList-ListCols .tableRows').after( '<table><tbody><tr><td>'+errMsg+'</td></tr></tbody></table>' );
 			});
 		}
 
@@ -901,13 +940,11 @@
 			// TAB: List Tools
 			{
 				// Populate <select> with List names
-				sprLib.rest({ restUrl:'/_api/web/lists/' })
+				sprLib.rest({ restUrl:'_api/web/lists?$select=Title&$filter=Hidden%20eq%20false' })
 				.then(function(arrayListObjs){
 					arrayListObjs
 					.sort(function(a,b){return (a.Title > b.Title) ? 1 : ((b.Title > a.Title) ? -1 : 0);} )
-					.forEach(function(obj,idx){
-						if ( !obj.Hidden ) $('#selSiteLists').append('<option value="'+ obj.Title +'">'+ obj.Title +'</option>');
-					});
+					.forEach(function(obj,idx){ $('#selSiteLists').append('<option value="'+ obj.Title +'">'+ obj.Title +'</option>'); });
 					$('#contListSelect .sprlib-spinner').remove();
 				});
 			}
@@ -935,11 +972,11 @@
 		}
 
 		// ==================================================================================================================
-		$(document).ready(function(){
+		/*$(document).ready(function(){
 			// Dynamically load library as SP Online is *BAD* abut caching
 			$.getScript("/sites/dev/SiteAssets/js/sprestlib.js", function(){ doPageLoad(); });
-		});
-		window.onload = function(){ SetFullScreenMode(true); };
+		});*/
+		window.onload = function(){ doPageLoad(); SetFullScreenMode(true); };
 	</script>
 </head>
 <body>
@@ -947,7 +984,7 @@
 
 	<div id="divBody">
 		<div class="bigTitle"><a href="https://github.com/GitBrent/SpRestLib" target="_blank">SpRestLib</a> SharePoint Toolkit</div>
-		<div class="bigSubtitle">Useful Tools for SharePoint Developers, Admins and SCAs.</div>
+		<div class="bigSubtitle">Useful Tools for SharePoint Admins, Developers and SCAs.</div>
 
 		<div id="navTabs" class="flexTabs">
 			<ul>
@@ -1002,38 +1039,45 @@
 			</div>
 
 			<div id="navtabSite" data-tab="Site Info">
-				<div class="subTitle">Site Collection Information</div>
+				<div class="subTitle plain">Site Collection Information</div>
+				<div id="contSiteLogo"><img id="siteLogo"></div>
 				<div id="boxInfo" class="modernTable" data-info="Site Info Table">
-					<div style="width:5%; vertical-align:middle; padding:5px;"><img id="siteLogo" style="max-height:50px; max-width:100px;"></span></div>
-					<div style="width:25%"><label>Site Name</label><span id="SiteName"></span></div>
-					<div style="width:15%; text-align:center;"><label>Storage Used</label><span id="UsageTot"></span></div>
-					<div style="width:15%; text-align:center;"><label>Percent Used</label><span id="UsagePct"></span></div>
-					<div style="width:20%; text-align:center;"><label>Date Created</label><span id="DateCre"></span></div>
-					<div style="width:20%; text-align:center;"><label>Last Modified</label><span id="DateMod"></span></div>
-				</div>
-				<div id="boxOpts" class="modernTable" data-info="Site Info Table Options">
-					<div>
-						<span>Show Description:</span>
-						<div class="contSwitch">
-							<label class="switch"><input type="checkbox" onchange="$('.showDesc').toggle()" checked><span class="slider round"></span></label>
-						</div>
-					</div>
-					<div>
-						<span>Show Hidden:</span>
-						<div class="contSwitch">
-							<label class="switch"><input id="chkHidn" type="checkbox" onchange="$('.showHidn').toggle()"><span class="slider round"></span></label>
-						</div>
-					</div>
-					<div>
-						<button type="button" class="flatBtn small flatBtn-blue">Export</button>
-					</div>
+					<div style="width:60%"><label>Site Name</label><span id="SiteName"></span></div>
+					<div style="width:10%; text-align:center;"><label>Storage Used</label><span id="UsageTot"></span></div>
+					<div style="width:10%; text-align:center;"><label>Percent Used</label><span id="UsagePct"></span></div>
+					<div style="width:10%; text-align:center;"><label>Date Created</label><span id="DateCre"></span></div>
+					<div style="width:10%; text-align:center;"><label>Last Modified</label><span id="DateMod"></span></div>
 				</div>
 
-				<div class="subTitle" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
+				<div id="LISTS" class="subTitle" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
 					<div class="arrow active"></div>Lists &amp; Libraries
 				</div>
 				<div class="contTabSiteLists">
-					<table id="tabSiteLists" class="tabModern">
+					<div id="boxOpts" class="modernFlex" data-info="Site Info Table Options">
+						<div>
+							<span>Show Hidden:</span>
+							<div class="contSwitch">
+								<label class="switch"><input id="chkHidn" type="checkbox" onchange="$('.showHidn').toggle()"><span class="slider round"></span></label>
+							</div>
+						</div>
+						<div>
+							<span>Show Description:</span>
+							<div class="contSwitch">
+								<label class="switch"><input type="checkbox" onchange="$('.showDesc').toggle()" checked><span class="slider round"></span></label>
+							</div>
+						</div>
+						<div>
+							<span>Show Template:</span>
+							<div class="contSwitch">
+								<label class="switch"><input id="chkHidn" type="checkbox" onchange="$('.showTemp').toggle()"><span class="slider round"></span></label>
+							</div>
+						</div>
+						<div>
+							<button type="button" class="flatBtn small flatBtn-blueLt" onclick="exportTabData('tabSiteLists')">Export to CSV</button>
+						</div>
+					</div>
+
+					<table id="tabSiteLists" class="tabModern tablesorter">
 						<thead>
 							<tr>
 								<th>Name / Description</th>
@@ -1057,22 +1101,22 @@
 					</table>
 				</div>
 
-				<div class="subTitle" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
+				<div id="SUBSITES" class="subTitle" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
 					<div class="arrow"></div>Subsites
 				</div>
 				<div class="contTabSubsites" style="display:none">
 					<div id="subsitesHeader" class="flex">
 						<div>
-							Click to load subiste information and storage data.<br>
+							Click to load subsite information and storage data.<br>
 							It is not loaded by default as each site has to be scanned and can be resource intensive.<br>
 							(NOTE: storman has no API - csom, jsom, or REST - so the usage is gathering by loading each site's storman and parsing it)
 						</div>
 						<div style="vertical-align:top; text-align:right;">
-							<button type="button" class="flatBtn flatBtn-blue" onclick="getStorman()">Load Subsite Info</button>
+							<button type="button" class="flatBtn flatBtn-blueLt" onclick="getStorman()">Load Subsite Info</button>
 						</div>
 					</div>
 
-					<table id="tabSubsites" class="tabModern">
+					<table id="tabSubsites" class="tabModern tablesorter">
 						<thead>
 							<tr>
 								<th>Subsite Name</th>
@@ -1116,12 +1160,12 @@
 					</div>
 				</div>
 
-				<div id="tab1-ListInfo" style="margin-bottom:20px;">
+				<div id="tabList-ListInfo" style="margin-bottom:20px;">
 					<div class="subTitle">List Information</div>
 					<div><pre><code class="language-javascript">sprLib.list('listName').info()</code></pre></div>
 				</div>
 
-				<div id="tab1-ListCols" style="margin-bottom:20px;">
+				<div id="tabList-ListCols" style="margin-bottom:20px;">
 					<div class="subTitle">List Columns</div>
 					<div><pre><code class="language-javascript">sprLib.list('listName').cols()</code></pre></div>
 				</div>
