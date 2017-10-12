@@ -14,7 +14,7 @@
 	<meta name="website"     content="https://github.com/gitbrent/SpRestLib/">
 	<meta name="keywords"    content="SpRestLib, JavaScript, js-sharepoint, OData, REST, SharePoint 2013, SP2013, SharePoint 2016, SP2016, SharePoint Online">
 	<meta name="description" content="Content Editor Webpart: SpRestLib SharePoint Toolkit">
-	<meta name="revised"     content="Oct 06, 2017">
+	<meta name="revised"     content="Oct 10, 2017">
 
 	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300">
 	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto+Mono">
@@ -25,14 +25,18 @@
 		abbr { cursor: help; }
 		.ms-webpartPage-root { border-spacing: 0px; }
 		#divBody {
-			font-family: 'Open Sans','Segoe UI','Helvetica Neue',sans-serif;
+			font-family: 'Segoe UI','Helvetica Neue','Open Sans',sans-serif;
 			color: #696969;
 			margin: -10px 30px 10px 30px;
 		}
 		#divBody div { box-sizing: border-box; }
-		.bigTitle { font-family:'Roboto','Segoe UI Light'; font-size:36px; color:#0088cc; margin:15px 0 10px 0; }
-		.bigSubtitle { font-family:'Open Sans','Segoe UI'; font-size:14px; color:#c7c7c7; margin:10px 0 20px 0; }
-		.sectionTitle, .subTitle { font-family:'Open Sans','Segoe UI'; font-size:18px; color:#0088cc; margin:20px 0 10px 0; cursor: pointer; }
+
+		#titleBox { margin-bottom: 20px; }
+		.bigTitle { font-family:'Segoe UI Light','Roboto'; font-size:36px; color:#0088cc; margin-bottom: 10px }
+		.bigTitsu { font-size:14px; color:#c7c7c7; }
+		#siteLogo { max-height:60px; max-width:250px; }
+
+		.sectionTitle, .subTitle { font-size:18px; color:#0088cc; margin:20px 0 10px 0; cursor: pointer; }
 		.sectionTitle.plain, .subTitle.plain { display: inline-block; cursor: default; }
 		.bigger { font-size:1.1em; }
 		.arrow {
@@ -48,16 +52,19 @@
 			transform: rotate(135deg);
 			margin-bottom: 3px;
 		}
-		#contSiteLogo { float:right; vertical-align:middle; margin-bottom:5px; }
-		#siteLogo { max-height:50px; max-width:100px; }
 
+		#tabSiteLists .imgIcon, #tabSiteGroups .imgIcon { vertical-align:bottom; margin-right:4px; cursor:help; }
+		#tabSiteGroups tbody td { vertical-align:top; }
 		#tabSubsites tbody td:nth-child(1) { min-width: 250px; }
 		#tabSubsites tbody td:nth-child(3) { white-space: nowrap; }
 		#tabSubsites tbody td:nth-child(4) { white-space: nowrap; }
+		.showHidn a, .showHidn a:visited { color:aaa; }
 
 		#navtabSite #boxInfo { margin-bottom: 20px; }
 		#navtabSite #boxInfo > div { vertical-align: top; }
 		#navtabSite #boxInfo span { font-family: Roboto; font-size: 22px; }
+		#navtabSite #boxOpts { flex-wrap:wrap; }
+		#navtabSite #boxOpts > div { white-space: nowrap; }
 		#navtabSite #boxOpts > div > span { margin-right:5px; vertical-align:middle; }
 		.contSwitch { display:inline-block; vertical-align:middle; }
 		#navtabSite #DateCre, #navtabSite #DateMod { white-space: nowrap; }
@@ -87,7 +94,6 @@
 		.flexTabs {
 			width: 100%;
 			margin: 20px 0 10px 0;
-			font-family: "Open Sans", "Segoe UI", Helvetica, Arial, sans-serif;
 			border: 1px solid #d5d5d5;
 			box-shadow: 0px 4px 10px -5px rgba(0,0,0,0.5);
 			border-radius: 5px;
@@ -114,10 +120,7 @@
 			color: #a7a7a7;
 			text-transform: uppercase;
 			border-bottom: 3px solid #FAFAFA;
-			-webkit-user-select: none;
-			   -moz-user-select: none;
-				-ms-user-select: none;
-					user-select: none;
+			-webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none;
 		}
 		.flexTabs > ul > li.active {
 			font-weight: bold;
@@ -172,18 +175,17 @@
 		div.divTableRows > div > div { display: table-cell; padding: 5px 10px; vertical-align: middle; background: #f2f9fc; }
 
 		/* */
-		#navtabSetup .divTableRows {
+		#navtabDbug .divTableRows {
 			min-width: 200px;
 			font-size: 14px;
 			border: 1px solid #d7e7f7;
 		}
-		#navtabSetup .divTableRows > div > div { padding: 10px 15px; background: #f2f9fc; }
-		#navtabSetup .divTableRows > div > div:first-child { width:1%; }
+		#navtabDbug .divTableRows > div > div { padding: 10px 15px; background: #f2f9fc; }
+		#navtabDbug .divTableRows > div > div:first-child { width:1%; }
 
 		/*-*/
 		.flatBtn {
 			display: inline-block;
-			font-family: Arial,Verdana,sans-serif;
 			font-size: 12px !important;
 			color: #ffffff !important;
 			border: 0 !important;
@@ -196,6 +198,7 @@
 			box-sizing: border-box;
 			cursor: pointer;
 			box-shadow: 0 2px 0 #c7c7c7;
+			-webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none;
 		}
 		.flatBtn.small {
 			padding: 5px 10px !important;
@@ -360,6 +363,7 @@
 		}
 		.tabModern > tbody > tr > th {
 			vertical-align: top;
+			font-weight: normal;
 			text-align: left;
 			padding: 8px 10px;
 			background: #f2f9fc;
@@ -367,6 +371,7 @@
 			border-bottom: 1px solid white !important;
 		}
 		.tabModern > tbody > tr > td {
+			vertical-align: top;
 			text-align: left;
 			padding: 8px 10px;
 			background: white;
@@ -394,9 +399,9 @@
 		td.nowrap { white-space: nowrap !important; }
 		/* ----- */
 		#tabSiteLists thead th:first-child { min-width:200px; }
-		.showDesc { color:#a7a7a7; margin-top:5px; }
+		.showDesc { color:#a7a7a7; margin-top:5px; font-size:11px; }
 		/* ----- */
-		.switch { width: 36px; height: 20px; position: relative; display: inline-block; }
+		.switch { width: 28px; height: 16px; position: relative; display: inline-block; }
 		.switch input { display:none; }
 		.slider {
 		  position: absolute;
@@ -408,23 +413,22 @@
 		.slider:before {
 		  position: absolute;
 		  content: "";
-		  height: 16px; width: 16px;
-		  left: 2px; bottom: 2px;
+		  height: 14px; width: 14px;
+		  left: 1px; bottom: 1px;
 		  background-color: white;
 		  transition: .4s; -webkit-transition: .4s;
 		}
-		input:focus   + .slider { box-shadow: 0 0 1px #92c0e0; }
-		input:checked + .slider { background-color: #92c0e0; }
-		input:checked + .slider:before { -webkit-transform:translateX(16px); -ms-transform:translateX(16px); transform:translateX(16px); }
-		.slider.round { border-radius: 20px; }
+		input:focus   + .slider { box-shadow: 0 0 1px #7fb0d2; }
+		input:checked + .slider { background-color: #7fb0d2; }
+		input:checked + .slider:before { -webkit-transform:translateX(12px); -ms-transform:translateX(12px); transform:translateX(12px); }
+		.slider.round { border-radius: 14px; }
 		.slider.round:before { border-radius: 50%; }
 	</style>
 
 	<script type="text/javascript" src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
 	<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.29.0/js/jquery.tablesorter.min.js"></script>
 	<script type="text/javascript" src="https://cdn.rawgit.com/gitbrent/SpRestLib/v1.2.0/dist/sprestlib.bundle.js"></script>
-
-	<!-- NOTE: If you prefer not to/cannot use CDNs, simply uncomment the lines below and comment the CDN lines above -->
+	<!-- NOTE: If you cant/wont use CDNs, simply uncomment the lines below and comment the CDN lines above -->
 	<!--
 	<script type="text/javascript" src="../SiteAssets/js/jquery.min.js"></script>
 	<script type="text/javascript" src="../SiteAssets/js/jquery.tablesorter.min.js"></script>
@@ -436,7 +440,7 @@
 		$.ajaxSetup({ cache:false });
 		// APP
 		const APP_VER = '1.0.0';
-		const APP_REL = '20171006-2258';
+		const APP_REL = '20171011';
 		// CONSTANTS: UI/LOGIC
 		const HTML_SPINNER = '<div class="sprlib-spinner"><div class="sprlib-bounce1"></div><div class="sprlib-bounce2"></div><div class="sprlib-bounce3"></div></div>';
 		const STR_EMPTY = '<span style="color:#ccc; font-style:italic;">(empty)</span>';
@@ -444,78 +448,89 @@
 		// CONSTANTS: APP
 		const MODE_VERBOSE = window.location.href.toLowerCase().indexOf('mode=verbose') > -1; if (MODE_VERBOSE) { console.log('*** VERBOSE MODE ***'); }
 		const MAXSITES = 50;
-		// REF: https://msdn.microsoft.com/en-us/library/microsoft.sharepoint.splisttemplatetype.aspx
+		// REF: (`SP.ListTemplateType`) https://msdn.microsoft.com/en-us/library/microsoft.sharepoint.splisttemplatetype.aspx
 		const SP_LIST_TEMPLATE_TYPES = {
-			 '-1': {name:'InvalidType', desc:'Not used.'},
-			'100': {name:'GenericList', desc:'Custom list.'},
-			'101': {name:'DocumentLibrary', desc:'Document library.'},
-			'102': {name:'Survey', desc:'Survey.'},
-			'103': {name:'Links', desc:'Links.'},
-			'104': {name:'Announcements', desc:'Announcements.'},
-			'105': {name:'Contacts', desc:'Contacts.'},
-			'106': {name:'Events', desc:'Calendar.'},
-			'107': {name:'Tasks', desc:'Tasks.'},
-			'108': {name:'DiscussionBoard', desc:'Discussion board.'},
-			'109': {name:'PictureLibrary', desc:'Picture library.'},
-			'110': {name:'DataSources', desc:'Data sources for a site.'},
-			'111': {name:'WebTemplateCatalog', desc:'Site template gallery.'},
-			'112': {name:'UserInformation', desc:'User Information.'},
-			'113': {name:'WebPartCatalog', desc:'Web Part gallery.'},
-			'114': {name:'ListTemplateCatalog', desc:'List template gallery.'},
-			'115': {name:'XMLForm', desc:'XML Form library.'},
-			'116': {name:'MasterPageCatalog', desc:'Master Page gallery.'},
-			'117': {name:'NoCodeWorkflows', desc:'No Code Workflows.'},
-			'118': {name:'WorkflowProcess', desc:'Custom Workflow Process.'},
-			'119': {name:'WebPageLibrary', desc:'Wiki Page Library.'},
-			'120': {name:'CustomGrid', desc:'Custom grid for a list.'},
-			'121': {name:'SolutionCatalog', desc:'Solutions.'},
-			'122': {name:'NoCodePublic', desc:'No Code Public Workflow.'},
-			'123': {name:'ThemeCatalog', desc:'Themes.'},
-			'124': {name:'DesignCatalog', desc:'DesignCatalog.'},
-			'125': {name:'AppDataCatalog', desc:'AppDataCatalog.'},
-			'126': {name:'AppFiles', desc:'App Files.'},
+			 '-1': {name:'InvalidType', desc:'Not used'},
+			'100': {name:'GenericList', desc:'Custom list'},
+			'101': {name:'DocumentLibrary', desc:'Document library'},
+			'102': {name:'Survey', desc:'Survey'},
+			'103': {name:'Links', desc:'Links'},
+			'104': {name:'Announcements', desc:'Announcements'},
+			'105': {name:'Contacts', desc:'Contacts'},
+			'106': {name:'Events', desc:'Calendar'},
+			'107': {name:'Tasks', desc:'Tasks'},
+			'108': {name:'DiscussionBoard', desc:'Discussion board'},
+			'109': {name:'PictureLibrary', desc:'Picture library'},
+			'110': {name:'DataSources', desc:'Data sources for a site'},
+			'111': {name:'WebTemplateCatalog', desc:'Site template gallery'},
+			'112': {name:'UserInformation', desc:'User Information'},
+			'113': {name:'WebPartCatalog', desc:'Web Part gallery'},
+			'114': {name:'ListTemplateCatalog', desc:'List template gallery'},
+			'115': {name:'XMLForm', desc:'XML Form library'},
+			'116': {name:'MasterPageCatalog', desc:'Master Page gallery'},
+			'117': {name:'NoCodeWorkflows', desc:'No Code Workflows'},
+			'118': {name:'WorkflowProcess', desc:'Custom Workflow Process'},
+			'119': {name:'WebPageLibrary', desc:'Wiki Page Library'},
+			'120': {name:'CustomGrid', desc:'Custom grid for a list'},
+			'121': {name:'SolutionCatalog', desc:'Solutions'},
+			'122': {name:'NoCodePublic', desc:'No Code Public Workflow'},
+			'123': {name:'ThemeCatalog', desc:'Themes'},
+			'124': {name:'DesignCatalog', desc:'DesignCatalog'},
+			'125': {name:'AppDataCatalog', desc:'AppDataCatalog'},
+			'126': {name:'AppFiles', desc:'App Files'},
 			'130': {name:'DataConnectionLibrary', desc:''},
-			'140': {name:'WorkflowHistory', desc:'Workflow History.'},
-			'150': {name:'GanttTasks', desc:'Project Tasks.'},
-			'151': {name:'HelpLibrary', desc:'Help Library.'},
-			'160': {name:'AccessRequest', desc:'Tasks with Timeline and Hierarchy.'},
-			'171': {name:'TasksWithTimelineAndHierarchy', desc:'.'},
-			'175': {name:'MaintenanceLogs', desc:'Maintenance Logs Library.'},
-			'200': {name:'Meetings', desc:'Meeting Series (Meeting).'},
-			'201': {name:'Agenda', desc:'Agenda (Meeting).'},
-			'202': {name:'MeetingUser', desc:'Attendees (Meeting).'},
-			'204': {name:'Decision', desc:'Decisions (Meeting).'},
-			'207': {name:'MeetingObjective', desc:'Objectives (Meeting).'},
-			'210': {name:'TextBox', desc:'Text Box (Meeting).'},
-			'211': {name:'ThingsToBring', desc:'Things To Bring (Meeting).'},
-			'212': {name:'HomePageLibrary', desc:'Workspace Pages (Meeting).'},
-			'301': {name:'Posts', desc:'Posts (Blog).'},
-			'302': {name:'Comments', desc:'Comments (Blog).'},
-			'303': {name:'Categories', desc:'Categories (Blog).'},
-			'402': {name:'Facility', desc:'Facility.'},
-			'403': {name:'Whereabouts', desc:'Whereabouts.'},
-			'404': {name:'CallTrack', desc:'Call Track.'},
-			'405': {name:'Circulation', desc:'Circulation.'},
-			'420': {name:'Timecard', desc:'Timecard.'},
-			'421': {name:'Holidays', desc:'Holidays.'},
-			'499': {name:'IMEDic', desc:'IME (Input Method Editor) Dictionary.'},
-			'544': {name:'MicroFeed', desc:'MySite MicroFeed Persistent Storage List.'},
-			'600': {name:'ExternalList', desc:'External.'},
-			'700': {name:'MySiteDocumentLibrary', desc:'MySiteDocumentLibrary.'},
-			'701': {name:'', desc:'.'},
-			'1100': {name:'IssueTracking', desc:'Issue tracking.'},
-			'1200': {name:'AdminTasks', desc:'Administrator Tasks.'},
-			'1220': {name:'HealthRules', desc:'Health Rules.'},
-			'1221': {name:'HealthReports', desc:'Health Reports.'},
-			'1230': {name:'DeveloperSiteDraftApps', desc:'Draft Apps library in Developer Site.'},
-			'3300': {name:'SharingLinks', desc:'Use this list to track documents which have internal or anonymous sharing links in the site.'},
-			'4501': {name:'', desc:'.'},
-			'110102': {name:'ConvertedForms', desc:'List of user browser-enabled form templates on this site collection.'}
+			'140': {name:'WorkflowHistory', desc:'Workflow History'},
+			'150': {name:'GanttTasks', desc:'Project Tasks'},
+			'151': {name:'HelpLibrary', desc:'Help Library'},
+			'160': {name:'AccessRequest', desc:'Tasks with Timeline and Hierarchy'},
+			'171': {name:'TasksWithTimelineAndHierarchy', desc:'Tasks with Timeline and Hierarchy'},
+			'175': {name:'MaintenanceLogs', desc:'Maintenance Logs Library'},
+			'200': {name:'Meetings', desc:'Meeting Series (Meeting)'},
+			'201': {name:'Agenda', desc:'Agenda (Meeting)'},
+			'202': {name:'MeetingUser', desc:'Attendees (Meeting)'},
+			'204': {name:'Decision', desc:'Decisions (Meeting)'},
+			'207': {name:'MeetingObjective', desc:'Objectives (Meeting)'},
+			'210': {name:'TextBox', desc:'Text Box (Meeting)'},
+			'211': {name:'ThingsToBring', desc:'Things To Bring (Meeting)'},
+			'212': {name:'HomePageLibrary', desc:'Workspace Pages (Meeting)'},
+			'301': {name:'Posts', desc:'Posts (Blog)'},
+			'302': {name:'Comments', desc:'Comments (Blog)'},
+			'303': {name:'Categories', desc:'Categories (Blog)'},
+			'402': {name:'Facility', desc:'Facility'},
+			'403': {name:'Whereabouts', desc:'Whereabouts'},
+			'404': {name:'CallTrack', desc:'Call Track'},
+			'405': {name:'Circulation', desc:'Circulation'},
+			'420': {name:'Timecard', desc:'Timecard'},
+			'421': {name:'Holidays', desc:'Holidays'},
+			'499': {name:'IMEDic', desc:'IME (Input Method Editor) Dictionary'},
+			'544': {name:'MicroFeed', desc:'MySite MicroFeed Persistent Storage List'},
+			'600': {name:'ExternalList', desc:'External List'},
+			'700': {name:'MySiteDocumentLibrary', desc:'My Site Document Library'},
+			'701': {name:'?', desc:'CustomDocumentLibrary?'},
+			'1100': {name:'IssueTracking', desc:'Issue tracking'},
+			'1200': {name:'AdminTasks', desc:'Administrator Tasks'},
+			'1220': {name:'HealthRules', desc:'Health Rules'},
+			'1221': {name:'HealthReports', desc:'Health Reports'},
+			'1230': {name:'DeveloperSiteDraftApps', desc:'Draft Apps library in Developer Site'},
+			'3300': {name:'SharingLinks', desc:'Use this list to track documents which have internal or anonymous sharing links in the site'},
+			'4501': {name:'wfsvc', desc:'wfsvc'},
+			'110102': {name:'ConvertedForms', desc:'List of user browser-enabled form templates on this site collection'}
 		};
+		// REF: (`SP.Utilities.PrincipalType`) https://msdn.microsoft.com/en-us/library/ee553710(v=office.14).aspx
+		const SP_PRINCIPLE_TYPES = {
+			 '0' : {name:'none', desc:'None'},
+			 '1' : {name:'user', desc:'User'},
+			 '2' : {name:'distributionList', desc:'Distribution List'},
+			 '4' : {name:'securityGroup', desc:'Security Group'},
+			 '8' : {name:'sharePointGroup', desc:'SharePoint Group'},
+			 '15': {name:'all', desc:'All'}
+		 };
 		// GLOBAL VARS
 		var gObjMapNameToId = {};
 		var gObjSubsites = {};
 		// TODO: I18N internationalization ('Y' etc)
+		// https://docs.microsoft.com/en-us/sharepoint/dev/sp-add-ins/sharepoint-net-server-csom-jsom-and-rest-api-index
+		// works: _spPageContextInfo.webAbsoluteUrl
 
 		// ==================================================================================================================
 
@@ -604,7 +619,11 @@
 
 		// ==================================================================================================================
 
-		function getSiteInfo() {
+		function popSiteInfo() {
+
+			// TODO: add "who gets reqs"
+			// sprLib.rest({ url:'_api/web/RequestAccessEmail' }).then(arr => console.table(arr));
+
 			// PERF: Query all site info now
 			Promise.all([
 				sprLib.rest({
@@ -618,9 +637,20 @@
 				}),
 				sprLib.rest({
 					url: '_api/web/lists',
-					queryCols: ['Title','BaseTemplate','BaseType','Created','Description','EnableAttachments','EnableVersioning','EntityTypeName',
-						'ForceCheckout','Hidden','ItemCount','LastItemModifiedDate'],
+					queryCols: ['Id','Title','BaseTemplate','BaseType','Created','Description','EnableAttachments','ImageUrl',
+						'EnableVersioning','EntityTypeName','ForceCheckout','Hidden','ItemCount','LastItemModifiedDate','RootFolder/ServerRelativeUrl'],
 					queryLimit: 5000
+				}),
+				sprLib.rest({
+					url: '_api/Web/SiteGroups',
+					queryCols: ['Id','Title','OwnerTitle','Description','PrincipalType','AllowMembersEditMembership'],
+					queryLimit: 1000
+				}),
+				sprLib.rest({
+					url: '_api/Web/RoleDefinitions',
+					queryCols: ['Id','Name','Description','RoleTypeKind'],
+					queryFilter: 'Hidden ne true',
+					queryLimit: 1000
 				}),
 				sprLib.rest({
 					url: '_api/web/webs',
@@ -640,9 +670,11 @@
 				var arrSite     = arrAllArrays[0];
 				var arrUsage    = arrAllArrays[1];
 				var arrLists    = arrAllArrays[2];
-				var arrSubsites = arrAllArrays[3];
+				var arrGroups   = arrAllArrays[3];
+				var arrRoles    = arrAllArrays[4];
+				var arrSubsites = arrAllArrays[5];
 
-				// STEP 2: Site info
+				// SHOW: Site info
 				{
 					// A:
 					if (MODE_VERBOSE) { console.log('arrSite[0]:'); console.table(arrSite[0]); }
@@ -655,7 +687,7 @@
 					$('#DateMod').text( getDateStrFromISO(arrSite[0].LastItemModifiedDate,'INTL') );
 				}
 
-				// STEP 3: Usage
+				// SHOW: Usage
 				{
 					// A:
 					if (MODE_VERBOSE) { console.log('arrUsage[0]:'); console.table(arrUsage[0]); }
@@ -665,36 +697,144 @@
 					$('#UsagePct').text( (arrUsage[0].Usage.StoragePercentageUsed * 100).toFixed(2) +'%');
 				}
 
-				// STEP 4: Lists/Libraries
+				// SHOW: Lists/Libraries
 				{
+					// A:
 					if (MODE_VERBOSE) { console.log('arrLists:'); console.table(arrLists); }
 
 					// B:
-					arrLists.forEach(function(list,idx){
-						let $row = $('<tr class="'+ (list.Hidden ? 'showHidn' : '') +'" style="'+ (list.Hidden && !$('#chkHidn').prop('checked') ? 'display:none' : '') +'"></tr>');
+					arrLists.forEach((list,idx)=>{
+						// B-1: Populate table
+						{
+							let $row = $('<tr data-list-id="'+list.Id+'" class="'+ (list.Hidden ? 'showHidn' : '') +'" style="'+ (list.Hidden && !$('#chkHidn').prop('checked') ? 'display:none' : '') +'"></tr>');
+							$row.append('<th><img class="imgIcon" src="'+ list.ImageUrl +'" title="'+ (SP_LIST_TEMPLATE_TYPES[list.BaseTemplate] ? SP_LIST_TEMPLATE_TYPES[list.BaseTemplate].desc : '') +'">'
+								+ '<a href="'+ list.RootFolder.ServerRelativeUrl +'" target="_blank">'+ list.Title +'</a>'
+								+ (list.Description ? '<div class="showDesc"><span style="display:none">: </span>'+ list.Description +'</div>' : '')
+								+ '</th>'
+							);
+							$row.append('<td>'+ (list.BaseType == 0 ? 'List' : 'Library') +'<span class="showTemp" style="display:none"> ('+ (SP_LIST_TEMPLATE_TYPES[list.BaseTemplate] ? SP_LIST_TEMPLATE_TYPES[list.BaseTemplate].name : list.BaseTemplate) +')</span></td>');
+							// TODO: showDate sort broken after show/hide
+							$row.append('<td class="nowctr showDate">'+ getDateStrFromISO(list.Created,'INTL') +'</td>');
+							$row.append('<td class="nowctr showDate">'+ getDateStrFromISO(list.LastItemModifiedDate,'INTL') +'</td>');
+							$row.append('<td class="nowctr">'+ list.ItemCount +'</td>');
+							$row.append('<td class="nowctr showFeat">'+ (list.EnableAttachments ? 'Y' : '') +'</td>');
+							$row.append('<td class="nowctr showFeat">'+ (list.EnableVersioning  ? 'Y' : '') +'</td>');
+							$row.append('<td class="nowctr showFeat">'+ (list.ForceCheckout     ? 'Y' : '') +'</td>');
 
-						// TODO: list.Title is not the correct URL!!
+							$row.append('<td class="showPerm" data-perm-name="Full Control"></td>');
+							$row.append('<td class="showPerm" data-perm-name="Design"></td>');
+							$row.append('<td class="showPerm" data-perm-name="Edit"></td>');
+							$row.append('<td class="showPerm" data-perm-name="Contribute"></td>');
+							$row.append('<td class="showPerm" data-perm-name="Read/View"></td>');
+							$row.append('<td class="showPerm" data-perm-name="Approve"></td>');
+
+							$('#tabSiteLists tbody').append( $row );
+						}
+
+						// B-2: Fetch/Pop List Permissions
+						sprLib.rest({
+							url: "_api/lists/getbytitle('"+list.Title+"')/RoleAssignments",
+							queryCols: ['Member/Title','RoleDefinitionBindings/Name','RoleDefinitionBindings/Hidden']
+						})
+						.then(arr=>{
+							arr.forEach((prin,idx)=>{
+								let arrPerms = [];
+								prin.RoleDefinitionBindings.forEach((perm,idx)=>{
+									//if (!perm.Hidden) arrPerms.push(perm.Name)
+									if ( !perm.Hidden ) {
+										perm.Name = perm.Name.replace('Read','Read/View').replace('View Only','Read/View');
+
+										if ( $('#tabSiteLists tr[data-list-id="'+list.Id+'"] td[data-perm-name="'+ perm.Name +'"]').length > 0 ) {
+											$('#tabSiteLists tr[data-list-id="'+list.Id+'"] td[data-perm-name="'+ perm.Name +'"]').append( prin.Member.Title );
+										}
+										else {
+											$('#tabSiteLists thead tr:first-child th:last-child').prop('colspan',Number($('#tabSiteLists thead tr:first-child th:last-child').prop('colspan'))+1);
+											$('#tabSiteLists thead tr:last-child').append('<th class="showPerm">'+ perm.Name +'</th>');
+											$('#tabSiteLists tbody tr').each((idx,row)=> $(row).append('<td data-perm-name="'+ perm.Name +'"></td>') );
+											$('#tabSiteLists tr[data-list-id="'+list.Id+'"] td[data-perm-name="'+ perm.Name +'"]').append( prin.Member.Title );
+										}
+									}
+								});
+							});
+
+							// Update tablesorter if needed
+							// TODO: ???
+							//if ( $('#tabSiteLists thead:last-child th:last-child').find('.header').length == 0 ) $('#tabSiteLists').trigger('update'); // TODO: does this work?
+						});
+					});
+
+					// C: Honor view options
+ 					if ( !$('#chkDate').prop('checked') ) $('.showDate').hide();
+					if ( !$('#chkFeat').prop('checked') ) $('.showFeat').hide();
+
+					// D: tablesorter
+					if ( $.tablesorter ) $('#tabSiteLists').tablesorter({ sortList:[[0,0]] });
+
+					// E: Show total
+					$('#LISTS').append('<span>('+ $('#tabSiteLists tbody tr').length +' total / '+ $('#tabSiteLists tbody tr.showHidn').length +' hidden)</span>');
+				}
+
+				// SHOW: Groups
+				{
+					// A:
+					if (MODE_VERBOSE) { console.log('arrGroups:'); console.table(arrGroups); }
+
+					// B: Populate Groups
+					arrGroups.forEach(function(group,idx){
+						// A-1: Create row
+						let $row = $('<tr/>');
 						$row.append('<th>'
-							+ '<a href="../Lists/'+ list.Title +'" target="_blank">'+ list.Title +'</a>'
-							+ (list.Description ? '<div class="showDesc"><span style="display:none">: </span>'+ list.Description +'</div>' : '')
-							+ '</th>'
-						);
-						$row.append('<td>'+ (list.BaseType == 0 ? 'List' : 'Library') +'<span class="showTemp" style="display:none"> ('+ (SP_LIST_TEMPLATE_TYPES[list.BaseTemplate] ? SP_LIST_TEMPLATE_TYPES[list.BaseTemplate].name : list.BaseTemplate) +')</span></td>');
-						$row.append('<td class="nowctr">'+ getDateStrFromISO(list.Created,'INTL') +'</td>');
-						$row.append('<td class="nowctr">'+ getDateStrFromISO(list.LastItemModifiedDate,'INTL') +'</td>');
-						$row.append('<td class="nowctr">'+ list.ItemCount +'</td>');
-						$row.append('<td class="nowctr">'+ (list.EnableAttachments ? 'Y' : '') +'</td>');
-						$row.append('<td class="nowctr">'+ (list.EnableVersioning  ? 'Y' : '') +'</td>');
-						$row.append('<td class="nowctr">'+ (list.ForceCheckout     ? 'Y' : '') +'</td>');
+							+ '<img class="imgIcon" src="/_layouts/15/images/ribbon_userprofile_16.png">'
+							+ '<a href="../_layouts/15/people.aspx?MembershipGroupId='+ group.Id +'" target="_blank">'+ group.Title +'</a>'
+							+ '</th>');
+						$row.append('<td>'+ group.OwnerTitle +'</td>');
+						$row.append('<td>'+ group.Description +'</td>');
+						$row.append('<td id="groupUsers'+ group.Id +'"></td>');
+						$('#tabSiteGroups tbody').append( $row );
 
-						$('#tabSiteLists tbody').append( $row );
+						// A-2: Populate Group members
+						sprLib.rest({
+							url: '_api/web/SiteGroups('+ group.Id +')/Users',
+							objCols: ['Id','Email','LoginName','PrincipleType','Title']
+						})
+						.then(arrUsers => {
+							var strUsers = '';
+							arrUsers.forEach(function(user,idx){ strUsers += ( (idx > 0 ? ', ' : '') + user.Title ); });
+							$('#groupUsers'+group.Id).html( strUsers ? strUsers : STR_EMPTY );
+						})
+						.catch(strErr => $('#groupUsers'+group.Id).text(strErr||'?'));
 					});
 
 					// C: tablesorter
-					if ( $.tablesorter ) $('#tabSiteLists').tablesorter({ sortList:[[0,0]] });
+					if ( $.tablesorter ) $('#tabSiteGroups').tablesorter({ sortList:[[0,0]], headers:{2:{sorter:false},3:{sorter:false}} });
+
+					// D: Show total
+					$('#GROUPS').append('<span>('+ $('#tabSiteGroups tbody tr').length +')</span>');
 				}
 
-				// STEP 5: Subsites
+				// SHOW: Roles
+				{
+					if (MODE_VERBOSE) { console.log('arrRoles:'); console.table(arrRoles); }
+
+					// B:
+					arrRoles.forEach(function(role,idx){
+						let $row = $('<tr/>');
+
+						$row.append('<th><a href="../_layouts/15/editrole.aspx?role='+ role.Name +'" target="_blank">'+ role.Name +'</a></th>');
+						$row.append('<td>'+ role.Description +'</td>');
+						$row.append('<td class="nowctr">'+ role.Id +'</td>');
+
+						$('#tabSiteRoles tbody').append( $row );
+					});
+
+					// C: tablesorter
+					if ( $.tablesorter ) $('#tabSiteRoles').tablesorter({ sortList:[[0,0]] });
+
+					// D: Show total
+					$('#ROLES').append('<span>('+ $('#tabSiteRoles tbody tr').length +')</span>');
+				}
+
+				// SHOW: Subsites
 				{
 					if (MODE_VERBOSE) { console.log('arrSubsites:'); console.table(arrSubsites); }
 
@@ -873,7 +1013,12 @@
 
 		function doPageLoad() {
 			// STEP 1: HTML Setup
-			document.title = "SpRestLib SharePoint Toolkit";
+			document.title = "SharePoint SCA Toolkit";
+
+			// STEP 2: UI Updates
+			if ( location.href.toLowerCase().indexOf('mode=verbose') > -1 ) $('#navTabs > ul > li:first-child').show().click();
+
+			// STEP 3: Populate tabs
 
 			// TAB: Setup
 			{
@@ -882,7 +1027,8 @@
 
 				// JS.A: jQuery
 				if ( typeof jQuery !== 'undefined' ) {
-					$('#libChkJquery').append( '<div class="iconYes"></div>' );
+					$('#libChkJquery > div:first-child').append( '<div class="iconYes"></div>' );
+					$('#libChkJquery > div:last-child').text( jQuery.fn.jquery );
 				}
 				else {
 					$('#libChkJquery').append('oops - go check <script> tag ');
@@ -890,7 +1036,7 @@
 
 				// JS.B: jQuery-tablesorter
 				if ( typeof $.tablesorter !== 'undefined' ) {
-					$('#libChkTsorter').append( '<div class="iconYes"></div>' );
+					$('#libChkTsorter > div:first-child').append( '<div class="iconYes"></div>' );
 					var baseUrl = sprLib.baseUrl();
 
 					// Make human readable when relative directory returned
@@ -908,10 +1054,11 @@
 
 				// JS.C: SpRestLib
 				if ( typeof sprLib !== 'undefined' ) {
-					$('#libChkSprLib').append( '<div class="iconYes"></div>' );
-					var baseUrl = sprLib.baseUrl();
+					$('#libChkSprLib > div:first-child').append( '<div class="iconYes"></div>' );
+					$('#libChkSprLib > div:last-child').text( sprLib.version() );
 
 					// Make human readable when relative directory returned
+					var baseUrl = sprLib.baseUrl();
 					if ( baseUrl == ".." ) {
 						baseUrl = location.href.substring(0, location.href.lastIndexOf('/'));
 						baseUrl = baseUrl.substring(0, baseUrl.lastIndexOf('/'));
@@ -929,16 +1076,18 @@
 				}
 
 				// LAST: Remove loading images
-				$('#navtabSetup .iconQues').remove();
+				$('#navtabDbug .iconQues').remove();
 			}
 
 			// TAB: Site Info
 			{
-				getSiteInfo();
+				$('#SiteName, #UsageTot, #UsagePct, #DateCre, #DateMod').html( HTML_SPINNER );
+				popSiteInfo();
 			}
 
-			// TAB: List Tools
+			// TAB: Site Compare
 			{
+				/*
 				// Populate <select> with List names
 				sprLib.rest({ restUrl:'_api/web/lists?$select=Title&$filter=Hidden%20eq%20false' })
 				.then(function(arrayListObjs){
@@ -947,10 +1096,12 @@
 					.forEach(function(obj,idx){ $('#selSiteLists').append('<option value="'+ obj.Title +'">'+ obj.Title +'</option>'); });
 					$('#contListSelect .sprlib-spinner').remove();
 				});
+				*/
 			}
 
-			// TAB: User/Groups Tools
+			// TAB: Site Synchronize
 			{
+				/*
 				var user1Code = "sprLib.user().info()\n"
 					+ ".then(function(objUser){\n"
 					+ "    $.each(objUser,function(key,val){\n"
@@ -968,6 +1119,7 @@
 					+ '});';
 				$('#user2Code pre code').text( user2Code );
 				eval(user2Code);
+				*/
 			}
 		}
 
@@ -983,23 +1135,31 @@
 	<iframe id="scraper" style="display:none"></iframe>
 
 	<div id="divBody">
-		<div class="bigTitle"><a href="https://github.com/GitBrent/SpRestLib" target="_blank">SpRestLib</a> SharePoint Toolkit</div>
-		<div class="bigSubtitle">Useful Tools for SharePoint Admins, Developers and SCAs.</div>
+		<div id="titleBox" class="divTable">
+			<div style="width:99%">
+				<div class="bigTitle">SharePoint Site Collection Admin Toolkit</div>
+				<div class="bigTitsu">Useful Tools for SharePoint Admins, Developers and SCAs.</div>
+			</div>
+			<div style="width:1%">
+				<img id="siteLogo">
+			</div>
+		</div>
 
 		<div id="navTabs" class="flexTabs">
 			<ul>
-				<li onclick="$('#navTabs').find('> div, li').removeClass('active'); $(this).addClass('active'); $('#navtabSetup').addClass('active');" class="active">Setup</li>
-				<li onclick="$('#navTabs').find('> div, li').removeClass('active'); $(this).addClass('active'); $('#navtabSite').addClass('active');">Site Info</li>
-				<li onclick="$('#navTabs').find('> div, li').removeClass('active'); $(this).addClass('active'); $('#navtabList').addClass('active');">List Compare</li>
-				<li onclick="$('#navTabs').find('> div, li').removeClass('active'); $(this).addClass('active'); $('#navtabUser').addClass('active');">Users and Groups</li>
+				<li onclick="$('#navTabs').find('> div, li').removeClass('active'); $(this).addClass('active'); $('#navtabDbug').addClass('active');" style="display:none">Setup Check</li>
+				<li onclick="$('#navTabs').find('> div, li').removeClass('active'); $(this).addClass('active'); $('#navtabSite').addClass('active');" class="active">Site Inventory</li>
+				<li onclick="$('#navTabs').find('> div, li').removeClass('active'); $(this).addClass('active'); $('#navtabComp').addClass('active');">Site Compare</li>
+				<li onclick="$('#navTabs').find('> div, li').removeClass('active'); $(this).addClass('active'); $('#navtabSync').addClass('active');">Site Synchronize</li>
 			</ul>
 
-			<div id="navtabSetup" data-tab="Setup" class="active">
-				<div class="subTitle">Welcome!</div>
+			<div id="navtabDbug" data-tab="Debug/Setup/Verbose">
+				<div class="subTitle">Welcome to Verbose Mode!</div>
 				<div class="bigger">
-					Let's check your setup and show you how SpRestLib is configured.
+					Lots of variables will be shown in the Console to better enable debubbing any issues you may be experiencing.
 					<ul>
-						<li>If everything below looks okay, then all the functionality in the demo tabs are ready to explore.</li>
+						<li>Did all of the external libraries shown below load successfully?</li>
+						<li>Does the SP Config/Info look right?  Is your Site Collection location correct?</li>
 						<li>Please check the <a href="https://github.com/gitbrent/SpRestLib">GitHub Project Site</a> for setup
 						and configuration FAQs and full documentation.</li>
 					</ul>
@@ -1009,14 +1169,20 @@
 					<div data-name="col1" style="flex:1 1 auto; margin-right:50px;">
 						<div class="subTitle">JavaScript Library Check</div>
 						<div class="divTableRows">
-							<div>
-								<div id="libChkJquery"><div class="iconQues"></div></div><div>jQuery loaded?</div>
+							<div id="libChkJquery">
+								<div><div class="iconQues"></div></div>
+								<div>jQuery</div>
+								<div></div>
 							</div>
-							<div>
-								<div id="libChkTsorter"><div class="iconQues"></div></div><div>TableSorter loaded?</div>
+							<div id="libChkSprLib">
+								<div><div class="iconQues"></div></div>
+								<div>SpRestLib</div>
+								<div></div>
 							</div>
-							<div>
-								<div id="libChkSprLib"><div class="iconQues"></div></div><div>SpRestLib loaded?</div>
+							<div id="libChkTsorter">
+								<div><div class="iconQues"></div></div>
+								<div>TableSorter</div>
+								<div></div>
 							</div>
 						</div>
 					</div>
@@ -1038,10 +1204,9 @@
 				<p>
 			</div>
 
-			<div id="navtabSite" data-tab="Site Info">
+			<div id="navtabSite" data-tab="Site Info" class="active">
 				<div class="subTitle plain">Site Collection Information</div>
-				<div id="contSiteLogo"><img id="siteLogo"></div>
-				<div id="boxInfo" class="modernTable" data-info="Site Info Table">
+				<div id="boxInfo" class="modernTable" data-desc="Site Info Table">
 					<div style="width:60%"><label>Site Name</label><span id="SiteName"></span></div>
 					<div style="width:10%; text-align:center;"><label>Storage Used</label><span id="UsageTot"></span></div>
 					<div style="width:10%; text-align:center;"><label>Percent Used</label><span id="UsagePct"></span></div>
@@ -1050,50 +1215,120 @@
 				</div>
 
 				<div id="LISTS" class="subTitle" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
-					<div class="arrow active"></div>Lists &amp; Libraries
+					<div class="arrow"></div>Lists &amp; Libraries
 				</div>
-				<div class="contTabSiteLists">
-					<div id="boxOpts" class="modernFlex" data-info="Site Info Table Options">
+				<div class="contTabSiteLists" style="display:none">
+					<div id="boxOpts" class="modernFlex" data-desc="Site Info Table Options">
 						<div>
-							<span>Show Hidden:</span>
-							<div class="contSwitch">
-								<label class="switch"><input id="chkHidn" type="checkbox" onchange="$('.showHidn').toggle()"><span class="slider round"></span></label>
-							</div>
-						</div>
-						<div>
-							<span>Show Description:</span>
+							<span>Show Description?</span>
 							<div class="contSwitch">
 								<label class="switch"><input type="checkbox" onchange="$('.showDesc').toggle()" checked><span class="slider round"></span></label>
 							</div>
 						</div>
 						<div>
-							<span>Show Template:</span>
+							<span>Show Type Template?</span>
 							<div class="contSwitch">
-								<label class="switch"><input id="chkHidn" type="checkbox" onchange="$('.showTemp').toggle()"><span class="slider round"></span></label>
+								<label class="switch"><input type="checkbox" onchange="$('.showTemp').toggle()"><span class="slider round"></span></label>
 							</div>
 						</div>
-						<div>
-							<button type="button" class="flatBtn small flatBtn-blueLt" onclick="exportTabData('tabSiteLists')">Export to CSV</button>
+						<div data-desc="show dates?">
+							<span>Show Dates?</span>
+							<div class="contSwitch">
+								<label class="switch"><input id="chkDate" type="checkbox" onchange="$('.showDate').toggle(); $('#tabSiteLists').trigger('update');"><span class="slider round"></span></label>
+							</div>
+						</div>
+						<div data-desc="show features?">
+							<span>Show Features?</span>
+							<div class="contSwitch">
+								<label class="switch"><input id="chkFeat" type="checkbox" onchange="$('.showFeat').toggle(); $('#tabSiteLists').trigger('update');"><span class="slider round"></span></label>
+							</div>
+						</div>
+						<div data-desc="show hidden?">
+							<span>Show Hidden Lists?</span>
+							<div class="contSwitch">
+								<label class="switch"><input id="chkHidn" type="checkbox" onchange="$('.showHidn').toggle()"><span class="slider round"></span></label>
+							</div>
+						</div>
+						<div data-desc="export buttons" style="padding:7px">
+							<button type="button" class="flatBtn small flatBtn-modGray" onclick="exportTabData('tabSiteLists')" style="margin-right:10px !important">CSV Export</button>
+							<button type="button" class="flatBtn small flatBtn-modGray" onclick="exportTabData('tabSiteLists')">JSON Export</button>
 						</div>
 					</div>
 
 					<table id="tabSiteLists" class="tabModern tablesorter">
 						<thead>
 							<tr>
-								<th>Name / Description</th>
-								<th>Type</th>
-								<th>Date Created</th>
-								<th>Date Modified</th>
-								<th>Total Items</th>
-								<th><abbr title="Are Attachments enabled?">Attachments?</abbr></th>
-								<th><abbr title="Is Versioning enabled?">Versioning?</abbr></th>
-								<th><abbr title="Force Checkout?">Force?</abbr></th>
+								<th rowspan="2">Name / Description</th>
+								<th rowspan="2" class="showType">Type</th>
+								<th rowspan="2">Items</th>
+								<th rowspan="2" class="showDate">Date Created</th>
+								<th rowspan="2" class="showDate">Date Modified</th>
+								<th colspan="3" class="showFeat sorter-false" style="text-align:center !important; border-bottom:1px solid white !important;">List Features</th>
+								<th colspan="6" class="showPerm sorter-false" style="text-align:center !important; border-bottom:1px solid white !important;">List Permissions</th>
+							</tr>
+							<tr>
+								<th class="showFeat"><abbr title="Are Attachments enabled?">Attachments?</abbr></th>
+								<th class="showFeat"><abbr title="Is Versioning enabled?">Versioning?</abbr></th>
+								<th class="showFeat"><abbr title="Force Checkout?">Force?</abbr></th>
+								<th class="showPerm sorter-false">Full</th>
+								<th class="showPerm sorter-false">Design</th>
+								<th class="showPerm sorter-false">Edit</th>
+								<th class="showPerm sorter-false">Contribute</th>
+								<th class="showPerm sorter-false">Read/View</th>
+								<th class="showPerm sorter-false">Approve</th>
 							</tr>
 						</thead>
 						<tbody></tbody>
 						<tfoot>
 							<tr class="busy" style="display:none">
-								<td colspan="7" style="text-align:center; border:1px solid #f1f1f1;">
+								<td colspan="14" style="text-align:center; border:1px solid #f1f1f1;">
+									<div class="sprlib-spinner"><div class="sprlib-bounce1"></div><div class="sprlib-bounce2"></div><div class="sprlib-bounce3"></div></div>
+								</td>
+							</tr>
+						</tfoot>
+					</table>
+				</div>
+
+				<div id="GROUPS" class="subTitle" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
+					<div class="arrow"></div>Groups &amp; Users
+				</div>
+				<div class="contTabSiteGroups" style="display:none">
+					<table id="tabSiteGroups" class="tabModern tablesorter">
+						<thead>
+							<tr>
+								<th>Title</th>
+								<th>Owner</th>
+								<th>Description</th>
+								<th>Member(s)</th>
+							</tr>
+						</thead>
+						<tbody></tbody>
+						<tfoot>
+							<tr class="busy" style="display:none">
+								<td colspan="4" style="text-align:center; border:1px solid #f1f1f1;">
+									<div class="sprlib-spinner"><div class="sprlib-bounce1"></div><div class="sprlib-bounce2"></div><div class="sprlib-bounce3"></div></div>
+								</td>
+							</tr>
+						</tfoot>
+					</table>
+				</div>
+
+				<div id="ROLES" class="subTitle" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
+					<div class="arrow"></div>Roles
+				</div>
+				<div class="contTabSiteRoles" style="display:none">
+					<table id="tabSiteRoles" class="tabModern tablesorter">
+						<thead>
+							<tr>
+								<th>Name</th>
+								<th>Description</th>
+								<th>ID</th>
+							</tr>
+						</thead>
+						<tbody></tbody>
+						<tfoot>
+							<tr class="busy" style="display:none">
+								<td colspan="3" style="text-align:center; border:1px solid #f1f1f1;">
 									<div class="sprlib-spinner"><div class="sprlib-bounce1"></div><div class="sprlib-bounce2"></div><div class="sprlib-bounce3"></div></div>
 								</td>
 							</tr>
@@ -1140,12 +1375,14 @@
 				</div>
 			</div>
 
-			<div id="navtabList" data-tab="List Tools">
-				<div class="subTitle">List/Library Compare</div>
+			<div id="navtabComp" data-tab="Site Compare">
+				<div class="subTitle">Site Collection Compare</div>
 				<p>
-					Here are all the Lists/Libraries found on this site:<br>
-					Select one and try some CRUD ops!
+					Compare two SharePoint Site Collections side-by-side.<br>
+					...
 				</p>
+
+				<h1>((WIP))</h1>
 
 				<div id="contListSelect" class="divTable" style="width:auto; margin-bottom:20px;">
 					<div class="th">
@@ -1171,37 +1408,12 @@
 				</div>
 			</div>
 
-			<div id="navtabUser" data-tab="Users and Groups Tools">
-				<div class="subTitle">User Methods</div>
+			<div id="navtabSync" data-tab="Site Sync">
+				<div class="subTitle">Site Collection Sync</div>
 				<p>
-					Get User Information (Title, Email, etc.) and User Groups (which SP Groups they belong to).
+					View/Execute code to sync SharePoint Site Collections.
 				</p>
-
-				<div class="subTitle">User Information</div>
-				<div>
-					<div id="user1Code"><pre><code class="language-javascript"></code></pre></div>
-					<div id="user1Html" style="margin-bottom:20px">
-						<table>
-							<tbody></tbody>
-						</table>
-					</div>
-				</div>
-
-				<div class="subTitle">User Groups</div>
-				<div>
-					<div id="user2Code"><pre><code class="language-javascript"></code></pre></div>
-					<div id="user2Html" style="margin-bottom:20px">
-						<table>
-							<thead>
-								<tr>
-									<th style="width:10%">Group ID</th>
-									<th style="width:90%">Group Title</th>
-								</tr>
-							</thead>
-							<tbody></tbody>
-						</table>
-					</div>
-				</div>
+				<h1>((WIP))</h1>
 			</div>
 		</div>
 	</div>
