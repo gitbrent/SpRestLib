@@ -43,7 +43,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 (function(){
 	// APP VERSION/BUILD
 	var APP_VER = "1.3.0-beta";
-	var APP_BLD = "20171005";
+	var APP_BLD = "20171011";
 	var DEBUG = false; // (verbose mode/lots of logging)
 	// APP FUNCTIONALITY
 	var APP_FILTEROPS = {
@@ -1413,7 +1413,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 
 			// STEP 3: Construct Base URL: `url` can be presented in many different forms...
 			objAjaxQuery.url = (inOpt.url.toLowerCase().indexOf('http') == 0 || inOpt.url.indexOf('/') == 0 ? '' : APP_OPTS.baseUrl);
-			objAjaxQuery.url += ( (inOpt.url.indexOf('/') == 0 ? '' : '/') + inOpt.url );
+			objAjaxQuery.url += (inOpt.url.toLowerCase().indexOf('http') != 0 && inOpt.url.indexOf('/') != 0 ? '/' : '') + inOpt.url;
 
 			// STEP 4: Continue building `url` when cols from either '$select' or `queryCols` options found
 			if ( inOpt.queryCols && objAjaxQuery.url.toLowerCase().indexOf('$select') == -1 ) {

@@ -11,6 +11,7 @@
  // QUnit.test("QUnit Base Test", function(assert){ assert.ok( true === true, "Passed!" ); });
  */
 
+const BASEURL = location.href.substring(0,location.href.replace('https://','https:--').indexOf('/'));
 const RESTROOT = '/sites/dev';
 const RESTDEMO = '/sites/demo';
 //
@@ -1124,6 +1125,33 @@ QUnit.module( "REST Methods" );
 		.then(function(arrayResults){
 			assert.ok( Object.keys(arrayResults[0]).length == 3, "arrayResults[0] has length == 3: "+ Object.keys(arrayResults[0]).length );
 			assert.ok( (arrayResults[0].Manager.Title), "arrayResults[0].Manager.Title exists: "+ arrayResults[0].Manager.Title );
+			assert.ok( getAsciiTableStr(arrayResults), `RESULTS:\n${getAsciiTableStr(arrayResults)}` );
+			done();
+		})
+		.catch(function(err){
+			assert.ok( (false), err );
+			done();
+		});
+	});
+
+	// TEST: Complete, full URL
+	QUnit.test("sprLib.rest() ex: 'https://full.url.com/_api/web/sitegroups'", function(assert){
+		var done = assert.async();
+		// TEST:
+		sprLib.rest({
+			url: BASEURL+RESTROOT+'/_api/web/sitegroups',
+			queryCols: {
+				title: { dataName:'Title' },
+				loginName: { dataName:'LoginName' },
+				editAllowed: { dataName:'AllowMembersEditMembership' }
+			}
+			,queryFilter:   "AllowMembersEditMembership eq true"
+			,queryOrderby:  "Title"
+			,queryLimit: 10
+		})
+		.then(function(arrayResults){
+			assert.ok( arrayResults.length > 0, "arrayResults is an Array and length > 0: "+ arrayResults.length );
+			assert.ok( (arrayResults[0].editAllowed), "arrayResults[0].editAllowed exists: "+ arrayResults[0].editAllowed );
 			assert.ok( getAsciiTableStr(arrayResults), `RESULTS:\n${getAsciiTableStr(arrayResults)}` );
 			done();
 		})
