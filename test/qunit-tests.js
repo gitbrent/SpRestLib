@@ -1226,6 +1226,90 @@ QUnit.module( "REST Methods" );
 }
 
 // ================================================================================================
+QUnit.module( "REST > Parsing/Options Tests" );
+// ================================================================================================
+{
+	// NOTE: Parameterized QUnit Tests (!)
+	var arrObjTests = [
+		{ testDesc:"url:relative", urlPath:  "_api/lists/getbytitle('Site Assets')/items" },
+		{ testDesc:"url:absolute", urlPath: "/_api/lists/getbytitle('Site Assets')/items" },
+		{ testDesc:"url:relative", urlPath:  "_api/lists/getbytitle('Site Assets')/items?$select=ID" },
+		{ testDesc:"url:absolute", urlPath: "/_api/lists/getbytitle('Site Assets')/items?$select=ID" },
+		{ testDesc:"url:RESTROOT", urlPath: RESTROOT+"/_api/lists/getbytitle('Site Assets')/items?$select=ID" },
+		{ testDesc:"url:BASEURL+RESTROOT", urlPath: BASEURL+RESTROOT+"/_api/lists/getbytitle('Site Assets')/items?$select=ID" },
+		{
+			testDesc: "query: queryCols",
+			urlPath:  "_api/lists/getbytitle('Site Assets')/items",
+			qryCols:  "ID",
+			arrTests: [
+				function(arrResults){ return arrResults.length > 0 },
+				function(arrResults){ return Object.keys(arrResults[0]).length == 1 },
+				function(arrResults){ return arrResults[0].ID }
+			]
+		},
+		{
+			testDesc: "query: queryCols + queryFilter",
+			urlPath: "_api/lists/getbytitle('Site Assets')/items",
+			qryCols: ['ID'],
+			qryFilter: "ID eq 10",
+			arrTests: [
+				function(arrResults){ return arrResults.length > 0 },
+				function(arrResults){ return Object.keys(arrResults[0]).length == 1 },
+				function(arrResults){ return arrResults[0].ID == 10 }
+			]
+		},
+		{
+			testDesc: "query: queryFilter",
+			urlPath: "_api/lists/getbytitle('Site Assets')/items",
+			qryFilter: "ID eq 10",
+			arrTests: [
+				function(arrResults){ return arrResults.length > 0 },
+				function(arrResults){ return Object.keys(arrResults[0]).length == 1 },
+				function(arrResults){ return arrResults[0].ID == 10 }
+			]
+		}
+		/*
+		{
+			testDesc : ""
+			urlPath  : RESTROOT+"/_api/lists/getbytitle('Site Assets')/items",
+			urlSelect: "",
+			qryCols  : null,
+			qryFilter: "",
+			qryLimit : ""
+		}
+		*/
+	];
+
+	QUnit.test("sprLib.rest() -> Battery of Parsing Tests (Total: "+arrObjTests.length+")", function(assert){
+		arrObjTests.forEach((objTest,idx)=>{
+			// A:
+			var done = assert.async();
+
+			// B: Set query object
+			var objRest = {};
+			if ( objTest.urlPath   ) objRest.url =  objTest.urlPath;
+			if ( objTest.urlSelect ) objRest.url += objTest.urlSelect;
+			if ( objTest.qryCols   ) objRest.queryCols   = objTest.qryCols;
+			if ( objTest.qryFilter ) objRest.queryFilter = objTest.qryFilter;
+			if ( objTest.qryLimit  ) objRest.queryLimit  = objTest.qryLimit;
+			if ( !objTest.arrTests ) objTest.arrTests = [function(arrResults){ return arrResults.length > 0 }];
+
+			// C: Execute test
+			sprLib.rest(objRest)
+			.then(function(arrResults){
+				objTest.arrTests.forEach((funcTest,idy) => assert.ok( funcTest(arrResults), (objTest.testDesc || "TEST "+idx)+"."+idy+":\n"+funcTest.toString() ));
+				assert.ok(true, `RESULTS:\n${getAsciiTableStr([arrResults[0]])}\n************************************************************\n`);
+				done();
+			})
+			.catch(function(err){
+				assert.ok( (false), err );
+				done();
+			});
+		});
+	});
+}
+
+// ================================================================================================
 QUnit.module( "USER Methods" );
 // ================================================================================================
 {
