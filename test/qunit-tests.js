@@ -30,9 +30,10 @@ function getAsciiTableStr(arrayResults) {
 
 	let table = new AsciiTable().setHeading( arrColHeadings );
 
-	arrayResults.forEach(function(obj,idx){
+	arrayResults.forEach((obj,idx)=>{
 		let vals = [];
 		$.each(obj, function(key,val){
+			if ( typeof val === 'object' && JSON.stringify(val).indexOf("__deferred") > 0 ) val = "[[__deferred]]";
 			vals.push( ( typeof val === 'object' && key != '__metadata' ? JSON.stringify(val) : val ) );
 		});
 		table.addRow(vals);
@@ -1259,15 +1260,34 @@ QUnit.module( "REST > Parsing/Options Tests" );
 			]
 		},
 		{
+			testDesc: "query: queryFilter + qryLimit",
+			urlPath: "_api/lists/getbytitle('Site Assets')/items",
+			qryFilter: "ID gt 10",
+			qryLimit: "5",
+			arrTests: [
+				function(arrResults){ return arrResults.length == 5 },
+				function(arrResults){ return arrResults[0].ID > 10 }
+			]
+		},
+		{
 			testDesc: "query: queryFilter",
 			urlPath: "_api/lists/getbytitle('Site Assets')/items",
 			qryFilter: "ID eq 10",
 			arrTests: [
 				function(arrResults){ return arrResults.length > 0 },
-				function(arrResults){ return Object.keys(arrResults[0]).length == 1 },
+				function(arrResults){ return arrResults[0].ID == 10 }
+			]
+		},
+		{
+			testDesc: "query: mixed $select and queryFilter",
+			urlPath: "_api/lists/getbytitle('Site Assets')/items?$select=ID",
+			qryFilter: "ID eq 10",
+			arrTests: [
+				function(arrResults){ return arrResults.length > 0 },
 				function(arrResults){ return arrResults[0].ID == 10 }
 			]
 		}
+
 		/*
 		{
 			testDesc : ""
@@ -1297,8 +1317,8 @@ QUnit.module( "REST > Parsing/Options Tests" );
 			// C: Execute test
 			sprLib.rest(objRest)
 			.then(function(arrResults){
-				objTest.arrTests.forEach((funcTest,idy) => assert.ok( funcTest(arrResults), (objTest.testDesc || "TEST "+idx)+"."+idy+":\n"+funcTest.toString() ));
-				assert.ok(true, `RESULTS:\n${getAsciiTableStr([arrResults[0]])}\n************************************************************\n`);
+				objTest.arrTests.forEach((funcTest,idy) => assert.ok( funcTest(arrResults), (objTest.testDesc || "TEST "+idx)+" #"+idy+":\n"+funcTest.toString() ));
+				assert.ok(true, `RESULTS:\n${getAsciiTableStr(arrResults)}\n************************************************************\n`);
 				done();
 			})
 			.catch(function(err){
