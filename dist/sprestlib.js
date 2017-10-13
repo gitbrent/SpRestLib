@@ -1415,56 +1415,68 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 			objAjaxQuery.url = (inOpt.url.toLowerCase().indexOf('http') == 0 || inOpt.url.indexOf('/') == 0 ? '' : APP_OPTS.baseUrl);
 			objAjaxQuery.url += (inOpt.url.toLowerCase().indexOf('http') != 0 && inOpt.url.indexOf('/') != 0 ? '/' : '') + inOpt.url;
 
-			// STEP 4: Continue building `url` when cols from either '$select' or `queryCols` options found
-			if ( inOpt.queryCols && objAjaxQuery.url.toLowerCase().indexOf('$select') == -1 ) {
-				// A: Start 'select query'
-				objAjaxQuery.url += "?$select=";
+			// STEP 4: Continue building up `url` with any options provided
+			{
+				// queryCols: Start 'select query'
+				if ( inOpt.queryCols ) {
+					// A: Start 'select query'
+					if ( objAjaxQuery.url.toLowerCase().indexOf('$select') == -1 ) objAjaxQuery.url += '?$select=';
 
-				// `queryCols` can be: string, array of strings, or objects
-				// A: Convert single string column into an array for use below
-				if ( typeof inOpt.queryCols === 'string' ) inOpt.queryCols = [ inOpt.queryCols ];
+					// B: parse `queryCols` (can be: string, array of strings, or objects)
+					// Convert single string column into an array for use below
+					if ( typeof inOpt.queryCols === 'string' ) inOpt.queryCols = [ inOpt.queryCols ];
 
-				// B: Build query object if `queryCols` array exists - create 'expands'
-				if ( inOpt.queryCols && Array.isArray(inOpt.queryCols) ) {
-					var objListCols = {};
-					inOpt.queryCols.forEach(function(colStr,i){
-						var strTmp = ( colStr.indexOf('/') > -1 ? colStr.substring(0,colStr.indexOf('/')) : colStr );
-						// Handle cases where there are 2 expands from same column. Ex: 'Manager/Id' and 'Manager/Title'
-						objListCols[strTmp] = ( objListCols[strTmp] ? { dataName:objListCols[strTmp].dataName+','+colStr } : { dataName:colStr } );
-					});
-					inOpt.queryCols = objListCols;
-				}
+					// C: Build query object if `queryCols` array exists - create 'expands'
+					if ( Array.isArray(inOpt.queryCols) ) {
+						var objListCols = {};
+						inOpt.queryCols.forEach(function(colStr,i){
+							var strTmp = ( colStr.indexOf('/') > -1 ? colStr.substring(0,colStr.indexOf('/')) : colStr );
+							// Handle cases where there are 2 expands from same column. Ex: 'Manager/Id' and 'Manager/Title'
+							objListCols[strTmp] = ( objListCols[strTmp] ? { dataName:objListCols[strTmp].dataName+','+colStr } : { dataName:colStr } );
+						});
+						inOpt.queryCols = objListCols;
+					}
 
-				// C: Add columns
-				if ( inOpt.queryCols && typeof inOpt.queryCols === 'object' ) {
-					// A: Add columns
-					$.each(inOpt.queryCols, function(key,col){
-						if ( !col.dataName ) return; // Skip columns without a 'dataName' key
-						// 1:
-						if ( objAjaxQuery.url.substring(objAjaxQuery.url.length-1) == '=' ) objAjaxQuery.url += col.dataName;
-						else objAjaxQuery.url += ( objAjaxQuery.url.lastIndexOf(',') == objAjaxQuery.url.length-1 ? col.dataName : ','+col.dataName );
-						// 2:
-						if ( col.dataName.indexOf('/') > -1 ) {
-							var strFieldName = col.dataName.substring(0, col.dataName.indexOf('/'));
-							if ( arrExpands.indexOf(strFieldName) == -1 ) {
-								arrExpands.push( strFieldName );
-								strExpands += (strExpands == '' ? '' : ',') + strFieldName;
+					// D: Add columns
+					if ( typeof inOpt.queryCols === 'object' ) {
+						// A: Add columns
+						$.each(inOpt.queryCols, function(key,col){
+							if ( !col.dataName ) return; // Skip columns without a 'dataName' key
+							// 1:
+							if ( objAjaxQuery.url.substring(objAjaxQuery.url.length-1) == '=' ) objAjaxQuery.url += col.dataName;
+							else objAjaxQuery.url += ( objAjaxQuery.url.lastIndexOf(',') == objAjaxQuery.url.length-1 ? col.dataName : ','+col.dataName );
+							// 2:
+							if ( col.dataName.indexOf('/') > -1 ) {
+								var strFieldName = col.dataName.substring(0, col.dataName.indexOf('/'));
+								if ( arrExpands.indexOf(strFieldName) == -1 ) {
+									arrExpands.push( strFieldName );
+									strExpands += (strExpands == '' ? '' : ',') + strFieldName;
+								}
 							}
-						}
-					});
+						});
+					}
 				}
 
-				// D: Add maxrows as default in SP2013 is a paltry 100 rows
-				if ( inOpt.url.indexOf('$top') == -1 ) objAjaxQuery.url += '&$top=' + ( inOpt.queryLimit ? inOpt.queryLimit : APP_OPTS.maxRows );
+				// queryLimit: Add maxrows (b/c default in SP2013 is a paltry 100 rows)
+				// NOTE: Only applies to GET types (POST with this param are obv. invalid!)
+				if ( inOpt.url.toLowerCase().indexOf('$top') == -1 && inOpt.type == "GET" ) {
+					objAjaxQuery.url += ( (objAjaxQuery.url.indexOf('?')>0?'&':'?')+'$top=' + ( inOpt.queryLimit ? inOpt.queryLimit : APP_OPTS.maxRows ) );
+				}
 
-				// E: Add expand (if any)
-				if ( strExpands ) objAjaxQuery.url += '&$expand=' + strExpands;
+				// queryFilter: Add filter (if any)
+				if ( inOpt.url.toLowerCase().indexOf('$filter') == -1 && inOpt.queryFilter ) {
+					objAjaxQuery.url += ( (objAjaxQuery.url.indexOf('?')>0?'&':'?')+'$filter=' + ( inOpt.queryFilter.indexOf('%') == -1 ? encodeURI(inOpt.queryFilter) : inOpt.queryFilter ) );
+				}
 
-				// F: Add filter (if any)
-				if ( inOpt.queryFilter ) objAjaxQuery.url += '&$filter=' + ( inOpt.queryFilter.indexOf('%') == -1 ? encodeURI(inOpt.queryFilter) : inOpt.queryFilter );
+				// queryOrderby: Add orderby (if any)
+				if ( inOpt.url.toLowerCase().indexOf('$orderby') == -1 && inOpt.queryOrderby ) {
+					objAjaxQuery.url += ( (objAjaxQuery.url.indexOf('?')>0?'&':'?')+'$orderby=' + inOpt.queryOrderby );
+				}
 
-				// G: Add orderby (if any)
-				if ( inOpt.queryOrderby ) objAjaxQuery.url += '&$orderby=' + inOpt.queryOrderby;
+				// Expands: Add expand (if any)
+				if ( inOpt.url.toLowerCase().indexOf('$expand') == -1 && strExpands ) {
+					objAjaxQuery.url += ( (objAjaxQuery.url.indexOf('?')>0?'&':'?')+'$expand=' + strExpands );
+				}
 			}
 
 			// STEP 5: Execute REST call
