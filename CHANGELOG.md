@@ -1,11 +1,11 @@
 # Change Log
 
-## [v1.2.1](https://github.com/gitbrent/sprestlib/tree/v1.2.1) (2017-10-??)
+## [v1.2.1](https://github.com/gitbrent/sprestlib/tree/v1.2.1) (2017-10-12)
 [Full Changelog](https://github.com/gitbrent/sprestlib/compare/v1.2.0...v1.2.1)
 
 **Fixed Bugs:**
 - Url param passing .rest() with 'http'/'https' is not being parsed correctly [\#2](https://github.com/gitbrent/sprestlib/issues/2) ([gitbrent](https://github.com/gitbrent))
-
+- Query options passed to .rest() are only parsed when 'queryCols' exists [\#3](https://github.com/gitbrent/sprestlib/issues/3) ([gitbrent](https://github.com/gitbrent))
 
 
 
@@ -19,6 +19,8 @@
 **Fixed Bugs:**
 - The sprLib.rest() method is not parsing queryCols correctly [\#1](https://github.com/gitbrent/sprestlib/issues/1) ([gitbrent](https://github.com/gitbrent))
 
+
+
 ## [v1.1.0](https://github.com/gitbrent/sprestlib/tree/v1.1.0) (2017-09-07)
 [Full Changelog](https://github.com/gitbrent/sprestlib/compare/v1.0.0...v1.1.0)
 
@@ -26,6 +28,8 @@
 - Fixed bug in error messages introduced in last release
 - Fixed error handling in Node.js
 - Fixed return of empty array for null Person/lookup fields
+
+
 
 ## [v1.0.0](https://github.com/gitbrent/sprestlib/tree/v1.0.0) (2017-08-08)
 [Full Changelog](https://github.com/gitbrent/sprestlib/compare/v0.12.0...v1.0.0)
