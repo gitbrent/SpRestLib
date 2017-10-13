@@ -1,11 +1,10 @@
 # Change Log
 
-## [v1.3.0](https://github.com/gitbrent/sprestlib/tree/v1.3.0) (2017-11-??)
-[Full Changelog](https://github.com/gitbrent/sprestlib/compare/v1.2.0...v1.3.0)
+## [v1.2.1](https://github.com/gitbrent/sprestlib/tree/v1.2.1) (2017-10-??)
+[Full Changelog](https://github.com/gitbrent/sprestlib/compare/v1.2.0...v1.2.1)
 
-**Implemented Enhancements:**
 **Fixed Bugs:**
-
+- Url param passing .rest() with 'http'/'https' is not being parsed correctly [\#2](https://github.com/gitbrent/sprestlib/issues/2) ([gitbrent](https://github.com/gitbrent))
 
 
 
