@@ -42,8 +42,8 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 
 (function(){
 	// APP VERSION/BUILD
-	var APP_VER = "1.3.0-beta";
-	var APP_BLD = "20171011";
+	var APP_VER = "1.2.1-beta";
+	var APP_BLD = "20171012";
 	var DEBUG = false; // (verbose mode/lots of logging)
 	// APP FUNCTIONALITY
 	var APP_FILTEROPS = {
@@ -1467,7 +1467,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 				if ( inOpt.queryOrderby ) objAjaxQuery.url += '&$orderby=' + inOpt.queryOrderby;
 			}
 
-			// STEP 6: Execute REST call
+			// STEP 5: Execute REST call
 			Promise.resolve()
 			.then(function(){
 				return new Promise(function(resolve, reject) {
