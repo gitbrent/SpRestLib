@@ -13,7 +13,7 @@
 	<meta name="author"      content="https://github.com/gitbrent/">
 	<meta name="website"     content="https://github.com/gitbrent/SpRestLib/">
 	<meta name="keywords"    content="SpRestLib, JavaScript, js-sharepoint, OData, REST, SharePoint 2013, SP2013, SharePoint 2016, SP2016, SharePoint Online">
-	<meta name="description" content="Content Editor Webpart: SpRestLib SharePoint Toolkit">
+	<meta name="description" content="Content Editor Webpart: SpRestLib SharePoint SCA Toolkit">
 	<meta name="revised"     content="Oct 13, 2017">
 
 	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300">
@@ -620,8 +620,10 @@
 
 				// STEP 1: Compile data
 				$('#'+inTabName+' tr').each(function(idx,row){
-					$(row).find('th,td').each(function(idy,cell){ data += '"'+ $(cell).text().trim() + '",'; });
-					data = data.substring(0,data.length-1) + '\n';
+					if ( $(row).is(':visible') ) {
+						$(row).find('th,td').each(function(idy,cell){ data += '"'+ $(cell).text().trim() + '",'; });
+						data = data.substring(0,data.length-1) + '\n';
+					}
 				});
 
 				// STEP 2: Export
