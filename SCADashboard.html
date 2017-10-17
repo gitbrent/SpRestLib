@@ -2,18 +2,18 @@
 <html lang="en-us">
 <head>
 	<!-- HOWTO / FAQ / SETUP
-		1) Add this file (SprestlibToolkit.html) to your 'SiteAssets' library
-		2) Create a new Page named 'SprestlibToolkit' (SP will add the '.aspx' at the end)
-		3) Add a Content Editor Web Part to the new page and point it to '../SiteAssets/SprestlibToolkit.html'
+		1) Add this file (SCADashboard.html) to your 'SiteAssets' library
+		2) Create a new Page named 'SCADashboard' (SP will add the '.aspx' at the end)
+		3) Add a Content Editor Web Part to the new page and point it to '../SiteAssets/SCADashboard.html'
 		4) Press the Save page button (top-left)
-		5) The SprestlibToolkit.aspx page is ready to go!
+		5) The SCADashboard.aspx page is ready to go!
 		!!!==>> Check the img folder for screencaps of the SharePoint setup! <<==!!!
 	-->
 	<meta charset="utf-8">
 	<meta name="author"      content="https://github.com/gitbrent/">
 	<meta name="website"     content="https://github.com/gitbrent/SpRestLib/">
 	<meta name="keywords"    content="SpRestLib, JavaScript, js-sharepoint, OData, REST, SharePoint 2013, SP2013, SharePoint 2016, SP2016, SharePoint Online">
-	<meta name="description" content="Content Editor Webpart: SpRestLib SharePoint SCA Toolkit">
+	<meta name="description" content="Content Editor Webpart: SpRestLib SharePoint SCA Dashboard">
 	<meta name="revised"     content="Oct 13, 2017">
 
 	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300">
@@ -31,13 +31,14 @@
 		}
 		#divBody div { box-sizing: border-box; }
 
-		#titleBox { margin-bottom: 20px; }
+		#titleBox { margin-bottom: 2px; }
 		.bigTitle { font-family:'Segoe UI Light','Roboto'; font-size:36px; color:#0088cc; margin-bottom:6px }
 		.bigTitsu { font-size:14px; color:#c7c7c7; }
-		#siteLogo { max-height:60px; max-width:250px; }
+		#siteLogo { max-height:50px; max-width:250px; }
 
 		.sectionTitle, .subTitle { font-size:18px; color:#0088cc; margin:20px 0 10px 0; cursor: pointer; }
-		.sectionTitle.plain, .subTitle.plain { display: inline-block; cursor: default; }
+		.sectionTitle.plain, .subTitle.plain { display:inline-block; cursor:default; }
+		.sectionTitle.first, .subTitle.first { margin-top:0 !important; }
 		.bigger { font-size:1.1em; }
 		.arrow {
 			display: inline-block;
@@ -68,16 +69,15 @@
 		#tabSubsites tbody td:nth-child(4) { white-space: nowrap; }
 		.showHidn a, .showHidn a:visited { color:aaa; }
 
-		#navtabSite #boxInfo { margin-bottom: 20px; }
-		#navtabSite #boxInfo > div { vertical-align: top; }
-		#navtabSite #boxInfo span { font-family: Roboto; font-size: 22px; }
-		#navtabSite .boxOpts { flex-wrap:wrap; }
-		#navtabSite .boxOpts > div { white-space: nowrap; }
-		#navtabSite .boxOpts > div > span { margin-right:5px; vertical-align:middle; }
-		.contSwitch { display:inline-block; vertical-align:middle; }
-		#navtabSite #DateCre, #navtabSite #DateMod { white-space: nowrap; }
+		#boxInfo { margin-bottom: 30px; }
+		#boxInfo > div { vertical-align: top; }
+		#boxInfo span { font-family: Roboto; font-size: 22px; }
+		#boxInfo #DateCre, #boxInfo #DateMod { white-space: nowrap; }
+		#navTabList .boxOpts { flex-wrap:wrap; }
+		#navTabList .boxOpts > div { white-space: nowrap; }
+		#navTabList .boxOpts > div > span { margin-right:5px; vertical-align:middle; }
 
-		#tabSiteLists .imgIcon, #tabSiteGroups .imgIcon { vertical-align:bottom; margin-right:4px; cursor:help; }
+		#tabSiteLists .imgIcon, #tabSiteLibrs .imgIcon, #tabSiteGroups .imgIcon { vertical-align:bottom; margin-right:4px; cursor:help; }
 		#tabSiteGroups thead th:first-child { min-width:150px; }
 		#tabSiteGroups tbody td { vertical-align:top; }
 
@@ -112,7 +112,7 @@
 		/* FLEXBOX TABS */
 		.flexTabs {
 			width: 100%;
-			margin: 20px 0 10px 0;
+			margin: 0 0 10px 0;
 			border: 1px solid #d5d5d5;
 			box-shadow: 0px 4px 10px -5px rgba(0,0,0,0.5);
 			border-radius: 5px;
@@ -201,6 +201,97 @@
 		}
 		#navtabDbug .divTableRows > div > div { padding: 5px 10px; background: #f2f9fc; }
 		#navtabDbug .divTableRows > div > div:first-child { width:1%; }
+
+		#breadcrumb {
+			list-style: none;
+			display: inline-block;
+			padding-left: 0px !important;
+		}
+		#breadcrumb .icon {
+			font-size: 14px;
+		}
+		#breadcrumb li {
+			float: left;
+			-webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none;
+		}
+		#breadcrumb li a {
+			color: #FFF;
+			display: block;
+			background: #3498db;
+			text-decoration: none;
+			position: relative;
+			height: 40px;
+			line-height: 40px;
+			padding: 0 10px 0 5px;
+			text-align: center;
+			margin-right: 23px;
+		}
+		#breadcrumb li:nth-child(even) a {
+			background-color: #2980b9;
+		}
+		#breadcrumb li:nth-child(even) a:before {
+			border-color: #2980b9;
+			border-left-color: transparent;
+		}
+		#breadcrumb li:nth-child(even) a:after {
+			border-left-color: #2980b9;
+		}
+		#breadcrumb li:first-child a {
+			padding-left: 15px;
+			-moz-border-radius: 4px 0 0 4px;
+			-webkit-border-radius: 4px;
+			border-radius: 4px 0 0 4px;
+		}
+		#breadcrumb li:first-child a:before {
+			border: none;
+		}
+		#breadcrumb li:last-child a {
+			padding-right: 15px;
+			-moz-border-radius: 0 4px 4px 0;
+			-webkit-border-radius: 0;
+			border-radius: 0 4px 4px 0;
+		}
+		#breadcrumb li:last-child a:after {
+			border: none;
+		}
+		#breadcrumb li a:before, #breadcrumb li a:after {
+			content: "";
+			position: absolute;
+			top: 0;
+			border: 0 solid #3498db;
+			border-width: 20px 10px;
+			width: 0;
+			height: 0;
+		}
+		#breadcrumb li a:before {
+			left: -20px;
+			border-left-color: transparent;
+		}
+		#breadcrumb li a:after {
+			left: 100%;
+			border-color: transparent;
+			border-left-color: #3498db;
+		}
+		#breadcrumb li a:hover {
+			background-color: #1abc9c;
+		}
+		#breadcrumb li a:hover:before {
+			border-color: #1abc9c;
+			border-left-color: transparent;
+		}
+		#breadcrumb li a:hover:after {
+			border-left-color: #1abc9c;
+		}
+		#breadcrumb li a:active {
+			background-color: #16a085;
+		}
+		#breadcrumb li a:active:before {
+			border-color: #16a085;
+			border-left-color: transparent;
+		}
+		#breadcrumb li a:active:after {
+			border-left-color: #16a085;
+		}
 
 		/*-*/
 		.flatBtn {
@@ -420,6 +511,7 @@
 		#tabSiteLists thead th:first-child { min-width:200px; }
 		.showDesc { color:#a7a7a7; margin-top:5px; font-size:11px; }
 		/* ----- */
+		.contSwitch { display:inline-block; vertical-align:middle; }
 		.switch { width: 28px; height: 16px; position: relative; display: inline-block; }
 		.switch input { display:none; }
 		.slider {
@@ -459,11 +551,12 @@
 		$.ajaxSetup({ cache:false });
 		// APP
 		const APP_VER = '1.0.0-beta';
-		const APP_REL = '20171013';
+		const APP_REL = '20171016';
 		// CONSTANTS: UI/LOGIC
 		const HTML_SPINNER = '<div class="sprlib-spinner"><div class="sprlib-bounce1"></div><div class="sprlib-bounce2"></div><div class="sprlib-bounce3"></div></div>';
 		const HTML_EMPTY = '<span style="color:#c7c7c7; font-style:italic;">(empty)</span>';
 		const HTML_NOTLOADED = '<span style="color:#c7c7c7; font-style:italic;">(not loaded)</span>';
+		const HTML_SPANSPACE = '<span style="display:none">; </span>';
 		const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 		// CONSTANTS: APP
 		const MODE_VERBOSE = window.location.href.toLowerCase().indexOf('mode=verbose') > -1; if (MODE_VERBOSE) { console.log('*** VERBOSE MODE ***'); }
@@ -616,7 +709,7 @@
 			 */
 			function exportTabData(inTabName) {
 				var data = '';
-		        var filename = 'sprLibToolkit_export_'+ new Date().toISOString().split('.')[0].replace(/\D/g,'') +'.csv';
+		        var filename = 'SCADashboard_'+ new Date().toISOString().split('.')[0].replace(/\D/g,'') +'.csv';
 
 				// STEP 1: Compile data
 				$('#'+inTabName+' tr').each(function(idx,row){
@@ -744,12 +837,13 @@
 						// B-1: Populate table
 						{
 							let $row = $('<tr data-list-id="'+list.Id+'" class="'+ (list.Hidden ? 'showHidn' : '') +'" style="'+ (list.Hidden && !$('#chkHidn').prop('checked') ? 'display:none' : '') +'"></tr>');
+
 							$row.append('<th><img class="imgIcon" src="'+ list.ImageUrl +'" title="'+ (SP_LIST_TEMPLATE_TYPES[list.BaseTemplate] ? SP_LIST_TEMPLATE_TYPES[list.BaseTemplate].desc : '') +'">'
 								+ '<a href="'+ list.RootFolder.ServerRelativeUrl +'" target="_blank">'+ list.Title +'</a>'
 								+ (list.Description ? '<div class="showDesc"><span style="display:none">: </span>'+ list.Description +'</div>' : '')
 								+ '</th>'
 							);
-							$row.append('<td>'+ (list.BaseType == 0 ? 'List' : 'Library') +'<span class="showTemp" style="display:none"> ('+ (SP_LIST_TEMPLATE_TYPES[list.BaseTemplate] ? SP_LIST_TEMPLATE_TYPES[list.BaseTemplate].name : list.BaseTemplate) +')</span></td>');
+							$row.append('<td class="showType">'+ (SP_LIST_TEMPLATE_TYPES[list.BaseTemplate] ? SP_LIST_TEMPLATE_TYPES[list.BaseTemplate].name : list.BaseTemplate) +'</td>');
 							$row.append('<td class="nowctr">'+ list.ItemCount +'</td>');
 							$row.append('<td class="nowctr showDate">'+ getDateStrFromISO(list.Created,'INTL') +'</td>');
 							$row.append('<td class="nowctr showDate">'+ getDateStrFromISO(list.LastItemModifiedDate,'INTL') +'</td>');
@@ -764,7 +858,8 @@
 							$row.append('<td class="showPerm" data-perm-name="Read/View"></td>');
 							$row.append('<td class="showPerm" data-perm-name="Approve"></td>');
 
-							$('#tabSiteLists tbody').append( $row );
+							if ( list.BaseType == 0 ) $('#tabSiteLists tbody').append( $row );
+							else $('#tabSiteLibrs tbody').append( $row );
 						}
 
 						// B-2: Fetch/Pop List Permissions
@@ -777,19 +872,24 @@
 								let arrPerms = [];
 								prin.RoleDefinitionBindings.forEach((perm,idx) => {
 									if ( !perm.Hidden ) {
+										let $row = $('#navTabList tr[data-list-id="'+list.Id+'"]');
+
 										// 1: Combine these 2 Roles
 										perm.Name = perm.Name.replace('Read','Read/View').replace('View Only','Read/View');
 
 										// 2: Create non-std perms column if needed
-										if ( $('#tabSiteLists tr[data-list-id="'+list.Id+'"] td[data-perm-name="'+ perm.Name +'"]').length == 0 ) {
+										if ( $row.find('td[data-perm-name="'+ perm.Name +'"]').length == 0 ) {
 											$('#tabSiteLists thead tr:first-child th:last-child').prop('colspan',Number($('#tabSiteLists thead tr:first-child th:last-child').prop('colspan'))+1);
 											$('#tabSiteLists thead tr:last-child').append('<th class="showPerm">'+ perm.Name +'</th>');
 											$('#tabSiteLists tbody tr').each((idx,row)=> $(row).append('<td data-perm-name="'+ perm.Name +'"></td>') );
+
+											$('#tabSiteLibrs thead tr:first-child th:last-child').prop('colspan',Number($('#tabSiteLibrs thead tr:first-child th:last-child').prop('colspan'))+1);
+											$('#tabSiteLibrs thead tr:last-child').append('<th class="showPerm">'+ perm.Name +'</th>');
+											$('#tabSiteLibrs tbody tr').each((idx,row)=> $(row).append('<td data-perm-name="'+ perm.Name +'"></td>') );
 										}
 
 										// 3: Add Role to table
-										$('#tabSiteLists tr[data-list-id="'+list.Id+'"] td[data-perm-name="'+ perm.Name +'"]')
-										.append('<div class="itemBox">'+ prin.Member.Title +'<span style="display:none">; </span></div>');
+										$row.find('td[data-perm-name="'+ perm.Name +'"]').append('<div class="itemBox">'+ prin.Member.Title +HTML_SPANSPACE+'</div>');
 									}
 								});
 							});
@@ -803,12 +903,14 @@
 					// C: Honor view options
  					if ( !$('#chkDate').prop('checked') ) $('.showDate').hide();
 					if ( !$('#chkFeat').prop('checked') ) $('.showFeat').hide();
+					if ( !$('#chkType').prop('checked') ) $('.showType').hide();
 
 					// D: tablesorter
-					if ( $.tablesorter ) $('#tabSiteLists').tablesorter({ sortList:[[0,0]] });
+					if ( $.tablesorter ) $('#tabSiteLists, #tabSiteLibrs').tablesorter({ sortList:[[0,0]] });
 
 					// E: Show total
-					$('#LISTS').append('<span>('+ $('#tabSiteLists tbody tr').length +' total / '+ $('#tabSiteLists tbody tr.showHidn').length +' hidden)</span>');
+					$('#LISTS').append('<span style="margin-left:4px">('+ $('#tabSiteLists tbody tr:visible').length +')</span>');
+					$('#LIBRS').append('<span style="margin-left:4px">('+ $('#tabSiteLibrs tbody tr:visible').length +')</span>');
 				}
 
 				// SHOW: Groups
@@ -854,7 +956,7 @@
 					if ( $.tablesorter ) $('#tabSiteGroups').tablesorter({ sortList:[[0,0]] });
 
 					// E: Show total
-					$('#GROUPS').append('<span>('+ $('#tabSiteGroups tbody tr').length +')</span>');
+					$('#GROUPS').append('<span style="margin-left:4px">('+ $('#tabSiteGroups tbody tr').length +')</span>');
 				}
 
 				// SHOW: Roles
@@ -876,7 +978,7 @@
 					if ( $.tablesorter ) $('#tabSiteRoles').tablesorter({ sortList:[[0,0]] });
 
 					// D: Show total
-					$('#ROLES').append('<span>('+ $('#tabSiteRoles tbody tr').length +')</span>');
+					$('#ROLES').append('<span style="margin-left:4px">('+ $('#tabSiteRoles tbody tr').length +')</span>');
 				}
 
 				// SHOW: Subsites
@@ -1020,59 +1122,14 @@
 
 			// STEP 5: Show total
 			$('#SUBSITES').find('.jsTotal').remove();
-			$('#SUBSITES').append('<span class="jsTotal">('+ $('#tabSubsites tbody tr').length +')</span>');
-		}
-
-		// ==================================================================================================================
-
-		// OLD:
-		function handleListChange() {
-			// A: Clear results
-			$('#tabList-ListInfo table').remove();
-			$('#tabList-ListCols table').remove();
-			// B: Return if nothing selected
-			if ( !$('#selSiteLists').val() ) return;
-
-			// LIST INFO:
-			$('#tabList-ListInfo pre code').text( 'sprLib.list(\''+ $('#selSiteLists').val() +'\').info()' );
-			sprLib.list($('#selSiteLists').val()).info()
-			.then(function(objInfo){
-				var $table = $('<table><tbody></tbody></table>');
-				Object.keys(objInfo).forEach(function(key,idx){
-					$table.find('tbody').append('<tr><th>'+ key +'</th>'+'<td>'+ objInfo[key] +'</td></tr>');
-				});
-				$('#tabList-ListInfo').append( $table );
-			})
-			.catch(function(errMsg){
-				$('$tabList-ListInfo .tableRows').after( '<table><tbody><tr><td>'+errMsg+'</td></tr></tbody></table>' );
-			});
-
-			// LIST COLS:
-			$('#tabList-ListCols pre code').text( 'sprLib.list(\''+ $('#selSiteLists').val() +'\').cols()' );
-			sprLib.list($('#selSiteLists').val()).cols()
-			.then(function(arrColObjs){
-				var $table = $('<table><thead><tr></tr></thead><tbody></tbody></table>');
-
-				if ( arrColObjs.length ) $.each(arrColObjs[0],function(key,val){ $table.find('thead tr').append('<th>'+key+'</th>') });
-
-				arrColObjs.forEach(function(obj,idx){
-					let $row = $('<tr/>');
-					$.each(obj,function(key,val){ $row.append('<td>'+val+'</td>') });
-					$table.find('tbody').append( $row );
-				});
-
-				$('#tabList-ListCols').append( $table );
-			})
-			.catch(function(errMsg){
-				$('$tabList-ListCols .tableRows').after( '<table><tbody><tr><td>'+errMsg+'</td></tr></tbody></table>' );
-			});
+			$('#SUBSITES').append('<span style="margin-left:4px" class="jsTotal">('+ $('#tabSubsites tbody tr').length +')</span>');
 		}
 
 		// ==================================================================================================================
 
 		function doPageLoad() {
 			// STEP 1: HTML Setup
-			document.title = "SharePoint SCA Toolkit";
+			document.title = "SharePoint SCA Dashboard";
 
 			// STEP 2: UI Updates
 			if ( location.href.toLowerCase().indexOf('mode=verbose') > -1 ) $('#navTabs > ul > li:first-child').show().click();
@@ -1200,20 +1257,30 @@
 	<div id="divBody">
 		<div id="titleBox" class="divTable">
 			<div style="width:99%">
-				<div class="bigTitle">SharePoint Site Collection Admin Toolkit</div>
-				<div class="bigTitsu">Useful Tools for SharePoint Admins, Developers and SCAs.</div>
+				<ul id="breadcrumb">
+					<li><a href="#"><img src="data:image/svg+xml;base64,PHN2ZyBmaWxsPSIjRkZGRkZGIiBoZWlnaHQ9IjI0IiB2aWV3Qm94PSIwIDAgMjQgMjQiIHdpZHRoPSIyNCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4gICAgPHBhdGggZD0iTTEwIDIwdi02aDR2Nmg1di04aDNMMTIgMyAyIDEyaDN2OHoiLz4gICAgPHBhdGggZD0iTTAgMGgyNHYyNEgweiIgZmlsbD0ibm9uZSIvPjwvc3ZnPg==" style="vertical-align:middle"></a></li>
+					<li><a href="#"><span class="icon icon-beaker"> </span> Subsite 1</a></li>
+				</ul>
 			</div>
 			<div style="width:1%; vertical-align:middle;">
 				<img id="siteLogo">
 			</div>
 		</div>
 
+		<div id="boxInfo" class="modernTable" data-desc="Site Info Table">
+			<div style="width:60%"><label>Site Name</label><span id="SiteName"></span></div>
+			<div style="width:10%; text-align:center;"><label>Storage Used</label><span id="UsageTot"></span></div>
+			<div style="width:10%; text-align:center;"><label>Percent Used</label><span id="UsagePct"></span></div>
+			<div style="width:10%; text-align:center;"><label>Date Created</label><span id="DateCre"></span></div>
+			<div style="width:10%; text-align:center;"><label>Last Modified</label><span id="DateMod"></span></div>
+		</div>
+
 		<div id="navTabs" class="flexTabs">
 			<ul>
 				<li onclick="$('#navTabs').find('> div, li').removeClass('active'); $(this).addClass('active'); $('#navtabDbug').addClass('active');" style="display:none">Setup Check</li>
-				<li onclick="$('#navTabs').find('> div, li').removeClass('active'); $(this).addClass('active'); $('#navtabSite').addClass('active');" class="active">Site Inventory</li>
-				<li onclick="$('#navTabs').find('> div, li').removeClass('active'); $(this).addClass('active'); $('#navtabComp').addClass('active');">Site Compare</li>
-				<li onclick="$('#navTabs').find('> div, li').removeClass('active'); $(this).addClass('active'); $('#navtabSync').addClass('active');">Site Synchronize</li>
+				<li onclick="$('#navTabs').find('> div, li').removeClass('active'); $(this).addClass('active'); $('#navTabList').addClass('active');" class="active">Contents</li>
+				<li onclick="$('#navTabs').find('> div, li').removeClass('active'); $(this).addClass('active'); $('#navTabPerm').addClass('active');">Permissions</li>
+				<li onclick="$('#navTabs').find('> div, li').removeClass('active'); $(this).addClass('active'); $('#navTabSubs').addClass('active');">Subsites</li>
 			</ul>
 
 			<div id="navtabDbug" data-tab="Debug/Setup/Verbose">
@@ -1267,21 +1334,8 @@
 				<p>
 			</div>
 
-			<div id="navtabSite" data-tab="Site Info" class="active">
-				<div class="subTitle plain">Site Collection Information</div>
-				<div id="boxInfo" class="modernTable" data-desc="Site Info Table">
-					<div style="width:60%"><label>Site Name</label><span id="SiteName"></span></div>
-					<div style="width:10%; text-align:center;"><label>Storage Used</label><span id="UsageTot"></span></div>
-					<div style="width:10%; text-align:center;"><label>Percent Used</label><span id="UsagePct"></span></div>
-					<div style="width:10%; text-align:center;"><label>Date Created</label><span id="DateCre"></span></div>
-					<div style="width:10%; text-align:center;"><label>Last Modified</label><span id="DateMod"></span></div>
-				</div>
-
-				<div id="LISTS" class="subTitle" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
-					<div class="arrow"></div>Lists &amp; Libraries
-				</div>
-				<div class="contTabSiteLists" style="display:none">
-					<div class="modernFlex boxOpts" data-desc="Site Info Table Options">
+			<div id="navTabList" data-tab="Lists" class="active">
+				<div class="modernFlex boxOpts" data-desc="Site Info Table Options">
 						<div data-desc="show list desc?">
 							<span>Show Description?</span>
 							<div class="contSwitch">
@@ -1291,7 +1345,7 @@
 						<div data-desc="show type template?">
 							<span>Show Type Template?</span>
 							<div class="contSwitch">
-								<label class="switch"><input type="checkbox" onchange="$('.showTemp').toggle()"><span class="slider round"></span></label>
+								<label class="switch"><input id="chkType" type="checkbox" onchange="$('.showType').toggle()"><span class="slider round"></span></label>
 							</div>
 						</div>
 						<div data-desc="show dates?">
@@ -1318,45 +1372,77 @@
 						</div>
 					</div>
 
-					<table id="tabSiteLists" class="tabModern tablesorter">
-						<thead>
-							<tr>
-								<th rowspan="2">Name / Description</th>
-								<th rowspan="2" class="showType">Type</th>
-								<th rowspan="2">Items</th>
-								<th rowspan="2" class="showDate">Date Created</th>
-								<th rowspan="2" class="showDate">Date Modified</th>
-								<th colspan="3" class="showFeat sorter-false" style="text-align:center !important; border-bottom:1px solid white !important;">List Features</th>
-								<th colspan="6" class="showPerm sorter-false" style="text-align:center !important; border-bottom:1px solid white !important;">List Permissions</th>
-							</tr>
-							<tr>
-								<th class="showFeat"><abbr title="Are Attachments enabled?">Attachments?</abbr></th>
-								<th class="showFeat"><abbr title="Is Versioning enabled?">Versioning?</abbr></th>
-								<th class="showFeat"><abbr title="Force Checkout?">Force?</abbr></th>
-								<th class="showPerm sorter-false">Full</th>
-								<th class="showPerm sorter-false">Design</th>
-								<th class="showPerm sorter-false">Edit</th>
-								<th class="showPerm sorter-false">Contribute</th>
-								<th class="showPerm sorter-false">Read/View</th>
-								<th class="showPerm sorter-false">Approve</th>
-							</tr>
-						</thead>
-						<tbody></tbody>
-						<tfoot>
-							<tr class="busy" style="display:none">
-								<td colspan="14" style="text-align:center; border:1px solid #f1f1f1;">
-									<div class="sprlib-spinner"><div class="sprlib-bounce1"></div><div class="sprlib-bounce2"></div><div class="sprlib-bounce3"></div></div>
-								</td>
-							</tr>
-						</tfoot>
-					</table>
-				</div>
+				<div id="LISTS" class="subTitle plain first">Lists</div>
+				<table id="tabSiteLists" class="tabModern tablesorter">
+					<thead>
+						<tr>
+							<th rowspan="2">Name / Description</th>
+							<th rowspan="2" class="showType">Type Template</th>
+							<th rowspan="2">Items</th>
+							<th rowspan="2" class="showDate">Date Created</th>
+							<th rowspan="2" class="showDate">Date Modified</th>
+							<th colspan="3" class="showFeat sorter-false" style="text-align:center !important; border-bottom:1px solid white !important;">List Features</th>
+							<th colspan="6" class="showPerm sorter-false" style="text-align:center !important; border-bottom:1px solid white !important;">List Permissions</th>
+						</tr>
+						<tr>
+							<th class="showFeat"><abbr title="Are Attachments enabled?">Attachments?</abbr></th>
+							<th class="showFeat"><abbr title="Is Versioning enabled?">Versioning?</abbr></th>
+							<th class="showFeat"><abbr title="Force Checkout?">Force?</abbr></th>
+							<th class="showPerm sorter-false">Full</th>
+							<th class="showPerm sorter-false">Design</th>
+							<th class="showPerm sorter-false">Edit</th>
+							<th class="showPerm sorter-false">Contribute</th>
+							<th class="showPerm sorter-false">Read/View</th>
+							<th class="showPerm sorter-false">Approve</th>
+						</tr>
+					</thead>
+					<tbody></tbody>
+					<tfoot>
+						<tr class="busy" style="display:none">
+							<td colspan="14" style="text-align:center; border:1px solid #f1f1f1;">
+								<div class="sprlib-spinner"><div class="sprlib-bounce1"></div><div class="sprlib-bounce2"></div><div class="sprlib-bounce3"></div></div>
+							</td>
+						</tr>
+					</tfoot>
+				</table>
 
-				<div id="GROUPS" class="subTitle" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
-					<div class="arrow"></div>Groups
-				</div>
-				<div class="contTabSiteGroups" style="display:none">
-					<div class="modernFlex boxOpts" data-desc="Site Info Table Options">
+				<div id="LIBRS" class="subTitle plain">Libraries</div>
+				<table id="tabSiteLibrs" class="tabModern tablesorter">
+					<thead>
+						<tr>
+							<th rowspan="2">Name / Description</th>
+							<th rowspan="2" class="showType">Type Template</th>
+							<th rowspan="2">Items</th>
+							<th rowspan="2" class="showDate">Date Created</th>
+							<th rowspan="2" class="showDate">Date Modified</th>
+							<th colspan="3" class="showFeat sorter-false" style="text-align:center !important; border-bottom:1px solid white !important;">List Features</th>
+							<th colspan="6" class="showPerm sorter-false" style="text-align:center !important; border-bottom:1px solid white !important;">List Permissions</th>
+						</tr>
+						<tr>
+							<th class="showFeat"><abbr title="Are Attachments enabled?">Attachments?</abbr></th>
+							<th class="showFeat"><abbr title="Is Versioning enabled?">Versioning?</abbr></th>
+							<th class="showFeat"><abbr title="Force Checkout?">Force?</abbr></th>
+							<th class="showPerm sorter-false">Full</th>
+							<th class="showPerm sorter-false">Design</th>
+							<th class="showPerm sorter-false">Edit</th>
+							<th class="showPerm sorter-false">Contribute</th>
+							<th class="showPerm sorter-false">Read/View</th>
+							<th class="showPerm sorter-false">Approve</th>
+						</tr>
+					</thead>
+					<tbody></tbody>
+					<tfoot>
+						<tr class="busy" style="display:none">
+							<td colspan="14" style="text-align:center; border:1px solid #f1f1f1;">
+								<div class="sprlib-spinner"><div class="sprlib-bounce1"></div><div class="sprlib-bounce2"></div><div class="sprlib-bounce3"></div></div>
+							</td>
+						</tr>
+					</tfoot>
+				</table>
+			</div>
+
+			<div id="navTabPerm" data-tab="Groups/Roles">
+				<div class="modernFlex boxOpts" data-desc="Site Info Table Options">
 						<div data-desc="show group desc?">
 							<span>Show Description?</span>
 							<div class="contSwitch">
@@ -1375,128 +1461,81 @@
 						</div>
 					</div>
 
-					<table id="tabSiteGroups" class="tabModern tablesorter">
-						<thead>
-							<tr>
-								<th>Title</th>
-								<th>Owner</th>
-								<th>Members</th>
-								<th class="sorter-false showGrpDesc">Description</th>
-								<th class="sorter-false showGrpMemb">Member Names</th>
-							</tr>
-						</thead>
-						<tbody></tbody>
-						<tfoot>
-							<tr class="busy" style="display:none">
-								<td colspan="5" style="text-align:center; border:1px solid #f1f1f1;">
-									<div class="sprlib-spinner"><div class="sprlib-bounce1"></div><div class="sprlib-bounce2"></div><div class="sprlib-bounce3"></div></div>
-								</td>
-							</tr>
-						</tfoot>
-					</table>
-				</div>
+				<div id="GROUPS" class="subTitle plain first">Groups</div>
+				<table id="tabSiteGroups" class="tabModern tablesorter">
+					<thead>
+						<tr>
+							<th>Title</th>
+							<th>Owner</th>
+							<th>Members</th>
+							<th class="sorter-false showGrpDesc">Description</th>
+							<th class="sorter-false showGrpMemb">Member Names</th>
+						</tr>
+					</thead>
+					<tbody></tbody>
+					<tfoot>
+						<tr class="busy" style="display:none">
+							<td colspan="5" style="text-align:center; border:1px solid #f1f1f1;">
+								<div class="sprlib-spinner"><div class="sprlib-bounce1"></div><div class="sprlib-bounce2"></div><div class="sprlib-bounce3"></div></div>
+							</td>
+						</tr>
+					</tfoot>
+				</table>
 
-				<div id="ROLES" class="subTitle" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
-					<div class="arrow"></div>Roles
-				</div>
-				<div class="contTabSiteRoles" style="display:none">
-					<table id="tabSiteRoles" class="tabModern tablesorter">
-						<thead>
-							<tr>
-								<th>Name</th>
-								<th>Description</th>
-								<th>ID</th>
-							</tr>
-						</thead>
-						<tbody></tbody>
-						<tfoot>
-							<tr class="busy" style="display:none">
-								<td colspan="3" style="text-align:center; border:1px solid #f1f1f1;">
-									<div class="sprlib-spinner"><div class="sprlib-bounce1"></div><div class="sprlib-bounce2"></div><div class="sprlib-bounce3"></div></div>
-								</td>
-							</tr>
-						</tfoot>
-					</table>
-				</div>
-
-				<div id="SUBSITES" class="subTitle" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
-					<div class="arrow"></div>Subsites
-				</div>
-				<div class="contTabSubsites" style="display:none">
-					<div id="subsitesHeader" class="flex">
-						<div>
-							Click to load subsite information and storage data.<br>
-							It is not loaded by default as each site has to be scanned and can be resource intensive.<br>
-							(NOTE: storman has no API - csom, jsom, or REST - so the usage is gathering by loading each site's storman and parsing it)
-						</div>
-						<div style="vertical-align:top; text-align:right;">
-							<button type="button" class="flatBtn flatBtn-blueLt" onclick="getSubsiteStorman()">Load Subsite Info</button>
-						</div>
-					</div>
-
-					<table id="tabSubsites" class="tabModern tablesorter">
-						<thead>
-							<tr>
-								<th>Subsite Name</th>
-								<th>Subsite URL</th>
-								<th>Total Size (MB)</th>
-								<th>Used %</th>
-								<th>Created</th>
-								<th>Last Modified</th>
-								<th class="sorter-false">Owners Group Members</th>
-							</tr>
-						</thead>
-						<tbody></tbody>
-						<tfoot>
-							<tr class="busy" style="display:none">
-								<td colspan="7" style="text-align:center; border:1px solid #f1f1f1;">
-									<div class="sprlib-spinner"><div class="sprlib-bounce1"></div><div class="sprlib-bounce2"></div><div class="sprlib-bounce3"></div></div>
-								</td>
-							</tr>
-						</tfoot>
-					</table>
-				</div>
+				<div id="ROLES" class="subTitle plain">Roles</div>
+				<table id="tabSiteRoles" class="tabModern tablesorter">
+					<thead>
+						<tr>
+							<th>Name</th>
+							<th>Description</th>
+							<th>ID</th>
+						</tr>
+					</thead>
+					<tbody></tbody>
+					<tfoot>
+						<tr class="busy" style="display:none">
+							<td colspan="3" style="text-align:center; border:1px solid #f1f1f1;">
+								<div class="sprlib-spinner"><div class="sprlib-bounce1"></div><div class="sprlib-bounce2"></div><div class="sprlib-bounce3"></div></div>
+							</td>
+						</tr>
+					</tfoot>
+				</table>
 			</div>
 
-			<div id="navtabComp" data-tab="Site Compare">
-				<div class="subTitle">Site Collection Compare</div>
-				<p>
-					Compare two SharePoint Site Collections side-by-side.<br>
-					...
-				</p>
-
-				<h1>((WIP))</h1>
-
-				<div id="contListSelect" class="divTable" style="width:auto; margin-bottom:20px;">
-					<div class="th">
-						Site Lists/Libraries
-					</div>
+			<div id="navTabSubs" data-tab="Subsites">
+				<div id="SUBSITES" class="subTitle plain first">Subsites</div>
+				<div id="subsitesHeader" class="flex">
 					<div>
-						<div class="sprlib-spinner"><div class="sprlib-bounce1"></div><div class="sprlib-bounce2"></div><div class="sprlib-bounce3"></div></div>
-						<select id="selSiteLists" onchange="handleListChange()">
-							<option value="">Select...</option>
-						</select>
-						<span>(only non-hidden Lists/Libraries are shown)</span>
+						Click to load subsite information and storage data.<br>
+						It is not loaded by default as each site has to be scanned and can be resource intensive.<br>
+						(NOTE: storman has no API - csom, jsom, or REST - so the usage is gathering by loading each site's storman and parsing it)
+					</div>
+					<div style="vertical-align:top; text-align:right;">
+						<button type="button" class="flatBtn flatBtn-blueLt" onclick="getSubsiteStorman()">Load Subsite Info</button>
 					</div>
 				</div>
 
-				<div id="tabList-ListInfo" style="margin-bottom:20px;">
-					<div class="subTitle">List Information</div>
-					<div><pre><code class="language-javascript">sprLib.list('listName').info()</code></pre></div>
-				</div>
-
-				<div id="tabList-ListCols" style="margin-bottom:20px;">
-					<div class="subTitle">List Columns</div>
-					<div><pre><code class="language-javascript">sprLib.list('listName').cols()</code></pre></div>
-				</div>
-			</div>
-
-			<div id="navtabSync" data-tab="Site Sync">
-				<div class="subTitle">Site Collection Sync</div>
-				<p>
-					View/Execute code to sync SharePoint Site Collections.
-				</p>
-				<h1>((WIP))</h1>
+				<table id="tabSubsites" class="tabModern tablesorter">
+					<thead>
+						<tr>
+							<th>Subsite Name</th>
+							<th>Subsite URL</th>
+							<th>Total Size (MB)</th>
+							<th>Used %</th>
+							<th>Created</th>
+							<th>Last Modified</th>
+							<th class="sorter-false">Owners Group Members</th>
+						</tr>
+					</thead>
+					<tbody></tbody>
+					<tfoot>
+						<tr class="busy" style="display:none">
+							<td colspan="7" style="text-align:center; border:1px solid #f1f1f1;">
+								<div class="sprlib-spinner"><div class="sprlib-bounce1"></div><div class="sprlib-bounce2"></div><div class="sprlib-bounce3"></div></div>
+							</td>
+						</tr>
+					</tfoot>
+				</table>
 			</div>
 		</div>
 	</div>
