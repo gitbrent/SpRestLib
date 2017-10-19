@@ -561,7 +561,7 @@
 		$.ajaxSetup({ cache:false });
 		// APP
 		const APP_VER = '1.0.0-beta';
-		const APP_REL = '20171017';
+		const APP_REL = '20171018';
 		// CONSTANTS: UI/LOGIC
 		const HTML_SPINNER   = '<div class="sprlib-spinner"><div class="sprlib-bounce1"></div><div class="sprlib-bounce2"></div><div class="sprlib-bounce3"></div></div>';
 		const HTML_EMPTY     = '<span style="color:#c7c7c7; font-style:italic;">(empty)</span>';
@@ -650,14 +650,17 @@
 		 };
 		// GLOBAL VARS
 		var gObjMapNameToId = {};
-		var gObjSubsites = {};
-		// TODO: I18N internationalization ('Y' etc)
-		// https://docs.microsoft.com/en-us/sharepoint/dev/sp-add-ins/sharepoint-net-server-csom-jsom-and-rest-api-index
-		/* SP site URL's:
-		_spPageContextInfo.siteAbsoluteUrl;
-		_spPageContextInfo.siteServerRelativeUrl;
-		_spPageContextInfo.webAbsoluteUrl;
-		_spPageContextInfo.webServerRelativeUrl;
+		var gObjSitesByID = {};
+		var gObjSitesByUrlRel = {};
+
+		/* TODO LIST:
+		* - I18N internationalization ('Y' etc)
+		* - https://docs.microsoft.com/en-us/sharepoint/dev/sp-add-ins/sharepoint-net-server-csom-jsom-and-rest-api-index
+		* FYI: SP site URL's:
+			_spPageContextInfo.siteAbsoluteUrl;
+			_spPageContextInfo.siteServerRelativeUrl;
+			_spPageContextInfo.webAbsoluteUrl;
+			_spPageContextInfo.webServerRelativeUrl;
 		*/
 
 		// ==================================================================================================================
@@ -747,33 +750,51 @@
 		    }
 
 			/**/
-			function handleSubsiteClick(strUrlRel) {
-				// STEP 1: Set baseUrl to selected
-				sprLib.baseUrl( strUrlRel || _spPageContextInfo.webServerRelativeUrl );
+			function handleSubsiteClick(argSite) {
+				// STEP 1: Adjust breadcrumbs, set baseUrl
+				{
+					// CASE 1: Home (empty arg)
+					if ( !argSite ) {
+						// A: Clear
+						$('#breadcrumb').empty();
 
-				// STEP 2: Adjust breadcrumbs
-				var urlCurr = $('#breadcrumb li:last-child').data('url');
+						// B: Strip home from path so we loop over remaining dirs below, then add initial home breadcrumb
+						$('#breadcrumb').append('<li title="Home"><a href="javascript:void(0)" onclick="handleSubsiteClick()"><img src="data:image/svg+xml;base64,PHN2ZyBmaWxsPSIjRkZGRkZGIiBoZWlnaHQ9IjI0IiB2aWV3Qm94PSIwIDAgMjQgMjQiIHdpZHRoPSIyNCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4gICAgPHBhdGggZD0iTTEwIDIwdi02aDR2Nmg1di04aDNMMTIgMyAyIDEyaDN2OHoiLz4gICAgPHBhdGggZD0iTTAgMGgyNHYyNEgweiIgZmlsbD0ibm9uZSIvPjwvc3ZnPg==" style="vertical-align:middle"></a></li>');
 
-// TODO: filter this object
-//				var objSite = gObjSubsites.filter((site) => { return site.UrlRel == strUrlRel })[0];
-console.log( objSite.split(urlCurr) );
+						// C: Set baseUrl
+						sprLib.baseUrl( _spPageContextInfo.webServerRelativeUrl );
+					}
 
-				// TODO: FIXME: logic is nto right
-				if ( urlCurr.replace(strUrlRel).length > 0 ) {
-					$('#breadcrumb').append('<li data-url="'+ $(ele).data('url') +'">'
-						+ '<a href="javascript:void(0)" onclick="handleSubsiteClick(this)">'+ objSite.Name || 'TODO' +'</a>'
-						+ '</li>'
-					);
+					// CASE 2: Descending into a subsite
+					else if ( typeof argSite === 'string' ) {
+						// A: Add breadcrumb for this new site
+						$('#breadcrumb').append('<li data-urlrel="'+ gObjSitesByUrlRel[argSite].UrlRel +'">'
+							+ '<a href="javascript:void(0)" onclick="handleSubsiteClick('+ $('#breadcrumb li').length +')">'
+							+ gObjSitesByUrlRel[argSite].Name +'</a></li>'
+						);
+
+						// B: Set baseUrl
+						sprLib.baseUrl( argSite );
+					}
+
+					// CASE 3: Ascending (clicking a previous [lower index] breadcrumb)
+					else if ( typeof argSite === 'number' ) {
+						// A: Remove breadcrumbs under this one
+						$('#breadcrumb li').each( (idx,crumb) => { if ( idx > argSite ) $(crumb).remove() } );
+
+						// B: Set baseUrl
+						sprLib.baseUrl( $('#breadcrumb li:eq('+argSite+')').data('urlrel') );
+					}
 				}
 
-				// STEP 3: Query selected site
-				doPopulateDash();
+				// STEP 2: Query selected site
+				doFetchAndPopTabs();
 			}
 		}
 
 		// ==================================================================================================================
 
-		function doPopulateDash() {
+		function doFetchAndPopTabs() {
 			// STEP 1: UI Updates
 			$('#SiteName, #UsageTot, #UsagePct, #DateCre, #DateMod').html( HTML_SPINNER );
 
@@ -837,8 +858,9 @@ console.log( objSite.split(urlCurr) );
 				$('#navTabs .tabModern tbody tr').hide();
 				$('#navTabs .tabModern tbody').empty();
 				$('#navTabs .tabModern tr.busy').show();
+				$('#navTabs .jsTotal').remove();
 
-				// SHOW: Site Info & Usage
+				// INFO: Site Info & Usage
 				{
 					// A:
 					if (MODE_VERBOSE) { console.log('arrSite[0]:'); console.table(arrSite[0]); }
@@ -860,12 +882,12 @@ console.log( objSite.split(urlCurr) );
 					$('#UsagePct').text( (arrUsage[0].Usage.StoragePercentageUsed * 100).toFixed(2) +'%');
 				}
 
-				// SHOW: Contents (Lists/Libraries)
+				// INFO: Contents (Lists/Libraries)
 				{
-					// A:
+					// A: Verbose
 					if (MODE_VERBOSE) { console.log('arrLists:'); console.table(arrLists); }
 
-					// B:
+					// B: Populate table / REST query perms
 					arrLists.forEach((list,idx) => {
 						// B-1: Populate table
 						{
@@ -942,13 +964,18 @@ console.log( objSite.split(urlCurr) );
 					if ( $.tablesorter ) $('#tabSiteLists, #tabSiteLibrs').tablesorter({ sortList:[[0,0]] });
 
 					// E: Show total
+					// FIXME: `tr:visible` wont work when the tab isnt showing... (eg: select a subite, and counts are 0)
 					$('#LISTS').append('<span class="jsTotal">('+ $('#tabSiteLists tbody tr:visible').length +')</span>');
 					$('#LIBRS').append('<span class="jsTotal">('+ $('#tabSiteLibrs tbody tr:visible').length +')</span>');
+
+					// F: Hide busy
+					$('#tabSiteLists tr.busy').hide();
+					$('#tabSiteLibrs tr.busy').hide();
 				}
 
-				// SHOW: Perms > Groups
+				// INFO: Perms > Groups
 				{
-					// A:
+					// A: Verbose
 					if (MODE_VERBOSE) { console.log('arrGroups:'); console.table(arrGroups); }
 
 					// B: Populate Groups
@@ -988,11 +1015,14 @@ console.log( objSite.split(urlCurr) );
 					// D: tablesorter
 					if ( $.tablesorter ) $('#tabSiteGroups').tablesorter({ sortList:[[0,0]] });
 
-					// E: Show total
+					// E: Hide busy
+					$('#tabSiteGroups tr.busy').hide();
+
+					// F: Show total
 					$('#GROUPS').append('<span class="jsTotal">('+ $('#tabSiteGroups tbody tr').length +')</span>');
 				}
 
-				// SHOW: Perms > Roles
+				// INFO: Perms > Roles
 				{
 					if (MODE_VERBOSE) { console.log('arrRoles:'); console.table(arrRoles); }
 
@@ -1011,22 +1041,31 @@ console.log( objSite.split(urlCurr) );
 					if ( $.tablesorter ) $('#tabSiteRoles').tablesorter({ sortList:[[0,0]] });
 
 					// D: Show total
-					$('#ROLES').append('<span class="jsTotal">('+ $('#tabSiteRoles tbody tr').length +')</span>');
+					$('#ROLES').find('.jsTotal').remove();
+					$('#ROLES').append('<span class="jsTotal">('+ $('#tabSiteRoles tbody tr').length +')</span>')
+
+					// E: Hide busy
+					$('#tabSiteRoles tr.busy').hide();
 				}
 
-				// SHOW: Subsites
+				// INFO: Subsites
 				{
 					var arrPromises = [];
 
-					// A:
+					// A: Clear global arrays
+					gObjSitesByID = {};
+					gObjSitesByUrlRel = {};
+
+					// B: Verbose
 					if (MODE_VERBOSE) { console.log('arrSubsites:'); console.table(arrSubsites); }
 
-					// B:
+					// C: Capture subsites
 					arrSubsites.forEach((site,idx) => {
 						if (MODE_VERBOSE) { console.log('arrSubsites loop ('+idx+'): '+site.Name); }
 
 						// B.1: Capture base subsite object
-						gObjSubsites[site.Id] = site;
+						gObjSitesByID[site.Id] = site;
+						gObjSitesByUrlRel[site.UrlRel] = site;
 
 						// B.2: Create mapping so we can store usage results as they come back
 						gObjMapNameToId[site.Name] = site.Id;
@@ -1045,7 +1084,7 @@ console.log( objSite.split(urlCurr) );
 						);
 					});
 
-					// C: Show Subsites (Sans storman sizing)
+					// D: Show Subsites (Sans storman sizing)
 					Promise.all(arrPromises).then(() => popSubsitesTable() );
 				}
 			})
@@ -1057,14 +1096,13 @@ console.log( objSite.split(urlCurr) );
 			$('#tabSubsites').trigger("destroy");
 			$('#tabSubsites tbody tr').hide();
 			$('#tabSubsites tbody').empty();
-			//$('#tabSubsites tr.busy').show();
-			$('#tabSubsites .jsTotal').remove();
+			$('#tabSubsites tr.busy').show();
 
 			// STEP 2: Populate table
-			$.each(gObjSubsites, function(id,site){
+			$.each(gObjSitesByID, function(id,site){
 				var $row = $('<tr data-site-id="'+ id +'"></tr>');
 
-				$row.append('<th><a href="javascript:void(0)" onclick="handleSubsiteClick(this)">'+ site.Name +'</a></th>');
+				$row.append('<th><a href="javascript:void(0)" onclick="handleSubsiteClick(\''+ site.UrlRel +'\')">'+ site.Name +'</a></th>');
 				$row.append('<td class="right">' + (site.UsedSize || HTML_NOTLOADED) +'</td>');
 				$row.append('<td class="nowctr">'+ (site.UsedPct  || HTML_NOTLOADED) +'</td>');
 				$row.append('<td class="nowctr">'+ getDateStrFromISO(site.Created, 'INTL') +'</td>');
@@ -1132,8 +1170,8 @@ console.log( objSite.split(urlCurr) );
 								}
 
 								if ( strCellSite && gObjMapNameToId[strCellSite] ) {
-									gObjSubsites[ gObjMapNameToId[strCellSite] ].UsedSize = strCellUsed;
-									gObjSubsites[ gObjMapNameToId[strCellSite] ].UsedPct  = strCellPrct;
+									gObjSitesByID[ gObjMapNameToId[strCellSite] ].UsedSize = strCellUsed;
+									gObjSitesByID[ gObjMapNameToId[strCellSite] ].UsedPct  = strCellPrct;
 								}
 							});
 
@@ -1170,7 +1208,7 @@ console.log( objSite.split(urlCurr) );
 
 			// STEP 3: Render main Tabs
 			sprLib.baseUrl(_spPageContextInfo.webAbsoluteUrl); // NOTE: Set baseurl to current site/subsite
-			doPopulateDash();
+			doFetchAndPopTabs();
 
 			// STEP 4: Populate Debug/Verbose/Setup Tab
 			{
@@ -1251,7 +1289,7 @@ console.log( objSite.split(urlCurr) );
 		<div id="bodyTitle" class="divTable">
 			<div style="width:99%">
 				<ul id="breadcrumb" data-url="">
-					<li title="Home"><a href="javascript:void(0)" onclick="handleSubsiteClick(this)"><img src="data:image/svg+xml;base64,PHN2ZyBmaWxsPSIjRkZGRkZGIiBoZWlnaHQ9IjI0IiB2aWV3Qm94PSIwIDAgMjQgMjQiIHdpZHRoPSIyNCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4gICAgPHBhdGggZD0iTTEwIDIwdi02aDR2Nmg1di04aDNMMTIgMyAyIDEyaDN2OHoiLz4gICAgPHBhdGggZD0iTTAgMGgyNHYyNEgweiIgZmlsbD0ibm9uZSIvPjwvc3ZnPg==" style="vertical-align:middle"></a></li>
+					<li title="Home"><a href="javascript:void(0)" onclick="handleSubsiteClick()"><img src="data:image/svg+xml;base64,PHN2ZyBmaWxsPSIjRkZGRkZGIiBoZWlnaHQ9IjI0IiB2aWV3Qm94PSIwIDAgMjQgMjQiIHdpZHRoPSIyNCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4gICAgPHBhdGggZD0iTTEwIDIwdi02aDR2Nmg1di04aDNMMTIgMyAyIDEyaDN2OHoiLz4gICAgPHBhdGggZD0iTTAgMGgyNHYyNEgweiIgZmlsbD0ibm9uZSIvPjwvc3ZnPg==" style="vertical-align:middle"></a></li>
 				</ul>
 			</div>
 			<div style="width:1%; vertical-align:middle;">
@@ -1521,7 +1559,7 @@ console.log( objSite.split(urlCurr) );
 					<tbody></tbody>
 					<tfoot>
 						<tr class="busy" style="display:none">
-							<td colspan="7" style="text-align:center; border:1px solid #f1f1f1;">
+							<td colspan="6" style="text-align:center; border:1px solid #f1f1f1;">
 								<div class="sprlib-spinner"><div class="sprlib-bounce1"></div><div class="sprlib-bounce2"></div><div class="sprlib-bounce3"></div></div>
 							</td>
 						</tr>
