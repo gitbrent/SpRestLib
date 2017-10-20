@@ -22,27 +22,33 @@
 	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inconsolata">
 
 	<style>
-		abbr { cursor: help; }
+		/* Responsive */
+		html { font-size: 62.5%;  } /* =10px */
+		body { font-size: 1.2rem; } /* =12px */
+		h1   { font-size: 2.4rem; } /* =24px */
+		/* SP2013 fixes */
 		.ms-webpartPage-root { border-spacing: 0px; }
-		#divBody {
+		.ms-fullscreenmode #contentBox { margin-left: 30px; }
+		/* HTML */
+		abbr { cursor: help; }
+		/* ----- */
+		#appBody {
 			font-family: 'Segoe UI','Helvetica Neue','Open Sans',sans-serif;
 			color: #696969;
-			margin: -10px 30px 10px 30px;
+			margin: -10px auto 0px auto;
 		}
 		#divBody div { box-sizing: border-box; }
-
 		#bodyTitle { margin-bottom: 2px; }
-		.bigTitle { font-family:'Segoe UI Light','Roboto'; font-size:36px; color:#0088cc; margin-bottom:6px }
-		.bigTitsu { font-size:14px; color:#c7c7c7; }
+		.bigTitle { font-family:'Segoe UI Light','Roboto'; font-size:3.6rem; color:#0088cc; margin-bottom:6px }
 		#siteLogo { max-height:50px; max-width:250px; padding-left:5px; }
 
-		.sectionTitle, .subTitle { font-size:18px; color:#0088cc; margin:20px 0 10px 0; cursor: pointer; }
+		.sectionTitle, .subTitle { font-size:1.8rem; color:#0088cc; margin:20px 0 10px 0; cursor: pointer; }
 		.sectionTitle.plain, .subTitle.plain { display:inline-block; cursor:default; }
 		.sectionTitle.first, .subTitle.first { margin-top:0 !important; }
-		.bigger { font-size:1.1em; }
+		.bigger { font-size:1.1rem; }
 		.arrow {
 			display: inline-block;
-			height: 12px; width: 12px;
+			height: 10px; width: 10px;
 			border-top: 3px solid #0085C3; border-right: 3px solid #0085C3;
 			margin-right: 10px;
 			cursor: pointer;
@@ -55,10 +61,10 @@
 		}
 		.itemBox {
 			display: inline-block;
-			background: linear-gradient(#f2f9fc,#fdfeff);
-			border: 1px #c6efef solid;
+			background: #fafbfc; /* makes page scrolling too slow!: linear-gradient(#f2f9fc,#fdfeff); */
+			border: 1px #e7e7f7 solid;
 			color: #999;
-			font-size: 11px;
+			font-size: 1.0rem;
 			margin: 0 6px 3px 0;
 			padding: 2px 6px;
 			border-radius: 3px;
@@ -72,7 +78,8 @@
 
 		#boxInfo { margin-bottom: 30px; }
 		#boxInfo > div { vertical-align: top; }
-		#boxInfo span { font-family: Roboto; font-size: 22px; }
+		#boxInfo > div.nowctr { white-space: nowrap !important; text-align: center !important; }
+		#boxInfo span { font-family: Roboto; font-size:2.2rem; }
 		#boxInfo #DateCre, #boxInfo #DateMod { white-space: nowrap; }
 		#navTabList .boxOpts { flex-wrap:wrap; }
 		#navTabList .boxOpts > div { white-space: nowrap; }
@@ -141,7 +148,7 @@
 			white-space: nowrap;
 			display: inline-block; list-style-type:none;
 			padding: 15px 10px;
-			font-size: 14px;
+			font-size: 1.4rem;
 			color: #a7a7a7;
 			text-transform: uppercase;
 			border-bottom: 3px solid #FAFAFA;
@@ -162,7 +169,7 @@
 		}
 		.flexTabs > div.active { display: block; }
 		.flexTabs > div > .subTitle:first-child { margin-top: 0; }
-		.flexTabs > p { font-size: 14px; margin-bottom: 15px; }
+		.flexTabs > p { font-size: 1.4rem; margin-bottom: 15px; }
 
 		.flex {
 			display: flex;
@@ -189,20 +196,20 @@
 			vertical-align: middle;
 		}
 
-		div.divTable { display: table; box-sizing: border-box; width: 100%; font-size: 12px; }
+		div.divTable { display: table; box-sizing: border-box; width: 100%; font-size:1.2rem; }
 		div.divTable > div { display:table-cell; padding:2px; vertical-align:top; }
 		div.divTable .subTitle { margin: 0 0 10px 0; }
 		div.divTable label { display: block; margin-bottom: 3px; color:#bcbcbc; }
 
 		/*-*/
-		div.divTableRows { display:table; box-sizing:border-box; width:100%; font-size:12px; border: 1px solid #d7e7f7; }
+		div.divTableRows { display:table; box-sizing:border-box; width:100%; font-size:1.2rem; border: 1px solid #d7e7f7; }
 		div.divTableRows > div { display: table-row; }
 		div.divTableRows > div > div { display: table-cell; padding: 5px 10px; vertical-align: middle; background: #f2f9fc; }
 
 		/* */
 		#navtabDbug .divTableRows {
 			min-width: 200px;
-			font-size: 14px;
+			font-size: 1.4rem;
 			border: 1px solid #d7e7f7;
 		}
 		#navtabDbug .divTableRows > div > div { padding: 5px 10px; background: #f2f9fc; }
@@ -214,9 +221,8 @@
 			display: inline-block;
 			padding-left: 0px !important;
 		}
-		#breadcrumb .icon {
-			font-size: 14px;
-		}
+		#breadcrumb .icon { font-size: 1.4rem; }
+		#breadcrumb li img { margin-top: 8px; vertical-align: inherit; }
 		#breadcrumb li {
 			float: left;
 			-webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none;
@@ -303,7 +309,7 @@
 		/*-*/
 		.flatBtn {
 			display: inline-block;
-			font-size: 12px !important;
+			font-size: 1.2rem !important;
 			color: #ffffff !important;
 			border: 0 !important;
 			padding: 10px;
@@ -319,7 +325,7 @@
 		}
 		.flatBtn.small {
 			padding: 5px 10px !important;
-			font-size: 11px !important;
+			font-size: 1.1rem !important;
 			box-shadow: none;
 		}
 		.flatBtn.shadow {
@@ -372,7 +378,7 @@
 			width: 100%;
 		}
 		div.modernTable div.cellTitle, .modernTable div.cellTitle {
-			font-size: 16px;
+			font-size: 1.6rem;
 			margin: -2px 0 4px 0;
 			white-space: nowrap;
 		}
@@ -381,7 +387,7 @@
 			white-space: nowrap;
 			text-transform: uppercase;
 			color: #bfcfdf;
-			font-size: 11px;
+			font-size: 1.1rem;
 			margin-bottom: 3px;
 		}
 		.modernTable .size { text-align: right; padding-right: 20px !important; }
@@ -438,7 +444,7 @@
 			width: 100%;
 			border-collapse: collapse;
 			margin: 0px;
-			font-size: 12px;
+			font-size: 1.2rem;
 		}
 		.tabModern > tbody > tr > th, .tabModern > tbody > tr > td { border: 1px #f1f1f1 solid; }
 		.tabModern th.icon {
@@ -457,7 +463,7 @@
 			border-top: 1px #e7e7f3 solid;
 			text-align: left;
 			padding: 8px;
-			font-size: 11px;
+			font-size: 1.1rem;
 			font-weight: normal;
 			color: #0090C0;
 			text-transform: uppercase;
@@ -469,7 +475,7 @@
 		    text-align: center;
 		    padding: 10px;
 		    color: white;
-		    font-size: 14px;
+		    font-size: 1.4rem;
 		    font-weight: bold;
 		}
 		.tabModern > thead > tr > th:first-child {
@@ -518,8 +524,8 @@
 		td.nowctr { white-space: nowrap !important; text-align: center !important; }
 		td.nowrap { white-space: nowrap !important; }
 		/* ----- */
-		#tabSiteLists thead th:first-child { min-width:200px; }
-		.showDesc { color:#a7a7a7; margin-top:5px; font-size:11px; }
+		#tabSiteLists thead tr:first-child th:first-child { min-width:200px; }
+		.showDesc { color:#a7a7a7; margin-top:5px; font-size:1.1rem; }
 		/* ----- */
 		.contSwitch { display:inline-block; vertical-align:middle; }
 		.switch { width: 28px; height: 16px; position: relative; display: inline-block; }
@@ -561,7 +567,7 @@
 		$.ajaxSetup({ cache:false });
 		// APP
 		const APP_VER = '1.0.0-beta';
-		const APP_REL = '20171018';
+		const APP_REL = '20171019';
 		// CONSTANTS: UI/LOGIC
 		const HTML_SPINNER   = '<div class="sprlib-spinner"><div class="sprlib-bounce1"></div><div class="sprlib-bounce2"></div><div class="sprlib-bounce3"></div></div>';
 		const HTML_EMPTY     = '<span style="color:#c7c7c7; font-style:italic;">(empty)</span>';
@@ -1203,8 +1209,9 @@
 			document.title = "SharePoint SCA Dashboard";
 
 			// STEP 2: UI Updates
-			if ( location.href.toLowerCase().indexOf('mode=verbose') > -1 ) $('#navTabs > ul > li:first-child').show().click();
 			// TODO: `_spPageContextInfo.isSiteAdmin`
+			if ( location.href.toLowerCase().indexOf('mode=verbose') > -1 ) $('#navTabs > ul > li:first-child').show().click();
+			$('#bodyTitle, #boxInfo').css('width',);
 
 			// STEP 3: Render main Tabs
 			sprLib.baseUrl(_spPageContextInfo.webAbsoluteUrl); // NOTE: Set baseurl to current site/subsite
@@ -1285,11 +1292,11 @@
 <body>
 	<iframe id="scraper" style="display:none"></iframe>
 
-	<div id="divBody">
+	<div id="appBody">
 		<div id="bodyTitle" class="divTable">
 			<div style="width:99%">
-				<ul id="breadcrumb" data-url="">
-					<li title="Home"><a href="javascript:void(0)" onclick="handleSubsiteClick()"><img src="data:image/svg+xml;base64,PHN2ZyBmaWxsPSIjRkZGRkZGIiBoZWlnaHQ9IjI0IiB2aWV3Qm94PSIwIDAgMjQgMjQiIHdpZHRoPSIyNCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4gICAgPHBhdGggZD0iTTEwIDIwdi02aDR2Nmg1di04aDNMMTIgMyAyIDEyaDN2OHoiLz4gICAgPHBhdGggZD0iTTAgMGgyNHYyNEgweiIgZmlsbD0ibm9uZSIvPjwvc3ZnPg==" style="vertical-align:middle"></a></li>
+				<ul id="breadcrumb">
+					<li title="Home"><a href="javascript:void(0)" onclick="handleSubsiteClick()"><img src="data:image/svg+xml;base64,PHN2ZyBmaWxsPSIjRkZGRkZGIiBoZWlnaHQ9IjI0IiB2aWV3Qm94PSIwIDAgMjQgMjQiIHdpZHRoPSIyNCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4gICAgPHBhdGggZD0iTTEwIDIwdi02aDR2Nmg1di04aDNMMTIgMyAyIDEyaDN2OHoiLz4gICAgPHBhdGggZD0iTTAgMGgyNHYyNEgweiIgZmlsbD0ibm9uZSIvPjwvc3ZnPg=="></a></li>
 				</ul>
 			</div>
 			<div style="width:1%; vertical-align:middle;">
@@ -1299,10 +1306,10 @@
 
 		<div id="boxInfo" class="modernTable" data-desc="Site Info Table">
 			<div style="width:60%"><label>Site Name</label><span id="SiteName"></span></div>
-			<div style="width:10%; text-align:center;"><label>Storage Used</label><span id="UsageTot"></span></div>
-			<div style="width:10%; text-align:center;"><label>Percent Used</label><span id="UsagePct"></span></div>
-			<div style="width:10%; text-align:center;"><label>Date Created</label><span id="DateCre"></span></div>
-			<div style="width:10%; text-align:center;"><label>Last Modified</label><span id="DateMod"></span></div>
+			<div style="width:10%" class="nowctr"><label>Storage Used</label><span id="UsageTot"></span></div>
+			<div style="width:10%" class="nowctr"><label>Percent Used</label><span id="UsagePct"></span></div>
+			<div style="width:10%" class="nowctr"><label>Date Created</label><span id="DateCre"></span></div>
+			<div style="width:10%" class="nowctr"><label>Last Modified</label><span id="DateMod"></span></div>
 		</div>
 
 		<div id="navTabs" class="flexTabs">
@@ -1366,109 +1373,117 @@
 
 			<div id="navTabList" data-tab="Lists" class="active">
 				<div class="modernFlex boxOpts" data-desc="Site Info Table Options">
-						<div data-desc="show list desc?">
-							<span>Show Description?</span>
-							<div class="contSwitch">
-								<label class="switch"><input type="checkbox" onchange="$('.showDesc').toggle()" checked><span class="slider round"></span></label>
-							</div>
-						</div>
-						<div data-desc="show type template?">
-							<span>Show Type Template?</span>
-							<div class="contSwitch">
-								<label class="switch"><input id="chkType" type="checkbox" onchange="$('.showType').toggle()"><span class="slider round"></span></label>
-							</div>
-						</div>
-						<div data-desc="show dates?">
-							<span>Show Dates?</span>
-							<div class="contSwitch">
-								<label class="switch"><input id="chkDate" type="checkbox" onchange="$('.showDate').toggle()"><span class="slider round"></span></label>
-							</div>
-						</div>
-						<div data-desc="show features?">
-							<span>Show Features?</span>
-							<div class="contSwitch">
-								<label class="switch"><input id="chkFeat" type="checkbox" onchange="$('.showFeat').toggle()"><span class="slider round"></span></label>
-							</div>
-						</div>
-						<div data-desc="show hidden?">
-							<span>Show Hidden Lists?</span>
-							<div class="contSwitch">
-								<label class="switch"><input id="chkHidn" type="checkbox" onchange="$('.showHidn').toggle()"><span class="slider round"></span></label>
-							</div>
-						</div>
-						<div data-desc="export buttons" style="padding:7px">
-							<button type="button" class="flatBtn small flatBtn-modGray" onclick="exportTabData('tabSiteLists')" style="margin-right:10px !important">CSV Export</button>
-							<button type="button" class="flatBtn small flatBtn-modGray" onclick="exportTabData('tabSiteLists')">JSON Export</button>
+					<div data-desc="show list desc?">
+						<span>Show Description?</span>
+						<div class="contSwitch">
+							<label class="switch"><input type="checkbox" onchange="$('.showDesc').toggle()" checked><span class="slider round"></span></label>
 						</div>
 					</div>
+					<div data-desc="show type template?">
+						<span>Show Type Template?</span>
+						<div class="contSwitch">
+							<label class="switch"><input id="chkType" type="checkbox" onchange="$('.showType').toggle()"><span class="slider round"></span></label>
+						</div>
+					</div>
+					<div data-desc="show dates?">
+						<span>Show Dates?</span>
+						<div class="contSwitch">
+							<label class="switch"><input id="chkDate" type="checkbox" onchange="$('.showDate').toggle()"><span class="slider round"></span></label>
+						</div>
+					</div>
+					<div data-desc="show features?">
+						<span>Show Features?</span>
+						<div class="contSwitch">
+							<label class="switch"><input id="chkFeat" type="checkbox" onchange="$('.showFeat').toggle()"><span class="slider round"></span></label>
+						</div>
+					</div>
+					<div data-desc="show hidden?">
+						<span>Show Hidden Lists?</span>
+						<div class="contSwitch">
+							<label class="switch"><input id="chkHidn" type="checkbox" onchange="$('.showHidn').toggle()"><span class="slider round"></span></label>
+						</div>
+					</div>
+					<div data-desc="export buttons" style="padding:7px">
+						<button type="button" class="flatBtn small flatBtn-modGray" onclick="exportTabData('tabSiteLists')" style="margin-right:10px !important">CSV Export</button>
+						<button type="button" class="flatBtn small flatBtn-modGray" onclick="exportTabData('tabSiteLists')">JSON Export</button>
+					</div>
+				</div>
 
-				<div id="LISTS" class="subTitle plain first">Lists</div>
-				<table id="tabSiteLists" class="tabModern tablesorter">
-					<thead>
-						<tr>
-							<th rowspan="2">Name / Description</th>
-							<th rowspan="2" class="showType">Type Template</th>
-							<th rowspan="2">Items</th>
-							<th rowspan="2" class="showDate">Date Created</th>
-							<th rowspan="2" class="showDate">Date Modified</th>
-							<th colspan="3" class="showFeat sorter-false" style="text-align:center !important; border-bottom:1px solid white !important;">List Features</th>
-							<th colspan="6" class="showPerm sorter-false" style="text-align:center !important; border-bottom:1px solid white !important;">List Permissions</th>
-						</tr>
-						<tr>
-							<th class="showFeat"><abbr title="Are Attachments enabled?">Attachments?</abbr></th>
-							<th class="showFeat"><abbr title="Is Versioning enabled?">Versioning?</abbr></th>
-							<th class="showFeat"><abbr title="Force Checkout?">Force?</abbr></th>
-							<th class="showPerm sorter-false">Full</th>
-							<th class="showPerm sorter-false">Design</th>
-							<th class="showPerm sorter-false">Edit</th>
-							<th class="showPerm sorter-false">Contribute</th>
-							<th class="showPerm sorter-false">Read/View</th>
-							<th class="showPerm sorter-false">Approve</th>
-						</tr>
-					</thead>
-					<tbody></tbody>
-					<tfoot>
-						<tr class="busy" style="display:none">
-							<td colspan="14" style="text-align:center; border:1px solid #f1f1f1;">
-								<div class="sprlib-spinner"><div class="sprlib-bounce1"></div><div class="sprlib-bounce2"></div><div class="sprlib-bounce3"></div></div>
-							</td>
-						</tr>
-					</tfoot>
-				</table>
+				<div id="LISTS" class="sectionTitle" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
+					<div class="arrow active"></div>Lists
+				</div>
+				<div>
+					<table id="tabSiteLists" class="tabModern tablesorter">
+						<thead>
+							<tr>
+								<th rowspan="2">Name / Description</th>
+								<th rowspan="2" class="showType">Type Template</th>
+								<th rowspan="2">Items</th>
+								<th rowspan="2" class="showDate">Date Created</th>
+								<th rowspan="2" class="showDate">Date Modified</th>
+								<th colspan="3" class="showFeat sorter-false" style="text-align:center !important; border-bottom:1px solid white !important;">List Features</th>
+								<th colspan="6" class="showPerm sorter-false" style="text-align:center !important; border-bottom:1px solid white !important;">List Permissions</th>
+							</tr>
+							<tr>
+								<th class="showFeat"><abbr title="Are Attachments enabled?">Attachments?</abbr></th>
+								<th class="showFeat"><abbr title="Is Versioning enabled?">Versioning?</abbr></th>
+								<th class="showFeat"><abbr title="Force Checkout?">Force?</abbr></th>
+								<th class="showPerm sorter-false">Full</th>
+								<th class="showPerm sorter-false">Design</th>
+								<th class="showPerm sorter-false">Edit</th>
+								<th class="showPerm sorter-false">Contribute</th>
+								<th class="showPerm sorter-false">Read/View</th>
+								<th class="showPerm sorter-false">Approve</th>
+							</tr>
+						</thead>
+						<tbody></tbody>
+						<tfoot>
+							<tr class="busy" style="display:none">
+								<td colspan="14" style="text-align:center; border:1px solid #f1f1f1;">
+									<div class="sprlib-spinner"><div class="sprlib-bounce1"></div><div class="sprlib-bounce2"></div><div class="sprlib-bounce3"></div></div>
+								</td>
+							</tr>
+						</tfoot>
+					</table>
+				</div>
 
-				<div id="LIBRS" class="subTitle plain">Libraries</div>
-				<table id="tabSiteLibrs" class="tabModern tablesorter">
-					<thead>
-						<tr>
-							<th rowspan="2">Name / Description</th>
-							<th rowspan="2" class="showType">Type Template</th>
-							<th rowspan="2">Items</th>
-							<th rowspan="2" class="showDate">Date Created</th>
-							<th rowspan="2" class="showDate">Date Modified</th>
-							<th colspan="3" class="showFeat sorter-false" style="text-align:center !important; border-bottom:1px solid white !important;">List Features</th>
-							<th colspan="6" class="showPerm sorter-false" style="text-align:center !important; border-bottom:1px solid white !important;">List Permissions</th>
-						</tr>
-						<tr>
-							<th class="showFeat"><abbr title="Are Attachments enabled?">Attachments?</abbr></th>
-							<th class="showFeat"><abbr title="Is Versioning enabled?">Versioning?</abbr></th>
-							<th class="showFeat"><abbr title="Force Checkout?">Force?</abbr></th>
-							<th class="showPerm sorter-false">Full</th>
-							<th class="showPerm sorter-false">Design</th>
-							<th class="showPerm sorter-false">Edit</th>
-							<th class="showPerm sorter-false">Contribute</th>
-							<th class="showPerm sorter-false">Read/View</th>
-							<th class="showPerm sorter-false">Approve</th>
-						</tr>
-					</thead>
-					<tbody></tbody>
-					<tfoot>
-						<tr class="busy" style="display:none">
-							<td colspan="14" style="text-align:center; border:1px solid #f1f1f1;">
-								<div class="sprlib-spinner"><div class="sprlib-bounce1"></div><div class="sprlib-bounce2"></div><div class="sprlib-bounce3"></div></div>
-							</td>
-						</tr>
-					</tfoot>
-				</table>
+				<div id="LIBRS" class="sectionTitle" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
+					<div class="arrow active"></div>Libraries
+				</div>
+				<div>
+					<table id="tabSiteLibrs" class="tabModern tablesorter">
+						<thead>
+							<tr>
+								<th rowspan="2">Name / Description</th>
+								<th rowspan="2" class="showType">Type Template</th>
+								<th rowspan="2">Items</th>
+								<th rowspan="2" class="showDate">Date Created</th>
+								<th rowspan="2" class="showDate">Date Modified</th>
+								<th colspan="3" class="showFeat sorter-false" style="text-align:center !important; border-bottom:1px solid white !important;">List Features</th>
+								<th colspan="6" class="showPerm sorter-false" style="text-align:center !important; border-bottom:1px solid white !important;">List Permissions</th>
+							</tr>
+							<tr>
+								<th class="showFeat"><abbr title="Are Attachments enabled?">Attachments?</abbr></th>
+								<th class="showFeat"><abbr title="Is Versioning enabled?">Versioning?</abbr></th>
+								<th class="showFeat"><abbr title="Force Checkout?">Force?</abbr></th>
+								<th class="showPerm sorter-false">Full</th>
+								<th class="showPerm sorter-false">Design</th>
+								<th class="showPerm sorter-false">Edit</th>
+								<th class="showPerm sorter-false">Contribute</th>
+								<th class="showPerm sorter-false">Read/View</th>
+								<th class="showPerm sorter-false">Approve</th>
+							</tr>
+						</thead>
+						<tbody></tbody>
+						<tfoot>
+							<tr class="busy" style="display:none">
+								<td colspan="14" style="text-align:center; border:1px solid #f1f1f1;">
+									<div class="sprlib-spinner"><div class="sprlib-bounce1"></div><div class="sprlib-bounce2"></div><div class="sprlib-bounce3"></div></div>
+								</td>
+							</tr>
+						</tfoot>
+					</table>
+				</div>
 			</div>
 
 			<div id="navTabPerm" data-tab="Groups/Roles">
