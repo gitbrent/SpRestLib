@@ -6,7 +6,7 @@
 	<meta name="website"     content="https://github.com/gitbrent/SpRestLib/">
 	<meta name="keywords"    content="SpRestLib, JavaScript, js-sharepoint, OData, REST, SharePoint 2013, SP2013, SharePoint 2016, SP2016, SharePoint Online">
 	<meta name="description" content="Content Editor WebPart to showcase SpRestLib features and capabilities">
-	<meta name="revised"     content="Jun 24, 2017">
+	<meta name="revised"     content="Oct 20, 2017">
 
 	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300">
 	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:700">
@@ -29,26 +29,47 @@
 		!!!==>> Check the img folder for screencaps of the SharePoint setup! <<==!!!
 	-->
 
-	<link rel="stylesheet" type="text/css" href="../SiteAssets/sprestlib/css/tablesorter.css">
 	<link rel="stylesheet" type="text/css" href="../SiteAssets/sprestlib/css/sprestlib.css">
 	<link rel="stylesheet" type="text/css" href="../SiteAssets/sprestlib/css/sprestlib-demo.css">
-	<link rel="stylesheet" type="text/css" href="../SiteAssets/sprestlib/css/prism-coy.min.css">
+	<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.8.3/themes/prism-coy.css">
+	<!-- <link rel="stylesheet" type="text/css" href="../SiteAssets/sprestlib/css/tablesorter.css"> -->
 
-	<!--
 	<script type="text/javascript" src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
-	https://cdn.rawgit.com/gitbrent/SpRestLib/v0.11.0/dist/sprestlib.bundle.js
+	<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.29.0/js/jquery.tablesorter.min.js"></script>
+	<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.8.3/prism.min.js"></script>
+	<script type="text/javascript" src="https://cdn.rawgit.com/sorensen/ascii-table/v0.0.9/ascii-table.min.js"></script>
+	<!-- DEBUG:
+	<script type="text/javascript" src="https://cdn.rawgit.com/gitbrent/SpRestLib/v1.2.1/dist/sprestlib.bundle.js"></script>
 	-->
-	<script type="text/javascript" src="../SiteAssets/sprestlib/js/jquery.min.js"></script>
-	<script type="text/javascript" src="../SiteAssets/sprestlib/js/jquery.tablesorter.min.js"></script>
-	<script type="text/javascript" src="../SiteAssets/sprestlib/js/ascii-table.min.js"></script>
-	<script type="text/javascript" src="../SiteAssets/sprestlib/js/prism.min.js"></script>
 
 	<script type="text/javascript">
 		$.ajaxSetup({ cache:false });
-		var APP_BLD = 20171004;
+		var APP_BLD = 20171022;
 		var HTML_SPINNER = '<div class="sprlib-spinner"><div class="sprlib-bounce1"></div><div class="sprlib-bounce2"></div><div class="sprlib-bounce3"></div></div>';
 
 		// ==================================================================================================================
+
+		function getAsciiTableStr(arrayResults) {
+			var arrColHeadings = [];
+
+			Object.keys(arrayResults[0]).forEach(function(key,idx){
+				if ( typeof key === 'object' ) Object.keys(key).forEach(function(key,idx){ arrColHeadings.push(key) });
+				else arrColHeadings.push(key);
+			});
+
+			let table = new AsciiTable().setHeading( arrColHeadings );
+
+			arrayResults.forEach((obj,idx)=>{
+				let vals = [];
+				$.each(obj, function(key,val){
+					if ( typeof val === 'object' && JSON.stringify(val).indexOf("__deferred") > 0 ) val = "[[__deferred]]";
+					vals.push( ( typeof val === 'object' && key != '__metadata' ? JSON.stringify(val) : val ) );
+				});
+				table.addRow(vals);
+			});
+
+			return table.toString();
+		}
 
 		function doInsertTest() {
 			sprLib.list('Employees').insert({
@@ -174,35 +195,167 @@
 
 			// TAB: Setup
 			{
-				// A: jQuery
+				// SP: Datetime Stamp
+				$('#spDateTime').text( new Date().toLocaleString() );
+
+				// JS.A: jQuery
 				if ( typeof jQuery !== 'undefined' ) {
-					$('#libChkJquery').append( '<div class="iconYes"></div>' );
+					$('#libChkJquery .iconSvg').removeClass('question').addClass('yes');
+					$('#libChkJquery > div:last-child').text( jQuery.fn.jquery );
 				}
 				else {
-					$('#libChkJquery').append( 'oops - go check &lt;script&gt; tag ' );
+					$('#libChkJquery .iconSvg').removeClass('question').addClass('fail');
+					$('#libChkJquery > div:last-child').text( '???' );
 				}
 
-				// B: sprLib
+				// JS.B: jQuery-tablesorter
+				if ( typeof $.tablesorter !== 'undefined' ) {
+					$('#libChkTsorter .iconSvg').removeClass('question').addClass('yes');
+					$('#libChkTsorter > div:last-child').text( $.tablesorter.version );
+				}
+				else {
+					$('#libChkTsorter .iconSvg').removeClass('question').addClass('fail');
+					$('#libChkTsorter > div:last-child').text( '???' );
+				}
+
+				// JS.C: SpRestLib
 				if ( typeof sprLib !== 'undefined' ) {
-					$('#libChkSprLib').append( '<div class="iconYes"></div>' );
-					var baseUrl = sprLib.baseUrl();
+					$('#libChkSprLib .iconSvg').removeClass('question').addClass('yes');
+					$('#libChkSprLib > div:last-child').text( sprLib.version() );
 
 					// Make human readable when relative directory returned
-					if ( baseUrl == ".." ) {
-						baseUrl = location.href.substring(0, location.href.lastIndexOf('/'));
-						baseUrl = baseUrl.substring(0, baseUrl.lastIndexOf('/'));
-
-						$('#spVersion').text( sprLib.version() );
-					}
-					$('#spBaseUrl').text( baseUrl );
+					$('#spBaseUrl').text( (sprLib.baseUrl() == ".." ? _spPageContextInfo.siteAbsoluteUrl : sprLib.baseUrl()) );
 				}
 				else {
-					$('#libChkSprLib').append( '<div class="iconFail"></div><br>oops - go check <script> tag ' );
+					$('#libChkSprLib .iconSvg').removeClass('question').addClass('fail');
+					$('#libChkSprLib > div:last-child').text( '???' );
 					$('#spBaseUrl').text( '(n/a)' );
 
 					// Halt execution
 					return;
 				}
+			}
+
+			// TAB: Site
+			{
+				// Clear UI
+				$('#tabSite .tablesorter').trigger("destroy");
+				$('#tabSite table tbody').empty();
+
+				// A: Site Info
+				sprLib.site().info()
+				.then(function(objSite){
+					Object.keys(objSite).forEach(function(key,idx){
+						$('#tabSiteInfo tbody').append('<tr><th>'+ key +'</th><td>'+ (typeof objSite[key] === 'object' ? JSON.stringify(objSite[key]).replace(/\,/g,'<br>') : objSite[key]) +'</td></tr>');
+					});
+					if ( $.tablesorter ) $('#tabSiteInfo').tablesorter({ sortList:[[0,0]] });
+				});
+
+				// B: Site Lists
+				sprLib.site().lists()
+				.then(function(arrLists){
+					arrLists.forEach(function(list,idx){
+						if ( !list.Hidden ) {
+							let $row = $('<tr/>');
+							$row.append('<th><img class="imgIcon" src="'+ list.ImageUrl +'">'
+								+ '<a href="'+ list.RootFolder.ServerRelativeUrl +'" target="_blank">'+ list.Title +'</a>'
+								+ (list.Description ? '<div class="showDesc"><span style="display:none">: </span>'+ list.Description +'</div>' : '')
+								+ '</th>'
+							);
+							$row.append('<td>'+ (list.BaseType == 0 ? 'List' : list.BaseType == 1 ? 'Library' : '?') +'</td>');
+							$row.append('<td class="right">'+ list.ItemCount +'</td>');
+							$('#tabSiteLists tbody').append( $row );
+						}
+					});
+					if ( $.tablesorter ) $('#tabSiteLists').tablesorter({ sortList:[[0,0]] });
+				});
+
+				// C: Site Perms
+				sprLib.site().perms()
+				.then(function(arrPerms){
+					arrPerms.forEach(function(perm,idx){
+						// A-1: Create row
+						let $row = $('<tr/>');
+						$row.append('<th>'
+						// TODO: diff icon for each `PrincipalType`
+							+ '<img class="imgIcon" src="/_layouts/15/images/ribbon_userprofile_16.png">'
+							+ '<a href="../_layouts/15/user.aspx" target="_blank">'+ perm.Member.Title +'</a>'
+							+ '</th>');
+						$row.append('<td/>');
+						perm.Roles.forEach(function(role,idx){
+							if ( !role.Hidden ) $row.find('td:last-child').append('<div class="itemBox">'+ role.Name +'<span style="display:none">; </span></div>');
+						});
+						$('#tabSitePerms tbody').append( $row );
+					});
+					if ( $.tablesorter ) $('#tabSitePerms').tablesorter({ sortList:[[0,0]] });
+				});
+
+				// D: Site Groups
+				sprLib.site().groups()
+				.then(function(arrGroups){
+					// B: Populate Groups
+					arrGroups.forEach(function(group,idx){
+						// Hide "System Account" Groups
+						// Ex: 'Title':"SharingLinks.44086f6e-e6e7-409f-9a2f-6ff12121bc85.OrganizationEdit.79c8003a-1234-4ca7-a942-172a81817a6a"
+						if ( group.OwnerTitle != 'System Account' ) {
+							// A-1: Create row
+							let $row = $('<tr/>');
+							$row.append('<th>'
+								+ '<img class="imgIcon" src="/_layouts/15/images/ribbon_userprofile_16.png">'
+								+ '<a href="../_layouts/15/people.aspx?MembershipGroupId='+ group.Id +'" target="_blank">'+ group.Title +'</a>'
+								+ '</th>');
+							$row.append('<td>'+ group.OwnerTitle +'</td>');
+							$row.append('<td id="groupCount'+ group.Id +'" class="nowctr"></td>');
+							$row.append('<td class="showGrpDesc">'+ group.Description +'</td>');
+							$row.append('<td id="groupUsers'+ group.Id +'" class="showGrpMemb"></td>');
+							$('#tabSiteGroups tbody').append( $row );
+
+							// A-2: Populate Group members
+							sprLib.rest({
+								url: '_api/web/SiteGroups('+ group.Id +')/Users',
+								queryCols: ['Id','Email','LoginName','PrincipleType','Title']
+							})
+							.then(arrUsers => {
+								arrUsers.forEach((user,idx) => $('#groupUsers'+group.Id).append('<div class="itemBox">'+ user.Title +'<span style="display:none">; </span></div>') );
+								$('#groupCount'+group.Id).text( $('#groupUsers'+group.Id+' .itemBox').length );
+							})
+							.catch(strErr => $('#groupUsers'+group.Id).text(strErr||'?'));
+						}
+					});
+					// FIXME: This will fire before all the AJAX above, then count sorting wont work, etc.
+					if ( $.tablesorter ) $('#tabSiteGroups').tablesorter({ sortList:[[0,0]] });
+				});
+
+				// E: Site Roles
+				sprLib.site().roles()
+				.then(function(arrRoles){
+					arrRoles.forEach(function(role,idx){
+						// Filter: Hidden roles
+						if ( !role.Hidden ) {
+							let $row = $('<tr/>');
+							$row.append('<th><a href="../_layouts/15/EditRole.aspx?role='+ role.Name +'" target="_blank">'+ role.Name +'</a></th>');
+							$row.append('<td class="showGrpDesc">'+ role.Description +'</td>');
+							$('#tabSiteRoles tbody').append( $row );
+						}
+					});
+					if ( $.tablesorter ) $('#tabSiteRoles').tablesorter({ sortList:[[0,0]] });
+				});
+
+				// F: Site Subsites
+				sprLib.site().subsites()
+				.then(function(arrSites){
+					// TODO: HOWTO: Get [base] perms (and/or does it have unq perms) for a given site (aka: subsite)
+
+					arrSites.forEach(function(site,idx){
+						let $row = $('<tr/>');
+						$row.append('<th><a href="'+ site.UrlRel +'" target="_blank">'+ site.Name +'</a></th>');
+						$row.append('<td class="showGrpDesc">'+ site.Created +'</td>');
+						$row.append('<td class="showGrpDesc">'+ site.Modified +'</td>');
+						$('#tabSiteSubsites tbody').append( $row );
+					});
+					if ( $.tablesorter ) $('#tabSiteSubsites').tablesorter({ sortList:[[0,0]] });
+
+				});
 			}
 
 			// TAB: List CRUD
@@ -268,6 +421,7 @@
 
 		// ==================================================================================================================
 		$(document).ready(function(){
+			// **DEBUG**
 			// Dynamically load library as SP Online is *BAD* abut caching
 			$.getScript("../SiteAssets/sprestlib/js/sprestlib.js", function(){ doPageLoad(); });
 		});
@@ -280,9 +434,15 @@
 		<div class="bigTitle"><a href="https://github.com/GitBrent/SpRestLib" target="_blank">SpRestLib</a> Feature Demos</div>
 		<div class="subTitle">JavaScript Library for SharePoint Web Services</div>
 
-		<div id="navTabs" class="modernTabs">
+		<div id="navTabs" class="flexTabs">
 			<ul>
-				<li class="active" onclick="$('#navTabs').find('> div, li').removeClass('active'); $(this).addClass('active'); $('#tabSetup').addClass('active');">Setup</li><li onclick="$('#navTabs').find('> div, li').removeClass('active'); $(this).addClass('active'); $('#tabForm').addClass('active');">Binding / Population</li><li onclick="$('#navTabs').find('> div, li').removeClass('active'); $(this).addClass('active'); $('#tabList').addClass('active');">List Methods</li><li onclick="$('#navTabs').find('> div, li').removeClass('active'); $(this).addClass('active'); $('#tabUser').addClass('active');">User Methods</li><li onclick="$('#navTabs').find('> div, li').removeClass('active'); $(this).addClass('active'); $('#tabRest').addClass('active');">REST API Calls</li><li onclick="$('#navTabs').find('> div, li').removeClass('active'); $(this).addClass('active'); $('#tabSandbox').addClass('active');">Code Sandbox</li>
+				<li class="active" onclick="$('#navTabs').find('> div, li').removeClass('active'); $(this).addClass('active'); $('#tabSetup').addClass('active');">Setup</li>
+				<li onclick="$('#navTabs').find('> div, li').removeClass('active'); $(this).addClass('active'); $('#tabSite').addClass('active');">Site Methods</li>
+				<li onclick="$('#navTabs').find('> div, li').removeClass('active'); $(this).addClass('active'); $('#tabList').addClass('active');">List Methods</li>
+				<li onclick="$('#navTabs').find('> div, li').removeClass('active'); $(this).addClass('active'); $('#tabUser').addClass('active');">User Methods</li>
+				<li onclick="$('#navTabs').find('> div, li').removeClass('active'); $(this).addClass('active'); $('#tabRest').addClass('active');">REST API Calls</li>
+				<li onclick="$('#navTabs').find('> div, li').removeClass('active'); $(this).addClass('active'); $('#tabSand').addClass('active');">Code Sandbox</li>
+				<!--<li onclick="$('#navTabs').find('> div, li').removeClass('active'); $(this).addClass('active'); $('#tabForm').addClass('active');">Binding / Population</li>-->
 			</ul>
 
 			<div id="tabSetup" data-tab="Setup" class="active">
@@ -297,31 +457,139 @@
 				</p>
 				<br>
 
-				<div class="divTable">
-					<div data-name="col1" style="width:33%; padding:0px;">
+				<div class="flex">
+					<div data-name="col1" style="flex:1 1 auto; margin-right:50px;">
 						<div class="subTitle">JavaScript Library Check</div>
 						<div class="divTableRows">
-							<div>
-								<div id="libChkJquery"></div><div>jQuery loaded?</div>
+							<div id="libChkJquery">
+								<div><div class="iconSvg question size32"></div></div>
+								<div>jQuery</div>
+								<div></div>
 							</div>
-							<div>
-								<div id="libChkSprLib"></div><div>sprLib loaded?</div>
+							<div id="libChkSprLib">
+								<div><div class="iconSvg question size32"></div></div>
+								<div>SpRestLib</div>
+								<div></div>
+							</div>
+							<div id="libChkTsorter">
+								<div><div class="iconSvg question size32"></div></div>
+								<div>TableSorter</div>
+								<div></div>
 							</div>
 						</div>
 					</div>
-					<div data-name="col2" style="width:67%; padding:0px;">
+					<div data-name="col2" style="flex:2 1 auto;">
 						<div class="subTitle">SharePoint Environment / Configuration</div>
 						<div class="divTableRows">
 							<div>
-								<div><div class="iconInfo"></div></div><div>SpRestLib Base URL</div><div id="spBaseUrl"></div>
+								<div><div class="iconSvg info size32"></div></div><div>SpRestLib Base URL</div><div id="spBaseUrl"></div>
 							</div>
 							<div>
-								<div><div class="iconInfo"></div></div><div>SpRestLib Version</div><div id="spVersion">?</div>
+								<div><div class="iconSvg info size32"></div></div><div>Current User/Perms</div><div id="spUserPerm">?</div>
+							</div>
+							<div>
+								<div><div class="iconSvg info size32"></div></div><div>Current Date/Time</div><div id="spDateTime"></div>
 							</div>
 						</div>
 					</div>
 				</div>
-				<p>
+			</div>
+
+			<div id="tabSite" data-tab="Site Methods">
+				<div class="subTitle" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
+					<div class="arrow active"></div>Site Info
+				</div>
+				<div>
+					<table id="tabSiteInfo" class="tabModern">
+						<thead>
+							<tr>
+								<th>Key</th>
+								<th>Value</th>
+							</tr>
+						</thead>
+						<tbody></tbody>
+					</table>
+				</div>
+
+				<div class="subTitle" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
+					<div class="arrow"></div>Contents
+				</div>
+				<div style="display:none">
+					<table id="tabSiteLists" class="tabModern">
+						<thead>
+							<tr>
+								<th>List Name/Desc</th>
+								<th>Type</th>
+								<th>Items</th>
+							</tr>
+						</thead>
+						<tbody></tbody>
+					</table>
+				</div>
+
+				<div class="subTitle" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
+					<div class="arrow"></div>Base Permissions
+				</div>
+				<div style="display:none">
+					<table id="tabSitePerms" class="tabModern">
+						<thead>
+							<tr>
+								<th>Member</th>
+								<th class="sorter-false showGrpDesc">Roles/Levels</th>
+							</tr>
+						</thead>
+						<tbody></tbody>
+					</table>
+				</div>
+
+				<div class="subTitle" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
+					<div class="arrow"></div>Permission Groups
+				</div>
+				<div style="display:none">
+					<table id="tabSiteGroups" class="tabModern">
+						<thead>
+							<tr>
+								<th>Title</th>
+								<th>Owner</th>
+								<th>Members</th>
+								<th class="sorter-false showGrpDesc">Description</th>
+								<th class="sorter-false showGrpMemb">Member Names</th>
+							</tr>
+						</thead>
+						<tbody></tbody>
+					</table>
+				</div>
+
+				<div class="subTitle" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
+					<div class="arrow"></div>Permission Roles/Levels
+				</div>
+				<div style="display:none">
+					<table id="tabSiteRoles" class="tabModern">
+						<thead>
+							<tr>
+								<th>Name</th>
+								<th>Description</th>
+							</tr>
+						</thead>
+						<tbody></tbody>
+					</table>
+				</div>
+
+				<div class="subTitle" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
+					<div class="arrow"></div>Subsites
+				</div>
+				<div style="display:none">
+					<table id="tabSiteSubsites" class="tabModern">
+						<thead>
+							<tr>
+								<th>Name</th>
+								<th>Perms</th>
+								<th>TODO</th>
+							</tr>
+						</thead>
+						<tbody></tbody>
+					</table>
+				</div>
 			</div>
 
 			<div id="tabForm" data-tab="Data Binding">
@@ -472,7 +740,7 @@
 				</div>
 			</div>
 
-			<div id="tabSandbox" data-tab="Code Sandbox">
+			<div id="tabSand" data-tab="Code Sandbox">
 				<div id="sandboxMessage">Code below is editable</div>
 				<div id="sandboxCode" class="boxCode" contenteditable="true"></div>
 				<div style="text-align:center; padding:10px; margin:20px 0;">

@@ -29,12 +29,12 @@
 
 /*
 DEVLIST:
-	* Add `Intl` (i18n) support (its supported in IE11!!) - Date and Currency formats are awesome (can we add Direction for our R->L users )
-	* Add AppendText/Versions support (auto-query and populate most recent text when isAppend is TRUE)
-	* Add logic we learned the hard way where FILTER cant have true/false but uses 0/1 due to MS bug
-	* Add support for using LIST-GUID (in addition to .listName) - `.listGUID`
-FUTURE:
-	* Support for turning LOOKUP values into a "text; text"-type output
+ - Add `$skip` (https://sharepoint.stackexchange.com/questions/45719/paging-using-rest-odata-with-sp-2013)
+ -- @see: https://dev.office.com/sharepoint/docs/sp-add-ins/use-odata-query-operations-in-sharepoint-rest-requests#page-through-returned-items
+ -- Only working SOLN is to get '__next' URI from results (or store prev ID and construct a similar URI using code)
+ -- Very ugly and not at all elegant
+
+ - Add `Intl` (i18n) support (its supported in IE11!!) - Date and Currency formats are awesome (add Direction for our R->L users too?)
 */
 
 // Detect Node.js
@@ -42,9 +42,9 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 
 (function(){
 	// APP VERSION/BUILD
-	var APP_VER = "0.9.1";
-	var APP_BLD = "20170205";
-	var DEBUG = false; // (verbose mode/lots of logging. FIXME:remove prior to v1.0.0)
+	var APP_VER = "1.3.0-beta";
+	var APP_BLD = "20171021";
+	var DEBUG = false; // (verbose mode/lots of logging)
 	// APP FUNCTIONALITY
 	var APP_FILTEROPS = {
 		"eq" : "==",
@@ -54,48 +54,50 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 		"lt" : "<",
 		"lte": "<="
 	};
-	// APP DATA MODEL OBJECTS
-	var APP_LIST_COL_METAS = {};
-	// APP MESSAGE STRINGS (i18n Internationalization)
+	// APP MESSAGE STRINGS (Internationalization)
 	var APP_STRINGS = {
-		de: {
+		"de": {
 			"false" : "Nein",
 			"noRows": "(Keine zeilen)",
 			"true"  : "Ja"
 		},
-		en: {
+		"en": {
 			"false" : "No",
 			"noRows": "(No rows)",
 			"true"  : "Yes"
 		},
-		es: {
+		"es": {
 			"false" : "No",
 			"noRows": "(No hay filas)",
 			"true"  : "Sí"
 		},
-		fr: {
+		"fr": {
 			"false" : "Non",
 			"noRows": "(Aucune ligne)",
 			"true"  : "Oui"
 		},
-		in: {
+		"in": {
 			"false" : "नहीं",
 			"noRows": "(कोई पंक्तियाँ)",
 			"true"  : "हाँ"
+		},
+		"jp": {
+			"false" : "偽",
+			"noRows": "(行がありません)",
+			"true"  : "真実"
 		}
 	};
-
-	// -----------------------------
 	// USER-CONFIGURABLE: UI OPTIONS
-	// -----------------------------
 	var APP_OPTS = {
 		baseUrl:         '..',
 		busySpinnerHtml: '<div class="sprlib-spinner"><div class="sprlib-bounce1"></div><div class="sprlib-bounce2"></div><div class="sprlib-bounce3"></div></div>',
 		cleanColHtml:    true,
 		currencyChar:    '$',
 		language:        'en',
-		maxRetries:      5,
+		maxRetries:      2,
 		maxRows:         1000,
+		nodeCookie:      '',
+		nodeServer:      '',
 		retryAfter:      1000
 	};
 	var APP_CSS = {
@@ -103,6 +105,8 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 		updatingErr: { 'background-color':'#e2999c', 'color':'#fff' },
 		updatingEnd: { 'background-color':'', 'color':'' }
 	};
+	// GLOBAL VARS
+	var gRetryCounter = 0;
 
 	/* ===============================================================================================
 	|
@@ -165,8 +169,8 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 
 	function parseErrorMessage(jqXHR, textStatus, errorThrown) {
 		// STEP 1:
-		jqXHR       = jqXHR || {};
-		textStatus  = textStatus || "";
+		jqXHR       = jqXHR       || {};
+		textStatus  = textStatus  || "";
 		errorThrown = errorThrown || "";
 
 		// STEP 2:
@@ -191,7 +195,9 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 			// Use SP.js UpdateFormDigest function if available
 			// @see http://www.wictorwilen.se/sharepoint-2013-how-to-refresh-the-request-digest-value-in-javascript
 			// UpdateFormDigest() is syncronous per this SharePoint MVP, so just run and return
-			UpdateFormDigest(_spPageContextInfo.webServerRelativeUrl, _spFormDigestRefreshInterval);
+			// DEFAULT: UpdateFormDigest(_spPageContextInfo.webServerRelativeUrl, _spFormDigestRefreshInterval);
+			// Use a very short refresh interval to force token renewal (otherwise, unless it's been 30 min or whatever, no new token will be provided by SP)
+			UpdateFormDigest(_spPageContextInfo.webServerRelativeUrl, 10);
 			resolve();
 		});
 	}
@@ -239,13 +245,23 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 			<select data-sprlib='{ "list":"Employees", "value":"Title", "text":"Id" }'></select>
 			*/
 			$('[data-sprlib]').each(function(i,tag){
+				if (DEBUG) { console.log('--------------------'); console.log('Found tag: '+$(tag).prop('tagName')+' - id: '+$(tag).prop('id')); }
+
 				// A: Parse bind data from html tags
 				var data = {};
 				try {
 					// NOTE: jQuery returns an JSON-type object automatically (no JSON.parse required)
 					data = $(tag).data('sprlib');
 					// Ignore garbage or tags w/o a LIST
-					if ( typeof data !== 'object' || !data.list ) return; // aka:next
+					if ( typeof data !== 'object' || !data.list ) {
+						if (DEBUG) {
+							console.log('**Warning** this tag has `data-sprlib` but its data isnt an object or its lacks `list` arg');
+							console.log(data);
+							console.log(typeof data);
+							console.log( (data.list ? data.list : 'data.list does not exist') );
+						}
+						return; // aka:next
+					}
 				}
 				catch(ex) {
 					console.log( 'Unable to ingest data-sprlib!' + '\n' );
@@ -260,7 +276,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 
 					return;
 				}
-				if (DEBUG) console.log( data );
+				if (DEBUG) { console.log('tag data: '); console.log(data); }
 
 				// TODO: Check select for text/value (fallback to cols if exists), etc.!
 				// TODO: REQD field checks here (we need cols right?)
@@ -282,7 +298,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 				if ( !objListData[data.list] ) objListData[data.list] = { cols:(data.cols || []) };
 
 				// D: Add columns to query list if needed - there's 4 ways cols come in:
-				$.each(data.cols, function(i,col){
+				(data.cols || []).forEach(function(col,i){
 					if (objListData[data.list].cols.indexOf(col) == -1) objListData[data.list].cols.push( col );
 				});
 				if ( data.filter && data.filter.col && objListData[data.list].cols.indexOf(data.filter.col) == -1 )
@@ -299,11 +315,11 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 				arrPromises.push(
 					sprLib.list(list)
 					.getItems({ listCols:opts.cols })
-					.catch(function(err){
-						console.log('TODO: bad list! or some err! set data to null and keep going!');
-					})
 					.then(function(data){
 						arrTags.filter(function(tag){ return tag.list == list }).map(function(tag){ tag.data = data });
+					})
+					.catch(function(err){
+						console.log('TODO: bad list! or some err! set data to null and keep going!');
 					})
 				);
 			});
@@ -312,9 +328,9 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 			// STEP 3: Wait for each List query to provide all the data needed to fill all tags
 			Promise.all( arrPromises )
 			.then(function(){
-				if (DEBUG) console.table(arrTags);
+				if (DEBUG) { console.log('arrTags:\n'); console.table(arrTags); }
 				// Populate each tag
-				$.each(arrTags, function(idx,objTag){
+				arrTags.forEach(function(objTag,idx){
 					// A: Remove any temporary UI items now that this element is being populated
 					objTag.tag.find('.sprlibTemp').remove();
 
@@ -375,17 +391,15 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 							}
 
 							// B: Add each table row
-							$.each(objTag.data, function(i,arrData){
+							objTag.data.forEach(function(arrData,i){
 								// 1: Add row
 								isFilterPassed = false;
 								var $newRow = $('<tr/>');
 
 								// 2: Add cells to new row (add blank and populate instead of .append'ing them bc we need to guarantee order eg: col->col)
-								for (var idx=0; idx<Object.keys(arrData).length; idx++) {
-									if ( Object.keys(arrData)[idx] != '__metadata' ) $newRow.append('<td/>');
-								}
+								objTag.cols.forEach(function(idx,col){ $newRow.append('<td/>') });
 
-								// 3: Populat row cells
+								// 3: Populate row cells
 								$.each(arrData, function(key,val){
 									// TODO: HELP: howto use these "op" lookups in an actual if? (eval?)
 									// FIXME: Filtering: "filter": {"col":"active", "op":"eq", "val":false}} }
@@ -426,8 +440,8 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 										}
 
 										// D: Add cell to row
-//										$newRow.append( $cell );
-// TODO: TEST Below!! where we use above works great
+										//$newRow.append( $cell );
+										// TODO: TEST Below!! where we use above works great
 										$newRow.find('td:nth-child('+ (objTag.cols.indexOf(key)+1) +')').text( val );
 									}
 								});
@@ -467,8 +481,8 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 		});
 	}
 
-	// TODO: Validate/Update 20161231
-	function doParseFormFieldsIntoJson(inModel, inEleId) {
+	function doParseFormIntoJson(inModel, inEleId) {
+		// TODO: Validate/Update/Document for post-1.0.0
 		var objReturn = {
 			jsonSpData: {},
 			jsonFormat: {}
@@ -568,6 +582,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 
 	this.sprLib = {};
 
+	// API: OPTIONS
 	/**
 	* Getter/Setter for the app option APP_OPTS.baseUrl (our _api call base)
 	*
@@ -595,22 +610,27 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 	* @param inName (string) - required - List Name or List GUID
 	*/
 	sprLib.list = function list(inName) {
-		// FIRST: Param check
-		if ( !inName || typeof inName !== 'string' ) { console.error("ERROR: listName/listGUID [string] is required!"); return null; }
+		// FIRST-1: Param check
+		if ( !inName || typeof inName !== 'string' ) {
+			console.error("ERROR: A 'listName' or 'listGUID' is required! EX: `sprLib.list('Emps')`");
+			return null;
+		}
 
+		// FIRST-2: Set vars
 		var guidRegex = /^[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}$/i;
 		var _newList = {};
-		// DESIGN: Accept [ListName] or [ListGUID]
-		var _urlBase = APP_OPTS.baseUrl + "/_api/lists" + ( guidRegex.test(inName) ? "(guid'"+ inName +"')" : "/getbytitle('"+ inName.replace(/\s/gi,'%20') +"')" );
-		var _urlRest = "/_api/lists" + ( guidRegex.test(inName) ? "(guid'"+ inName +"')" : "/getbytitle('"+ inName.replace(/\s/gi,'%20') +"')" );
+		// NOTE: DESIGN: Accept either [ListName] or [ListGUID]
+		var _urlBase = "_api/lists" + ( guidRegex.test(inName) ? "(guid'"+ inName +"')" : "/getbytitle('"+ inName.replace(/\s/gi,'%20') +"')" );
 
 		/**
 		* Used after `.create()` if no {type} was provided (enables us to continue using the object in subsequnt operations)
 		* Used internally when users send CRUD methods objects without `__metadata.type`
 		*/
-		function getMetaType() {
+		function getListItemType() {
 			return new Promise(function(resolve, reject) {
-				sprLib.rest({ restUrl:_urlRest+"?$select=ListItemEntityTypeFullName" })
+				sprLib.rest({
+					url: _urlBase+"?$select=ListItemEntityTypeFullName"
+				})
 				.then(function(result){
 					if (result && Array.isArray(result) && result.length == 1) resolve( {"type":result[0].ListItemEntityTypeFullName } );
 					else reject('Invalid result!');
@@ -624,6 +644,22 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 		// STEP 1: Add public methods
 
 		/**
+		* Set baseUrl for this List
+		* - Enables dynamically querying without redefining the library's baseUrl (eg: search subsites)
+		*
+		* @example: sprLib.list('Employees').baseUrl('/sites/dev/brent/')
+		*/
+		_newList.baseUrl = function(strUrl) {
+			if ( strUrl && strUrl.toString().length > 0 ) {
+				_urlBase = strUrl + (strUrl.substring(strUrl.length-1,strUrl.length) == "/" ? '' : '/') + "_api/lists" + ( guidRegex.test(inName) ? "(guid'"+ inName +"')" : "/getbytitle('"+ inName.replace(/\s/gi,'%20') +"')" );
+				return _newList;
+			}
+			else {
+				return ( _urlBase && _urlBase.indexOf('/_api') > -1 ? _urlBase.substring(0, _urlBase.indexOf('/_api')) : _urlBase );
+			}
+		};
+
+		/**
 		* Return array of column objects with info about each (title, REST/internal name, type, etc.)
 		*
 		* @example: sprLib.list('Employees').cols().then(function(cols){ console.table(cols) });
@@ -633,19 +669,21 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 			// https://msdn.microsoft.com/en-us/library/microsoft.sharepoint.client.fieldtype.aspx
 			// https://msdn.microsoft.com/en-us/library/office/jj245826.aspx#properties
 			return new Promise(function(resolve, reject) {
-				var arrColumns = [];
-
-				$.ajax({
-					url    : _urlBase+"?$select=Fields&$expand=Fields",
-					type   : "GET",
-					cache  : false,
-					headers: {"Accept":"application/json;odata=verbose"}
+				sprLib.rest({
+					url: _urlBase+"?$select=Fields&$expand=Fields"
 				})
-				.done(function(data,textStatus){
+				.then(function(arrData){
+					var arrColumns = [];
+
 					// STEP 1: Gather fields
-					$.each(data.d.Fields.results, function(i,result){
-						// DESIGN: Only capture "user" columns (Type=17 are `Calculated` cols)
-						if ( result.InternalName == 'ID' || (!result.Hidden && result.CanBeDeleted) || (!result.CanBeDeleted && result.FieldTypeKind == 17) ) {
+					( arrData && arrData[0] && arrData[0].Fields && arrData[0].Fields.results ? arrData[0].Fields.results : [] )
+					.forEach(function(result,i){
+						// DESIGN: Only capture "user" columns (FYI: Type=17 are `Calculated` cols)
+						if (
+							result.InternalName == 'ID'
+							|| ( !result.Hidden && (result.CanBeDeleted || result.InternalName == 'Title') )
+							|| ( !result.CanBeDeleted && result.FieldTypeKind == 17 )
+						) {
 							arrColumns.push({
 								dispName:     result.Title,
 								dataName:     result.InternalName,
@@ -653,6 +691,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 								isAppend:     ( result.AppendOnly || false ),
 								isNumPct:     ( result.SchemaXml.toLowerCase().indexOf('percentage="true"') > -1 ),
 								isReadOnly:   result.ReadOnlyField,
+								isRequired:   result.Required,
 								isUnique:     result.EnforceUniqueValues,
 								defaultValue: ( result.DefaultValue || null ),
 								maxLength:    ( result.MaxLength || null )
@@ -663,8 +702,8 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 					// STEP 2: Resolve Promise
 					resolve( arrColumns );
 				})
-				.fail(function(jqXHR,textStatus,errorThrown){
-					reject({ 'jqXHR':jqXHR, 'textStatus':textStatus, 'errorThrown':errorThrown });
+				.catch(function(strErr){
+					reject( strErr );
 				});
 			});
 		}
@@ -676,15 +715,18 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 		*/
 		_newList.info = function() {
 			return new Promise(function(resolve, reject) {
-				var strUrl = _urlRest
-					+ "?$select=AllowContentTypes,BaseTemplate,Created,Description,EnableAttachments,ForceCheckout,Hidden,Id,ItemCount,Title";
+				var strFields = 'Id,AllowContentTypes,BaseTemplate,BaseType,Created,Description,DraftVersionVisibility,'
+					+ 'EnableAttachments,EnableFolderCreation,EnableVersioning,ForceCheckout,Hidden,ItemCount,'
+					+ 'LastItemDeletedDate,LastItemModifiedDate,LastItemUserModifiedDate,ListItemEntityTypeFullName,Title';
 
-				sprLib.rest({ restUrl:strUrl })
-				.then(function(data){
-					resolve(data[0]);
+				sprLib.rest({
+					url: _urlBase+"?$select="+strFields
 				})
-				.catch(function(err){
-					reject(err);
+				.then(function(arrData){
+					resolve( (arrData && arrData.length > 0 ? arrData[0] : []) );
+				})
+				.catch(function(strErr){
+					reject( strErr );
 				});
 			});
 		}
@@ -704,8 +746,24 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 		* | `queryOrderby`| string  | no    | OData style order by  | `Badge_x0020_Number`, `Badge_x0020_Number desc` [asc sort is SP2013 default] |
 		* | `queryLimit`  | number  | no    | OData style row limit | `10` would limit number of rows returned to 10 |
 		*
-		* @example - omitting listCols means "return all" (mirrors SP behavior)
-		* sprLib.list('Employees').getItems().then(function(arrData){ console.table(arrData); });
+		* @example - no args - omitting listCols/arguments means "return all" (mirrors SP behavior)
+		* sprLib.list('Employees').getItems()
+		*
+		* @example - simple array of column names
+		* sprLib.list('Employees').getItems(['Name', 'Badge_x0020_Number', 'Hire_x0020_Date'])
+		*
+		* @example using `listCols` - simple array of column names
+		* sprLib.list('Employees').getItems({
+		*   listCols: ['Name', 'Badge_x0020_Number', 'Hire_x0020_Date']
+		* })
+		*
+		* @example using `listCols` - object with user designated key names and column options
+		* sprLib.list('Employees').getItems({
+		*   listCols: {
+		*     name:  { dataName:'Name'               },
+		*     badge: { dataName:'Badge_x0020_Number' }
+		*   }
+		* })
 		*
 		* @example - with some options
 		* sprLib.list('Employees').getItems({
@@ -714,17 +772,6 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 		*   queryOrderby: "Hire_x0020_Date",
 		*   queryLimit:   100
 		* })
-		* .then(function(arrData){ console.log(arrData) })
-		* .catch(function(errMsg){ console.error(errMsg) });
-		*
-		* @example listCols - simple array of column names
-		* listCols: ['Name', 'Badge_x0020_Number', 'Hire_x0020_Date']
-		*
-		* @example listCols - object with user designated key names and column options
-		* listCols: {
-		*   name:  { dataName:'Name'               },
-		*   badge: { dataName:'Badge_x0020_Number', dispName:'Badge Number' }
-		* }
 		*
 		* listCols properties:
 		*
@@ -748,226 +795,323 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 		* @see: FieldTypes: https://msdn.microsoft.com/en-us/library/office/microsoft.sharepoint.client.fieldtype.aspx
 		*/
 		_newList.getItems = function(inObj) {
+			var listGUID = '';
 			return new Promise(function(resolve, reject) {
-				var listGUID = '';
+				// STEP 1: Create/Init Params
+				inObj = inObj || {};
+				// Deal with garbage here instead of in parse
+				if ( inObj == '' || inObj == [] ) inObj = {};
+				// Handle: `$filter` only accepts single quote (%27), double-quote (%22) will fail, so transform if needed
+				if ( inObj.queryFilter ) inObj.queryFilter = inObj.queryFilter.replace(/\"/gi,"'");
 
-				// FIRST: Param check
-				// N/A for this Method: `getItems()` does not req any opts/params.  We do need a valid inObj though, so create if needed
-				if ( !inObj || typeof inObj !== 'object' ) inObj = {};
+				// TODO: check for dupe col names! ['Name','Name']
 
-				// STEP 1: Attach/Init data properties to this query
-				inObj.spObjData = {};
-				inObj.spObjMeta = {};
-				inObj.spArrData = [];
+				// STEP 2: Parse options/cols / Set Internal Arrays
+				{
+					// CASE 1: Option: single string col name
+					if ( typeof inObj === 'string' || typeof inObj === 'number' ) {
+						var objCol = {};
+						objCol[ inObj.toString() ] = { dataName:inObj.toString() };
+						inObj = { listCols:objCol };
+					}
+					// CASE 2: Options: array of col names
+					else if ( Array.isArray(inObj) ) {
+						var objListCols = {};
+						inObj.forEach(function(colStr,i){
+							var strTmp = ( colStr.indexOf('/') > -1 ? colStr.substring(0,colStr.indexOf('/')) : colStr );
+							// Handle cases where there are 2 expands from same column. Ex: 'Manager/Id' and 'Manager/Title'
+							if ( colStr ) objListCols[strTmp] = ( objListCols[strTmp] ? { dataName:objListCols[strTmp].dataName+','+colStr } : { dataName:colStr } );
+						});
+						inObj = { listCols: objListCols };
+					}
+					// CASE 3: Options: `listCols` is a simple string
+					else if ( typeof inObj.listCols === 'string' ) {
+						var objNew = {};
+						Object.keys(inObj).forEach(function(key,idx){ objNew[key] = inObj[key]; });
+						inObj.listCols = [inObj.listCols];
+						var objListCols = {};
+						inObj.listCols.forEach(function(colStr,i){
+							var strTmp = ( colStr.indexOf('/') > -1 ? colStr.substring(0,colStr.indexOf('/')) : colStr );
+							// Handle cases where there are 2 expands from same column. Ex: 'Manager/Id' and 'Manager/Title'
+							if ( colStr ) objListCols[strTmp] = ( objListCols[strTmp] ? { dataName:objListCols[strTmp].dataName+','+colStr } : { dataName:colStr } );
+						});
+						objNew.listCols = objListCols;
+						inObj = objNew;
+					}
+					// CASE 4: Options: `listCols` is a simple array of col names
+					else if ( Array.isArray(inObj.listCols) ) {
+						var objNew = {};
+						Object.keys(inObj).forEach(function(key,idx){ objNew[key] = inObj[key]; });
+						var objListCols = {};
+						inObj.listCols.forEach(function(colStr,i){
+							var strTmp = ( colStr.indexOf('/') > -1 ? colStr.substring(0,colStr.indexOf('/')) : colStr );
+							// Handle cases where there are 2 expands from same column. Ex: 'Manager/Id' and 'Manager/Title'
+							if ( colStr ) objListCols[strTmp] = ( objListCols[strTmp] ? { dataName:objListCols[strTmp].dataName+','+colStr } : { dataName:colStr } );
+						});
+						objNew.listCols = objListCols;
+						inObj = objNew;
+					}
+					// CASE 5: No listCols - create when needed
+					else if ( !inObj.listCols ) inObj.listCols = {};
 
-				// STEP 2: `listCols` can be: string, array of strings, or objects
-				// A: Convert single string column into an array for use below
-				if ( typeof inObj.listCols === 'string' ) inObj.listCols = [ inObj.listCols ];
-				// B: Build query object
-				if ( inObj.listCols && $.isArray(inObj.listCols) ) {
-					var listCols = {};
-					$.each(inObj.listCols, function(i,colStr){
-						listCols[colStr] = { dataName:colStr }
-					});
-					inObj.listCols = listCols;
+					// AJAX OPTIONS:
+					inObj.cache = inObj.cache || false;
+					// TODO: change 'false' to DEF_CACHE
+
+					// Add internal data objects
+					inObj.spArrData = [];
+					inObj.spObjData = {};
+					inObj.spObjMeta = {};
 				}
 
 				// STEP 3: Start data fetch Promise chain
 				Promise.resolve()
 				.then(function(){
-					// PERF: Only query metadata when user requested append-text
-					if ( !inObj.fetchAppend ) return Promise.resolve();
-
-					// Fetch LIST metadata
 					return new Promise(function(resolve, reject) {
-						// STEP 1: Query SharePoint
-						$.ajax({
-							url: _urlBase+"?$select=Fields/Title,Fields/InternalName,Fields/CanBeDeleted,Fields/TypeAsString,Fields/SchemaXml,Fields/AppendOnly&$expand=Fields",
-							type: "GET",
-							cache: false,
-							headers: {"Accept":"application/json; odata=verbose"}
-						})
-						.done(function(data,textStatus){
-							// A: Get list GUID for use in XML query
-							listGUID = data.d.__metadata.id.split("guid'").pop().replace(/\'\)/g,'');
+						var objAjaxQuery = {
+							url    : _urlBase+"/items",
+							type   : "GET",
+							cache  : inObj.cache,
+							headers: { "Accept":"application/json;odata=verbose", "X-RequestDigest":$("#__REQUESTDIGEST").val() }
+						};
+						var arrExpands = [], strExpands = "";
 
-							// B: Gather field metadata
-							$.each(data.d.Fields.results, function(i,result){
-								// TODO-1.0: FIXME: handle 'Account/Title' etc.
-								$.each(inObj.listCols, function(key,col){
-									// DESIGN: col.dataName is *NOT REQD*
-									if ( col.dataName && col.dataName.split('/')[0] == result.InternalName ) {
-										inObj.listCols[key].dataType = result.TypeAsString;
-										inObj.listCols[key].dispName = ( inObj.listCols[key].dispName || result.Title ); // Fallback to SP.Title ("Display Name"]
-										inObj.listCols[key].isAppend = ( result.AppendOnly || false );
-										inObj.listCols[key].isNumPct = ( result.SchemaXml.toLowerCase().indexOf('percentage="true"') > -1 );
-									}
-								});
-							});
-							if (DEBUG) console.table( inObj.listCols );
+						// STEP 1: Start building REST Endpoint URL
+						{
+							// If columns were provided, start a select query
+							if ( inObj.listCols && Object.keys(inObj.listCols).length > 0 ) objAjaxQuery.url += "?$select=";
+						}
 
-							// STEP 2: Resolve Promise
-							APP_LIST_COL_METAS[inName] = inObj.listCols;
-							resolve();
-						})
-						.fail(function(jqXHR,textStatus,errorThrown){
-							reject({ 'jqXHR':jqXHR, 'textStatus':textStatus, 'errorThrown':errorThrown });
-						});
-					});
-				})
-				.then(function(){
-					return new Promise(function(resolve, reject) {
-						var objAjax = {};
-						var strAjaxUrl = "", strExpands = "";
-
-						// STEP 1: Start building REST URL
-						strAjaxUrl = _urlBase+"/items";
-						// If columns were provided, ensure we select `Id` for use in building our data model SP-array/object
-						if ( inObj.listCols ) strAjaxUrl = strAjaxUrl+"?$select=";
-
-						// STEP 2: Continue building REST URL
+						// STEP 2: Keep building REST Endpoint URL
 						{
 							// A: Add columns
 							$.each(inObj.listCols, function(key,col){
 								if ( !col.dataName ) return; // Skip columns without a 'dataName' key
 								// 1:
-								if ( strAjaxUrl.substring(strAjaxUrl.length-1) == '=' ) strAjaxUrl += col.dataName;
-								else strAjaxUrl += ( strAjaxUrl.lastIndexOf(',') == strAjaxUrl.length-1 ? col.dataName : ','+col.dataName );
+								if ( objAjaxQuery.url.substring(objAjaxQuery.url.length-1) == '=' ) objAjaxQuery.url += col.dataName;
+								else objAjaxQuery.url += ( objAjaxQuery.url.lastIndexOf(',') == objAjaxQuery.url.length-1 ? col.dataName : ','+col.dataName );
 								// 2:
-								if ( col.dataName.indexOf('/') > -1 ) strExpands += (strExpands == '' ? '' : ',') + col.dataName.substring(0,col.dataName.indexOf('/'));
+								if ( col.dataName.indexOf('/') > -1 ) {
+									var strFieldName = col.dataName.substring(0, col.dataName.indexOf('/'));
+									if ( arrExpands.indexOf(strFieldName) == -1 ) {
+										arrExpands.push( strFieldName );
+										strExpands += (strExpands == '' ? '' : ',') + strFieldName;
+									}
+								}
 							});
 
 							// B: Add maxrows (if any) or use default b/c SP2013 default is a paltry 100 rows!
-							strAjaxUrl += (strAjaxUrl.indexOf('?$') > -1 ? '&':'?') + '$top=' + ( inObj.queryLimit ? inObj.queryLimit : APP_OPTS.maxRows );
+							objAjaxQuery.url += (objAjaxQuery.url.indexOf('?$') > -1 ? '&':'?') + '$top=' + ( inObj.queryLimit ? inObj.queryLimit : APP_OPTS.maxRows );
 
 							// C: Add expand (if any)
-							if ( strExpands ) strAjaxUrl += (strAjaxUrl.indexOf('?$') > -1 ? '&':'?') + '$expand=' + strExpands;
+							if ( strExpands ) objAjaxQuery.url += (objAjaxQuery.url.indexOf('?$') > -1 ? '&':'?') + '$expand=' + strExpands;
 
 							// D: Add filter (if any)
 							if ( inObj.queryFilter ) {
-								strAjaxUrl += (strAjaxUrl.indexOf('?$') > -1 ? '&':'?') + '$filter=' + ( inObj.queryFilter.indexOf('%') == -1 ? encodeURI(inObj.queryFilter) : inObj.queryFilter );
+								objAjaxQuery.url += (objAjaxQuery.url.indexOf('?$') > -1 ? '&':'?') + '$filter=' + ( inObj.queryFilter.indexOf('%') == -1 ? encodeURI(inObj.queryFilter) : inObj.queryFilter );
 							}
 
 							// E: Add orderby (if any)
-							if ( inObj.queryOrderby ) strAjaxUrl += (strAjaxUrl.indexOf('?$') > -1 ? '&':'?') + '$orderby=' + inObj.queryOrderby;
+							if ( inObj.queryOrderby ) objAjaxQuery.url += (objAjaxQuery.url.indexOf('?$') > -1 ? '&':'?') + '$orderby=' + inObj.queryOrderby;
 						}
-						strAjaxUrl = strAjaxUrl.replace(',&','&'); // FIXME: we wont this catch condition after we stop selecting "Id," above!
 
 						// STEP 3: Send AJAX REST query
-						$.ajax({
-							url: strAjaxUrl,
-							type: (inObj.ajaxType || "GET"),
-							cache: false,
-							headers: { "Accept":"application/json; odata=verbose", "X-RequestDigest":$("#__REQUESTDIGEST").val() }
-						})
-						.done(function(data,textStatus){
-							// A: Iterate over results
-							$.each((data.d.results || data), function(i,result){
-								// A1: Create row object JSON
-								var objRow = {};
-								var objId = 0;
+						sprLib.rest(objAjaxQuery)
+						.then(function(arrResults){
+							// A: Add all cols is none provided (aka:"fetch all")
+							if ( (!inObj.listCols || Object.keys(inObj.listCols).length == 0) && arrResults.length > 0 ) {
+								var objListCols = {};
+								Object.keys(arrResults[0]).forEach(function(colStr,idx){
+									// DESIGN: Dont include those first few junky fields from SP that point to FieldsAsHTML etc
+									if ( arrResults[0][colStr] && typeof arrResults[0][colStr] === 'object' && arrResults[0][colStr].__deferred ) {
+										if (DEBUG) console.log('FYI: Skipping "select all" column: '+colStr);
+									}
+									else {
+										objListCols[colStr] = { dataName:colStr };
+									}
+								});
+								inObj.listCols = objListCols;
+							}
 
-								// A2: Add {Id} and {__metadata} (if any returned)
+							// B: Iterate over results and capture them
+							arrResults.forEach(function(result,idx){
+								// B.1: Create row object
+								var objRow = {};
+								var intID = 0;
+
+								// B.2: Capture `Id` and `__metadata` (if any)
 								if ( result.__metadata ) {
+									// Capture metadata
 									objRow['__metadata'] = result.__metadata;
 
-									// Capture this item's `Id` by parsing metadata (so we dont add "Id," to the select etc)
-									if ( result.__metadata.uri && result.__metadata.uri.indexOf('/Items(') > -1 )
-										objId = Number(result.__metadata.uri.split('/Items(').pop().replace(')',''));
-								}
-
-								// A3: Add columns specified -OR- add everything we got back (mirror SP behavior)
-								if ( inObj.listCols && typeof inObj.listCols === 'object' ) {
-									$.each(inObj.listCols, function(key,col){
-										var arrCol = [];
-										var colVal = "";
-
-										if ( col.dataName ) {
-											arrCol = col.dataName.replace(/\//gi,'.').split('.');
-											colVal = ( arrCol.length > 1 ? result[arrCol[0]][arrCol[1]] : result[arrCol[0]] );
-											// TODO: ^^^ results like 'Account/Title' will be created above (!)
-											// TODO: is above still true?? (20161212)
+									// Grab item `ID` and list `GUID` if possible
+									if ( result.__metadata.uri ) {
+										if ( result.__metadata.uri.indexOf('/Items(') > -1 ) {
+											intID = Number(result.__metadata.uri.split('/Items(').pop().replace(')',''));
 										}
-										else if ( col.dataFunc ) {
-											colVal = col.dataFunc(result);
+										if ( !listGUID && result.__metadata.uri.indexOf("guid'") > -1 ) {
+											listGUID = result.__metadata.uri.split("guid'").pop().split("')/")[0];
 										}
-
-										// Convert: Not all values can be taken at return value (dates have to be turned into actual Date objects, etc.)
-										if ( col.dataType == 'DateTime' ) { objRow[key] = new Date(colVal); }
-										else {
-											objRow[key] = ( APP_OPTS.cleanColHtml && col.listDataType == 'string' ? colVal.replace(/<div(.|\n)*?>/gi,'').replace(/<\/div>/gi,'') : colVal );
-										}
-									});
-								}
-								else {
-									$.each(result, function(key,val){
-										if ( typeof val !== 'object' ) objRow[key] = val;
-									});
+									}
 								}
 
-								// A4: Store data as array and as object (for lookups so we dont have to spArrData.filter) if Id exists
-								if ( objId ) {
-									inObj.spObjData[objId] = objRow;
-									inObj.spObjMeta[objId] = ( result.__metadata || {} );
-									objRow.Id = objId;
-								}
+								// B.3: Capture query results
+								$.each(inObj.listCols, function(key,col){
+									var arrCol = [];
+									var colVal = "";
+
+									// B.3.1: Get value(s) for this key
+									// Handle LookupMulti columns
+									if ( col.dataName && col.dataName.indexOf('/') > -1 && result[col.dataName.split('/')[0]].results ) {
+										// A:
+										// NOTE: `listCols` can have "Dept/Id" and "Dept/Title", but SP only returns *ONE* result
+										// ....: So, skip any subsequnt listCol once results have been captured
+										if ( objRow[key] ) return;
+
+										// B: Default for this column type is empty array
+										colVal = [];
+
+										// C: Add any results
+										result[col.dataName.split('/')[0]].results.forEach(function(objResult,idx){
+											// EX: {__metadata:Object, Id:2, Title:"Human Resources"}
+											if ( objResult.__metadata ) delete objResult.__metadata;
+											// Capture any-and-all columns returned (aside from removal of above)
+											colVal.push( objResult );
+										});
+									}
+									// Handle Lookup/Person/Url/etc. Ex: 'Manager/Title'
+									else if ( col.dataName && col.dataName.indexOf('/') > -1 ) {
+										// A: Split lookup info object/field
+										arrCol = col.dataName.split('/');
+										// B: Remove extraneous `__metadata`
+										if ( result[arrCol[0]].__metadata ) delete result[arrCol[0]].__metadata;
+										// B: Same for `__deferred`.
+										// NOTE: Empty Multi-Person returns `{__deferred:{uri:'http...'}}` (ugh!)
+										if ( result[arrCol[0]].__deferred ) delete result[arrCol[0]].__deferred;
+										// C: Capture value
+										// CASE 1: `dataName` was used - in this case return the actual field user asked for
+										// Detect use of names listCols by comparing key to dataName
+										if ( key != arrCol[0] && key != col.dataName ) colVal = result[arrCol[0]][arrCol[1]];
+										// CASE 2: Other - in this case return the complete object (Ex: { Title:'Manager' })
+										// IMPORTANT: This de facto returns all the *other* fields queried. Eg: 'Manager/Id' and 'Manager/Title' were in cols
+										// We want to return a *single* object with these 2 elements, so they can be derefereced using 'Manger.Title' etc.
+										// Capture any-and-all columns returned (aside from removal of above)
+										else colVal = result[arrCol[0]];
+
+										// D: Fix result if needed: Empty person fields will be `{__proto__:{}}` at this point
+										if ( typeof colVal === 'object' && !Array.isArray(colVal) && Object.keys(colVal).length == 0 ) colVal = null;
+									}
+									else if ( col.dataName ) {
+										colVal = result[col.dataName];
+									}
+									else if ( col.dataFunc ) {
+										colVal = col.dataFunc(result);
+									}
+
+									// B.3.2: Set value for this key
+									// If dataType is known, then convert
+									if ( col.dataType == 'DateTime' ) {
+										objRow[key] = new Date(colVal);
+									}
+									else {
+										objRow[key] = ( APP_OPTS.cleanColHtml && col.listDataType == 'string' ? colVal.replace(/<div(.|\n)*?>/gi,'').replace(/<\/div>/gi,'') : colVal );
+									}
+
+									// B.3.3: Handle `getVersions`
+									// Results of an append-text query is an array of Note versions in desc order
+									if ( col.getVersions ) objRow[key] = [];
+								});
+
+								// 4: Set data
+								// 4.A: Result row
 								inObj.spArrData.push( objRow );
+								// 4.B: Create data object if we have ID (for lookups w/o spArrData.filter)
+								if ( intID ) {
+									inObj.spObjData[intID] = objRow;
+									inObj.spObjMeta[intID] = ( result.__metadata || {} );
+								}
 							});
 
 							// LAST:
 							resolve();
 						})
-						.fail(function(jqXHR,textStatus,errorThrown){
-							reject({ 'jqXHR':jqXHR, 'textStatus':textStatus, 'errorThrown':errorThrown });
+						.catch(function(strErr){
+							reject( strErr );
 						});
 					});
 				})
 				.then(function(){
-					var arrAppendColDatanames = [];
+					var arrAppendCols = [], arrAppendColNames = [];
 
-					// STEP 1: Check for any append cols that need to be queried
-					// Append cols were captured by `fetchAppend:true` option
-					$.each(inObj.listCols, function(key,col){ if ( col.isAppend ) arrAppendColDatanames.push( col.dataName ); });
+					// STEP 1: Gather any append cols that need to be queried
+					$.each(inObj.listCols, function(key,col){
+						if ( col.getVersions ) {
+							col.keyName = key; // Store this column's key to avoid complex (slow) filtering below when we need to save by this key name
+							arrAppendCols.push( col );
+							arrAppendColNames.push( col.dataName );
+						}
+					});
 
-					// STEP 2: Get data for nay found cols
-					if ( arrAppendColDatanames.length ) {
+					// STEP 2: Get data for any found cols
+					if ( listGUID && arrAppendCols.length ) {
 						// STEP 1: Query SharePoint
 						// Convert our dataName array into a comma-delim string, then replace ',' with '%20' and our query string is constrcuted!
-						$.ajax({
-							url: APP_OPTS.baseUrl +"/_vti_bin/owssvr.dll?Cmd=Display&List="
+						sprLib.rest({
+							url: "_vti_bin/owssvr.dll?Cmd=Display&List="
 								+ "%7B"+ listGUID +"%7D"+"&XMLDATA=TRUE&IncludeVersions=TRUE"
-								+ '&Query=ID%20'+ arrAppendColDatanames.toString().replace(/\,/g,'%20') +'%20'
+								+ "&Query=ID%20"+ arrAppendColNames.toString().replace(/\,/g,'%20') +"%20"
+								+ "Modified%20Editor%20"
 								+ "&SortField=Modified&SortDir=ASC"
 						})
-						.done(function(result,textStatus){
-							// Query is order by oldest->newest, so always capture the result and the last one captured will always be the most recent
-							$(result).find("z\\:row, row").each(function(i,row){
-								arrAppendColDatanames.forEach(function(dataName,idx){
-									var itemId = $(row).attr("ows_ID");
+						.then(function(result){
+							if ( result && result[0] && result[0].documentElement ) {
+								// Query is order by oldest->newest, so always capture the result and the last one captured will always be the most recent
+								$(result[0].documentElement).find("z\\:row, row").each(function(i,row){
+									arrAppendCols.forEach(function(objCol,idx){
+										var intID = $(row).attr("ows_ID");
+										var prvComm = "";
 
-									if ( $(row).attr("ows_"+dataName) ) {
-										// A: Set array data
-										inObj.spArrData.filter(function(item){ return item.Id == itemId })[0][dataName] = $(row).attr("ows_"+dataName);
-										// B: Set object data
-										if ( inObj.spObjData[itemId] ) inObj.spObjData[itemId][dataName] = $(row).attr("ows_"+dataName);
-									}
+										// NOTE: LOGIC: Versions doesnt filter like getItems, so we may get many more items than our dataset has
+										if ( inObj.spObjData[intID] && $(row).attr("ows_"+objCol.dataName) ) {
+											var rowNote = ($(row).attr('ows_'+objCol.dataName) || '');
+											if ( rowNote ) {
+												if ( rowNote != prvComm ) {
+													inObj.spObjData[intID][objCol.keyName].push({
+														verDate: new Date($(row).attr('ows_Modified')).toISOString(),
+														verName: $(row).attr('ows_Editor').substring($(row).attr('ows_Editor').indexOf("#")+1),
+														verText: rowNote
+													});
+													prvComm = rowNote;
+												}
+												else {
+													// When note content is the same, replace the previous version
+													// (so author and date are correct - older ones are ModifiedBy folks who Modified *OTHER* fields! - oldest is true author!)
+													inObj.spObjData[intID][objCol.keyName].pop();
+													inObj.spObjData[intID][objCol.keyName].push({
+														verDate: new Date($(row).attr('ows_Modified')).toISOString(),
+														verName: $(row).attr('ows_Editor').substring($(row).attr('ows_Editor').indexOf("#")+1),
+														verText: rowNote
+													});
+												}
+											}
+										}
+									});
 								});
-							});
+							}
 
 							// LAST: Return List data
 							resolve(inObj.spArrData);
 						})
-						.fail(function(jqXHR,textStatus,errorThrown){
-							reject({ 'jqXHR':jqXHR, 'textStatus':textStatus, 'errorThrown':errorThrown });
+						.catch(function(strErr){
+							reject( strErr );
 						});
 					}
 					else {
 						resolve(inObj.spArrData);
 					}
 				})
-				.catch(function(objErr){
-					if (DEBUG) console.error(objErr);
-					reject( parseErrorMessage(objErr.jqXHR, objErr.textStatus, objErr.errorThrown) );
+				.catch(function(strErr){
+					reject( strErr );
 				});
 			});
 		}
@@ -990,62 +1134,56 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 		*/
 		_newList.create = function(jsonData) {
 			return new Promise(function(resolve, reject) {
-				// A: Param check
-				if ( !jsonData || typeof jsonData !== 'object' ) reject("{jsonData} expected");
-				try { test = JSON.stringify(jsonData) } catch(ex) { reject("JSON.stringify({jsonData}) failed") }
+				// FIRST: Param checks
+				if ( !jsonData || Array.isArray(jsonData) || typeof jsonData !== 'object' || Object.keys(jsonData).length == 0 ) reject("JSON data expected! Ex: `{Name:'Brent'}`");
+				try { var test = JSON.stringify(jsonData) } catch(ex) { reject("`JSON.stringify(jsonData)` failed! Send valid JSON Please. Ex: `{'Name':'Brent'}`") }
 
-				// B: Create item
+				// STEP 1: Param Setup
+				// B: DESIGN/OPTION: If no etag is provided, consider it a force (a faux {OPTION})
+				jsonData.__metadata = jsonData.__metadata || {};
+				// Ensure we dont pass an etag
+				delete jsonData.__metadata.etag;
+
+				// STEP 2: Create item
 				Promise.resolve()
 				.then(function(){
-					// A: Keep going if we have a `type` value
-					if ( jsonData.__metadata && jsonData.__metadata.type ) return;
-					// B: Else, fetch metadata before continuing
-					return getMetaType();
+					return ( jsonData.__metadata.type ? null : getListItemType() );
 				})
 				.then(function(objMetadata){
 					// 1: Add __metadata if provided
 					if ( objMetadata && objMetadata.type ) jsonData.__metadata = objMetadata;
 
-					// 2: Do insert
-					$.ajax({
-						type       : "POST",
-						url        : _urlBase+"/items",
-						data       : JSON.stringify(jsonData),
-						contentType: "application/json;odata=verbose",
-						headers    : { "Accept":"application/json; odata=verbose", "X-RequestDigest":$("#__REQUESTDIGEST").val() }
+					// 2: Create item
+					sprLib.rest({
+						type   : "POST",
+						url    : _urlBase +"/items",
+						data   : JSON.stringify(jsonData),
+						headers: { "Accept":"application/json;odata=verbose", "X-RequestDigest":$("#__REQUESTDIGEST").val() }
 					})
-					.done(function(data, textStatus){
-						// Remove any columns that have a value of `{__deferred:''}`
-						// They're empty anyway, plus future operations with this item would fail, eg: insert.
-						$.each(data.d, function(key,val){ if ( val && typeof val === 'object' && val.__deferred ) delete data.d[key] });
+					.then(function(arrData){
+						if ( arrData && arrData[0] ) {
+							// A: Populate new ID (both 'Id' and 'ID' to mimic SP)
+							jsonData.Id = arrData[0].Id;
+							jsonData.ID = arrData[0].ID;
+
+							// B: Populate metadata
+							jsonData.__metadata = jsonData.__metadata || arrData[0].__metadata || {};
+							jsonData.__metadata.etag = jsonData.__metadata.etag || arrData[0].__metadata.etag;
+						}
+						else {
+							jsonData = null;
+						}
 
 						// LAST: Return new item
-						resolve( data.d );
+						resolve( jsonData );
 					})
-					.fail(function(jqXHR, textStatus, errorThrown){
-						// TODO: Is there way to do this without a retryCnt??, otherwise: add,increment,clear
-						/*
-							try {
-							var strErrCode = jqXHR.status.toString();
-							var strErrText = "("+ jqXHR.status +") "+ textStatus +": "+ errorThrown;
-							var strSpeCode = $.parseJSON(jqXHR.responseText).error['code'].split(',')[0];
-
-							// CASE '403': SP2013-2016 Expired Token error: Microsoft.SharePoint.SPException (-2130575252): "X-RequestDigest expired form digest"
-							if ( strErrCode == '403' && strSpeCode == '-2130575252' ) doRenewDigestToken();
-						} catch(ex) {}
-						*/
-						reject( parseErrorMessage(jqXHR, textStatus, errorThrown) );
+					.catch(function(strErr){
+						reject( strErr );
 					});
 				})
 				.catch(function(err){ reject(err) });
 			});
 		};
-		/* TEST
-		sprLib.list('Employees')
-		.create( { __metadata:{type:"SP.Data.EmployeesListItem"}, Name:'sprLib.list.insert test'} )
-		.then( function(newItem){ console.table(newItem) } )
-		.catch( function(err){ console.error(err) } );
-		*/
 
 		/**
 		* Update an existing item in a SP List/Library
@@ -1067,63 +1205,61 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 		_newList.update = function(jsonData) {
 			return new Promise(function(resolve, reject) {
 				// FIRST: Param checks
-				if ( !jsonData || typeof jsonData !== 'object' ) reject("{jsonData} expected");
-				if ( !jsonData['ID'] && !jsonData['Id'] && !jsonData['iD'] && !jsonData['id'] ) reject("{jsonData}['Id'] expected");
-				try { test = JSON.stringify(jsonData) } catch(ex) { reject("JSON.stringify(`jsonData`) failed") }
+				if ( !jsonData || Array.isArray(jsonData) || typeof jsonData !== 'object' || Object.keys(jsonData).length == 0 ) reject("JSON data expected! Ex: `{Name:'Brent'}`");
+				if ( !jsonData['ID'] && !jsonData['Id'] && !jsonData['iD'] && !jsonData['id'] ) reject("JSON data must have an `ID` value! Ex: `{Id:99}`");
+				try { var test = JSON.stringify(jsonData) } catch(ex) { reject("`JSON.stringify(jsonData)` failed! Send valid JSON Please. Ex: `{'Name':'Brent'}`") }
 
-				// STEP 1: Determine SP.Type if needed
-				// TODO: for all CRUD ops: `__metadata` is *OPTIONAL* (if not incld, then get List Metadta (TODO: internal func for this))
-				//if ( !jsonData.__metadata ) { promise.getMeta,then()... continue below }
-
-				// STEP 2: Set our `Id` value (users may send an of 4 different cases), then remove as its nt updateable
-				var itemId = jsonData['ID'] || jsonData['Id'] || jsonData['iD'] || jsonData['id'];
+				// STEP 1: Param Setup
+				// A: Set our `Id` value (users may send an of 4 different cases), then remove as ID is not updateable in SP
+				var intID = jsonData['ID'] || jsonData['Id'] || jsonData['iD'] || jsonData['id'];
 				delete jsonData.ID; delete jsonData.Id; delete jsonData.iD; delete jsonData.id;
-
-				// STEP 3: Build headers
-				// DESIGN/OPTION: If no etag is provided, consider it a force (a faux {OPTION})
-				var objHeaders = {
-					"X-HTTP-Method"  : "MERGE",
-					"Accept"         : "application/json;odata=verbose",
-					"X-RequestDigest": $("#__REQUESTDIGEST").val(),
-					"IF-MATCH"       : ( jsonData.__metadata && jsonData.__metadata.etag ? jsonData.__metadata.etag : "*" )
-				};
-
-				// STEP 4: Clean-up data
+				// B: DESIGN/OPTION: If no etag is provided, consider it a force (a faux {OPTION})
+				jsonData.__metadata = jsonData.__metadata || {};
+				// Ensure we dont pass junk as etag or SP will error
 				if ( jsonData.__metadata.etag == "" || jsonData.__metadata.etag == null ) delete jsonData.__metadata.etag;
 
-				// STEP 5: Update item
-				$.ajax({
-					type       : "POST",
-					url        : _urlBase+"/items("+ itemId +")",
-					data       : JSON.stringify(jsonData),
-					contentType: "application/json;odata=verbose",
-					headers    : objHeaders
+				// STEP 2: Update item
+				Promise.resolve()
+				.then(function(){
+					return ( jsonData.__metadata.type ? null : getListItemType() );
 				})
-				.done(function(data, textStatus){
-					// A: SP doesnt return anything for Merge/Update, so return original jsonData object so users can chain, etc.
-					// Populate both 'Id' and 'ID' to mimic SP2013
-					jsonData.ID = itemId; jsonData.Id = itemId;
+				.then(function(objMetadata){
+					// 1: Add `__metadata.type` if needed
+					if ( objMetadata && objMetadata.type ) jsonData.__metadata.type = objMetadata.type;
 
-					// B: Increment etag (if one was provided, otherwise, we cant know what it is without querying for it!)
-					if ( jsonData.__metadata.etag ) jsonData.__metadata.etag = '"'+ (Number(jsonData.__metadata.etag.replace(/[\'\"]+/gi, ''))+1) +'"';
+					// 2: Update item
+					sprLib.rest({
+						type   : "POST",
+						url    : _urlBase +"/items("+ intID +")",
+						data   : JSON.stringify(jsonData),
+						headers: {
+							"X-HTTP-Method"  : "MERGE",
+							"Accept"         : "application/json;odata=verbose",
+							"X-RequestDigest": $("#__REQUESTDIGEST").val(),
+							"IF-MATCH"       : ( jsonData.__metadata.etag ? jsonData.__metadata.etag : "*" )
+						}
+					})
+					.then(function(arrData){
+						// A: SP doesnt return anything for Merge/Update, so return original jsonData object so users can chain, etc.
+						// Populate both 'Id' and 'ID' to mimic SP2013
+						jsonData.Id = intID; jsonData.ID = intID;
 
-					// LAST: Return item
-					resolve( jsonData );
-				})
-				.fail(function(jqXHR, textStatus, errorThrown){
-					reject( parseErrorMessage(jqXHR, textStatus, errorThrown) );
+						// B: Increment etag (if one was provided, otherwise, we cant know what it is without querying for it!)
+						if ( jsonData.__metadata.etag ) jsonData.__metadata.etag = '"'+ (Number(jsonData.__metadata.etag.replace(/[\'\"]+/gi, ''))+1) +'"';
+
+						// LAST: Return item
+						resolve( jsonData );
+					})
+					.catch(function(strErr){
+						reject( strErr );
+					});
 				});
 			});
 		};
-		/* TEST
-		sprLib.list('Employees')
-		.update({ __metadata:{type:"SP.Data.EmployeesListItem"}, id:1, Name:'updated by sprLib.list().update()' })
-		.then( function(objItem){ console.table(objItem) } )
-		.catch( function(err){ console.error(err) } );
-		*/
 
 		/**
 		* Delete an item from a SP List/Library
+		* This operation is permanent (item does not go into Recycle Bin)!
 		*
 		* @example - with etag
 		* sprLib.list('Employees').delete({
@@ -1137,44 +1273,89 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 		* sprLib.list('Employees').delete({ Id: 1 })
 		* .then(function(){ console.log('Deleted!') })
 		* .catch(function(strErr){ console.error(strErr)  });
-	 	*/
+		*
+		* @return {number} Return the `id` just deleted.
+		*/
 		_newList.delete = function(jsonData) {
 			return new Promise(function(resolve,reject) {
 				// FIRST: Param checks
-				if ( !jsonData || typeof jsonData !== 'object' ) reject("{jsonData} expected");
-				if ( !jsonData['ID'] && !jsonData['Id'] && !jsonData['iD'] && !jsonData['id'] ) reject("{jsonData}['Id'] expected");
-				try { test = JSON.stringify(jsonData) } catch(ex) { reject("JSON.stringify(`jsonData`) failed") }
+				if ( !jsonData || Array.isArray(jsonData) || typeof jsonData !== 'object' || Object.keys(jsonData).length == 0 ) reject("JSON data expected! Ex: `{Name:'Brent'}`");
+				if ( !jsonData['ID'] && !jsonData['Id'] && !jsonData['iD'] && !jsonData['id'] ) reject("JSON data must have an `ID` value! Ex: `{Id:99}`");
+				try { var test = JSON.stringify(jsonData) } catch(ex) { reject("`JSON.stringify(jsonData)` failed! Send valid JSON Please. Ex: `{'Name':'Brent'}`") }
 
-				// STEP 1: Determine SP.Type if needed
-				// TODO: for all CRUD ops: `__metadata` is *OPTIONAL* (if not incld, then get List Metadta (TODO: internal func for this))
-				//if ( !jsonData.__metadata ) { promise.getMeta,then()... continue below }
-
-				// STEP 2: Set our `Id` value (users may send an of 4 different cases), then remove as its nt updateable
-				var itemId = jsonData['ID'] || jsonData['Id'] || jsonData['iD'] || jsonData['id'];
+				// STEP 1: Param Setup
+				// A: Set our `Id` value (users may send an of 4 different cases), then remove as ID is not updateable in SP
+				var intID = jsonData['ID'] || jsonData['Id'] || jsonData['iD'] || jsonData['id'];
 				delete jsonData.ID; delete jsonData.Id; delete jsonData.iD; delete jsonData.id;
+				// B: DESIGN/OPTION: If no etag is provided, consider it a force (a faux {OPTION})
+				jsonData.__metadata = jsonData.__metadata || {};
+				// Ensure we dont pass junk as etag or SP will error
+				if ( jsonData.__metadata.etag == "" || jsonData.__metadata.etag == null ) delete jsonData.__metadata.etag;
 
-				// STEP 3: Build headers
-				// DESIGN/OPTION: If no etag is provided, consider it a force (a fuax {OPTION})
-				var objHeaders = {
-					"X-HTTP-Method"  : "MERGE",
-					"Accept"         : "application/json; odata=verbose",
-					"X-RequestDigest": $("#__REQUESTDIGEST").val(),
-					"IF-MATCH"       : ( jsonData.__metadata && jsonData.__metadata.etag ? jsonData.__metadata.etag : "*" )
-				};
+				// STEP 2: Update item
+				Promise.resolve()
+				.then(function(){
+					return ( jsonData.__metadata.type ? null : getListItemType() );
+				})
+				.then(function(objMetadata){
+					// 1: Add `__metadata.type` if needed
+					if ( objMetadata && objMetadata.type ) jsonData.__metadata.type = objMetadata.type;
 
-				// STEP 4: Delete item
-				$.ajax({
-					type       : "DELETE",
-					url        : _urlBase+"/items("+ itemId +")",
-					contentType: "application/json;odata=verbose",
-					headers    : objHeaders
+					// 2: Update item
+					sprLib.rest({
+						type   : "DELETE",
+						url    : _urlBase +"/items("+ intID +")",
+						headers: {
+							"X-HTTP-Method"  : "MERGE",
+							"Accept"         : "application/json;odata=verbose",
+							"X-RequestDigest": $("#__REQUESTDIGEST").val(),
+							"IF-MATCH"       : ( jsonData.__metadata.etag ? jsonData.__metadata.etag : "*" )
+						}
+					})
+					.then(function(){
+						// SP doesnt return anything for Deletes, but SpRestLib returns ID
+						resolve( intID );
+					})
+					.catch(function(strErr){
+						reject( strErr );
+					});
+				});
+			});
+		};
+
+		/**
+		* Remove an item from a SP List/Library
+		* This operation sends the item to Recycle Bin
+		*
+		* @example - with etag
+		* sprLib.list('Employees').recycle({ __metadata:{ etag:10 }, Id:123 })
+		*
+		* @example - without etag
+		* sprLib.list('Employees').recycle({ Id:123 })
+		*
+		* @example - simple ID (number or string)
+		* sprLib.list('Employees').recycle(123)
+		*
+		* @return {number} Return the `id` just deleted.
+		*/
+		_newList.recycle = function(intID) {
+			return new Promise(function(resolve,reject) {
+				// FIRST: Param checks
+				if ( !intID || typeof intID.toString() !== 'string' ) reject("ID expected! Ex: `recycle(99)`");
+
+				// STEP 1: Recycle item
+				sprLib.rest({
+					type   : "POST",
+					url    : _urlBase +"/items("+ intID.toString() +")/recycle()",
+					headers    : { "Accept":"application/json; odata=verbose", "X-RequestDigest":$("#__REQUESTDIGEST").val() }
 				})
-				.done(function(data, textStatus){
-					// SP doesnt return anything for Deletes, so return is empty.
-					resolve();
+				.then(function(){
+					// SP returns the item guid for Recycle operations
+					// EX: {"d":{"Recycle":"ed504e3d-f8ab-4dd4-bb22-6ddaa78bd117"}}
+					resolve( Number(intID) );
 				})
-				.fail(function(jqXHR, textStatus, errorThrown){
-					reject( parseErrorMessage(jqXHR, textStatus, errorThrown) );
+				.catch(function(strErr){
+					reject( strErr );
 				});
 			});
 		};
@@ -1183,113 +1364,243 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 		return _newList;
 	};
 
-	// API: REST (raw, ad-hoc interface)
+	// API: REST (Runs internal AJAX ops *and* provides direct/ad-hoc interface to users)
 	/**
 	* Execute an ad-hoc REST query to one of many endpoints
 	*
 	* @example
 	sprLib.rest({
-		restUrl: '/sites/dev/_api/web/sitegroups',
-		restType: ["GET" | "POST"],
+		url: '/sites/dev/_api/web/sitegroups',
+		type: ['GET' | 'POST'],
 		queryCols: {
-			title: { dataName:'Title' },
-			loginName: { dataName:'LoginName' },
+			title:       { dataName:'Title' },
+			loginName:   { dataName:'LoginName' },
 			editAllowed: { dataName:'AllowMembersEditMembership' }
 		},
-		queryFilter:   "AllowMembersEditMembership eq 1",
-		queryOrderby:  "Title",
-		queryLimit: 10
+		queryFilter:  "AllowMembersEditMembership eq 1",
+		queryOrderby: "Title",
+		queryLimit:   10
 	})
 	.then(function(arrayResults){ console.table(arrayResults) });
 	*/
-	// sprLib.rest({ restUrl:"/sites/dev/_api/web/sitegroups" }).then(function(data){ console.table(data); }); (data.d.results)
-	// sprLib.rest({ restUrl:"/_api/web/lists/getbytitle('Employees')" }).then(function(data){ console.table(data); }); (data.d)
+	// sprLib.rest({ url:"/sites/dev/_api/web/sitegroups" }).then(function(data){ console.table(data); }); (data.d.results)
+	// sprLib.rest({ url:"/_api/web/lists/getbytitle('Employees')" }).then(function(data){ console.table(data); }); (data.d)
 	//
-	// EX: https://gitbrent.sharepoint.com/sites/dev/_api/web/lists/getbytitle('Employees')/
-	// EX: https://gitbrent.sharepoint.com/sites/dev/_api/web/sitegroups
+	// EX: https://siteurl.sharepoint.com/sites/dev/_api/web/lists/getbytitle('Employees')/
+	// EX: https://siteurl.sharepoint.com/sites/dev/_api/web/sitegroups
 	sprLib.rest = function rest(inOpt) {
 		return new Promise(function(resolve, reject) {
-			// STEP 1: REALITY-CHECK
-			if ( !inOpt.restUrl ) {
-				var strTemp = 'restQuery ERROR:\n\n object parameter must contain: restUrl';
-				( inObj.onFail ) ? inObj.onFail(strTemp) : console.error(strTemp);
-				return null;
-			}
-
-			// STEP 2: Setup vars
-			var objAjax = {};
-			var strAjaxUrl = "", strExpands = "";
+			// STEP 1: Options setup
+			inOpt = inOpt || {};
+			inOpt.cache = inOpt.cache || false;
+			inOpt.type  = inOpt.restType || inOpt.type || "GET";
+			inOpt.url   = (inOpt.restUrl || inOpt.url || APP_OPTS.baseUrl).replace(/\"/g, "'");
+			//
 			inOpt.spArrData = [];
 
-			// STEP 3: Construct Base URL: restUrl can be presented in many different forms...
-			if      ( inOpt.restUrl.indexOf('/_api') == 0 )						strAjaxUrl = APP_OPTS.baseUrl + inOpt.restUrl;
-			else if ( inOpt.restUrl.indexOf('_api')  == 0 )						strAjaxUrl = APP_OPTS.baseUrl + "/" + inOpt.restUrl;
-			else if ( inOpt.restUrl.indexOf('/')     == 0 &&  inOpt.queryCols )	strAjaxUrl = inOpt.restUrl + "?$select=";
-			else if ( inOpt.restUrl.indexOf('/')     == 0 && !inOpt.queryCols )	strAjaxUrl = inOpt.restUrl;
-			else if ( inOpt.restUrl.indexOf('http')  == 0 &&  inOpt.queryCols )	strAjaxUrl = inOpt.restUrl + "?$select=";
-			else if ( inOpt.restUrl.indexOf('http')  == 0 && !inOpt.queryCols )	strAjaxUrl = inOpt.restUrl;
+			// STEP 2: Setup vars
+			var arrExpands = [], strExpands = "";
+			var objAjaxQuery = {
+				url    : inOpt.url,
+				type   : inOpt.type,
+				cache  : inOpt.cache,
+				headers: inOpt.headers || { "Accept":"application/json;odata=verbose", "X-RequestDigest":$("#__REQUESTDIGEST").val() }
+			};
+			// Add `data` if included
+			if ( inOpt.data ) objAjaxQuery.data = inOpt.data;
+			// Add default `context-type` for POST if none was specified
+			if ( objAjaxQuery.type == 'POST' && !objAjaxQuery.headers.contentType ) objAjaxQuery.headers['content-type'] = 'application/json;odata=verbose';
 
-			// STEP 4: Continue building URL: Some REST API calls can contain select columns (`queryCols`)
-			if ( strAjaxUrl.indexOf('$select') > -1 ) {
-				// `listCols` can be: string, array of strings, or objects
-				// A: Convert single string column into an array for use below
-				if ( typeof inOpt.queryCols === 'string' ) inOpt.queryCols = [ inOpt.queryCols ];
+			// STEP 3: Construct Base URL: `url` can be presented in many different forms...
+			objAjaxQuery.url = (inOpt.url.toLowerCase().indexOf('http') == 0 || inOpt.url.indexOf('/') == 0 ? '' : APP_OPTS.baseUrl);
+			objAjaxQuery.url += (inOpt.url.toLowerCase().indexOf('http') != 0 && inOpt.url.indexOf('/') != 0 ? '/' : '') + inOpt.url;
 
-				// B: Build query object
-				if ( inOpt.queryCols && $.isArray(inOpt.queryCols) ) {
-					var listCols = {};
-					$.each(inOpt.queryCols, function(i,colStr){ listCols[colStr] = { dataName:colStr } });
-					inOpt.queryCols = listCols;
+			// STEP 4: Continue building up `url` with any options provided
+			{
+				// queryCols: Start 'select query'
+				if ( inOpt.queryCols ) {
+					// A: Start 'select query'
+					if ( objAjaxQuery.url.toLowerCase().indexOf('$select') == -1 ) objAjaxQuery.url += '?$select=';
+
+					// B: parse `queryCols` (can be: string, array of strings, or objects)
+					// Convert single string column into an array for use below
+					if ( typeof inOpt.queryCols === 'string' ) inOpt.queryCols = [ inOpt.queryCols ];
+
+					// C: Build query object if `queryCols` array exists - create 'expands'
+					if ( Array.isArray(inOpt.queryCols) ) {
+						var objListCols = {};
+						inOpt.queryCols.forEach(function(colStr,i){
+							var strTmp = ( colStr.indexOf('/') > -1 ? colStr.substring(0,colStr.indexOf('/')) : colStr );
+							// Handle cases where there are 2 expands from same column. Ex: 'Manager/Id' and 'Manager/Title'
+							objListCols[strTmp] = ( objListCols[strTmp] ? { dataName:objListCols[strTmp].dataName+','+colStr } : { dataName:colStr } );
+						});
+						inOpt.queryCols = objListCols;
+					}
+
+					// D: Add columns
+					if ( typeof inOpt.queryCols === 'object' ) {
+						// A: Add columns
+						$.each(inOpt.queryCols, function(key,col){
+							if ( !col.dataName ) return; // Skip columns without a 'dataName' key
+							// 1:
+							if ( objAjaxQuery.url.substring(objAjaxQuery.url.length-1) == '=' ) objAjaxQuery.url += col.dataName;
+							else objAjaxQuery.url += ( objAjaxQuery.url.lastIndexOf(',') == objAjaxQuery.url.length-1 ? col.dataName : ','+col.dataName );
+							// 2:
+							if ( col.dataName.indexOf('/') > -1 ) {
+								var strFieldName = col.dataName.substring(0, col.dataName.indexOf('/'));
+								if ( arrExpands.indexOf(strFieldName) == -1 ) {
+									arrExpands.push( strFieldName );
+									strExpands += (strExpands == '' ? '' : ',') + strFieldName;
+								}
+							}
+						});
+					}
 				}
 
-				// C: Add columns
-				$.each(inOpt.queryCols, function(key,col){
-					if ( !col.dataName ) return; // Skip columns without a 'dataName' key
-					// A:
-					if ( strAjaxUrl.substring(strAjaxUrl.length-1) == '=' ) strAjaxUrl += col.dataName;
-					else strAjaxUrl += ( strAjaxUrl.lastIndexOf(',') == strAjaxUrl.length-1 ? col.dataName : ','+col.dataName );
-					// B:
-					if ( col.dataName.indexOf('/') > -1 ) strExpands += ( strExpands == '' ? col.dataName.substring(0,col.dataName.indexOf('/')) : ','+col.dataName.substring(0,col.dataName.indexOf('/')) );
-				});
+				// queryLimit: Add maxrows (b/c default in SP2013 is a paltry 100 rows)
+				// NOTE: Only applies to GET types (POST with this param are obv. invalid!)
+				if ( inOpt.url.toLowerCase().indexOf('$top') == -1 && inOpt.type == "GET" ) {
+					objAjaxQuery.url += ( (objAjaxQuery.url.indexOf('?')>0?'&':'?')+'$top=' + ( inOpt.queryLimit ? inOpt.queryLimit : APP_OPTS.maxRows ) );
+				}
 
-				// D: Add maxrows as default in SP2013 is a paltry 100 rows
-				strAjaxUrl += '&$top=' + ( inOpt.queryLimit ? inOpt.queryLimit : APP_OPTS.maxRows );
+				// queryFilter: Add filter (if any)
+				if ( inOpt.url.toLowerCase().indexOf('$filter') == -1 && inOpt.queryFilter ) {
+					objAjaxQuery.url += ( (objAjaxQuery.url.indexOf('?')>0?'&':'?')+'$filter=' + ( inOpt.queryFilter.indexOf('%') == -1 ? encodeURI(inOpt.queryFilter) : inOpt.queryFilter ) );
+				}
 
-				// E: Add expand (if any)
-				if ( strExpands ) strAjaxUrl += '&$expand=' + strExpands;
+				// queryOrderby: Add orderby (if any)
+				if ( inOpt.url.toLowerCase().indexOf('$orderby') == -1 && inOpt.queryOrderby ) {
+					objAjaxQuery.url += ( (objAjaxQuery.url.indexOf('?')>0?'&':'?')+'$orderby=' + inOpt.queryOrderby );
+				}
 
-				// F: Add filter (if any)
-				else if ( inOpt.queryFilter ) strAjaxUrl += '&$filter=' + ( inOpt.queryFilter.indexOf('%') == -1 ? encodeURI(inOpt.queryFilter) : inOpt.queryFilter );
-
-				// G: Add orderby (if any)
-				if ( inOpt.queryOrderby ) strAjaxUrl += '&$orderby=' + inOpt.queryOrderby;
+				// Expands: Add expand (if any)
+				if ( inOpt.url.toLowerCase().indexOf('$expand') == -1 && strExpands ) {
+					objAjaxQuery.url += ( (objAjaxQuery.url.indexOf('?')>0?'&':'?')+'$expand=' + strExpands );
+				}
 			}
 
 			// STEP 5: Execute REST call
-			$.ajax({
-				url    : strAjaxUrl,
-				type   : (inOpt.ajaxType || "GET"),
-				cache  : false,
-				headers: { "Accept":"application/json; odata=verbose", "X-RequestDigest":$("#__REQUESTDIGEST").val() }
+			Promise.resolve()
+			.then(function(){
+				return new Promise(function(resolve, reject) {
+					if ( NODEJS ) {
+						objAjaxQuery.headers["Cookie"] = APP_OPTS.nodeCookie;
+						delete objAjaxQuery.headers["X-RequestDigest"];
+						var options = {
+							hostname: APP_OPTS.nodeServer,
+							path:     objAjaxQuery.url,
+							method:   objAjaxQuery.type,
+							headers:  objAjaxQuery.headers
+						};
+						var request = https.request(options, function(res){
+							var rawData = '';
+							res.setEncoding('utf8');
+							res.on('data', function(chunk){ rawData += chunk; });
+							res.on('end', function(){
+								// NOTE: SP errors come here, not `res.on(error)`, so check for errors!
+								if ( rawData.indexOf('HTTP Error') > -1 ) {
+									/* EX: bad URL is returned as
+										<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN""http://www.w3.org/TR/html4/strict.dtd">
+										<HTML><HEAD><TITLE>Bad Request</TITLE>
+										<META HTTP-EQUIV="Content-Type" Content="text/html; charset=us-ascii"></HEAD>
+										<BODY><h2>Bad Request - Invalid URL</h2>
+										<hr><p>HTTP Error 400. The request URL is invalid.</p>
+										</BODY></HTML>
+									*/
+									reject();
+								}
+								else if ( rawData.indexOf('Microsoft.SharePoint.SPException') > -1 ) {
+									// EX: {"error":{"code":"-1, Microsoft.SharePoint.SPException","message":{"lang":"en-US","value":"The field or property 'ColDoesntExist' does not exist."}}}
+									reject( JSON.parse(rawData).error.message.value + "\n\nURL used: " + objAjaxQuery.url );
+								}
+								else {
+									resolve(rawData);
+								}
+							});
+							res.on('error', function(e){
+								reject( JSON.parse(rawData).error.message.value + "\n\nURL used: " + objAjaxQuery.url );
+							});
+						});
+						request.end();
+					}
+					else {
+						$.ajax(objAjaxQuery)
+						.done(function(data,textStatus){
+							resolve(data);
+						})
+						.fail(function(jqXHR,textStatus,errorThrown){
+							// TODO: 20170628: renewSecurityToken when detected
+							reject( parseErrorMessage(jqXHR, textStatus, errorThrown) + "\n\nURL used: " + objAjaxQuery.url );
+						});
+					}
+				});
 			})
-			.done(function(data,textStatus){
-				var arrResults = [];
+			.then(function(data){
+				// A: Parse if needed
+				data = ( typeof data === 'string' && data.indexOf('{') == 0 ? JSON.parse(data) : data );
 
-				// A: Depending upon which REST endpoint used, SP can return results in various ways... (!)
-
-				// data.d.results is an [] of {}: [ {Title:'Brent', Email:'Brent.Ely@microsoft.com'}, {}, {} ]
-				if ( data && data.d && data.d.results ) {
+				// B: Iterate over results
+				// NOTE: Depending upon which REST endpoint used, SP can return results in various forms (!)
+				// EX..: data.d.results is an [] of {}: [ {Title:'Brent Ely', Email:'Brent.Ely@microsoft.com'}, {}, {} ]
+				// NOTE: Ensure results are an object because SP will return an entire HTML page as a result in some error cases!
+				if ( data && data.d && data.d.results && typeof data.d.results === 'object' ) {
 					$.each(data.d.results, function(key,result){
 						var objRow = {};
 
 						if ( inOpt.queryCols ) {
 							$.each(inOpt.queryCols, function(key,col){
-								var arrCol = col.dataName.replace(/\//gi,'.').split('.');
-								var colVal = ( arrCol.length > 1 ? result[arrCol[0]][arrCol[1]] : result[arrCol[0]] );
+								var arrCol = [];
+								var colVal = "";
+
+								// B.3.1: Get value(s) for this key
+
+								// Handle LookupMulti columns
+								if ( col.dataName && col.dataName.indexOf('/') > -1 && result[col.dataName.split('/')[0]].results ) {
+									// A:
+									// NOTE: `listCols` can have "Dept/Id" and "Dept/Title", but SP only returns *ONE* result with both vals
+									// ....: So, skip any subsequent listCol's once results have been captured
+									if ( objRow[key] ) return;
+
+									// B: Default for this column type is empty array as multi-lookup returns an array of `results`
+									colVal = [];
+
+									// C: Add any results
+									result[col.dataName.split('/')[0]].results.forEach(function(objResult,idx){
+										// EX: {__metadata:Object, Id:2, Title:"Human Resources"}
+										if ( objResult.__metadata ) delete objResult.__metadata;
+										// Capture any-and-all columns returned (aside from removal of above)
+										colVal.push( objResult );
+									});
+								}
+								// Handle Lookup/Person/Url/etc. Ex: 'Manager/Title'
+								else if ( col.dataName && col.dataName.indexOf('/') > -1 ) {
+									// A: Split lookup info object/field
+									arrCol = col.dataName.split('/');
+									// B: Remove extraneous metadata
+									if ( result[arrCol[0]].__metadata ) delete result[arrCol[0]].__metadata;
+									// B: Same for deferred. NOTE: Multi-Person fields return only a `{__deferred:{uri:'http...'}}` result when field is empty (ugh!)
+									if ( result[arrCol[0]].__deferred ) delete result[arrCol[0]].__deferred;
+									// C: Capture value
+									// CASE 1: `dataName` was used - in this case return the actual field user asked for
+									// Detect use of names listCols by comparing key to dataName
+									if ( key != arrCol[0] && key != col.dataName ) colVal = result[arrCol[0]][arrCol[1]];
+									// CASE 2: Other - in this case return the complete object (Ex: { Title:'Manager' })
+									// IMPORTANT: This de facto returns all the *other* fields queried. Eg: 'Manager/Id' and 'Manager/Title' were in cols
+									// We want to return a *single* object with these 2 elements, so they can be derefereced using 'Manger.Title' etc.
+									// Capture any-and-all columns returned (aside from removal of above)
+									else colVal = result[arrCol[0]];
+
+									// D: Value clean-up (things like empty multi-person fields may end up being `{}`)
+									if ( typeof colVal === 'object' && !Array.isArray(colVal) && Object.keys(colVal).length == 0 ) colVal = [];
+								}
+								else if ( col.dataName ) {
+									arrCol = col.dataName.split('/');
+									colVal = ( arrCol.length > 1 ? result[arrCol[0]][arrCol[1]] : result[arrCol[0]] );
+								}
+
 								// DESIGN: Not all values can be taken at return value - things like dates have to be turned into actual Date objects
 								if ( col.dataType == 'DateTime' ) objRow[key] = new Date(colVal);
 								else objRow[key] = ( APP_OPTS.cleanColHtml && col.listDataType == 'string' ? colVal.replace(/<div(.|\n)*?>/gi,'').replace(/<\/div>/gi,'') : colVal );
-								// TODO-1.0: ^^ results like 'Account/Title' will be created above (!)
 							});
 						}
 						else {
@@ -1300,7 +1611,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 					});
 				}
 				// data.d or data is an {}: { listTitle:'Game Systems', numberOfItems:25 }
-				else if ( data ) {
+				else if ( (data && data.d ? data.d : (data ? data : false)) && typeof (data.d || data) === 'object' ) {
 					var objRow = {};
 
 					$.each((data.d || data), function(key,result){
@@ -1313,65 +1624,288 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 				// C:
 				resolve( inOpt.spArrData );
 			})
-			.fail(function(jqXHR,textStatus,errorThrown){
-				reject( parseErrorMessage(jqXHR, textStatus, errorThrown) + "\n\nURL used: " + strAjaxUrl );
+			.catch(function(strErr){
+				// ROBUST: Renew token when needed (use `gRetryCounter` to prevent race condition)
+				// CASE '403': SP2013-2016 Expired Token error: Microsoft.SharePoint.SPException (-2130575252): "X-RequestDigest expired form digest"
+				// var strErrCode = jqXHR.status.toString();
+				// var strSpeCode = $.parseJSON(jqXHR.responseText).error['code'].split(',')[0];
+				// INFO: ( strErrCode == '403' && strSpeCode == '-2130575252' )
+				if ( !NODEJS && typeof strErr == 'string' && strErr.indexOf('(403)') > -1 && gRetryCounter <= APP_OPTS.maxRetries ) {
+					Promise.resolve()
+					.then(function(){
+						return sprLib.renewSecurityToken();
+					})
+					.then(function(){
+						if (DEBUG) console.log('err-403: token renewed');
+						// Some operations (ex: CRUD) will include the token value in header. It must be refreshed as well (or the new tolem is pointless!)
+						if ( inOpt.headers && inOpt.headers['X-RequestDigest'] ) inOpt.headers['X-RequestDigest'] = $("#__REQUESTDIGEST").val();
+						gRetryCounter++;
+						sprLib.rest(inOpt);
+					});
+				}
+				else {
+					gRetryCounter = 0;
+					reject(strErr);
+				}
 			});
 		});
 	}
 
-	// API: SITE (TODO: FUTURE:)
+	// API: SITE (or WEB)
+	/**
+	* NOTE: `site` and `web` may be used interchangably (`/_api/site` is the top-level Web site and all its subsites)
+	* `web` is a secuable web resource (aka: a SP website)
+	* https://msdn.microsoft.com/library/microsoft.sharepoint.spsite "top-level Web site and all its subsites. Each SPSite object, or site collection, is represented within an SPSiteCollection object"
+	*/
 	sprLib.site = function site(inUrl) {
-		return new Promise(function(resolve, reject) {
-			// TODO: POST-1.0:
-			/*
-			https://msdn.microsoft.com/library/microsoft.sharepoint.spsite
+		// STEP 1: Variables
+		var newSite = {};
+		var strBaseUrl = (inUrl ? inUrl.replace(/\/*$/g,'/') : ''); // Guarantee that baseUrl will end with a forward slash
 
-			## Site
-			* `sprLib.site().listPerms()` - Returns an array of all List/Library Permissions for the current/specified Site
-			* `sprLib.site().permGroups()` - Returns an array of Permission Groups and their membership for the current/specified Site
-			*/
-			// 2: Get SITE info (logo, etc): https://gitbrent.sharepoint.com/sites/dev/_api/web/
-			// 3: Lists+props: https://gitbrent.sharepoint.com/sites/dev/_api/web/Lists/
-		});
+		/**
+		* Get site info: (`Id`, `Email`, `IsSiteAdmin`, `LoginName`, `PrincipalType`, `Title`)
+		*
+		* @example - no args - omitting arguments means "current site"
+		* sprLib.site().info().then( function(objSite){ console.table(objSite) } );
+		*
+		* @example - get site by ID
+		* sprLib.site({ id:'12345-abcd-12345' }).info().then( function(objSite){ console.table(objSite) } );
+		*
+		* @return {Promise} - return `Promise` containing User info object
+		*/
+		newSite.info = function() {
+			return new Promise(function(resolve, reject) {
+				var arrCols = ['Id','Title','Description','Language','Created',
+					'LastItemModifiedDate','LastItemUserModifiedDate','RequestAccessEmail','SiteLogoUrl','Url','WebTemplate'
+					'AssociatedOwnerGroup/Id','AssociatedOwnerGroup/OwnerTitle','AssociatedOwnerGroup/PrincipalType'];
+
+				// TODO: Promise.all()
+				// add site/Owner (return Id, Title, Email, LoginName)
+				// https://contoso.sharepoint.com/sites/dev/_api/site/Owner
+
+				sprLib.rest({
+					url: strBaseUrl+'_api/web',
+					queryCols: arrCols,
+					cache: false
+				})
+				.then(function(arrData){
+					var objSite = {};
+
+					// A: Gather user properties
+					( arrData && Array.isArray(arrData) && arrData[0] && Object.keys(arrData[0]).length > 0 ? Object.keys(arrData[0]) : [] )
+					.forEach(function(key,idx){
+						objSite[key] = arrData[0][key];
+					});
+
+					// B: Resolve results (NOTE: if site was not found, an empty object is the correct result)
+					resolve( objSite );
+				})
+				.catch(function(strErr){
+					reject( strErr );
+				});
+			});
+		}
+
+		newSite.lists = function() {
+			return new Promise(function(resolve, reject) {
+				sprLib.rest({
+					url: strBaseUrl+'_api/web/lists',
+					queryCols: ['Id','Title','Description','ParentWebUrl','ItemCount','Hidden','ImageUrl','BaseType','BaseTemplate','RootFolder/ServerRelativeUrl']
+				})
+				.then(function(arrData){
+					// TODO: `RootFolder/ServerRelativeUrl` needs ot be flattened to just 'ServerRelativeUrl' and its value!
+					// A: Resolve results (NOTE: empty array is the correct default result)
+					resolve( arrData || [] );
+				})
+				.catch(function(strErr){
+					reject( strErr );
+				});
+			});
+		}
+
+		newSite.perms = function() {
+			return new Promise(function(resolve, reject) {
+				sprLib.rest({
+					url: strBaseUrl+'_api/web/roleAssignments',
+					queryCols: ['PrincipalId','Member/PrincipalType','Member/Title','RoleDefinitionBindings/Name','RoleDefinitionBindings/Hidden']
+				})
+				.then(function(arrData){
+					// Transform:
+					arrData.forEach(function(objItem,idx){
+						// "Rename" the key to be user-friendly
+						Object.defineProperty(objItem, 'Roles', Object.getOwnPropertyDescriptor(objItem, 'RoleDefinitionBindings'));
+						delete objItem[RoleDefinitionBindings];
+					});
+
+					// TODO: OPTION: "Show Group Members", then do lookups below, otherwise, just show users/group names
+					/*
+					// TODO: use PrincipalType to find groups and query for thier users, then full pictureisodne!!!
+					.then(arrOwnerId => { return sprLib.rest({ url:site.UrlAbs+'/_api/web/SiteGroups/GetById('+ arrOwnerId[0].Id +')/Users', queryCols:['Title','Email'] }) })
+					.then(arrUsers   => arrUsers.forEach((user,idx) => site.OwnersGroupUsers += ('<div class="itemBox">'+ user.Title +'<span style="display:none">; </span></div>') ))
+					*/
+
+					// A: Resolve results (NOTE: empty array is the correct default result)
+					resolve( arrData || [] );
+				})
+				.catch(function(strErr){
+					reject( strErr );
+				});
+			});
+		}
+
+		newSite.groups = function() {
+			return new Promise(function(resolve, reject) {
+				sprLib.rest({
+					url: strBaseUrl+'_api/web/siteGroups',
+					queryCols: ['Id','Title','OwnerTitle','Description','PrincipalType','AllowMembersEditMembership']
+				})
+				.then(function(arrData){
+					// A: Resolve results (NOTE: empty array is the correct default result)
+					resolve( arrData || [] );
+				})
+				.catch(function(strErr){
+					reject( strErr );
+				});
+			});
+		}
+
+		newSite.roles = function() {
+			return new Promise(function(resolve, reject) {
+				sprLib.rest({
+					url: strBaseUrl+'_api/web/roleDefinitions',
+					queryCols: ['Id','Name','Description','RoleTypeKind','Hidden']
+				})
+				.then(function(arrData){
+					// A: Resolve results (NOTE: empty array is the correct default result)
+					resolve( arrData || [] );
+				})
+				.catch(function(strErr){
+					reject( strErr );
+				});
+			});
+		}
+
+		// TODO:
+		newSite.subsites = function() {
+			return new Promise(function(resolve, reject) {
+				sprLib.rest({
+					url: strBaseUrl+'_api/web/webs',
+					queryCols: {
+						Id:				{ dataName:'Id'						,dispName:'Id'					},
+						Name:			{ dataName:'Title'					,dispName:'Subsite Name'		},
+						UrlAbs:			{ dataName:'Url'					,dispName:'Absolute URL'		},
+						UrlRel:			{ dataName:'ServerRelativeUrl'      ,dispNAme:'Relative URL'		},
+						Created:		{ dataName:'Created'				,dispName:'Date Created'		},
+						Modified:		{ dataName:'LastItemModifiedDate'	,dispName:'Date Last Modified'	},
+						Language:		{ dataName:'Language'				,dispName:'Language'			},
+						IsMultilang:	{ dataName:'IsMultilingual'			,dispName:'Is Multilingual?'	}
+					}
+				})
+				.then(function(arrData){
+					// A: Resolve results (NOTE: empty array is the correct default result)
+					resolve( arrData || [] );
+				})
+				.catch(function(strErr){
+					reject( strErr );
+				});
+			});
+		}
+
+		/* TODO
+
+		// TODO:
+		newSite.contentTypes = function() {
+			// ContentTypes: https://contoso.sharepoint.com/sites/dev/_api/web/ContentTypes
+		}
+
+		// TODO:
+		newSite.features = function() {
+			// Features: https://contoso.sharepoint.com/sites/dev/_api/site/Features
+		}
+
+		*/
+
+		// TODO: FUTURE:
+		/*
+			FYI:
+			/sites/dev/_api/site/Usage
+			/sites/dev/sandbox/_api/site/Usage
+			^^^ same result (Storage is whole site collection - not individual webs!)
+
+			sprLib.rest({
+				url: '_api/site/usage',
+				queryCols: ['Usage/Storage','Usage/StoragePercentageUsed']
+			})
+			<d:Usage xmlns:d="http://schemas.microsoft.com/ado/2007/08/dataservices" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" xmlns:georss="http://www.georss.org/georss" xmlns:gml="http://www.opengis.net/gml" m:type="SP.UsageInfo">
+				<d:Bandwidth m:type="Edm.Int64">0</d:Bandwidth>
+				<d:DiscussionStorage m:type="Edm.Int64">0</d:DiscussionStorage>
+				<d:Hits m:type="Edm.Int64">0</d:Hits>
+				<d:Storage m:type="Edm.Int64">512050423</d:Storage>
+				<d:StoragePercentageUsed m:type="Edm.Double">1.8628285870363472E-05</d:StoragePercentageUsed>
+				<d:Visits m:type="Edm.Int64">0</d:Visits>
+			</d:Usage>
+		*/
+
+		// LAST: Return this List to enable chaining
+		return newSite;
 	}
 
 	// API: USER
 	sprLib.user = function user(inOpt) {
-		// STEP 1: Create new user object
+		// STEP 1: Variables
 		var newUser = {};
+		var strDynUrl = "_api/Web/CurrentUser?";
 
-		// STEP 2: Build query URL based on whether its current user (no parameter) or a passed in one
-		var strDynUrl = APP_OPTS.baseUrl+"/_api/Web/" + ( inOpt && !isNaN(inOpt) ? "GetUserById("+inOpt+")" : "CurrentUser" );
+		// STEP 2: Build query URL based on whether its current user (no parameter) or a passed in object
+		// NOTE: Use CurrentUser service as it is included in SP-Foundation and will work for everyone
+		// ....: (Users will need SP-Enterprise for UserProfiles service to work)
+		// NOTE: `_api/Web/GetUserById()` for non-existant users results in a heinous error 500 that chokes jQuery.ajax.fail(),
+		// ....: so dont use it, or check user id with `siteusers?$filter` first!
+		if      ( inOpt && inOpt['id']    ) strDynUrl = "_api/Web/siteusers?$filter=Id%20eq%20"+           inOpt['id']    +"&";
+		else if ( inOpt && inOpt['email'] ) strDynUrl = "_api/web/siteusers?$filter=Email%20eq%20%27"+     inOpt['email'] +"%27&";
+		else if ( inOpt && inOpt['login'] ) strDynUrl = "_api/web/siteusers?$filter=LoginName%20eq%20%27"+ inOpt['login'].replace(/#/g,'%23') +"%27&";
+		else if ( inOpt && inOpt['title'] ) strDynUrl = "_api/web/siteusers?$filter=Title%20eq%20%27"+     inOpt['title'] +"%27&";
 
 		/**
-		* Get user's base info (`Id`, `Title`, `LoginName`, `Email`)
+		* Get user info: (`Id`, `Email`, `IsSiteAdmin`, `LoginName`, `PrincipalType`, `Title`)
 		*
-		* @example
+		* @example - no args - omitting arguments means "current user"
 		* sprLib.user().info().then( function(objUser){ console.table(objUser) } );
-		* sprLib.user(1234).info().then( function(objUser){ console.table(objUser) } );
 		*
-		* @return {Promise} - return `Promise` containing User info (`Id`, `Title`, `LoginName`, `Email`)
+		* @example - get user by ID
+		* sprLib.user({ id:1234 }).info().then( function(objUser){ console.table(objUser) } );
+		*
+		* @return {Promise} - return `Promise` containing User info object
 		*/
 		newUser.info = function() {
 			return new Promise(function(resolve, reject) {
-				// STEP 1: Get SP.User info
-				// NOTE: Use CurrentUser service as it is included in SP-Foundation and will work for everyone (Users will need SP-Enterprise for UserProfiles service to work)
-				$.ajax({
-					url    : strDynUrl += "?$select=Id,LoginName,Title,Email,PrincipalType,IsSiteAdmin",
-					type   : "GET",
-					cache  : false,
-					headers: {"Accept":"application/json; odata=verbose"}
-				})
-				.done(function(data, textStatus){
-					// A: Gather user data
-					var objUser = {};
-					$.each(data.d, function(key,result){ objUser[key] = result; });
+				// A: Handle case when options have empty/null/undef params
+				if ( inOpt == '' || (inOpt && !inOpt['id'] && !inOpt['email'] && !inOpt['login'] && !inOpt['title']) ) {
+					resolve( {} );
+					return;
+				}
 
-					// B: Resolve results
+				// B:
+				sprLib.rest({
+					url    : strDynUrl + "$select=Id,Title,Email,LoginName,IsSiteAdmin,PrincipalType",
+					headers: { "Accept":"application/json;odata=verbose" },
+					type   : "GET",
+					cache  : false
+				})
+				.then(function(arrData){
+					var objUser = {};
+
+					// A: Gather user properties
+					( arrData && Array.isArray(arrData) && arrData[0] && Object.keys(arrData[0]).length > 0 ? Object.keys(arrData[0]) : [] )
+					.forEach(function(key,idx){
+						objUser[key] = arrData[0][key];
+					});
+
+					// B: Resolve results - if user was not found, an empty object is the correct result
 					resolve( objUser );
 				})
-				.fail(function(jqXHR, textStatus, errorThrown){
-					reject( parseErrorMessage(jqXHR, textStatus, errorThrown) );
+				.catch(function(strErr){
+					reject( strErr );
 				});
 			});
 		}
@@ -1387,36 +1921,93 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 		*/
 		newUser.groups = function() {
 			return new Promise(function(resolve, reject) {
-				$.ajax({
-					url    : strDynUrl += "?$select=Groups/Id,Groups/Title&$expand=Groups",
+				// A: Handle case when options have empty/null/undef params
+				if ( inOpt == '' || (inOpt && !inOpt['id'] && !inOpt['email'] && !inOpt['login'] && !inOpt['title']) ) {
+					resolve( [] );
+					return;
+				}
+
+				// B:
+				sprLib.rest({
+					url    : strDynUrl + "$select=Groups/Id,Groups/Title,Groups/Description,Groups/LoginName,Groups/OwnerTitle&$expand=Groups",
+					headers: { "Accept":"application/json;odata=verbose" },
 					type   : "GET",
-					cache  : false,
-					headers: {"Accept":"application/json; odata=verbose"}
+					cache  : false
 				})
-				.done(function(data, textStatus) {
-					// A: Gather groups
+				.then(function(arrData){
 					var arrGroups = [];
-					$.each(data.d.Groups.results, function(idx,group){ arrGroups.push({ Id:group.Id, Title:group.Title }); });
+
+					// A: Gather groups
+					( arrData && arrData[0] && arrData[0].Groups && arrData[0].Groups.results ? arrData[0].Groups.results : [] )
+					.forEach(function(group,idx){
+						arrGroups.push({
+							Id: group.Id,
+							Title: group.Title,
+							Description: group.Description,
+							OwnerTitle: group.OwnerTitle,
+							LoginName: group.LoginName
+						});
+					});
 
 					// B: Resolve results
 					resolve( arrGroups );
 				})
-				.fail(function(jqXHR, textStatus, errorThrown) {
-					reject( parseErrorMessage(jqXHR, textStatus, errorThrown) );
+				.catch(function(strErr){
+					reject( strErr );
 				});
 			});
 		}
 
+		// TODO: Add newUser.profile - that will work when users have Enterpise license/access to User-Profile-Service
 		// FUTURE: add ability to fetch individual properties (`Manager` etc)
 		// http://sharepoint.stackexchange.com/questions/207422/getting-user-profile-property-with-dash-in-name-with-rest-api
+		// User Profile service - https://msdn.microsoft.com/en-us/library/office/dn790354.aspx
+		//
+		/* WORKS:
+			/sites/dev/_api/sp.userprofiles.profileloader.getprofileloader/getuserprofile - (The user profile of the current user)
+			/sites/dev/_api/sp.userprofiles.profileloader.getprofileloader/getuserprofile/AccountName
+			/sites/dev/_api/sp.userprofiles.profileloader.getowneruserprofile
+		*/
+		/* 20170611:
+			sprLib.rest({
+				url: "/sites/dev/_api/sp.userprofiles.profileloader.getowneruserprofile",
+				type: 'POST'
+			})
+			// WORKS in SP Online
+			PictureUrl, SipAddress, etc.
+		*/
+		/* 20170611:
+		// NOTE: Encode "#" to "%23" or query fails!
+		// NOTE: Per MSDN we can only query with `accountName`
+			sprLib.rest({
+				url: "/sites/dev/_api/SP.UserProfiles.PeopleManager/GetPropertiesFor(accountName=@v)?@v='i:0%23.f|membership|admin@siteurl.onmicrosoft.com'",
+				type: 'POST'
+			})
+		*/
+		/* More Ex:
+		http://siteurl/_api/SP.UserProfiles.PeopleManager/GetUserProfilePropertyFor(accountName=@v,propertyName='LastName')?@v='i:0%23.f|membership|brent@siteurl.onmicrosoft.com'
+		http://siteurl/_api/SP.UserProfiles.PeopleManager/GetMyProperties?$select=PictureUrl,AccountName
+		*/
 
 		// LAST: Return this List to enable chaining
 		return newUser;
 	}
 
-	// API: Version
+	// API: UTILITY: Token
+	sprLib.renewSecurityToken = function renewSecurityToken(){
+		return doRenewDigestToken();
+	}
+
+	// API: UTILITY: Library Version
 	sprLib.version = function version(){
-		return APP_VER;
+		return APP_VER+'-'+APP_BLD;
+	}
+
+	// API: NODEJS: Setup
+	sprLib.nodeConfig = function nodeConfig(inOpts){
+		inOpts = (inOpts && typeof inOpts === 'object' ? inOpts : {});
+		APP_OPTS.nodeCookie = inOpts.cookie || '';
+		APP_OPTS.nodeServer = inOpts.server || '';
 	}
 
 	/* ===============================================================================================
@@ -1442,9 +2033,13 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 
 // [Node.js] support
 if ( NODEJS ) {
-	// A: Load 2 depdendencies
-	var $ = require("jquery-node");
+	// A: Set vars
+	var isElectron = require("is-electron");
 
-	// B: Export module
+	// B: Load depdendencies
+	var $ = require("jquery-node");
+	var https = require("https");
+
+	// C: Export module
 	module.exports = sprLib;
 }
