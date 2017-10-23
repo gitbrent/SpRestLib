@@ -43,7 +43,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 (function(){
 	// APP VERSION/BUILD
 	var APP_VER = "1.3.0-beta";
-	var APP_BLD = "20171013";
+	var APP_BLD = "20171022";
 	var DEBUG = false; // (verbose mode/lots of logging)
 	// APP FUNCTIONALITY
 	var APP_FILTEROPS = {
@@ -1651,20 +1651,204 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 		});
 	}
 
-	// API: SITE (TODO: FUTURE:)
+	// API: SITE (or WEB)
+	/**
+	* NOTE: `site` and `web` may be used interchangably (`/_api/site` is the top-level Web site and all its subsites)
+	* `web` is a secuable web resource (aka: a SP website)
+	* https://msdn.microsoft.com/library/microsoft.sharepoint.spsite "top-level Web site and all its subsites. Each SPSite object, or site collection, is represented within an SPSiteCollection object"
+	*/
 	sprLib.site = function site(inUrl) {
-		return new Promise(function(resolve, reject) {
-			// TODO: POST-1.0:
-			/*
-			https://msdn.microsoft.com/library/microsoft.sharepoint.spsite
+		// STEP 1: Variables
+		var newSite = {};
+		var strBaseUrl = (inUrl ? inUrl.replace(/\/*$/g,'/') : ''); // Guarantee that baseUrl will end with a forward slash
 
-			## Site
-			* `sprLib.site().listPerms()` - Returns an array of all List/Library Permissions for the current/specified Site
-			* `sprLib.site().permGroups()` - Returns an array of Permission Groups and their membership for the current/specified Site
-			*/
-			// 2: Get SITE info (logo, etc): https://siteurl.sharepoint.com/sites/dev/_api/web/
-			// 3: Lists+props: https://siteurl.sharepoint.com/sites/dev/_api/web/Lists/
-		});
+		/**
+		* Get site info: (`Id`, `Email`, `IsSiteAdmin`, `LoginName`, `PrincipalType`, `Title`)
+		*
+		* @example - no args - omitting arguments means "current site"
+		* sprLib.site().info().then( function(objSite){ console.table(objSite) } );
+		*
+		* @example - get site by ID
+		* sprLib.site({ id:'12345-abcd-12345' }).info().then( function(objSite){ console.table(objSite) } );
+		*
+		* @return {Promise} - return `Promise` containing User info object
+		*/
+		newSite.info = function() {
+			return new Promise(function(resolve, reject) {
+				var arrCols = ['Id','Title','Description','Language','Created',
+					'LastItemModifiedDate','LastItemUserModifiedDate','RequestAccessEmail','SiteLogoUrl','Url','WebTemplate',
+					'AssociatedOwnerGroup/Id','AssociatedOwnerGroup/OwnerTitle','AssociatedOwnerGroup/PrincipalType'];
+
+				// TODO: Promise.all()
+				// add site/Owner (return Id, Title, Email, LoginName)
+				// https://contoso.sharepoint.com/sites/dev/_api/site/Owner
+
+				sprLib.rest({
+					url: strBaseUrl+'_api/web',
+					queryCols: arrCols,
+					cache: false
+				})
+				.then(function(arrData){
+					var objSite = {};
+
+					// A: Gather user properties
+					( arrData && Array.isArray(arrData) && arrData[0] && Object.keys(arrData[0]).length > 0 ? Object.keys(arrData[0]) : [] )
+					.forEach(function(key,idx){
+						objSite[key] = arrData[0][key];
+					});
+
+					// B: Resolve results (NOTE: if site was not found, an empty object is the correct result)
+					resolve( objSite );
+				})
+				.catch(function(strErr){
+					reject( strErr );
+				});
+			});
+		}
+
+		newSite.lists = function() {
+			return new Promise(function(resolve, reject) {
+				sprLib.rest({
+					url: strBaseUrl+'_api/web/lists',
+					queryCols: ['Id','Title','Description','ParentWebUrl','ItemCount','Hidden','ImageUrl','BaseType','BaseTemplate','RootFolder/ServerRelativeUrl']
+				})
+				.then(function(arrData){
+					// TODO: `RootFolder/ServerRelativeUrl` needs ot be flattened to just 'ServerRelativeUrl' and its value!
+					// A: Resolve results (NOTE: empty array is the correct default result)
+					resolve( arrData || [] );
+				})
+				.catch(function(strErr){
+					reject( strErr );
+				});
+			});
+		}
+
+		newSite.perms = function() {
+			return new Promise(function(resolve, reject) {
+				sprLib.rest({
+					url: strBaseUrl+'_api/web/roleAssignments',
+					queryCols: ['PrincipalId','Member/PrincipalType','Member/Title','RoleDefinitionBindings/Name','RoleDefinitionBindings/Hidden']
+				})
+				.then(function(arrData){
+					// Transform:
+					arrData.forEach(function(objItem,idx){
+						// "Rename" the `RoleDefinitionBindings` key to be user-friendly
+						Object.defineProperty(objItem, 'Roles', Object.getOwnPropertyDescriptor(objItem, 'RoleDefinitionBindings'));
+						delete objItem.RoleDefinitionBindings;
+
+						// Move `PrincipalId` inside {Member}
+						objItem.Member.PrincipalId = objItem.PrincipalId;
+						delete objItem.PrincipalId;
+					});
+
+					// TODO: OPTION: "Show Group Members", then do lookups below, otherwise, just show users/group names
+					// TODO: use PrincipalType to find groups and query for thier users, then full pictureisodne!!!
+					//.then(arrOwnerId => { return sprLib.rest({ url:site.UrlAbs+'/_api/web/SiteGroups/GetById('+ arrOwnerId[0].Id +')/Users', queryCols:['Title','Email'] }) })
+					//.then(arrUsers   => arrUsers.forEach((user,idx) => site.OwnersGroupUsers += ('<div class="itemBox">'+ user.Title +'<span style="display:none">; </span></div>') ))
+
+					// A: Resolve results (NOTE: empty array is the correct default result)
+					resolve( arrData || [] );
+				})
+				.catch(function(strErr){
+					reject( strErr );
+				});
+			});
+		}
+
+		newSite.groups = function() {
+			return new Promise(function(resolve, reject) {
+				sprLib.rest({
+					url: strBaseUrl+'_api/web/siteGroups',
+					queryCols: ['Id','Title','OwnerTitle','Description','PrincipalType','AllowMembersEditMembership']
+				})
+				.then(function(arrData){
+					// A: Resolve results (NOTE: empty array is the correct default result)
+					resolve( arrData || [] );
+				})
+				.catch(function(strErr){
+					reject( strErr );
+				});
+			});
+		}
+
+		newSite.roles = function() {
+			return new Promise(function(resolve, reject) {
+				sprLib.rest({
+					url: strBaseUrl+'_api/web/roleDefinitions',
+					queryCols: ['Id','Name','Description','RoleTypeKind','Hidden']
+				})
+				.then(function(arrData){
+					// A: Resolve results (NOTE: empty array is the correct default result)
+					resolve( arrData || [] );
+				})
+				.catch(function(strErr){
+					reject( strErr );
+				});
+			});
+		}
+
+		newSite.subsites = function() {
+			return new Promise(function(resolve, reject) {
+				sprLib.rest({
+					url: strBaseUrl+'_api/web/webs',
+					queryCols: {
+						Id:				{ dataName:'Id'						,dispName:'Id'					},
+						Name:			{ dataName:'Title'					,dispName:'Subsite Name'		},
+						UrlAbs:			{ dataName:'Url'					,dispName:'Absolute URL'		},
+						UrlRel:			{ dataName:'ServerRelativeUrl'      ,dispNAme:'Relative URL'		},
+						Created:		{ dataName:'Created'				,dispName:'Date Created'		},
+						Modified:		{ dataName:'LastItemModifiedDate'	,dispName:'Date Last Modified'	},
+						Language:		{ dataName:'Language'				,dispName:'Language'			},
+						SiteLogoUrl:	{ dataName:'SiteLogoUrl'			,dispName:'Site Logo URL'		}
+					}
+				})
+				.then(function(arrData){
+					// A: Resolve results (NOTE: empty array is the correct default result)
+					resolve( arrData || [] );
+				})
+				.catch(function(strErr){
+					reject( strErr );
+				});
+			});
+		}
+
+		/* TODO
+
+			// TODO:
+			newSite.contentTypes = function() {
+				// ContentTypes: https://contoso.sharepoint.com/sites/dev/_api/web/ContentTypes
+			}
+
+			// TODO:
+			newSite.features = function() {
+				// Features: https://contoso.sharepoint.com/sites/dev/_api/site/Features
+			}
+
+		*/
+
+		// TODO: FUTURE:
+		/*
+			FYI:
+			/sites/dev/_api/site/Usage
+			/sites/dev/sandbox/_api/site/Usage
+			^^^ same result (Storage is whole site collection - not individual webs!)
+
+			sprLib.rest({
+				url: '_api/site/usage',
+				queryCols: ['Usage/Storage','Usage/StoragePercentageUsed']
+			})
+			<d:Usage xmlns:d="http://schemas.microsoft.com/ado/2007/08/dataservices" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" xmlns:georss="http://www.georss.org/georss" xmlns:gml="http://www.opengis.net/gml" m:type="SP.UsageInfo">
+				<d:Bandwidth m:type="Edm.Int64">0</d:Bandwidth>
+				<d:DiscussionStorage m:type="Edm.Int64">0</d:DiscussionStorage>
+				<d:Hits m:type="Edm.Int64">0</d:Hits>
+				<d:Storage m:type="Edm.Int64">512050423</d:Storage>
+				<d:StoragePercentageUsed m:type="Edm.Double">1.8628285870363472E-05</d:StoragePercentageUsed>
+				<d:Visits m:type="Edm.Int64">0</d:Visits>
+			</d:Usage>
+		*/
+
+		// LAST: Return this List to enable chaining
+		return newSite;
 	}
 
 	// API: USER
