@@ -1071,6 +1071,64 @@ QUnit.module( "LIST > ITEM GET Methods" );
 }
 
 // ================================================================================================
+QUnit.module( "QA: Result Parsing" );
+// ================================================================================================
+{
+	QUnit.test("sprLib.rest() ex: 'Parsing Lookups: Lookup with 2 sub items (ex: 'Member.ID' and 'Member.Title') - plain cols", function(assert){
+		var done = assert.async();
+		// TEST:
+		sprLib.rest({
+			url: '_api/web/roleAssignments',
+			queryCols: ['PrincipalId','Member/PrincipalType','Member/Title','RoleDefinitionBindings/Name','RoleDefinitionBindings/Hidden']
+		})
+		.then(function(arrayResults){
+			var objRow = arrayResults[0];
+			assert.ok( Object.keys(objRow).length == 3, "objRow has length == 3: "+ Object.keys(objRow).length );
+			assert.ok( (objRow.Member.PrincipalType && objRow.Member.Title), "objRow.Member.PrincipalType/Title both exist: "+ objRow.Member.PrincipalType+' / '+objRow.Member.Title );
+			assert.ok( (typeof objRow.Member === 'object' && !Array.isArray(objRow.Member)), "objRow.Member is object (and !array): "+ typeof objRow.Member === 'object' );
+			assert.ok( (Array.isArray(objRow.RoleDefinitionBindings)), "objRow.RoleDef is an array: "+ Array.isArray(objRow.RoleDefinitionBindings) );
+			assert.ok( (objRow.RoleDefinitionBindings[0].Name && objRow.RoleDefinitionBindings[0].Hidden !== 'undefined'), "objRow.RoleDef[0].Name/Hidden both exist: "+ objRow.RoleDefinitionBindings[0].Name+' / '+objRow.RoleDefinitionBindings[0].Hidden );
+			assert.ok( getAsciiTableStr(arrayResults), `RESULTS:\n${getAsciiTableStr(arrayResults)}` );
+			done();
+		})
+		.catch(function(err){
+			assert.ok( (false), err );
+			done();
+		});
+	});
+
+	QUnit.test("sprLib.rest() ex: 'Parsing Lookups: Lookup with 2 sub items (ex: 'Member.ID' and 'Member.Title') - col objects", function(assert){
+		var done = assert.async();
+		// TEST:
+		sprLib.rest({
+			url: '_api/web/roleAssignments',
+			queryCols: {
+				PrincipalId:	{ dataName:'PrincipalId' },
+				PrincipalType:	{ dataName:'Member/PrincipalType' },
+				Title:			{ dataName:'Member/Title' },
+				RoleNames:		{ dataName:'RoleDefinitionBindings/Name' }
+			}
+		})
+		.then(function(arrayResults){
+			var objRow = arrayResults[0];
+			assert.ok( Object.keys(objRow).length == 4, "objRow has length == 4: "+ Object.keys(objRow).length );
+			assert.ok( (objRow.PrincipalId && objRow.PrincipalType && objRow.Title && objRow.RoleNames), "All cols exist: "+ Object.keys(arrayResults[0]).toString() );
+			assert.ok( (typeof objRow.PrincipalType === 'number'), "typeof objRow.PrincipalType === 'number': "+ typeof objRow.PrincipalType );
+			assert.ok( (Array.isArray(objRow.RoleNames)), "Array.isArray(objRow.RoleNames): "+ Array.isArray(objRow.RoleNames) );
+			assert.ok( (objRow.RoleNames[0].Name), "objRow.RoleNames[0].Name exists: "+ objRow.RoleNames[0].Name );
+			assert.ok( getAsciiTableStr(arrayResults), `RESULTS:\n${getAsciiTableStr(arrayResults)}` );
+			done();
+		})
+		.catch(function(err){
+			assert.ok( (false), err );
+			done();
+		});
+	});
+}
+
+
+
+// ================================================================================================
 QUnit.module( "REST Methods" );
 // ================================================================================================
 {
