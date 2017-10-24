@@ -59,11 +59,12 @@
 
 			let table = new AsciiTable().setHeading( arrColHeadings );
 
-			arrayResults.forEach((obj,idx)=>{
+			arrayResults.forEach((obj,idx) => {
 				let vals = [];
 				$.each(obj, function(key,val){
 					if ( typeof val === 'object' && JSON.stringify(val).indexOf("__deferred") > 0 ) val = "[[__deferred]]";
-					vals.push( ( typeof val === 'object' && key != '__metadata' ? JSON.stringify(val) : val ) );
+					if ( typeof val === 'object' && JSON.stringify(val).indexOf("__metadata") > 0 ) val = "[[__metadata]]";
+					vals.push( ( typeof val === 'object' ? JSON.stringify(val) : val ) );
 				});
 				table.addRow(vals);
 			});
@@ -112,9 +113,9 @@
 			$('#tab1-ListInfo pre code').text( 'sprLib.list(\''+ $('#selSiteLists').val() +'\').info()' );
 			sprLib.list($('#selSiteLists').val()).info()
 			.then(function(objInfo){
-				var $table = $('<table><tbody></tbody></table>');
+				var $table = $('<table class="tabModern"><tbody></tbody></table>');
 				Object.keys(objInfo).forEach(function(key,idx){
-					$table.find('tbody').append('<tr><th>'+ key +'</th>'+'<td>'+ objInfo[key] +'</td></tr>');
+					$table.find('tbody').append('<tr><th>'+ key +'</th>'+'<td class="code">'+ objInfo[key] +'</td></tr>');
 				});
 				$('#tab1-ListInfo').append( $table );
 			})
@@ -126,7 +127,7 @@
 			$('#tab1-ListCols pre code').text( 'sprLib.list(\''+ $('#selSiteLists').val() +'\').cols()' );
 			sprLib.list($('#selSiteLists').val()).cols()
 			.then(function(arrColObjs){
-				var $table = $('<table><thead><tr></tr></thead><tbody></tbody></table>');
+				var $table = $('<table class="tabModern"><thead><tr></tr></thead><tbody></tbody></table>');
 
 				if ( arrColObjs.length ) $.each(arrColObjs[0],function(key,val){ $table.find('thead tr').append('<th>'+key+'</th>') });
 
@@ -239,14 +240,18 @@
 			// TAB: Site
 			{
 				// Clear UI
-				$('#tabSite .tablesorter').trigger("destroy");
+				if ( $.tablesorter ) $('#tabSite .tablesorter').trigger("destroy");
 				$('#tabSite table tbody').empty();
 
 				// A: Site Info
 				sprLib.site().info()
 				.then(function(objSite){
 					Object.keys(objSite).forEach(function(key,idx){
-						$('#tabSiteInfo tbody').append('<tr><th>'+ key +'</th><td>'+ (typeof objSite[key] === 'object' ? JSON.stringify(objSite[key]).replace(/\,/g,'<br>') : objSite[key]) +'</td></tr>');
+						$('#tabSiteInfo tbody').append(
+							'<tr><th>'+ key +'</th>'
+							+ '<td class="code">'+ (typeof objSite[key] === 'object' ? JSON.stringify(objSite[key],null,4) : objSite[key]) +'</td>'
+							+ '</tr>'
+						);
 					});
 					if ( $.tablesorter ) $('#tabSiteInfo').tablesorter({ sortList:[[0,0]] });
 				});
@@ -344,7 +349,7 @@
 				// F: Site Subsites
 				sprLib.site().subsites()
 				.then(function(arrSites){
-					// TODO: HOWTO: Get [base] perms (and/or does it have unq perms) for a given site (aka: subsite)
+					// TODO: call each site(UrlRel) to Get [base] perms!
 
 					arrSites.forEach(function(site,idx){
 						let $row = $('<tr/>');
@@ -358,7 +363,7 @@
 				});
 			}
 
-			// TAB: List CRUD
+			// TAB: List
 			{
 				// Populate <select> with List names
 				sprLib.rest({ restUrl:'_api/web/lists/' })
@@ -395,15 +400,12 @@
 
 			// TAB: REST API
 			{
-				var rest1Code = "sprLib.rest({ restUrl:'_api/web/lists/' })\n"
+				var rest1Code = "sprLib.rest({\n"
+				 	+ "    url:  '_api/web/lists/',\n"
+					+ "    queryCols: ['BaseType','ItemCount','Title']\n"
+				 	+ "})\n"
 					+ ".then(function(arrayListObjs){\n"
-					+ "    var table = new AsciiTable('Site Lists').setHeading(['BaseType','ItemCount','Title']);\n"
-					+ "    arrayListObjs.forEach(function(obj,idx){\n"
-					+ "        let vals = [];\n"
-					+ "        for (var key in obj) { if ($.inArray(key,['BaseType','ItemCount','Title']) > -1) vals.push(obj[key]) };\n"
-					+ "        table.addRow(vals);\n"
-					+ "    });\n"
-					+ "    $('#rest1Html').append( table.toString() );\n"
+					+ "    $('#rest1Html').append( getAsciiTableStr(arrayListObjs) );\n"
 					+ "});";
 				$('#rest1Code pre code').text( rest1Code );
 				eval(rest1Code);
@@ -496,10 +498,14 @@
 			</div>
 
 			<div id="tabSite" data-tab="Site Methods">
+				<div class="subTitle" style="border-bottom:2px solid #b5d5f5">Local Website</div>
+
 				<div class="subTitle" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
 					<div class="arrow active"></div>Site Info
 				</div>
 				<div>
+					<div><pre><code class="language-javascript">sprLib.site().info()</code></pre></div>
+
 					<table id="tabSiteInfo" class="tabModern">
 						<thead>
 							<tr>
@@ -512,9 +518,11 @@
 				</div>
 
 				<div class="subTitle" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
-					<div class="arrow"></div>Contents
+					<div class="arrow"></div>Site Contents
 				</div>
 				<div style="display:none">
+					<div><pre><code class="language-javascript">sprLib.site().lists()</code></pre></div>
+
 					<table id="tabSiteLists" class="tabModern">
 						<thead>
 							<tr>
@@ -528,9 +536,11 @@
 				</div>
 
 				<div class="subTitle" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
-					<div class="arrow"></div>Base Permissions
+					<div class="arrow"></div>Site Permissions
 				</div>
 				<div style="display:none">
+					<div><pre><code class="language-javascript">sprLib.site().perms()</code></pre></div>
+
 					<table id="tabSitePerms" class="tabModern">
 						<thead>
 							<tr>
@@ -543,9 +553,31 @@
 				</div>
 
 				<div class="subTitle" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
+					<div class="arrow"></div>Site Subsites
+				</div>
+				<div style="display:none">
+					<div><pre><code class="language-javascript">sprLib.site().subsites()</code></pre></div>
+
+					<table id="tabSiteSubsites" class="tabModern">
+						<thead>
+							<tr>
+								<th>Name</th>
+								<th>Perms</th>
+								<th>TODO</th>
+							</tr>
+						</thead>
+						<tbody></tbody>
+					</table>
+				</div>
+
+				<div class="subTitle" style="border-bottom:2px solid #b5d5f5">Site-Collection</div>
+
+				<div class="subTitle" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
 					<div class="arrow"></div>Permission Groups
 				</div>
 				<div style="display:none">
+					<div><pre><code class="language-javascript">sprLib.site().groups()</code></pre></div>
+
 					<table id="tabSiteGroups" class="tabModern">
 						<thead>
 							<tr>
@@ -564,27 +596,13 @@
 					<div class="arrow"></div>Permission Roles/Levels
 				</div>
 				<div style="display:none">
+					<div><pre><code class="language-javascript">sprLib.site().roles()</code></pre></div>
+
 					<table id="tabSiteRoles" class="tabModern">
 						<thead>
 							<tr>
 								<th>Name</th>
 								<th>Description</th>
-							</tr>
-						</thead>
-						<tbody></tbody>
-					</table>
-				</div>
-
-				<div class="subTitle" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
-					<div class="arrow"></div>Subsites
-				</div>
-				<div style="display:none">
-					<table id="tabSiteSubsites" class="tabModern">
-						<thead>
-							<tr>
-								<th>Name</th>
-								<th>Perms</th>
-								<th>TODO</th>
 							</tr>
 						</thead>
 						<tbody></tbody>
@@ -706,7 +724,7 @@
 				<div>
 					<div id="user1Code"><pre><code class="language-javascript"></code></pre></div>
 					<div id="user1Html" style="margin-bottom:20px">
-						<table>
+						<table class="tabModern">
 							<tbody></tbody>
 						</table>
 					</div>
@@ -716,7 +734,7 @@
 				<div>
 					<div id="user2Code"><pre><code class="language-javascript"></code></pre></div>
 					<div id="user2Html" style="margin-bottom:20px">
-						<table>
+						<table class="tabModern">
 							<thead>
 								<tr>
 									<th style="width:10%">Group ID</th>

@@ -43,8 +43,17 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 (function(){
 	// APP VERSION/BUILD
 	var APP_VER = "1.3.0-beta";
-	var APP_BLD = "20171022";
+	var APP_BLD = "20171023";
 	var DEBUG = false; // (verbose mode/lots of logging)
+	// ENUMERATIONS
+	var ENUM_PRINCIPALTYPES = {
+		"0" : "None",
+		"1" : "User",
+		"2" : "Distribution List",
+		"4" : "Security Group",
+		"8" : "SharePoint Group",
+		"15": "All"
+	};
 	// APP FUNCTIONALITY
 	var APP_FILTEROPS = {
 		"eq" : "==",
@@ -1663,7 +1672,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 		var strBaseUrl = (inUrl ? inUrl.replace(/\/*$/g,'/') : ''); // Guarantee that baseUrl will end with a forward slash
 
 		/**
-		* Get site info: (`Id`, `Email`, `IsSiteAdmin`, `LoginName`, `PrincipalType`, `Title`)
+		* Get Site information: (`Id`, `Email`, `IsSiteAdmin`, `LoginName`, `PrincipalType`, `Title`)
 		*
 		* @example - no args - omitting arguments means "current site"
 		* sprLib.site().info().then( function(objSite){ console.table(objSite) } );
@@ -1671,33 +1680,47 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 		* @example - get site by ID
 		* sprLib.site({ id:'12345-abcd-12345' }).info().then( function(objSite){ console.table(objSite) } );
 		*
-		* @return {Promise} - return `Promise` containing User info object
+		* @return {Promise} - return `Promise` containing Site info object
 		*/
 		newSite.info = function() {
 			return new Promise(function(resolve, reject) {
-				var arrCols = ['Id','Title','Description','Language','Created',
-					'LastItemModifiedDate','LastItemUserModifiedDate','RequestAccessEmail','SiteLogoUrl','Url','WebTemplate',
-					'AssociatedOwnerGroup/Id','AssociatedOwnerGroup/OwnerTitle','AssociatedOwnerGroup/PrincipalType'];
-
-				// TODO: Promise.all()
-				// add site/Owner (return Id, Title, Email, LoginName)
-				// https://contoso.sharepoint.com/sites/dev/_api/site/Owner
-
-				sprLib.rest({
-					url: strBaseUrl+'_api/web',
-					queryCols: arrCols,
-					cache: false
-				})
-				.then(function(arrData){
+				Promise.all([
+					sprLib.rest({
+						url: strBaseUrl+'_api/site',
+						queryCols: ['Owner/Id','Owner/Email','Owner/LoginName','Owner/Title','Owner/IsSiteAdmin'],
+						cache: false
+					}),
+					sprLib.rest({
+						url: strBaseUrl+'_api/web',
+						queryCols: ['Id','Title','Description','Language','Created',
+							'LastItemModifiedDate','LastItemUserModifiedDate','RequestAccessEmail','SiteLogoUrl','Url','WebTemplate',
+							'AssociatedOwnerGroup/Id',        'AssociatedMemberGroup/Id',        'AssociatedOwnerGroup/Id',        'AssociatedVisitorGroup/Id',
+							'AssociatedOwnerGroup/OwnerTitle','AssociatedMemberGroup/OwnerTitle','AssociatedOwnerGroup/OwnerTitle','AssociatedVisitorGroup/OwnerTitle',
+							'AssociatedOwnerGroup/Title',     'AssociatedMemberGroup/Title',     'AssociatedOwnerGroup/Title',     'AssociatedVisitorGroup/Title'
+						],
+						cache: false
+					})
+				])
+				.then(function(arrAllArrays){
+					var arrRest = [arrAllArrays[0][0], arrAllArrays[1][0]];
+					// ES6: Object.assign(obj1, obj2);
+					for (var attrname in arrRest[1]) { arrRest[0][attrname] = arrRest[1][attrname]; }
+					var objRest = arrRest[0];
 					var objSite = {};
 
-					// A: Gather user properties
-					( arrData && Array.isArray(arrData) && arrData[0] && Object.keys(arrData[0]).length > 0 ? Object.keys(arrData[0]) : [] )
+					// A: Gather site properties
+					( objRest && Object.keys(objRest).length > 0 ? Object.keys(objRest) : [] )
 					.forEach(function(key,idx){
-						objSite[key] = arrData[0][key];
+						objSite[key] = objRest[key];
 					});
 
-					// B: Resolve results (NOTE: if site was not found, an empty object is the correct result)
+					// B: Remove junky metadata
+					delete objSite.Owner.__metadata;
+					delete objSite.AssociatedMemberGroup.__metadata;
+					delete objSite.AssociatedOwnerGroup.__metadata;
+					delete objSite.AssociatedVisitorGroup.__metadata;
+
+					// C: Resolve results (NOTE: if site was not found, an empty object is the correct result)
 					resolve( objSite );
 				})
 				.catch(function(strErr){
@@ -1706,6 +1729,14 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 			});
 		}
 
+		/**
+		* Get Site Lists/Libraries (name and about 12 other fields)
+		*
+		* @example
+		* sprLib.site().lists().then( function(arr){ console.table(arr) } );
+		*
+		* @return {Promise} - Return `Promise` containing Site Lists/Libraries
+		*/
 		newSite.lists = function() {
 			return new Promise(function(resolve, reject) {
 				sprLib.rest({
@@ -1723,6 +1754,22 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 			});
 		}
 
+		/**
+		* Get Site base permissions
+		* Returns array of obejcts with 2 keys: `Member` and `Roles`
+		*
+		* @example - sprLib.site().perms().then( arr => console.table(arr) );
+		.--------------------------------------------------------------------------------------------------------------------------------------------------.
+		|                                    Member                                    |                               Roles                               |
+		|------------------------------------------------------------------------------|-------------------------------------------------------------------|
+		| {"Title":"Brent Ely",   "PrincipalType":"User",            "PrincipalId":9}  | [{"Hidden":false,"Name":"Design"},{"Hidden":false,"Name":"Edit"}] |
+		| {"Title":"Dev Owners",  "PrincipalType":"SharePoint Group","PrincipalId":14} | [{"Hidden":false,"Name":"Full Control"}]                          |
+		| {"Title":"Dev Members", "PrincipalType":"SharePoint Group","PrincipalId":15} | [{"Hidden":false,"Name":"Edit"}]                                  |
+		| {"Title":"Dev Visitors","PrincipalType":"SharePoint Group","PrincipalId":16} | [{"Hidden":false,"Name":"Read"}]                                  |
+		'--------------------------------------------------------------------------------------------------------------------------------------------------'
+		*
+		* @return {Promise} - return `Promise` containing Site Permission object { Member:{}, Roles:[] }
+		*/
 		newSite.perms = function() {
 			return new Promise(function(resolve, reject) {
 				sprLib.rest({
@@ -1730,15 +1777,18 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 					queryCols: ['PrincipalId','Member/PrincipalType','Member/Title','RoleDefinitionBindings/Name','RoleDefinitionBindings/Hidden']
 				})
 				.then(function(arrData){
-					// Transform:
+					// Transform: Results s/b 2 keys with props inside each
 					arrData.forEach(function(objItem,idx){
-						// "Rename" the `RoleDefinitionBindings` key to be user-friendly
+						// A: "Rename" the `RoleDefinitionBindings` key to be user-friendly
 						Object.defineProperty(objItem, 'Roles', Object.getOwnPropertyDescriptor(objItem, 'RoleDefinitionBindings'));
 						delete objItem.RoleDefinitionBindings;
 
-						// Move `PrincipalId` inside {Member}
+						// B: Move `PrincipalId` inside {Member}
 						objItem.Member.PrincipalId = objItem.PrincipalId;
 						delete objItem.PrincipalId;
+
+						// C: Decode PrincipalType into text
+						objItem.Member.PrincipalType = ENUM_PRINCIPALTYPES[objItem.Member.PrincipalType] || objItem.Member.PrincipalType;
 					});
 
 					// TODO: OPTION: "Show Group Members", then do lookups below, otherwise, just show users/group names
@@ -1755,6 +1805,12 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 			});
 		}
 
+		/**
+		* Get Site Groups (all Groups under a Site Collection)
+		* Results
+		*
+		* @return {Promise} - return `Promise` containing Site Permission object { Member:{}, Roles:[] }
+		*/
 		newSite.groups = function() {
 			return new Promise(function(resolve, reject) {
 				sprLib.rest({
