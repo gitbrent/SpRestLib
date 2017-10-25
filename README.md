@@ -159,13 +159,13 @@ Syntax: `sprLib.list(listName)` or `sprLib.list(listGUID)`
 
 ### BaseUrl
 By default, the library defaults to the local directory.  There are occasions where operations would be pointed to other
-locations - reading from a subsite, etc. - and that can be done easily be setting the baseUrl at the list-level.
+locations - reading from a subsite, etc. - and that can be done easily be passing a baseUrl parameter.
 
-Syntax: `sprLib.list(listName).baseUrl(urlPath)`
+Syntax: `sprLib.list({ listName:'name', baseUrl:'urlPath' })`
 
 Example:
 ```javascript
-sprLib.list('Employees').baseUrl('/sites/HumanResources/devtest/')
+sprLib.list({ listName:'Employees', baseUrl:'/sites/HumanResources/devtest/' })
 ```
 
 
