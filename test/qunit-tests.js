@@ -11,12 +11,14 @@
  // QUnit.test("QUnit Base Test", function(assert){ assert.ok( true === true, "Passed!" ); });
  */
 
-const BASEURL = location.href.substring(0,location.href.replace('https://','https:--').indexOf('/'));
+const BASEURL = _spPageContextInfo.siteServerRelativeUrl;
 const RESTROOT = '/sites/dev';
-const RESTDEMO = '/sites/demo';
+const RESTDEMO1 = '/sites/dev/sandbox';
+const RESTDEMO2 = '/sites/dev/sandbox/';
 //
 const ARR_NAMES_FIRST = ['Jack','Mark','CutiePie','Steve','Barry','Clark','Diana','Star','Luke','Captain'];
 const ARR_NAMES_LAST  = ['Septiceye','Iplier','Martzia','Rodgers','Allen','Kent','Prince','Lord','Skywalker','Marvel'];
+const LIST_GUID2 = '23846527-218a-43a2-b5c1-7b55b6feb1a3';
 //
 var gTestUserId = 9;
 
@@ -64,6 +66,7 @@ QUnit.module( "Library OPTIONS" );
 QUnit.module( "LIST > COLS and INFO Methods" );
 // ================================================================================================
 {
+	// TEST: Using GUID
 	['Departments', 'Employees', 'Empty', '8fda2798-dbbc-497d-9840-df87b08e09c1']
 	.forEach(function(list,idx){
 		QUnit.test(`sprLib.list('${list}').cols()`, function(assert){
@@ -98,12 +101,11 @@ QUnit.module( "LIST > COLS and INFO Methods" );
 	});
 
 	// TEST: Using `baseUrl`
-	['Empty', 'Reports', '23846527-218a-43a2-b5c1-7b55b6feb1a3']
+	['Documents', 'Site Assets', 'Site Pages']
 	.forEach(function(list,idx){
-		QUnit.test(`sprLib.list('${list}').baseUrl('${RESTDEMO}').cols()`, function(assert){
+		QUnit.test(`sprLib.list({ listName:'${list}', baseUrl:'${RESTDEMO1}' }).cols()`, function(assert){
 			var done = assert.async();
-			// TEST:
-			sprLib.list(list).baseUrl(RESTDEMO).cols()
+			sprLib.list({ listName:list, baseUrl:RESTDEMO1 }).cols()
 			.then(function(arrColObjs){
 				assert.ok( arrColObjs.length > 0		,"Pass: arrColObjs.length = " + arrColObjs.length );
 				assert.ok( Object.keys(arrColObjs[0])	,"Pass: Object.keys().... = " + Object.keys(arrColObjs[0]).toString() );
@@ -117,10 +119,9 @@ QUnit.module( "LIST > COLS and INFO Methods" );
 			});
 		});
 
-		QUnit.test(`sprLib.list('${list}').baseUrl('${RESTDEMO}').info()`, function(assert){
+		QUnit.test(`sprLib.list({ listName:'${list}', baseUrl:'${RESTDEMO2}' }).info()`, function(assert){
 			var done = assert.async();
-			// TEST:
-			sprLib.list(list).baseUrl(RESTDEMO).info()
+			sprLib.list({ listName:list, baseUrl:RESTDEMO2 }).info()
 			.then(function(objInfo){
 				assert.ok( objInfo.Id		     , "Pass: Id....... = " + objInfo.Id );
 				assert.ok( objInfo.Created	     , "Pass: Created.. = " + objInfo.Created );
@@ -180,20 +181,21 @@ QUnit.module( "LIST > COLS and INFO Methods" );
 QUnit.module( "LIST > BASEURL Methods" );
 // ================================================================================================
 {
-	QUnit.test(`sprLib.list('Empty').baseUrl('${RESTROOT}')`, function(assert){
-		var sprResult = sprLib.list('Employees').baseUrl(RESTROOT);
-		//
-		assert.ok( sprResult							, "Pass: sprResult.............................. = "+ sprResult );
-		assert.ok( typeof sprResult === 'object'		, "Pass: typeof sprResult === 'object'.......... = "+ typeof sprResult );
-		assert.ok( typeof sprResult.cols === 'function'	, "Pass: typeof sprResult.cols === 'function'... = "+ typeof sprResult.cols );
-		assert.ok( sprResult.baseUrl() == RESTROOT		, "Pass: sprResult.baseUrl() == RESTROOT........ = "+ sprResult.baseUrl() );
-	});
+	QUnit.test(`sprLib.list() 'baseUrl' parsing VS!`, function(assert){
+		var done = assert.async();
+		Promise.all([
+			sprLib.list({ listName:'Employees', baseUrl:'/sites/dev//'}).cols(),
+			sprLib.list({ listName:'Employees', baseUrl:'/sites/dev/' }).cols(),
+			sprLib.list({ listName:'Employees', baseUrl:'/sites/dev'  }).cols()
+		])
+		.then(arrArr => {
+			assert.ok(arrArr[0].length > 0);
+			assert.ok(arrArr[1].length > 0);
+			assert.ok(arrArr[2].length > 0);
+			assert.ok( arrArr[0].length == arrArr[1].length && arrArr[1].length == arrArr[2].length, "Pass: lengths all the same: "+ arrArr[0].length+'/'+arrArr[1].length+'/'+arrArr[2].length );
 
-	QUnit.test(`sprLib.list('Empty').baseUrl() VS!`, function(assert){
-		var sprHas = sprLib.list('Employees').baseUrl('/sites/demo/').baseUrl();
-		var sprNot = sprLib.list('Employees').baseUrl('/sites/demo').baseUrl();
-		//
-		assert.ok( sprHas == sprNot, "Pass: sprHas == sprNot : '"+ sprHas +"' == '"+ sprNot+ "'" );
+			done();
+		})
 	});
 }
 
@@ -1126,8 +1128,6 @@ QUnit.module( "QA: Result Parsing" );
 	});
 }
 
-
-
 // ================================================================================================
 QUnit.module( "REST Methods" );
 // ================================================================================================
@@ -1198,7 +1198,7 @@ QUnit.module( "REST Methods" );
 		var done = assert.async();
 		// TEST:
 		sprLib.rest({
-			url: BASEURL+RESTROOT+'/_api/web/sitegroups',
+			url: BASEURL+'/_api/web/sitegroups',
 			queryCols: {
 				title: { dataName:'Title' },
 				loginName: { dataName:'LoginName' },
@@ -1295,7 +1295,7 @@ QUnit.module( "REST > Parsing/Options Tests" );
 		{ testDesc:"url:relative", urlPath:  "_api/lists/getbytitle('Site Assets')/items?$select=ID" },
 		{ testDesc:"url:absolute", urlPath: "/_api/lists/getbytitle('Site Assets')/items?$select=ID" },
 		{ testDesc:"url:RESTROOT", urlPath: RESTROOT+"/_api/lists/getbytitle('Site Assets')/items?$select=ID" },
-		{ testDesc:"url:BASEURL+RESTROOT", urlPath: BASEURL+RESTROOT+"/_api/lists/getbytitle('Site Assets')/items?$select=ID" },
+		{ testDesc:"url:BASEURL+RESTROOT", urlPath: BASEURL+"/_api/lists/getbytitle('Site Assets')/items?$select=ID" },
 		{
 			testDesc: "query: queryCols",
 			urlPath:  "_api/lists/getbytitle('Site Assets')/items",

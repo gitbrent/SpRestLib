@@ -5,7 +5,7 @@
 
 **Fixed Bugs:**
 **Implemented Enhancements:**
-
+- `.list()` now accepts an object in addition to listname (string)
 
 
 

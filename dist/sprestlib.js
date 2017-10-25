@@ -43,7 +43,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 (function(){
 	// APP VERSION/BUILD
 	var APP_VER = "1.3.0-beta";
-	var APP_BLD = "20171023";
+	var APP_BLD = "20171024";
 	var DEBUG = false; // (verbose mode/lots of logging)
 	// ENUMERATIONS
 	var ENUM_PRINCIPALTYPES = {
@@ -115,6 +115,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 		updatingEnd: { 'background-color':'', 'color':'' }
 	};
 	// GLOBAL VARS
+	var gRegexGUID = /^[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}$/i;
 	var gRetryCounter = 0;
 
 	/* ===============================================================================================
@@ -616,20 +617,28 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 
 	// API: LIST (CRUD + getItems)
 	/**
-	* @param inName (string) - required - List Name or List GUID
+	* @param inOpts (string) - required - List Name or List GUID
+	* @param inOpts (object) - required - { `listName`/`listGuid` }
+	* @param inOpts (object) - required - { `listName`/`listGuid`, `baseUrl` }
 	*/
-	sprLib.list = function list(inName) {
+	sprLib.list = function list(inOpts) {
+		var _newList = {};
+		var _urlBase = "_api/lists";
+
 		// FIRST-1: Param check
-		if ( !inName || typeof inName !== 'string' ) {
+		if ( inOpts && typeof inOpts === 'string' ) {
+			// DESIGN: Accept either [ListName] or [ListGUID]
+			_urlBase += ( gRegexGUID.test(inOpts) ? "(guid'"+ inOpts +"')" : "/getbytitle('"+ inOpts.replace(/\s/gi,'%20') +"')" );
+		}
+		else if ( inOpts && typeof inOpts === 'object' && Object.keys(inOpts).length > 0 && (inOpts.listName || inOpts.listGuid) ) {
+			_urlBase = (inOpts.baseUrl ? inOpts.baseUrl.replace(/\/+$/,'')+'/_api/lists' : _urlBase);
+			_urlBase += ( gRegexGUID.test(inOpts.listName || inOpts.listGuid) ? "(guid'"+ (inOpts.listName || inOpts.listGuid) +"')" : "/getbytitle('"+ (inOpts.listName || inOpts.listGuid).replace(/\s/gi,'%20') +"')" );
+		}
+		else {
 			console.error("ERROR: A 'listName' or 'listGUID' is required! EX: `sprLib.list('Emps')`");
+			console.error(inOpts);
 			return null;
 		}
-
-		// FIRST-2: Set vars
-		var guidRegex = /^[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}$/i;
-		var _newList = {};
-		// NOTE: DESIGN: Accept either [ListName] or [ListGUID]
-		var _urlBase = "_api/lists" + ( guidRegex.test(inName) ? "(guid'"+ inName +"')" : "/getbytitle('"+ inName.replace(/\s/gi,'%20') +"')" );
 
 		/**
 		* Used after `.create()` if no {type} was provided (enables us to continue using the object in subsequnt operations)
@@ -651,22 +660,6 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 		}
 
 		// STEP 1: Add public methods
-
-		/**
-		* Set baseUrl for this List
-		* - Enables dynamically querying without redefining the library's baseUrl (eg: search subsites)
-		*
-		* @example: sprLib.list('Employees').baseUrl('/sites/dev/brent/')
-		*/
-		_newList.baseUrl = function(strUrl) {
-			if ( strUrl && strUrl.toString().length > 0 ) {
-				_urlBase = strUrl + (strUrl.substring(strUrl.length-1,strUrl.length) == "/" ? '' : '/') + "_api/lists" + ( guidRegex.test(inName) ? "(guid'"+ inName +"')" : "/getbytitle('"+ inName.replace(/\s/gi,'%20') +"')" );
-				return _newList;
-			}
-			else {
-				return ( _urlBase && _urlBase.indexOf('/_api') > -1 ? _urlBase.substring(0, _urlBase.indexOf('/_api')) : _urlBase );
-			}
-		};
 
 		/**
 		* Return array of column objects with info about each (title, REST/internal name, type, etc.)
@@ -1468,7 +1461,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 
 				// queryLimit: Add maxrows (b/c default in SP2013 is a paltry 100 rows)
 				// NOTE: Only applies to GET types (POST with this param are obv. invalid!)
-				if ( inOpt.url.toLowerCase().indexOf('$top') == -1 && inOpt.type == "GET" ) {
+				if ( (inOpt.queryFilter || objAjaxQuery.url.toLowerCase().indexOf('$select') > -1) && inOpt.url.toLowerCase().indexOf('$top') == -1 && inOpt.type == "GET" ) {
 					objAjaxQuery.url += ( (objAjaxQuery.url.indexOf('?')>0?'&':'?')+'$top=' + ( inOpt.queryLimit ? inOpt.queryLimit : APP_OPTS.maxRows ) );
 				}
 
