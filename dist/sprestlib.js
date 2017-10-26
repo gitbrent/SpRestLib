@@ -43,7 +43,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 (function(){
 	// APP VERSION/BUILD
 	var APP_VER = "1.3.0-beta";
-	var APP_BLD = "20171024";
+	var APP_BLD = "20171025";
 	var DEBUG = false; // (verbose mode/lots of logging)
 	// ENUMERATIONS
 	var ENUM_PRINCIPALTYPES = {
@@ -618,24 +618,29 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 	// API: LIST (CRUD + getItems)
 	/**
 	* @param inOpts (string) - required - List Name or List GUID
-	* @param inOpts (object) - required - { `listName`/`listGuid` }
-	* @param inOpts (object) - required - { `listName`/`listGuid`, `baseUrl` }
+	* @example - string - sprLib.list('Documents');
+	*
+	* @param inOpts (object) - required - { `name`, [`baseUrl`] }
+	* @example - string - sprLib.list({ name:'23846527-228a-41a2-b5c1-7b55b6fea1a3' });
+	* @example - string - sprLib.list({ name:'Documents' });
+	* @example - string - sprLib.list({ name:'Documents', baseUrl:'/sites/dev/sandbox' });
 	*/
 	sprLib.list = function list(inOpts) {
 		var _newList = {};
 		var _urlBase = "_api/lists";
 
-		// FIRST-1: Param check
+		// A: Param check
 		if ( inOpts && typeof inOpts === 'string' ) {
 			// DESIGN: Accept either [ListName] or [ListGUID]
 			_urlBase += ( gRegexGUID.test(inOpts) ? "(guid'"+ inOpts +"')" : "/getbytitle('"+ inOpts.replace(/\s/gi,'%20') +"')" );
 		}
-		else if ( inOpts && typeof inOpts === 'object' && Object.keys(inOpts).length > 0 && (inOpts.listName || inOpts.listGuid) ) {
+		else if ( inOpts && typeof inOpts === 'object' && Object.keys(inOpts).length > 0 && inOpts.name ) {
 			_urlBase = (inOpts.baseUrl ? inOpts.baseUrl.replace(/\/+$/,'')+'/_api/lists' : _urlBase);
-			_urlBase += ( gRegexGUID.test(inOpts.listName || inOpts.listGuid) ? "(guid'"+ (inOpts.listName || inOpts.listGuid) +"')" : "/getbytitle('"+ (inOpts.listName || inOpts.listGuid).replace(/\s/gi,'%20') +"')" );
+			_urlBase += ( gRegexGUID.test(inOpts.name) ? "(guid'"+ inOpts.name +"')" : "/getbytitle('"+ inOpts.name.replace(/\s/gi,'%20') +"')" );
 		}
 		else {
-			console.error("ERROR: A 'listName' or 'listGUID' is required! EX: `sprLib.list('Emps')`");
+			console.error("ERROR: A 'listName' or 'listGUID' is required! EX: `sprLib.list('Employees')` or `sprLib.list({ name:'Employees' })`");
+			console.error('ARGS:');
 			console.error(inOpts);
 			return null;
 		}
@@ -672,7 +677,8 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 			// https://msdn.microsoft.com/en-us/library/office/jj245826.aspx#properties
 			return new Promise(function(resolve, reject) {
 				sprLib.rest({
-					url: _urlBase+"?$select=Fields&$expand=Fields"
+					url: _urlBase+"?$select=Fields&$expand=Fields",
+					metadata: false
 				})
 				.then(function(arrData){
 					var arrColumns = [];
@@ -722,7 +728,8 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 					+ 'LastItemDeletedDate,LastItemModifiedDate,LastItemUserModifiedDate,ListItemEntityTypeFullName,Title';
 
 				sprLib.rest({
-					url: _urlBase+"?$select="+strFields
+					url: _urlBase+"?$select="+strFields,
+					metadata: false
 				})
 				.then(function(arrData){
 					resolve( (arrData && arrData.length > 0 ? arrData[0] : []) );
@@ -742,8 +749,9 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 		*
 		* | property      | type    | reqd  | description       | example/allowed vals |
 		* |---------------|---------|-------|-------------------|----------------------|
-		* | `listCols`    | array   | no    | array of column names in OData style | `listCols: ['Name', 'Badge_x0020_Number']`
-		* | `listCols`    | object  | no    | object with column properties | `listCols: { badge: { dataName:'Badge_x0020_Number' } }`
+		* | `listCols`    | array   | no    | array of column names in OData style | `listCols: ['Name', 'Badge_x0020_Number']` |
+		* | `listCols`    | object  | no    | object with column properties | `listCols: { badge: { dataName:'Badge_x0020_Number' } }` |
+		* | `metadata`    | boolean | no    | whether to return `__metadata` | `metadata: true }` |
 		* | `queryFilter` | string  | no    | OData style filter    | `ID eq 1`, `Badge_x0020_Number eq 1234` |
 		* | `queryOrderby`| string  | no    | OData style order by  | `Badge_x0020_Number`, `Badge_x0020_Number desc` [asc sort is SP2013 default] |
 		* | `queryLimit`  | number  | no    | OData style row limit | `10` would limit number of rows returned to 10 |
@@ -772,7 +780,8 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 		*   listCols:     { badgeNum: { dataName:'Badge_x0020_Number' } },
 		*   queryFilter:  "Salary gt 100000",
 		*   queryOrderby: "Hire_x0020_Date",
-		*   queryLimit:   100
+		*   queryLimit:   100,
+		*   metadata:     true
 		* })
 		*
 		* listCols properties:
@@ -871,10 +880,11 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 				.then(function(){
 					return new Promise(function(resolve, reject) {
 						var objAjaxQuery = {
-							url    : _urlBase+"/items",
-							type   : "GET",
-							cache  : inObj.cache,
-							headers: { "Accept":"application/json;odata=verbose", "X-RequestDigest":$("#__REQUESTDIGEST").val() }
+							url     : _urlBase+"/items",
+							type    : "GET",
+							cache   : inObj.cache,
+							metadata: inObj.metadata || false,
+							headers : { "Accept":"application/json;odata=verbose", "X-RequestDigest":$("#__REQUESTDIGEST").val() }
 						};
 						var arrExpands = [], strExpands = "";
 
@@ -1157,10 +1167,11 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 
 					// 2: Create item
 					sprLib.rest({
-						type   : "POST",
-						url    : _urlBase +"/items",
-						data   : JSON.stringify(jsonData),
-						headers: { "Accept":"application/json;odata=verbose", "X-RequestDigest":$("#__REQUESTDIGEST").val() }
+						type    : "POST",
+						url     : _urlBase +"/items",
+						data    : JSON.stringify(jsonData),
+						metadata: true,
+						headers : { "Accept":"application/json;odata=verbose", "X-RequestDigest":$("#__REQUESTDIGEST").val() }
 					})
 					.then(function(arrData){
 						if ( arrData && arrData[0] ) {
@@ -1231,10 +1242,11 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 
 					// 2: Update item
 					sprLib.rest({
-						type   : "POST",
-						url    : _urlBase +"/items("+ intID +")",
-						data   : JSON.stringify(jsonData),
-						headers: {
+						type    : "POST",
+						url     : _urlBase +"/items("+ intID +")",
+						data    : JSON.stringify(jsonData),
+						metadata: true,
+						headers : {
 							"X-HTTP-Method"  : "MERGE",
 							"Accept"         : "application/json;odata=verbose",
 							"X-RequestDigest": $("#__REQUESTDIGEST").val(),
@@ -1305,9 +1317,10 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 
 					// 2: Update item
 					sprLib.rest({
-						type   : "DELETE",
-						url    : _urlBase +"/items("+ intID +")",
-						headers: {
+						type    : "DELETE",
+						url     : _urlBase +"/items("+ intID +")",
+						metadata: true,
+						headers : {
 							"X-HTTP-Method"  : "MERGE",
 							"Accept"         : "application/json;odata=verbose",
 							"X-RequestDigest": $("#__REQUESTDIGEST").val(),
@@ -1347,9 +1360,10 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 
 				// STEP 1: Recycle item
 				sprLib.rest({
-					type   : "POST",
-					url    : _urlBase +"/items("+ intID.toString() +")/recycle()",
-					headers    : { "Accept":"application/json; odata=verbose", "X-RequestDigest":$("#__REQUESTDIGEST").val() }
+					type    : "POST",
+					url     : _urlBase +"/items("+ intID.toString() +")/recycle()",
+					metadata: true,
+					headers : { "Accept":"application/json; odata=verbose", "X-RequestDigest":$("#__REQUESTDIGEST").val() }
 				})
 				.then(function(){
 					// SP returns the item guid for Recycle operations
@@ -1370,6 +1384,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 	/**
 	* Execute an ad-hoc REST query to one of many endpoints
 	*
+	* @example - sprLib.rest({ url:'/sites/dev/_api/web/webs', metadata:true });
 	* @example
 	sprLib.rest({
 		url: '/sites/dev/_api/web/sitegroups',
@@ -1395,8 +1410,9 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 			// STEP 1: Options setup
 			inOpt = inOpt || {};
 			inOpt.cache = inOpt.cache || false;
-			inOpt.type  = inOpt.restType || inOpt.type || "GET";
-			inOpt.url   = (inOpt.restUrl || inOpt.url || APP_OPTS.baseUrl).replace(/\"/g, "'");
+			inOpt.metadata = inOpt.metadata || false;
+			inOpt.type = inOpt.restType || inOpt.type || "GET";
+			inOpt.url = (inOpt.restUrl || inOpt.url || APP_OPTS.baseUrl).replace(/\"/g, "'");
 			//
 			inOpt.spArrData = [];
 
@@ -1609,17 +1625,17 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 							$.each(result, function(key,val){ objRow[key] = val; });
 						}
 
+						if ( objRow.__metadata && !inOpt.metadata ) delete objRow.__metadata;
 						inOpt.spArrData.push( objRow );
 					});
 				}
-				// data.d or data is an {}: { listTitle:'Game Systems', numberOfItems:25 }
+				// EX..: data.d or data is an [object]: { listTitle:'Game Systems', numberOfItems:25 }
 				else if ( (data && data.d ? data.d : (data ? data : false)) && typeof (data.d || data) === 'object' ) {
 					var objRow = {};
 
-					$.each((data.d || data), function(key,result){
-						objRow[key] = result;
-					});
+					$.each((data.d || data), function(key,result){ objRow[key] = result; });
 
+					if ( objRow.__metadata && !inOpt.metadata ) delete objRow.__metadata;
 					inOpt.spArrData.push( objRow );
 				}
 

@@ -5,8 +5,9 @@
 
 **Fixed Bugs:**
 **Implemented Enhancements:**
+- *BREAKING CHANGE*: `list().baseUrl()` removed! (use `baseUrl` param to `list()` now)
 - `.list()` now accepts an object in addition to listname (string)
-
+- Added new `metadata` option to `list().getItems()` and `rest()` methods
 
 
 

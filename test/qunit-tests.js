@@ -2,7 +2,7 @@
  * NAME: qunit-test.js
  * DESC: tests for qunit-test.html (coded to my O365 Dev Site - YMMV)
  * AUTH: https://github.com/gitbrent/
- * DATE: Oct 03, 2017
+ * DATE: Oct 25, 2017
  *
  * HOWTO: Generate text tables for README etc.:
  * sprLib.list('Employees').getItems(['Id', 'Name', 'Badge_x0020_Number']).then(function(arrData){ console.log(getAsciiTableStr(arrData)) });
@@ -36,7 +36,8 @@ function getAsciiTableStr(arrayResults) {
 		let vals = [];
 		$.each(obj, function(key,val){
 			if ( typeof val === 'object' && JSON.stringify(val).indexOf("__deferred") > 0 ) val = "[[__deferred]]";
-			vals.push( ( typeof val === 'object' && key != '__metadata' ? JSON.stringify(val) : val ) );
+			//vals.push( ( typeof val === 'object' && key != '__metadata' ? JSON.stringify(val) : val ) );
+			vals.push( typeof val === 'object' ? JSON.stringify(val) : val );
 		});
 		table.addRow(vals);
 	});
@@ -103,9 +104,9 @@ QUnit.module( "LIST > COLS and INFO Methods" );
 	// TEST: Using `baseUrl`
 	['Documents', 'Site Assets', 'Site Pages']
 	.forEach(function(list,idx){
-		QUnit.test(`sprLib.list({ listName:'${list}', baseUrl:'${RESTDEMO1}' }).cols()`, function(assert){
+		QUnit.test(`sprLib.list({ name:'${list}', baseUrl:'${RESTDEMO1}' }).cols()`, function(assert){
 			var done = assert.async();
-			sprLib.list({ listName:list, baseUrl:RESTDEMO1 }).cols()
+			sprLib.list({ name:list, baseUrl:RESTDEMO1 }).cols()
 			.then(function(arrColObjs){
 				assert.ok( arrColObjs.length > 0		,"Pass: arrColObjs.length = " + arrColObjs.length );
 				assert.ok( Object.keys(arrColObjs[0])	,"Pass: Object.keys().... = " + Object.keys(arrColObjs[0]).toString() );
@@ -119,9 +120,9 @@ QUnit.module( "LIST > COLS and INFO Methods" );
 			});
 		});
 
-		QUnit.test(`sprLib.list({ listName:'${list}', baseUrl:'${RESTDEMO2}' }).info()`, function(assert){
+		QUnit.test(`sprLib.list({ name:'${list}', baseUrl:'${RESTDEMO2}' }).info()`, function(assert){
 			var done = assert.async();
-			sprLib.list({ listName:list, baseUrl:RESTDEMO2 }).info()
+			sprLib.list({ name:list, baseUrl:RESTDEMO2 }).info()
 			.then(function(objInfo){
 				assert.ok( objInfo.Id		     , "Pass: Id....... = " + objInfo.Id );
 				assert.ok( objInfo.Created	     , "Pass: Created.. = " + objInfo.Created );
@@ -184,9 +185,9 @@ QUnit.module( "LIST > BASEURL Methods" );
 	QUnit.test(`sprLib.list() 'baseUrl' parsing VS!`, function(assert){
 		var done = assert.async();
 		Promise.all([
-			sprLib.list({ listName:'Employees', baseUrl:'/sites/dev//'}).cols(),
-			sprLib.list({ listName:'Employees', baseUrl:'/sites/dev/' }).cols(),
-			sprLib.list({ listName:'Employees', baseUrl:'/sites/dev'  }).cols()
+			sprLib.list({ name:'Employees', baseUrl:'/sites/dev//'}).cols(),
+			sprLib.list({ name:'Employees', baseUrl:'/sites/dev/' }).cols(),
+			sprLib.list({ name:'Employees', baseUrl:'/sites/dev'  }).cols()
 		])
 		.then(arrArr => {
 			assert.ok(arrArr[0].length > 0);
@@ -247,7 +248,7 @@ QUnit.module( "LIST > ITEM CRUD Methods" );
 		var done = assert.async();
 
 		// PREP:
-		sprLib.list('Employees').getItems({ listCols:'Id', queryOrderby:'Modified', queryLimit:1 })
+		sprLib.list('Employees').getItems({ listCols:'Id', queryOrderby:'Modified', queryLimit:1, metadata:true })
 		.then(function(data){
 			// TEST:
 			sprLib.list('Employees')
@@ -316,7 +317,7 @@ QUnit.module( "LIST > ITEM CRUD Methods" );
 		var done = assert.async();
 		// PREP:
 		var gUpdateItem = {};
-		sprLib.list('Employees').getItems({ listCols:'Id', queryOrderby:'Modified', queryLimit:1 })
+		sprLib.list('Employees').getItems({ listCols:'Id', queryOrderby:'Modified', queryLimit:1, metadata:true })
 		.then(function(data){ gUpdateItem = data[0]; })
 		.then(function(){
 			// TEST:
@@ -523,7 +524,7 @@ QUnit.module( "LIST > ITEM GET Methods" );
 		.getItems()
 		.then(function(arrayResults){
 			assert.ok( arrayResults.length > 0        , "arrayResults is an Array and length > 0: "+ arrayResults.length );
-			assert.ok( (arrayResults[0].__metadata.id), "arrayResults[0].__metadata.id exists: "+ JSON.stringify(arrayResults[0].__metadata.id) );
+			assert.ok( (!arrayResults[0].__metadata)  , "arrayResults[0].__metadata does not exist!" );
 			assert.ok( getAsciiTableStr(arrayResults) , `RESULTS:\n${getAsciiTableStr(arrayResults)}`);
 			done();
 		})
@@ -540,8 +541,7 @@ QUnit.module( "LIST > ITEM GET Methods" );
 		.getItems('Name')
 		.then(function(arrayResults){
 			assert.ok( arrayResults.length > 0                 , "arrayResults is an Array and length > 0: "+ arrayResults.length );
-			assert.ok( (arrayResults[0].__metadata.id)         , "arrayResults[0].__metadata.id exists: "+ JSON.stringify(arrayResults[0].__metadata.id) );
-			assert.ok( Object.keys(arrayResults[0]).length == 2, "arrayResults[0] has length == 2: "+ Object.keys(arrayResults[0]).length );
+			assert.ok( Object.keys(arrayResults[0]).length == 1, "arrayResults[0] has length == 1: "+ Object.keys(arrayResults[0]).length );
 			assert.ok( getAsciiTableStr(arrayResults)          , `RESULTS:\n${getAsciiTableStr(arrayResults)}`);
 			done();
 		})
@@ -560,8 +560,7 @@ QUnit.module( "LIST > ITEM GET Methods" );
 		)
 		.then(function(arrayResults){
 			assert.ok( arrayResults.length > 0                 , "arrayResults is an Array and length > 0: "+ arrayResults.length );
-			assert.ok( (arrayResults[0].__metadata.id)         , "arrayResults[0].__metadata.id exists: "+ JSON.stringify(arrayResults[0].__metadata.id) );
-			assert.ok( Object.keys(arrayResults[0]).length == 4, "arrayResults[0] has length == 4: "+ Object.keys(arrayResults[0]).length );
+			assert.ok( Object.keys(arrayResults[0]).length == 3, "arrayResults[0] has length == 3: "+ Object.keys(arrayResults[0]).length );
 			assert.ok( getAsciiTableStr(arrayResults)          , `RESULTS:\n${getAsciiTableStr(arrayResults)}`);
 			done();
 		})
@@ -577,8 +576,7 @@ QUnit.module( "LIST > ITEM GET Methods" );
 		sprLib.list('Employees')
 		.getItems({ listCols:'Manager/Title' })
 		.then(function(arrayResults){
-			assert.ok( Object.keys(arrayResults[0]).length == 2, "arrayResults[0] has length == 2: "+ Object.keys(arrayResults[0]).length );
-			assert.ok( (arrayResults[0].__metadata.id)         , "arrayResults[0].__metadata.id exists: "+ JSON.stringify(arrayResults[0].__metadata.id) );
+			assert.ok( Object.keys(arrayResults[0]).length == 1, "arrayResults[0] has length == 1: "+ Object.keys(arrayResults[0]).length );
 			assert.ok( (arrayResults[0].Manager.Title)         , "arrayResults[0].Manager.Title exists: "+ JSON.stringify(arrayResults[0].Manager.Title) );
 			assert.ok( getAsciiTableStr(arrayResults)          , `RESULTS:\n${getAsciiTableStr(arrayResults)}`);
 			done();
@@ -597,8 +595,7 @@ QUnit.module( "LIST > ITEM GET Methods" );
 			listCols:['Id', 'Name', 'Manager/Title']
 		})
 		.then(function(arrayResults){
-			assert.ok( Object.keys(arrayResults[0]).length == 4, "arrayResults[0] has length == 4: "+ Object.keys(arrayResults[0]).length );
-			assert.ok( (arrayResults[0].__metadata.id)         , "arrayResults[0].__metadata.id exists: "+ JSON.stringify(arrayResults[0].__metadata.id) );
+			assert.ok( Object.keys(arrayResults[0]).length == 3, "arrayResults[0] has length == 3: "+ Object.keys(arrayResults[0]).length );
 			assert.ok( (arrayResults[0].Manager.Title)         , "arrayResults[0].Manager.Title exists: "+ JSON.stringify(arrayResults[0].Manager.Title) );
 			assert.ok( getAsciiTableStr(arrayResults)          , `RESULTS:\n${getAsciiTableStr(arrayResults)}`);
 			done();
@@ -612,9 +609,10 @@ QUnit.module( "LIST > ITEM GET Methods" );
 	QUnit.test("sprLib.getItems() 06: `listCols` with simple array of col names (Manager/Id and Manager/Title)", function(assert){
 		var done = assert.async();
 		// TEST:
-		sprLib.list('Employees')
+		sprLib.list({ name:'Employees' })
 		.getItems({
-			listCols:['Id', 'Name', 'Manager/Id', 'Manager/Title']
+			listCols: ['Id', 'Name', 'Manager/Id', 'Manager/Title'],
+			metadata: true
 		})
 		.then(function(arrayResults){
 			assert.ok( Object.keys(arrayResults[0]).length == 4, "arrayResults[0] has length == 4: "+ Object.keys(arrayResults[0]).length );
@@ -640,7 +638,8 @@ QUnit.module( "LIST > ITEM GET Methods" );
 				badgeNum: { dataName:'Badge_x0020_Number' },
 				mgrId:    { dataName:'Manager/Id'         },
 				mgrTitle: { dataName:'Manager/Title'      }
-			}
+			},
+			metadata: true
 		})
 		.then(function(arrayResults){
 			assert.ok( arrayResults.length > 0                     , "arrayResults is an Array and length > 0: "+ arrayResults.length );
@@ -670,7 +669,7 @@ QUnit.module( "LIST > ITEM GET Methods" );
 			}
 		})
 		.then(function(arrayResults){
-			assert.ok( Object.keys(arrayResults[0]).length == 5, "arrayResults[0] has length == 5: "+ Object.keys(arrayResults[0]).length );
+			assert.ok( Object.keys(arrayResults[0]).length == 4, "arrayResults[0] has length == 4: "+ Object.keys(arrayResults[0]).length );
 			assert.ok( typeof arrayResults[0].mgrTitle === 'string', "`mgrTitle` named column returned a string value: "+ arrayResults[0].mgrTitle );
 			assert.ok(
 				'"'+arrayResults[0].funcTest+'"' == '"'+arrayResults[0].name+':'+arrayResults[0].badgeNum+'"',
@@ -699,7 +698,7 @@ QUnit.module( "LIST > ITEM GET Methods" );
 			queryFilter: "Departments_x0020_Supported ne null"
 		})
 		.then(function(arrayResults){
-			assert.ok( Object.keys(arrayResults[0]).length == 4, "arrayResults[0] has length == 4: "+ Object.keys(arrayResults[0]).length );
+			assert.ok( Object.keys(arrayResults[0]).length == 3, "arrayResults[0] has length == 3: "+ Object.keys(arrayResults[0]).length );
 			assert.ok( !isNaN(arrayResults[0].depsArr[0].Id), "arrayResults[0].depsArr[0].Id is a number: "+ arrayResults[0].depsArr[0].Id );
 			assert.ok( getAsciiTableStr(arrayResults), `RESULTS:\n${getAsciiTableStr(arrayResults)}`);
 			done();
@@ -720,7 +719,7 @@ QUnit.module( "LIST > ITEM GET Methods" );
 			queryFilter: "Departments_x0020_Supported ne null"
 		})
 		.then(function(arrayResults){
-			assert.ok( Object.keys(arrayResults[0]).length == 4                  , "arrayResults[0] has length == 4: "+ Object.keys(arrayResults[0]).length );
+			assert.ok( Object.keys(arrayResults[0]).length == 3                  , "arrayResults[0] has length == 3: "+ Object.keys(arrayResults[0]).length );
 			assert.ok( (arrayResults[0].Manager.Title)                           , "arrayResults[0].Manager.Title exists: "+ JSON.stringify(arrayResults[0].Manager.Title) );
 			assert.ok( Array.isArray(arrayResults[0].Departments_x0020_Supported), "arrayResults[0].Dep[..]ted is an array: true" );
 			assert.ok( (arrayResults[0].Departments_x0020_Supported[0].Id)       , "arrayResults[0].Dep[..]ted[0].Id exists: "+ JSON.stringify(arrayResults[0].Departments_x0020_Supported[0].Id) );
@@ -754,7 +753,7 @@ QUnit.module( "LIST > ITEM GET Methods" );
 		])
 		.then(function(arrayResults){
 			var res1 = arrayResults[0];
-			assert.ok( Object.keys(res1[0]).length == 3, "res1[0] has length == 3: "+ Object.keys(res1[0]).length );
+			assert.ok( Object.keys(res1[0]).length == 2, "res1[0] has length == 2: "+ Object.keys(res1[0]).length );
 			assert.ok(
 				!isNaN( res1[0].Departments_x0020_Supported[0].Id ),
 				"res1[0].Departments_x0020_Supported[0].Id is a number: "+ res1[0].Departments_x0020_Supported[0].Id
@@ -767,7 +766,7 @@ QUnit.module( "LIST > ITEM GET Methods" );
 
 			// Empty Multi-Lookup fields should be an empty array `[]`
 			var res2 = arrayResults[1];
-			assert.ok( Object.keys(res2[0]).length == 3, "res2[0] has length == 3: "+ Object.keys(res2[0]).length );
+			assert.ok( Object.keys(res2[0]).length == 2, "res2[0] has length == 2: "+ Object.keys(res2[0]).length );
 			assert.ok(
 				(Array.isArray(res2[0].Departments_x0020_Supported) && res2[0].Departments_x0020_Supported.length == 0),
 				"res2[0].Departments_x0020_Supported == []: "+ res2[0].Departments_x0020_Supported
@@ -800,14 +799,14 @@ QUnit.module( "LIST > ITEM GET Methods" );
 		])
 		.then(function(arrayResults){
 			var res1 = arrayResults[0];
-			assert.ok( Object.keys(res1[0]).length == 3, "res1[0] has length == 3: "+ Object.keys(res1[0]).length );
+			assert.ok( Object.keys(res1[0]).length == 2, "res1[0] has length == 2: "+ Object.keys(res1[0]).length );
 			assert.ok( !isNaN(res1[0].Mentored_x0020_Team_x0020_Member[0].ID), "res1[0].Mentored_x0020_Team_x0020_Member[0].ID is a number: "+ res1[0].Mentored_x0020_Team_x0020_Member[0].ID );
 			assert.ok( (res1[0].Mentored_x0020_Team_x0020_Member[0].Title), "res1[0].Mentored_x0020_Team_x0020_Member[0].Title exists: "+ res1[0].Mentored_x0020_Team_x0020_Member[0].Title );
 			assert.ok( getAsciiTableStr(res1), `RESULTS:\n${getAsciiTableStr(res1)}`);
 
 			// Empty Person/Lookup fields should be null
 			var res2 = arrayResults[1];
-			assert.ok( Object.keys(res2[0]).length == 3, "res2[0] has length == 3: "+ Object.keys(res2[0]).length );
+			assert.ok( Object.keys(res2[0]).length == 2, "res2[0] has length == 2: "+ Object.keys(res2[0]).length );
 			assert.ok( (res2[0].Mentored_x0020_Team_x0020_Member == null), "res2[0].Mentored_x0020_Team_x0020_Member == null: "+ res2[0].Mentored_x0020_Team_x0020_Member );
 			assert.ok( getAsciiTableStr(res2), `RESULTS:\n${getAsciiTableStr(res2)}`);
 
@@ -834,7 +833,7 @@ QUnit.module( "LIST > ITEM GET Methods" );
 				queryFilter: 'Id eq '+intId
 			})
 			.then(function(arrayResults){
-				assert.ok( Object.keys(arrayResults[0]).length == 3, "arrayResults[0] has length == 3: "+ Object.keys(arrayResults[0]).length );
+				assert.ok( Object.keys(arrayResults[0]).length == 2, "arrayResults[0] has length == 2: "+ Object.keys(arrayResults[0]).length );
 				assert.ok( (arrayResults[0].Id == intId)           , "arrayResults[0].Id == intId: "+ intId );
 				assert.ok( (arrayResults[0].Name)                  , "arrayResults[0].Name exists: "+ JSON.stringify(arrayResults[0].Name) );
 				assert.ok( getAsciiTableStr(arrayResults)          , `RESULTS:\n${getAsciiTableStr(arrayResults)}`);
@@ -863,7 +862,7 @@ QUnit.module( "LIST > ITEM GET Methods" );
 				queryLimit: 1
 			})
 			.then(function(arrayResults){
-				assert.ok( Object.keys(arrayResults[0]).length == 2, "arrayResults[0] has length == 2: "+ Object.keys(arrayResults[0]).length );
+				assert.ok( Object.keys(arrayResults[0]).length == 1, "arrayResults[0] has length == 1: "+ Object.keys(arrayResults[0]).length );
 				assert.ok( (arrayResults[0].Name)                  , "arrayResults[0].Name exists: "+ JSON.stringify(arrayResults[0].Name) );
 				assert.ok( getAsciiTableStr(arrayResults)          , `RESULTS:\n${getAsciiTableStr(arrayResults)}`);
 				done();
@@ -891,7 +890,7 @@ QUnit.module( "LIST > ITEM GET Methods" );
 				queryLimit: 1
 			})
 			.then(function(arrayResults){
-				assert.ok( Object.keys(arrayResults[0]).length == 2, "arrayResults[0] has length == 2: "+ Object.keys(arrayResults[0]).length );
+				assert.ok( Object.keys(arrayResults[0]).length == 1, "arrayResults[0] has length == 1: "+ Object.keys(arrayResults[0]).length );
 				assert.ok( (arrayResults[0].Name)                  , "arrayResults[0].Name exists: "+ JSON.stringify(arrayResults[0].Name) );
 				assert.ok( getAsciiTableStr(arrayResults)          , `RESULTS:\n${getAsciiTableStr(arrayResults)}`);
 				done();
@@ -907,7 +906,7 @@ QUnit.module( "LIST > ITEM GET Methods" );
 		var done = assert.async();
 		// TEST:
 		sprLib.list('Employees')
-		.getItems({ listCols:'Name', queryLimit:3 })
+		.getItems({ listCols:'Name', queryLimit:3, metadata:true })
 		.then(function(arrayResults){
 			assert.ok( arrayResults.length == 3       , "arrayResults length == 3: "+ arrayResults.length );
 			assert.ok( (arrayResults[0].__metadata.id), "arrayResults[0].__metadata.id exists: "+ JSON.stringify(arrayResults[0].__metadata.id) );
@@ -1012,19 +1011,19 @@ QUnit.module( "LIST > ITEM GET Methods" );
 			.then(function(arrayResults){
 				var result = arrayResults[0];
 				assert.ok( true, "Negative Test: getVersions=false\n------------------" );
-				assert.ok( Object.keys(result[0]).length == 4, "result[0] has length == 4: "+ Object.keys(result[0]).length );
+				assert.ok( Object.keys(result[0]).length == 3, "result[0] has length == 43: "+ Object.keys(result[0]).length );
 				assert.ok( (true), "result[0].Versioned_x0020_Comments: "+ result[0].Versioned_x0020_Comments );
 				assert.ok( getAsciiTableStr(result), `RESULTS:\n${getAsciiTableStr(result)}` );
 
 				var result = arrayResults[1];
 				assert.ok( true, "TEST: getVersions with keyname-1\n------------------" );
-				assert.ok( Object.keys(result[0]).length == 2, "result[0] has length == 2: "+ Object.keys(result[0]).length );
+				assert.ok( Object.keys(result[0]).length == 1, "result[0] has length == 1: "+ Object.keys(result[0]).length );
 				assert.ok( (true), "result[0].appendText: "+ result[0].appendText );
 				assert.ok( getAsciiTableStr(result), `RESULTS:\n${getAsciiTableStr(result)}` );
 
 				var result = arrayResults[2];
 				assert.ok( true, "TEST: getVersions with keyname-2\n------------------" );
-				assert.ok( Object.keys(result[0]).length == 2, "result[0] has length == 2: "+ Object.keys(result[0]).length );
+				assert.ok( Object.keys(result[0]).length == 1, "result[0] has length == 1: "+ Object.keys(result[0]).length );
 				assert.ok( (true), "result[0].Versioned_x0020_Comments: "+ result[0].Versioned_x0020_Comments );
 				assert.ok( (true), "result[0].VC is Array(): "+ Array.isArray(result[0].Versioned_x0020_Comments) );
 				assert.ok( getAsciiTableStr(result), `RESULTS:\n${getAsciiTableStr(result)}` );
@@ -1047,7 +1046,6 @@ QUnit.module( "LIST > ITEM GET Methods" );
 			sprLib.list('Employees').getItems(data)
 			.then(function(arrayResults){
 				assert.ok( arrayResults.length > 0        , "arrayResults is an Array and length > 0: "+ arrayResults.length );
-				assert.ok( (arrayResults[0].__metadata.id), "arrayResults[0].__metadata.id exists: "+ JSON.stringify(arrayResults[0].__metadata.id) );
 				assert.ok( getAsciiTableStr(arrayResults) , `RESULTS:\n${getAsciiTableStr(arrayResults)}`);
 				done();
 			})
@@ -1158,11 +1156,12 @@ QUnit.module( "REST Methods" );
 		var done = assert.async();
 		// TEST:
 		sprLib.rest({
-			url: "_api/lists/getbytitle('Employees')/items?$select=Id,Name,Manager/Title&$orderby=ID%20desc&$top=5&$expand=Manager"
+			url: "_api/lists/getbytitle('Employees')/items?$select=Name,Manager/Title&$orderby=ID%20desc&$top=5&$expand=Manager"
 		})
 		.then(function(arrayResults){
-			// NOTE: Running your own select results in raw results - sprLib only parses `queryCols` (hence 5 col shere and "unparsed" Manager/Title)
-			assert.ok( Object.keys(arrayResults[0]).length == 5, "arrayResults[0] has length == 5: "+ Object.keys(arrayResults[0]).length );
+			// NOTE: Running your own select results in raw results (sprLib only parses `queryCols`). Ex: `{"Title":"Brent Ely"}`
+			assert.ok( Object.keys(arrayResults[0]).length == 2, "arrayResults[0] has length == 2: "+ Object.keys(arrayResults[0]).length );
+			assert.ok( arrayResults[0].Manager, "arrayResults[0].Manager: "+ arrayResults[0].Manager );
 			assert.ok( arrayResults.length == 5, "arrayResults has length == 5: "+ arrayResults.length );
 			assert.ok( getAsciiTableStr(arrayResults), `RESULTS:\n${getAsciiTableStr(arrayResults)}` );
 			done();
@@ -1463,108 +1462,11 @@ sprLib.rest({ restUrl:'../_api/web/GetByTitle' });
 */
 
 
-/*
-QUnit.test("sprLib.getItems() - onDone", function(assert){
-	var done = assert.async();
-	sprLib.getItems({
-		listName: 'Employees',
-		listCols: { id:{dataName:'ID'} },
-		queryLimit: 1,
-		onDone: function(){ assert.ok( true, "onDone fired!" ); done(); }
-	});
-});
-
-QUnit.test("sprLib.getItems() - with listCols", function(assert){
-	var done = assert.async();
-	sprLib.getItems({
-		listName: 'Employees',
-		listCols: {
-			id:       { dataName:'ID' },
-			name:     { dataName:'Name' },
-			badgeNum: { dataName:'Badge_x0020_Number' },
-			hireDate: { dataName:'Hire_x0020_Date', dispName:'Hire Date', dataFormat:'INTL' },
-			salary:   { dataName:'Salary' },
-			extn:     { dataName:'Extension' },
-			utilPct:  { dataName:'Utilization_x0020_Pct', dispName:'Util %' },
-			comments: { dataName:'Comments' }
-		},
-		queryLimit: 10,
-		onDone: function(arrayResults){
-			assert.ok( $.isArray(arrayResults), "onDone result is an array" );
-			assert.ok( arrayResults.length > 0, "arrayResults.length > 0" );
-			assert.ok( (arrayResults[0].__metadata && typeof arrayResults[0].__metadata !== 'undefined'), "arrayResults[0] is valid -> __metadata: "+ arrayResults[0].__metadata );
-			assert.ok( (arrayResults[0].id         && typeof arrayResults[0].name       !== 'undefined'), "arrayResults[0] is valid -> Id: "+arrayResults[0].id+" / Title: "+arrayResults[0].name );
-			// TODO: Move to the (as yet undone) MODEL TEST section
-
-			/ *
-			QUnit.test("sprLib.model('Emp').data() method", function(assert){
-				assert.ok( $.isArray(sprLib.model('Employees').data()), "sprLib.model().add().data() is an array" );
-				assert.ok( $.isArray(sprLib.model('Employees').data('array')), "sprLib.model().add().data('array') is an array" );
-				assert.ok( (typeof sprLib.model('Employees').data('object') === 'object'), "sprLib.model().add().data('object') is an object" );
-			});
-			* /
-			done();
-		}
-	});
-});
-
-QUnit.test("sprLib.getItems() - w/o listCols", function(assert){
-	var done = assert.async();
-	sprLib.getItems({
-		listName: 'Employees',
-		queryLimit: 10,
-		onDone: function(arrayResults){
-			assert.ok( $.isArray(arrayResults), "onDone result is an array" );
-			assert.ok( arrayResults.length > 0, "arrayResults.length > 0" );
-			assert.ok( ( arrayResults[0].Id ), "arrayResults[0] is valid - Id: "+arrayResults[0].Id );
-			QUnit.test("sprLib.model('Emp').data() method", function(assert){
-				assert.ok( $.isArray(sprLib.model('Employees').data()), "sprLib.model().add().data() is an array" );
-				assert.ok( $.isArray(sprLib.model('Employees').data('array')), "sprLib.model().add().data('array') is an array" );
-				assert.ok( (typeof sprLib.model('Employees').data('object') === 'object'), "sprLib.model().add().data('object') is an object" );
-			});
-			done();
-		}
-	});
-});
-
-QUnit.test("sprLib.getItems() - dataFunc listCols", function(assert){
-	var done = assert.async();
-	sprLib.getItems({
-		listName: 'Employees',
-		listCols: {
-			name:     { dataName:'Name' },
-			badgeNum: { dataName:'Badge_x0020_Number' },
-			funcTest: { dataFunc:function(objItem){ return objItem.Name +' ('+ objItem.Badge_x0020_Number+')' } }
-		},
-		queryLimit: 10,
-		onDone: function(arrayResults){
-			assert.ok( $.isArray(arrayResults), "onDone result is an array" );
-			assert.ok( arrayResults.length > 0, "arrayResults.length > 0" );
-			assert.ok( ( arrayResults[0].badgeNum ), "arrayResults[0] is valid - badgeNum: " + arrayResults[0].badgeNum );
-			assert.ok( ( arrayResults[0].funcTest ), "arrayResults[0] is valid - funcTest: " + arrayResults[0].funcTest );
-			done();
-		}
-	});
-});
-*/
-
 // ================================================================================================
 //QUnit.module( "Binding / Forms" );
 // ================================================================================================
 // sprLib.model('Employees').syncItem()
 
-// WORKS
-/*
-sprLib.model('junk').add({
-	listName: '/sites/dev/_api/web/sitegroups',
-	listCols: {
-		title: { dataName:'Title' },
-		loginName: { dataName:'LoginName' },
-		editAllowed: { dataName:'AllowMembersEditMembership' }
-	},
-	onDone: function(data){ console.table(data) }
-});
-*/
 
 /*
 some API calls require an arguamnet (group/pr0file rest endpoints ets), require an auth toekn an POST!
