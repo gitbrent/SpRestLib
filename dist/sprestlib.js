@@ -1681,13 +1681,14 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 		var strBaseUrl = (inUrl ? inUrl.replace(/\/*$/g,'/') : ''); // Guarantee that baseUrl will end with a forward slash
 
 		/**
-		* Get Site information: (`Id`, `Email`, `IsSiteAdmin`, `LoginName`, `PrincipalType`, `Title`)
+		* Get Site information:
+		* Keys: (AssociatedMemberGroup, AssociatedOwnerGroup, AssociatedVisitorGroup, Created, Description, Id, Language, LastItemModifiedDate, LastItemUserModifiedDate, Owner, RequestAccessEmail, SiteLogoUrl, Title, Url, WebTemplate)
 		*
 		* @example - no args - omitting arguments means "current site"
-		* sprLib.site().info().then( function(objSite){ console.table(objSite) } );
+		* sprLib.site().info().then( objSite => console.table([objSite]) );
 		*
 		* @example - get site by ID
-		* sprLib.site({ id:'12345-abcd-12345' }).info().then( function(objSite){ console.table(objSite) } );
+		* sprLib.site({ id:'12345-abcd-12345' }).info().then(objSite => console.table([objSite]));
 		*
 		* @return {Promise} - return `Promise` containing Site info object
 		*/
