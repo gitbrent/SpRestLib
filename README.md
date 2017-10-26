@@ -208,10 +208,9 @@ The `dataFunc` option allows you access to the entire result set and to return a
 #### Sample Code
 ```javascript
 // EX: Simple array of column names
-sprLib.list('Employees')
-.getItems( ['Id','Name','Badge_x0020_Number'] )
-.then((arrData) => console.table(arrData) })
-.catch(function(errMsg){ console.error(errMsg) });
+sprLib.list('Employees').getItems( ['Id','Name','Badge_x0020_Number'] )
+.then(arrData => console.table(arrData))
+.catch(errMsg => console.error(errMsg));
 
 // Result:
 /*
@@ -228,8 +227,8 @@ sprLib.list('Employees')
 sprLib.list('Employees').getItems({
     listCols: ['Name', 'Badge_x0020_Number', 'Hire_x0020_Date']
 })
-.then(function(arrData){ console.table(arrData) })
-.catch(function(errMsg){ console.error(errMsg) });
+.then(arrData => console.table(arrData))
+.catch(errMsg => console.error(errMsg));
 ```
 
 ```javascript
