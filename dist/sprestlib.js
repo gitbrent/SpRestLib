@@ -43,7 +43,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 (function(){
 	// APP VERSION/BUILD
 	var APP_VER = "1.3.0-beta";
-	var APP_BLD = "20171025";
+	var APP_BLD = "20171026";
 	var DEBUG = false; // (verbose mode/lots of logging)
 	// ENUMERATIONS
 	var ENUM_PRINCIPALTYPES = {
@@ -591,6 +591,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 	*/
 
 	this.sprLib = {};
+	sprLib.version = APP_VER+'-'+APP_BLD;
 
 	// API: OPTIONS
 	/**
@@ -665,6 +666,9 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 		}
 
 		// STEP 1: Add public methods
+
+		// TODO: list().perms()
+		// returns exactly what SP Perms page has (user/group, type, perm roles/levels)
 
 		/**
 		* Return array of column objects with info about each (title, REST/internal name, type, etc.)
@@ -1817,18 +1821,29 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 
 		/**
 		* Get Site Groups (all Groups under a Site Collection)
-		* Results
 		*
-		* @return {Promise} - return `Promise` containing Site Permission object { Member:{}, Roles:[] }
+		* @return {Promise} - return `Promise` containing Site Groups
 		*/
 		newSite.groups = function() {
 			return new Promise(function(resolve, reject) {
 				sprLib.rest({
 					url: strBaseUrl+'_api/web/siteGroups',
-					queryCols: ['Id','Title','OwnerTitle','Description','PrincipalType','AllowMembersEditMembership']
+					queryCols:
+						['Id','Description','Title','OwnerTitle','PrincipalType','AllowMembersEditMembership',
+						'Users/Id','Users/Title','Users/LoginName']
 				})
 				.then(function(arrData){
-					// A: Resolve results (NOTE: empty array is the correct default result)
+					// A: Filter internal/junk groups
+					if ( arrData && Array.isArray(arrData) ) {
+						arrData = arrData.filter(function(group){ return group.Title.indexOf('SharingLinks') == -1 });
+					}
+
+					// B: Decode PrincipalType
+//					arrData = arrData.map(function(item){ item.PrincipalType = (ENUM_PRINCIPALTYPES[item.PrincipalType] || item.PrincipalType); });
+// console.table(arrData);
+// TODO: FIXME: borken ^^^
+
+					// C: Resolve results (NOTE: empty array is the correct default result)
 					resolve( arrData || [] );
 				})
 				.catch(function(strErr){
@@ -1878,21 +1893,47 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 			});
 		}
 
-		/* TODO
+		/**
+		* Get Site Users (all Users under a Site Collection)
+		*
+		* @return {Promise} - return `Promise` containing Site Users
+		*/
+		newSite.users = function() {
+			return new Promise(function(resolve, reject) {
+				sprLib.rest({
+					url: strBaseUrl+'_api/web/siteUsers',
+					queryCols:['Id','Email','LoginName','PrincipalType','Title','IsSiteAdmin','Groups/Id','Groups/Title']
+				})
+				.then(function(arrData){
+					// A: Filter internal/junk users
+					if ( arrData && Array.isArray(arrData) ) {
+						arrData = arrData.filter(function(user){ return user.Title.indexOf('spocrwl') == -1 && user.Id < 1000000000 });
+					}
 
-			// TODO:
+					// B: Decode PrincipalType
+					//arrData = arrData.map(function(item){ item.PrincipalType = ENUM_PRINCIPALTYPES[item.PrincipalType] || item.PrincipalType });
+// TODO: FIXME:
+
+					// C: Resolve results (NOTE: empty array is the correct default result)
+					resolve( arrData || [] );
+				})
+				.catch(function(strErr){
+					reject( strErr );
+				});
+			});
+		}
+
+		// TODO: contentTypes & Features
+		/*
 			newSite.contentTypes = function() {
 				// ContentTypes: https://contoso.sharepoint.com/sites/dev/_api/web/ContentTypes
 			}
-
-			// TODO:
 			newSite.features = function() {
 				// Features: https://contoso.sharepoint.com/sites/dev/_api/site/Features
 			}
-
 		*/
 
-		// TODO: FUTURE:
+		// TODO: FUTURE: Usage
 		/*
 			FYI:
 			/sites/dev/_api/site/Usage
@@ -2063,11 +2104,6 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 	// API: UTILITY: Token
 	sprLib.renewSecurityToken = function renewSecurityToken(){
 		return doRenewDigestToken();
-	}
-
-	// API: UTILITY: Library Version
-	sprLib.version = function version(){
-		return APP_VER+'-'+APP_BLD;
 	}
 
 	// API: NODEJS: Setup
