@@ -6,8 +6,12 @@
 **Fixed Bugs:**
 **Implemented Enhancements:**
 - *BREAKING CHANGE*: `list().baseUrl()` removed! (use `baseUrl` param to `list()` now)
+- *BREAKING CHANGE*: `version()` method removed! (use `version` property now)
 - `.list()` now accepts an object in addition to listname (string)
 - Added new `metadata` option to `list().getItems()` and `rest()` methods
+- Added new core method: `site()` - returns users, perms, subsites, etc.
+
+
 
 
 
