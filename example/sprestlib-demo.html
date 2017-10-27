@@ -222,7 +222,7 @@
 				// JS.C: SpRestLib
 				if ( typeof sprLib !== 'undefined' ) {
 					$('#libChkSprLib .iconSvg').removeClass('question').addClass('yes');
-					$('#libChkSprLib > div:last-child').text( sprLib.version() );
+					$('#libChkSprLib > div:last-child').text( sprLib.version );
 
 					// Make human readable when relative directory returned
 					$('#spBaseUrl').text( (sprLib.baseUrl() == ".." ? _spPageContextInfo.siteAbsoluteUrl : sprLib.baseUrl()) );
