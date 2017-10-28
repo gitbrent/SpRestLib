@@ -1830,7 +1830,8 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 					url: strBaseUrl+'_api/web/siteGroups',
 					queryCols:
 						['Id','Description','Title','OwnerTitle','PrincipalType','AllowMembersEditMembership',
-						'Users/Id','Users/Title','Users/LoginName']
+						'Users/Id','Users/Title','Users/LoginName'],
+					queryLimit: 5000
 				})
 				.then(function(arrData){
 					// A: Filter internal/junk groups
@@ -1839,9 +1840,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 					}
 
 					// B: Decode PrincipalType
-//					arrData = arrData.map(function(item){ item.PrincipalType = (ENUM_PRINCIPALTYPES[item.PrincipalType] || item.PrincipalType); });
-// console.table(arrData);
-// TODO: FIXME: borken ^^^
+					arrData.forEach(function(item,idx){ item.PrincipalType = ENUM_PRINCIPALTYPES[item.PrincipalType] || item.PrincipalType });
 
 					// C: Resolve results (NOTE: empty array is the correct default result)
 					resolve( arrData || [] );
@@ -1902,7 +1901,8 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 			return new Promise(function(resolve, reject) {
 				sprLib.rest({
 					url: strBaseUrl+'_api/web/siteUsers',
-					queryCols:['Id','Email','LoginName','PrincipalType','Title','IsSiteAdmin','Groups/Id','Groups/Title']
+					queryCols: ['Id','Email','LoginName','PrincipalType','Title','IsSiteAdmin','Groups/Id','Groups/Title'],
+					queryLimit: 5000
 				})
 				.then(function(arrData){
 					// A: Filter internal/junk users
@@ -1911,8 +1911,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 					}
 
 					// B: Decode PrincipalType
-					//arrData = arrData.map(function(item){ item.PrincipalType = ENUM_PRINCIPALTYPES[item.PrincipalType] || item.PrincipalType });
-// TODO: FIXME:
+					arrData.forEach(function(item,idx){ item.PrincipalType = ENUM_PRINCIPALTYPES[item.PrincipalType] || item.PrincipalType });
 
 					// C: Resolve results (NOTE: empty array is the correct default result)
 					resolve( arrData || [] );
@@ -2100,6 +2099,14 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 		// LAST: Return this List to enable chaining
 		return newUser;
 	}
+
+
+	// TODO: add `.users()` and `.groups()` - than accept param - (eg to queyr a user, otherwise send back all under _api/web/RoleAssignments!)
+	// instead, lets add method for site users that hits _api/web/RoleAssignments - as that's the Users for a given site
+	// ex: `sprLib.site().users('all')`
+	// TODO: same for GROUPS
+
+
 
 	// API: UTILITY: Token
 	sprLib.renewSecurityToken = function renewSecurityToken(){
