@@ -43,7 +43,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 (function(){
 	// APP VERSION/BUILD
 	var APP_VER = "1.3.0-beta";
-	var APP_BLD = "20171026";
+	var APP_BLD = "20171028";
 	var DEBUG = false; // (verbose mode/lots of logging)
 	// ENUMERATIONS
 	var ENUM_PRINCIPALTYPES = {
@@ -1680,9 +1680,9 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 	* https://msdn.microsoft.com/library/microsoft.sharepoint.spsite "top-level Web site and all its subsites. Each SPSite object, or site collection, is represented within an SPSiteCollection object"
 	*/
 	sprLib.site = function site(inUrl) {
-		// STEP 1: Variables
+		// Variables
 		var newSite = {};
-		var strBaseUrl = (inUrl ? inUrl.replace(/\/*$/g,'/') : ''); // Guarantee that baseUrl will end with a forward slash
+		var strBaseUrl = (inUrl ? inUrl.replace(/\/+$/g,'/') : ''); // Guarantee that baseUrl will end with a forward slash
 
 		/**
 		* Get Site information:
@@ -1700,33 +1700,26 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 			return new Promise(function(resolve, reject) {
 				Promise.all([
 					sprLib.rest({
-						url: strBaseUrl+'_api/site',
-						queryCols: ['Owner/Id','Owner/Email','Owner/LoginName','Owner/Title','Owner/IsSiteAdmin'],
+						url: strBaseUrl+'_api/web',
+						queryCols: ['Id','Title','Description','Language','Created',
+							'LastItemModifiedDate','LastItemUserModifiedDate',
+							'RequestAccessEmail','SiteLogoUrl','Url','WebTemplate',
+							'AssociatedOwnerGroup/Id',        'AssociatedMemberGroup/Id',        'AssociatedVisitorGroup/Id',
+							'AssociatedOwnerGroup/OwnerTitle','AssociatedMemberGroup/OwnerTitle','AssociatedVisitorGroup/OwnerTitle',
+							'AssociatedOwnerGroup/Title',     'AssociatedMemberGroup/Title',     'AssociatedVisitorGroup/Title'
+						],
 						cache: false
 					}),
 					sprLib.rest({
-						url: strBaseUrl+'_api/web',
-						queryCols: ['Id','Title','Description','Language','Created',
-							'LastItemModifiedDate','LastItemUserModifiedDate','RequestAccessEmail','SiteLogoUrl','Url','WebTemplate',
-							'AssociatedOwnerGroup/Id',        'AssociatedMemberGroup/Id',        'AssociatedOwnerGroup/Id',        'AssociatedVisitorGroup/Id',
-							'AssociatedOwnerGroup/OwnerTitle','AssociatedMemberGroup/OwnerTitle','AssociatedOwnerGroup/OwnerTitle','AssociatedVisitorGroup/OwnerTitle',
-							'AssociatedOwnerGroup/Title',     'AssociatedMemberGroup/Title',     'AssociatedOwnerGroup/Title',     'AssociatedVisitorGroup/Title'
-						],
+						url: strBaseUrl+'_api/site',
+						queryCols: ['Owner/Email','Owner/LoginName','Owner/Title','Owner/IsSiteAdmin'],
 						cache: false
 					})
 				])
 				.then(function(arrAllArrays){
-					var arrRest = [arrAllArrays[0][0], arrAllArrays[1][0]];
-					// ES6: Object.assign(obj1, obj2);
-					for (var attrname in arrRest[1]) { arrRest[0][attrname] = arrRest[1][attrname]; }
-					var objRest = arrRest[0];
-					var objSite = {};
-
-					// A: Gather site properties
-					( objRest && Object.keys(objRest).length > 0 ? Object.keys(objRest) : [] )
-					.forEach(function(key,idx){
-						objSite[key] = objRest[key];
-					});
+					// A: Combine results into one object
+					var objSite = arrAllArrays[0][0];
+					objSite.Owner = arrAllArrays[1][0].Owner;
 
 					// B: Remove junky metadata
 					delete objSite.Owner.__metadata;
@@ -1758,8 +1751,10 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 					queryCols: ['Id','Title','Description','ParentWebUrl','ItemCount','Hidden','ImageUrl','BaseType','BaseTemplate','RootFolder/ServerRelativeUrl']
 				})
 				.then(function(arrData){
-					// TODO: `RootFolder/ServerRelativeUrl` needs ot be flattened to just 'ServerRelativeUrl' and its value!
-					// A: Resolve results (NOTE: empty array is the correct default result)
+					// A: Flatten value
+					arrData.forEach(function(item,idx){ item.RootFolder = item.RootFolder.ServerRelativeUrl });
+
+					// B: Resolve results (NOTE: empty array is the correct default result)
 					resolve( arrData || [] );
 				})
 				.catch(function(strErr){
@@ -1820,9 +1815,9 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 		}
 
 		/**
-		* Get Site Groups (all Groups under a Site Collection)
+		* Get SiteCollection Groups
 		*
-		* @return {Promise} - return `Promise` containing Site Groups
+		* @return {Promise} - return `Promise` containing Groups
 		*/
 		newSite.groups = function() {
 			return new Promise(function(resolve, reject) {
@@ -1851,6 +1846,11 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 			});
 		}
 
+		/**
+		* Get SiteCollection Roles
+		*
+		* @return {Promise} - return `Promise` containing Roles
+		*/
 		newSite.roles = function() {
 			return new Promise(function(resolve, reject) {
 				sprLib.rest({
@@ -1867,6 +1867,11 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 			});
 		}
 
+		/**
+		* Get Subsites
+		*
+		* @return {Promise} - return `Promise` containing Subsites
+		*/
 		newSite.subsites = function() {
 			return new Promise(function(resolve, reject) {
 				sprLib.rest({
@@ -1893,9 +1898,9 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 		}
 
 		/**
-		* Get Site Users (all Users under a Site Collection)
+		* Get SiteCollection Users
 		*
-		* @return {Promise} - return `Promise` containing Site Users
+		* @return {Promise} - return `Promise` containing Users
 		*/
 		newSite.users = function() {
 			return new Promise(function(resolve, reject) {
@@ -1921,6 +1926,26 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 				});
 			});
 		}
+
+		// FIXME: CURRENT: NEXT: 20171028
+		// TODO: Under .users() and .groups() - if no siteUrl, then return SiteCollection users/groups - otherwise just web/RoleAssignments!!
+		/*
+		{
+			// TODO: API: USERS (All Users under this webs or specified site URL)
+			sprLib.users = function users(inUrl) {
+				// Variables
+				var newSite = {};
+				var strBaseUrl = (inUrl ? inUrl.replace(/\/+$/g,'/') : ''); // Guarantee that baseUrl will end with a forward slash
+
+				// REST: _api/web/RoleAssignments
+			}
+
+			// TODO: API: GROUPS
+			sprLib.groups = function groups(inUrl) {
+				// TODO: _api/web/RoleAssignments - then return Groups (and members) (and perms)?
+			}
+		}
+		*/
 
 		// TODO: contentTypes & Features
 		/*
@@ -1957,7 +1982,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 		return newSite;
 	}
 
-	// API: USER
+	// API: USER (Current or Query User by Props)
 	sprLib.user = function user(inOpt) {
 		// STEP 1: Variables
 		var newUser = {};
@@ -2099,14 +2124,6 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 		// LAST: Return this List to enable chaining
 		return newUser;
 	}
-
-
-	// TODO: add `.users()` and `.groups()` - than accept param - (eg to queyr a user, otherwise send back all under _api/web/RoleAssignments!)
-	// instead, lets add method for site users that hits _api/web/RoleAssignments - as that's the Users for a given site
-	// ex: `sprLib.site().users('all')`
-	// TODO: same for GROUPS
-
-
 
 	// API: UTILITY: Token
 	sprLib.renewSecurityToken = function renewSecurityToken(){
