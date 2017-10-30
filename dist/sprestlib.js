@@ -42,9 +42,18 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 
 (function(){
 	// APP VERSION/BUILD
-	var APP_VER = "1.2.0";
-	var APP_BLD = "20171005";
+	var APP_VER = "1.3.0-beta";
+	var APP_BLD = "20171028";
 	var DEBUG = false; // (verbose mode/lots of logging)
+	// ENUMERATIONS
+	var ENUM_PRINCIPALTYPES = {
+		"0" : "None",
+		"1" : "User",
+		"2" : "Distribution List",
+		"4" : "Security Group",
+		"8" : "SharePoint Group",
+		"15": "All"
+	};
 	// APP FUNCTIONALITY
 	var APP_FILTEROPS = {
 		"eq" : "==",
@@ -106,6 +115,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 		updatingEnd: { 'background-color':'', 'color':'' }
 	};
 	// GLOBAL VARS
+	var gRegexGUID = /^[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}$/i;
 	var gRetryCounter = 0;
 
 	/* ===============================================================================================
@@ -581,6 +591,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 	*/
 
 	this.sprLib = {};
+	sprLib.version = APP_VER+'-'+APP_BLD;
 
 	// API: OPTIONS
 	/**
@@ -607,20 +618,33 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 
 	// API: LIST (CRUD + getItems)
 	/**
-	* @param inName (string) - required - List Name or List GUID
+	* @param inOpts (string) - required - List Name or List GUID
+	* @example - string - sprLib.list('Documents');
+	*
+	* @param inOpts (object) - required - { `name`, [`baseUrl`] }
+	* @example - string - sprLib.list({ name:'23846527-228a-41a2-b5c1-7b55b6fea1a3' });
+	* @example - string - sprLib.list({ name:'Documents' });
+	* @example - string - sprLib.list({ name:'Documents', baseUrl:'/sites/dev/sandbox' });
 	*/
-	sprLib.list = function list(inName) {
-		// FIRST-1: Param check
-		if ( !inName || typeof inName !== 'string' ) {
-			console.error("ERROR: A 'listName' or 'listGUID' is required! EX: `sprLib.list('Emps')`");
+	sprLib.list = function list(inOpts) {
+		var _newList = {};
+		var _urlBase = "_api/lists";
+
+		// A: Param check
+		if ( inOpts && typeof inOpts === 'string' ) {
+			// DESIGN: Accept either [ListName] or [ListGUID]
+			_urlBase += ( gRegexGUID.test(inOpts) ? "(guid'"+ inOpts +"')" : "/getbytitle('"+ inOpts.replace(/\s/gi,'%20') +"')" );
+		}
+		else if ( inOpts && typeof inOpts === 'object' && Object.keys(inOpts).length > 0 && inOpts.name ) {
+			_urlBase = (inOpts.baseUrl ? inOpts.baseUrl.replace(/\/+$/,'')+'/_api/lists' : _urlBase);
+			_urlBase += ( gRegexGUID.test(inOpts.name) ? "(guid'"+ inOpts.name +"')" : "/getbytitle('"+ inOpts.name.replace(/\s/gi,'%20') +"')" );
+		}
+		else {
+			console.error("ERROR: A 'listName' or 'listGUID' is required! EX: `sprLib.list('Employees')` or `sprLib.list({ name:'Employees' })`");
+			console.error('ARGS:');
+			console.error(inOpts);
 			return null;
 		}
-
-		// FIRST-2: Set vars
-		var guidRegex = /^[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}$/i;
-		var _newList = {};
-		// NOTE: DESIGN: Accept either [ListName] or [ListGUID]
-		var _urlBase = "_api/lists" + ( guidRegex.test(inName) ? "(guid'"+ inName +"')" : "/getbytitle('"+ inName.replace(/\s/gi,'%20') +"')" );
 
 		/**
 		* Used after `.create()` if no {type} was provided (enables us to continue using the object in subsequnt operations)
@@ -643,21 +667,8 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 
 		// STEP 1: Add public methods
 
-		/**
-		* Set baseUrl for this List
-		* - Enables dynamically querying without redefining the library's baseUrl (eg: search subsites)
-		*
-		* @example: sprLib.list('Employees').baseUrl('/sites/dev/brent/')
-		*/
-		_newList.baseUrl = function(strUrl) {
-			if ( strUrl && strUrl.toString().length > 0 ) {
-				_urlBase = strUrl + (strUrl.substring(strUrl.length-1,strUrl.length) == "/" ? '' : '/') + "_api/lists" + ( guidRegex.test(inName) ? "(guid'"+ inName +"')" : "/getbytitle('"+ inName.replace(/\s/gi,'%20') +"')" );
-				return _newList;
-			}
-			else {
-				return ( _urlBase && _urlBase.indexOf('/_api') > -1 ? _urlBase.substring(0, _urlBase.indexOf('/_api')) : _urlBase );
-			}
-		};
+		// TODO: list().perms()
+		// returns exactly what SP Perms page has (user/group, type, perm roles/levels)
 
 		/**
 		* Return array of column objects with info about each (title, REST/internal name, type, etc.)
@@ -670,7 +681,8 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 			// https://msdn.microsoft.com/en-us/library/office/jj245826.aspx#properties
 			return new Promise(function(resolve, reject) {
 				sprLib.rest({
-					url: _urlBase+"?$select=Fields&$expand=Fields"
+					url: _urlBase+"?$select=Fields&$expand=Fields",
+					metadata: false
 				})
 				.then(function(arrData){
 					var arrColumns = [];
@@ -720,7 +732,8 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 					+ 'LastItemDeletedDate,LastItemModifiedDate,LastItemUserModifiedDate,ListItemEntityTypeFullName,Title';
 
 				sprLib.rest({
-					url: _urlBase+"?$select="+strFields
+					url: _urlBase+"?$select="+strFields,
+					metadata: false
 				})
 				.then(function(arrData){
 					resolve( (arrData && arrData.length > 0 ? arrData[0] : []) );
@@ -740,8 +753,9 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 		*
 		* | property      | type    | reqd  | description       | example/allowed vals |
 		* |---------------|---------|-------|-------------------|----------------------|
-		* | `listCols`    | array   | no    | array of column names in OData style | `listCols: ['Name', 'Badge_x0020_Number']`
-		* | `listCols`    | object  | no    | object with column properties | `listCols: { badge: { dataName:'Badge_x0020_Number' } }`
+		* | `listCols`    | array   | no    | array of column names in OData style | `listCols: ['Name', 'Badge_x0020_Number']` |
+		* | `listCols`    | object  | no    | object with column properties | `listCols: { badge: { dataName:'Badge_x0020_Number' } }` |
+		* | `metadata`    | boolean | no    | whether to return `__metadata` | `metadata: true }` |
 		* | `queryFilter` | string  | no    | OData style filter    | `ID eq 1`, `Badge_x0020_Number eq 1234` |
 		* | `queryOrderby`| string  | no    | OData style order by  | `Badge_x0020_Number`, `Badge_x0020_Number desc` [asc sort is SP2013 default] |
 		* | `queryLimit`  | number  | no    | OData style row limit | `10` would limit number of rows returned to 10 |
@@ -770,7 +784,8 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 		*   listCols:     { badgeNum: { dataName:'Badge_x0020_Number' } },
 		*   queryFilter:  "Salary gt 100000",
 		*   queryOrderby: "Hire_x0020_Date",
-		*   queryLimit:   100
+		*   queryLimit:   100,
+		*   metadata:     true
 		* })
 		*
 		* listCols properties:
@@ -869,10 +884,11 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 				.then(function(){
 					return new Promise(function(resolve, reject) {
 						var objAjaxQuery = {
-							url    : _urlBase+"/items",
-							type   : "GET",
-							cache  : inObj.cache,
-							headers: { "Accept":"application/json;odata=verbose", "X-RequestDigest":$("#__REQUESTDIGEST").val() }
+							url     : _urlBase+"/items",
+							type    : "GET",
+							cache   : inObj.cache,
+							metadata: inObj.metadata || false,
+							headers : { "Accept":"application/json;odata=verbose", "X-RequestDigest":$("#__REQUESTDIGEST").val() }
 						};
 						var arrExpands = [], strExpands = "";
 
@@ -1155,10 +1171,11 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 
 					// 2: Create item
 					sprLib.rest({
-						type   : "POST",
-						url    : _urlBase +"/items",
-						data   : JSON.stringify(jsonData),
-						headers: { "Accept":"application/json;odata=verbose", "X-RequestDigest":$("#__REQUESTDIGEST").val() }
+						type    : "POST",
+						url     : _urlBase +"/items",
+						data    : JSON.stringify(jsonData),
+						metadata: true,
+						headers : { "Accept":"application/json;odata=verbose", "X-RequestDigest":$("#__REQUESTDIGEST").val() }
 					})
 					.then(function(arrData){
 						if ( arrData && arrData[0] ) {
@@ -1229,10 +1246,11 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 
 					// 2: Update item
 					sprLib.rest({
-						type   : "POST",
-						url    : _urlBase +"/items("+ intID +")",
-						data   : JSON.stringify(jsonData),
-						headers: {
+						type    : "POST",
+						url     : _urlBase +"/items("+ intID +")",
+						data    : JSON.stringify(jsonData),
+						metadata: true,
+						headers : {
 							"X-HTTP-Method"  : "MERGE",
 							"Accept"         : "application/json;odata=verbose",
 							"X-RequestDigest": $("#__REQUESTDIGEST").val(),
@@ -1303,9 +1321,10 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 
 					// 2: Update item
 					sprLib.rest({
-						type   : "DELETE",
-						url    : _urlBase +"/items("+ intID +")",
-						headers: {
+						type    : "DELETE",
+						url     : _urlBase +"/items("+ intID +")",
+						metadata: true,
+						headers : {
 							"X-HTTP-Method"  : "MERGE",
 							"Accept"         : "application/json;odata=verbose",
 							"X-RequestDigest": $("#__REQUESTDIGEST").val(),
@@ -1345,9 +1364,10 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 
 				// STEP 1: Recycle item
 				sprLib.rest({
-					type   : "POST",
-					url    : _urlBase +"/items("+ intID.toString() +")/recycle()",
-					headers    : { "Accept":"application/json; odata=verbose", "X-RequestDigest":$("#__REQUESTDIGEST").val() }
+					type    : "POST",
+					url     : _urlBase +"/items("+ intID.toString() +")/recycle()",
+					metadata: true,
+					headers : { "Accept":"application/json; odata=verbose", "X-RequestDigest":$("#__REQUESTDIGEST").val() }
 				})
 				.then(function(){
 					// SP returns the item guid for Recycle operations
@@ -1368,6 +1388,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 	/**
 	* Execute an ad-hoc REST query to one of many endpoints
 	*
+	* @example - sprLib.rest({ url:'/sites/dev/_api/web/webs', metadata:true });
 	* @example
 	sprLib.rest({
 		url: '/sites/dev/_api/web/sitegroups',
@@ -1393,8 +1414,9 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 			// STEP 1: Options setup
 			inOpt = inOpt || {};
 			inOpt.cache = inOpt.cache || false;
-			inOpt.type  = inOpt.restType || inOpt.type || "GET";
-			inOpt.url   = (inOpt.restUrl || inOpt.url || APP_OPTS.baseUrl).replace(/\"/g, "'");
+			inOpt.metadata = inOpt.metadata || false;
+			inOpt.type = inOpt.restType || inOpt.type || "GET";
+			inOpt.url = (inOpt.restUrl || inOpt.url || APP_OPTS.baseUrl).replace(/\"/g, "'");
 			//
 			inOpt.spArrData = [];
 
@@ -1413,61 +1435,73 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 
 			// STEP 3: Construct Base URL: `url` can be presented in many different forms...
 			objAjaxQuery.url = (inOpt.url.toLowerCase().indexOf('http') == 0 || inOpt.url.indexOf('/') == 0 ? '' : APP_OPTS.baseUrl);
-			objAjaxQuery.url += ( (inOpt.url.indexOf('/') == 0 ? '' : '/') + inOpt.url );
+			objAjaxQuery.url += (inOpt.url.toLowerCase().indexOf('http') != 0 && inOpt.url.indexOf('/') != 0 ? '/' : '') + inOpt.url;
 
-			// STEP 4: Continue building `url` when cols from either '$select' or `queryCols` options found
-			if ( inOpt.queryCols && objAjaxQuery.url.toLowerCase().indexOf('$select') == -1 ) {
-				// A: Start 'select query'
-				objAjaxQuery.url += "?$select=";
+			// STEP 4: Continue building up `url` with any options provided
+			{
+				// queryCols: Start 'select query'
+				if ( inOpt.queryCols ) {
+					// A: Start 'select query'
+					if ( objAjaxQuery.url.toLowerCase().indexOf('$select') == -1 ) objAjaxQuery.url += '?$select=';
 
-				// `queryCols` can be: string, array of strings, or objects
-				// A: Convert single string column into an array for use below
-				if ( typeof inOpt.queryCols === 'string' ) inOpt.queryCols = [ inOpt.queryCols ];
+					// B: parse `queryCols` (can be: string, array of strings, or objects)
+					// Convert single string column into an array for use below
+					if ( typeof inOpt.queryCols === 'string' ) inOpt.queryCols = [ inOpt.queryCols ];
 
-				// B: Build query object if `queryCols` array exists - create 'expands'
-				if ( inOpt.queryCols && Array.isArray(inOpt.queryCols) ) {
-					var objListCols = {};
-					inOpt.queryCols.forEach(function(colStr,i){
-						var strTmp = ( colStr.indexOf('/') > -1 ? colStr.substring(0,colStr.indexOf('/')) : colStr );
-						// Handle cases where there are 2 expands from same column. Ex: 'Manager/Id' and 'Manager/Title'
-						objListCols[strTmp] = ( objListCols[strTmp] ? { dataName:objListCols[strTmp].dataName+','+colStr } : { dataName:colStr } );
-					});
-					inOpt.queryCols = objListCols;
-				}
+					// C: Build query object if `queryCols` array exists - create 'expands'
+					if ( Array.isArray(inOpt.queryCols) ) {
+						var objListCols = {};
+						inOpt.queryCols.forEach(function(colStr,i){
+							var strTmp = ( colStr.indexOf('/') > -1 ? colStr.substring(0,colStr.indexOf('/')) : colStr );
+							// Handle cases where there are 2 expands from same column. Ex: 'Manager/Id' and 'Manager/Title'
+							objListCols[strTmp] = ( objListCols[strTmp] ? { dataName:objListCols[strTmp].dataName+','+colStr } : { dataName:colStr } );
+						});
+						inOpt.queryCols = objListCols;
+					}
 
-				// C: Add columns
-				if ( inOpt.queryCols && typeof inOpt.queryCols === 'object' ) {
-					// A: Add columns
-					$.each(inOpt.queryCols, function(key,col){
-						if ( !col.dataName ) return; // Skip columns without a 'dataName' key
-						// 1:
-						if ( objAjaxQuery.url.substring(objAjaxQuery.url.length-1) == '=' ) objAjaxQuery.url += col.dataName;
-						else objAjaxQuery.url += ( objAjaxQuery.url.lastIndexOf(',') == objAjaxQuery.url.length-1 ? col.dataName : ','+col.dataName );
-						// 2:
-						if ( col.dataName.indexOf('/') > -1 ) {
-							var strFieldName = col.dataName.substring(0, col.dataName.indexOf('/'));
-							if ( arrExpands.indexOf(strFieldName) == -1 ) {
-								arrExpands.push( strFieldName );
-								strExpands += (strExpands == '' ? '' : ',') + strFieldName;
+					// D: Add columns
+					if ( typeof inOpt.queryCols === 'object' ) {
+						// A: Add columns
+						$.each(inOpt.queryCols, function(key,col){
+							if ( !col.dataName ) return; // Skip columns without a 'dataName' key
+							// 1:
+							if ( objAjaxQuery.url.substring(objAjaxQuery.url.length-1) == '=' ) objAjaxQuery.url += col.dataName;
+							else objAjaxQuery.url += ( objAjaxQuery.url.lastIndexOf(',') == objAjaxQuery.url.length-1 ? col.dataName : ','+col.dataName );
+							// 2:
+							if ( col.dataName.indexOf('/') > -1 ) {
+								var strFieldName = col.dataName.substring(0, col.dataName.indexOf('/'));
+								if ( arrExpands.indexOf(strFieldName) == -1 ) {
+									arrExpands.push( strFieldName );
+									strExpands += (strExpands == '' ? '' : ',') + strFieldName;
+								}
 							}
-						}
-					});
+						});
+					}
 				}
 
-				// D: Add maxrows as default in SP2013 is a paltry 100 rows
-				if ( inOpt.url.indexOf('$top') == -1 ) objAjaxQuery.url += '&$top=' + ( inOpt.queryLimit ? inOpt.queryLimit : APP_OPTS.maxRows );
+				// queryLimit: Add maxrows (b/c default in SP2013 is a paltry 100 rows)
+				// NOTE: Only applies to GET types (POST with this param are obv. invalid!)
+				if ( (inOpt.queryFilter || objAjaxQuery.url.toLowerCase().indexOf('$select') > -1) && inOpt.url.toLowerCase().indexOf('$top') == -1 && inOpt.type == "GET" ) {
+					objAjaxQuery.url += ( (objAjaxQuery.url.indexOf('?')>0?'&':'?')+'$top=' + ( inOpt.queryLimit ? inOpt.queryLimit : APP_OPTS.maxRows ) );
+				}
 
-				// E: Add expand (if any)
-				if ( strExpands ) objAjaxQuery.url += '&$expand=' + strExpands;
+				// queryFilter: Add filter (if any)
+				if ( inOpt.url.toLowerCase().indexOf('$filter') == -1 && inOpt.queryFilter ) {
+					objAjaxQuery.url += ( (objAjaxQuery.url.indexOf('?')>0?'&':'?')+'$filter=' + ( inOpt.queryFilter.indexOf('%') == -1 ? encodeURI(inOpt.queryFilter) : inOpt.queryFilter ) );
+				}
 
-				// F: Add filter (if any)
-				if ( inOpt.queryFilter ) objAjaxQuery.url += '&$filter=' + ( inOpt.queryFilter.indexOf('%') == -1 ? encodeURI(inOpt.queryFilter) : inOpt.queryFilter );
+				// queryOrderby: Add orderby (if any)
+				if ( inOpt.url.toLowerCase().indexOf('$orderby') == -1 && inOpt.queryOrderby ) {
+					objAjaxQuery.url += ( (objAjaxQuery.url.indexOf('?')>0?'&':'?')+'$orderby=' + inOpt.queryOrderby );
+				}
 
-				// G: Add orderby (if any)
-				if ( inOpt.queryOrderby ) objAjaxQuery.url += '&$orderby=' + inOpt.queryOrderby;
+				// Expands: Add expand (if any)
+				if ( inOpt.url.toLowerCase().indexOf('$expand') == -1 && strExpands ) {
+					objAjaxQuery.url += ( (objAjaxQuery.url.indexOf('?')>0?'&':'?')+'$expand=' + strExpands );
+				}
 			}
 
-			// STEP 6: Execute REST call
+			// STEP 5: Execute REST call
 			Promise.resolve()
 			.then(function(){
 				return new Promise(function(resolve, reject) {
@@ -1595,17 +1629,17 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 							$.each(result, function(key,val){ objRow[key] = val; });
 						}
 
+						if ( objRow.__metadata && !inOpt.metadata ) delete objRow.__metadata;
 						inOpt.spArrData.push( objRow );
 					});
 				}
-				// data.d or data is an {}: { listTitle:'Game Systems', numberOfItems:25 }
+				// EX..: data.d or data is an [object]: { listTitle:'Game Systems', numberOfItems:25 }
 				else if ( (data && data.d ? data.d : (data ? data : false)) && typeof (data.d || data) === 'object' ) {
 					var objRow = {};
 
-					$.each((data.d || data), function(key,result){
-						objRow[key] = result;
-					});
+					$.each((data.d || data), function(key,result){ objRow[key] = result; });
 
+					if ( objRow.__metadata && !inOpt.metadata ) delete objRow.__metadata;
 					inOpt.spArrData.push( objRow );
 				}
 
@@ -1639,23 +1673,316 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 		});
 	}
 
-	// API: SITE (TODO: FUTURE:)
+	// API: SITE (or WEB)
+	/**
+	* NOTE: `site` and `web` may be used interchangably (`/_api/site` is the top-level Web site and all its subsites)
+	* `web` is a secuable web resource (aka: a SP website)
+	* https://msdn.microsoft.com/library/microsoft.sharepoint.spsite "top-level Web site and all its subsites. Each SPSite object, or site collection, is represented within an SPSiteCollection object"
+	*/
 	sprLib.site = function site(inUrl) {
-		return new Promise(function(resolve, reject) {
-			// TODO: POST-1.0:
-			/*
-			https://msdn.microsoft.com/library/microsoft.sharepoint.spsite
+		// Variables
+		var newSite = {};
+		var strBaseUrl = (inUrl ? inUrl.replace(/\/+$/g,'/') : ''); // Guarantee that baseUrl will end with a forward slash
 
-			## Site
-			* `sprLib.site().listPerms()` - Returns an array of all List/Library Permissions for the current/specified Site
-			* `sprLib.site().permGroups()` - Returns an array of Permission Groups and their membership for the current/specified Site
-			*/
-			// 2: Get SITE info (logo, etc): https://siteurl.sharepoint.com/sites/dev/_api/web/
-			// 3: Lists+props: https://siteurl.sharepoint.com/sites/dev/_api/web/Lists/
-		});
+		/**
+		* Get Site information:
+		* Keys: (AssociatedMemberGroup, AssociatedOwnerGroup, AssociatedVisitorGroup, Created, Description, Id, Language, LastItemModifiedDate, LastItemUserModifiedDate, Owner, RequestAccessEmail, SiteLogoUrl, Title, Url, WebTemplate)
+		*
+		* @example - no args - omitting arguments means "current site"
+		* sprLib.site().info().then( objSite => console.table([objSite]) );
+		*
+		* @example - get site by ID
+		* sprLib.site({ id:'12345-abcd-12345' }).info().then(objSite => console.table([objSite]));
+		*
+		* @return {Promise} - return `Promise` containing Site info object
+		*/
+		newSite.info = function() {
+			return new Promise(function(resolve, reject) {
+				Promise.all([
+					sprLib.rest({
+						url: strBaseUrl+'_api/web',
+						queryCols: ['Id','Title','Description','Language','Created',
+							'LastItemModifiedDate','LastItemUserModifiedDate',
+							'RequestAccessEmail','SiteLogoUrl','Url','WebTemplate',
+							'AssociatedOwnerGroup/Id',        'AssociatedMemberGroup/Id',        'AssociatedVisitorGroup/Id',
+							'AssociatedOwnerGroup/OwnerTitle','AssociatedMemberGroup/OwnerTitle','AssociatedVisitorGroup/OwnerTitle',
+							'AssociatedOwnerGroup/Title',     'AssociatedMemberGroup/Title',     'AssociatedVisitorGroup/Title'
+						],
+						cache: false
+					}),
+					sprLib.rest({
+						url: strBaseUrl+'_api/site',
+						queryCols: ['Owner/Email','Owner/LoginName','Owner/Title','Owner/IsSiteAdmin'],
+						cache: false
+					})
+				])
+				.then(function(arrAllArrays){
+					// A: Combine results into one object
+					var objSite = arrAllArrays[0][0];
+					objSite.Owner = arrAllArrays[1][0].Owner;
+
+					// B: Remove junky metadata
+					delete objSite.Owner.__metadata;
+					delete objSite.AssociatedMemberGroup.__metadata;
+					delete objSite.AssociatedOwnerGroup.__metadata;
+					delete objSite.AssociatedVisitorGroup.__metadata;
+
+					// C: Resolve results (NOTE: if site was not found, an empty object is the correct result)
+					resolve( objSite );
+				})
+				.catch(function(strErr){
+					reject( strErr );
+				});
+			});
+		}
+
+		/**
+		* Get Site Lists/Libraries (name and about 12 other fields)
+		*
+		* @example
+		* sprLib.site().lists().then( function(arr){ console.table(arr) } );
+		*
+		* @return {Promise} - Return `Promise` containing Site Lists/Libraries
+		*/
+		newSite.lists = function() {
+			return new Promise(function(resolve, reject) {
+				sprLib.rest({
+					url: strBaseUrl+'_api/web/lists',
+					queryCols: ['Id','Title','Description','ParentWebUrl','ItemCount','Hidden','ImageUrl','BaseType','BaseTemplate','RootFolder/ServerRelativeUrl']
+				})
+				.then(function(arrData){
+					// A: Flatten value
+					arrData.forEach(function(item,idx){ item.RootFolder = item.RootFolder.ServerRelativeUrl });
+
+					// B: Resolve results (NOTE: empty array is the correct default result)
+					resolve( arrData || [] );
+				})
+				.catch(function(strErr){
+					reject( strErr );
+				});
+			});
+		}
+
+		/**
+		* Get Site base permissions
+		* Returns array of obejcts with 2 keys: `Member` and `Roles`
+		*
+		* @example - sprLib.site().perms().then( arr => console.table(arr) );
+		.--------------------------------------------------------------------------------------------------------------------------------------------------.
+		|                                    Member                                    |                               Roles                               |
+		|------------------------------------------------------------------------------|-------------------------------------------------------------------|
+		| {"Title":"Brent Ely",   "PrincipalType":"User",            "PrincipalId":9}  | [{"Hidden":false,"Name":"Design"},{"Hidden":false,"Name":"Edit"}] |
+		| {"Title":"Dev Owners",  "PrincipalType":"SharePoint Group","PrincipalId":14} | [{"Hidden":false,"Name":"Full Control"}]                          |
+		| {"Title":"Dev Members", "PrincipalType":"SharePoint Group","PrincipalId":15} | [{"Hidden":false,"Name":"Edit"}]                                  |
+		| {"Title":"Dev Visitors","PrincipalType":"SharePoint Group","PrincipalId":16} | [{"Hidden":false,"Name":"Read"}]                                  |
+		'--------------------------------------------------------------------------------------------------------------------------------------------------'
+		*
+		* @return {Promise} - return `Promise` containing Site Permission object { Member:{}, Roles:[] }
+		*/
+		newSite.perms = function() {
+			return new Promise(function(resolve, reject) {
+				sprLib.rest({
+					url: strBaseUrl+'_api/web/roleAssignments',
+					queryCols: ['PrincipalId','Member/PrincipalType','Member/Title','RoleDefinitionBindings/Name','RoleDefinitionBindings/Hidden']
+				})
+				.then(function(arrData){
+					// Transform: Results s/b 2 keys with props inside each
+					arrData.forEach(function(objItem,idx){
+						// A: "Rename" the `RoleDefinitionBindings` key to be user-friendly
+						Object.defineProperty(objItem, 'Roles', Object.getOwnPropertyDescriptor(objItem, 'RoleDefinitionBindings'));
+						delete objItem.RoleDefinitionBindings;
+
+						// B: Move `PrincipalId` inside {Member}
+						objItem.Member.PrincipalId = objItem.PrincipalId;
+						delete objItem.PrincipalId;
+
+						// C: Decode PrincipalType into text
+						objItem.Member.PrincipalType = ENUM_PRINCIPALTYPES[objItem.Member.PrincipalType] || objItem.Member.PrincipalType;
+					});
+
+					// TODO: OPTION: "Show Group Members", then do lookups below, otherwise, just show users/group names
+					// TODO: use PrincipalType to find groups and query for thier users, then full pictureisodne!!!
+					//.then(arrOwnerId => { return sprLib.rest({ url:site.UrlAbs+'/_api/web/SiteGroups/GetById('+ arrOwnerId[0].Id +')/Users', queryCols:['Title','Email'] }) })
+					//.then(arrUsers   => arrUsers.forEach((user,idx) => site.OwnersGroupUsers += ('<div class="itemBox">'+ user.Title +'<span style="display:none">; </span></div>') ))
+
+					// A: Resolve results (NOTE: empty array is the correct default result)
+					resolve( arrData || [] );
+				})
+				.catch(function(strErr){
+					reject( strErr );
+				});
+			});
+		}
+
+		/**
+		* Get SiteCollection Groups
+		*
+		* @return {Promise} - return `Promise` containing Groups
+		*/
+		newSite.groups = function() {
+			return new Promise(function(resolve, reject) {
+				sprLib.rest({
+					url: strBaseUrl+'_api/web/siteGroups',
+					queryCols:
+						['Id','Description','Title','OwnerTitle','PrincipalType','AllowMembersEditMembership',
+						'Users/Id','Users/Title','Users/LoginName'],
+					queryLimit: 5000
+				})
+				.then(function(arrData){
+					// A: Filter internal/junk groups
+					if ( arrData && Array.isArray(arrData) ) {
+						arrData = arrData.filter(function(group){ return group.Title.indexOf('SharingLinks') == -1 });
+					}
+
+					// B: Decode PrincipalType
+					arrData.forEach(function(item,idx){ item.PrincipalType = ENUM_PRINCIPALTYPES[item.PrincipalType] || item.PrincipalType });
+
+					// C: Resolve results (NOTE: empty array is the correct default result)
+					resolve( arrData || [] );
+				})
+				.catch(function(strErr){
+					reject( strErr );
+				});
+			});
+		}
+
+		/**
+		* Get SiteCollection Roles
+		*
+		* @return {Promise} - return `Promise` containing Roles
+		*/
+		newSite.roles = function() {
+			return new Promise(function(resolve, reject) {
+				sprLib.rest({
+					url: strBaseUrl+'_api/web/roleDefinitions',
+					queryCols: ['Id','Name','Description','RoleTypeKind','Hidden']
+				})
+				.then(function(arrData){
+					// A: Resolve results (NOTE: empty array is the correct default result)
+					resolve( arrData || [] );
+				})
+				.catch(function(strErr){
+					reject( strErr );
+				});
+			});
+		}
+
+		/**
+		* Get Subsites
+		*
+		* @return {Promise} - return `Promise` containing Subsites
+		*/
+		newSite.subsites = function() {
+			return new Promise(function(resolve, reject) {
+				sprLib.rest({
+					url: strBaseUrl+'_api/web/webs',
+					queryCols: {
+						Id:				{ dataName:'Id'						,dispName:'Id'					},
+						Name:			{ dataName:'Title'					,dispName:'Subsite Name'		},
+						UrlAbs:			{ dataName:'Url'					,dispName:'Absolute URL'		},
+						UrlRel:			{ dataName:'ServerRelativeUrl'      ,dispNAme:'Relative URL'		},
+						Created:		{ dataName:'Created'				,dispName:'Date Created'		},
+						Modified:		{ dataName:'LastItemModifiedDate'	,dispName:'Date Last Modified'	},
+						Language:		{ dataName:'Language'				,dispName:'Language'			},
+						SiteLogoUrl:	{ dataName:'SiteLogoUrl'			,dispName:'Site Logo URL'		}
+					}
+				})
+				.then(function(arrData){
+					// A: Resolve results (NOTE: empty array is the correct default result)
+					resolve( arrData || [] );
+				})
+				.catch(function(strErr){
+					reject( strErr );
+				});
+			});
+		}
+
+		/**
+		* Get SiteCollection Users
+		*
+		* @return {Promise} - return `Promise` containing Users
+		*/
+		newSite.users = function() {
+			return new Promise(function(resolve, reject) {
+				sprLib.rest({
+					url: strBaseUrl+'_api/web/siteUsers',
+					queryCols: ['Id','Email','LoginName','PrincipalType','Title','IsSiteAdmin','Groups/Id','Groups/Title'],
+					queryLimit: 5000
+				})
+				.then(function(arrData){
+					// A: Filter internal/junk users
+					if ( arrData && Array.isArray(arrData) ) {
+						arrData = arrData.filter(function(user){ return user.Title.indexOf('spocrwl') == -1 && user.Id < 1000000000 });
+					}
+
+					// B: Decode PrincipalType
+					arrData.forEach(function(item,idx){ item.PrincipalType = ENUM_PRINCIPALTYPES[item.PrincipalType] || item.PrincipalType });
+
+					// C: Resolve results (NOTE: empty array is the correct default result)
+					resolve( arrData || [] );
+				})
+				.catch(function(strErr){
+					reject( strErr );
+				});
+			});
+		}
+
+		// FIXME: CURRENT: NEXT: 20171028
+		// TODO: Under .users() and .groups() - if no siteUrl, then return SiteCollection users/groups - otherwise just web/RoleAssignments!!
+		/*
+		{
+			// TODO: API: USERS (All Users under this webs or specified site URL)
+			sprLib.users = function users(inUrl) {
+				// Variables
+				var newSite = {};
+				var strBaseUrl = (inUrl ? inUrl.replace(/\/+$/g,'/') : ''); // Guarantee that baseUrl will end with a forward slash
+
+				// REST: _api/web/RoleAssignments
+			}
+
+			// TODO: API: GROUPS
+			sprLib.groups = function groups(inUrl) {
+				// TODO: _api/web/RoleAssignments - then return Groups (and members) (and perms)?
+			}
+		}
+		*/
+
+		// TODO: contentTypes & Features
+		/*
+			newSite.contentTypes = function() {
+				// ContentTypes: https://contoso.sharepoint.com/sites/dev/_api/web/ContentTypes
+			}
+			newSite.features = function() {
+				// Features: https://contoso.sharepoint.com/sites/dev/_api/site/Features
+			}
+		*/
+
+		// TODO: FUTURE: Usage
+		/*
+			FYI:
+			/sites/dev/_api/site/Usage
+			/sites/dev/sandbox/_api/site/Usage
+			^^^ same result (Storage is whole site collection - not individual webs!)
+
+			sprLib.rest({
+				url: '_api/site/usage',
+				queryCols: ['Usage/Storage','Usage/StoragePercentageUsed']
+			})
+			<d:Usage xmlns:d="http://schemas.microsoft.com/ado/2007/08/dataservices" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" xmlns:georss="http://www.georss.org/georss" xmlns:gml="http://www.opengis.net/gml" m:type="SP.UsageInfo">
+				<d:Bandwidth m:type="Edm.Int64">0</d:Bandwidth>
+				<d:DiscussionStorage m:type="Edm.Int64">0</d:DiscussionStorage>
+				<d:Hits m:type="Edm.Int64">0</d:Hits>
+				<d:Storage m:type="Edm.Int64">512050423</d:Storage>
+				<d:StoragePercentageUsed m:type="Edm.Double">1.8628285870363472E-05</d:StoragePercentageUsed>
+				<d:Visits m:type="Edm.Int64">0</d:Visits>
+			</d:Usage>
+		*/
+
+		// LAST: Return this List to enable chaining
+		return newSite;
 	}
 
-	// API: USER
+	// API: USER (Current or Query User by Props)
 	sprLib.user = function user(inOpt) {
 		// STEP 1: Variables
 		var newUser = {};
@@ -1801,11 +2128,6 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 	// API: UTILITY: Token
 	sprLib.renewSecurityToken = function renewSecurityToken(){
 		return doRenewDigestToken();
-	}
-
-	// API: UTILITY: Library Version
-	sprLib.version = function version(){
-		return APP_VER+'-'+APP_BLD;
 	}
 
 	// API: NODEJS: Setup

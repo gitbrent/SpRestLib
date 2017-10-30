@@ -159,19 +159,19 @@ Syntax: `sprLib.list(listName)` or `sprLib.list(listGUID)`
 
 ### BaseUrl
 By default, the library defaults to the local directory.  There are occasions where operations would be pointed to other
-locations - reading from a subsite, etc. - and that can be done easily be setting the baseUrl at the list-level.
+locations - reading from a subsite, etc. - and that can be done easily be passing a baseUrl parameter.
 
-Syntax: `sprLib.list(listName).baseUrl(urlPath)`
+Syntax: `sprLib.list({ listName:'name', baseUrl:'urlPath' })`
 
 Example:
 ```javascript
-sprLib.list('Employees').baseUrl('/sites/HumanResources/devtest/')
+sprLib.list({ listName:'Employees', baseUrl:'/sites/HumanResources/devtest/' })
 ```
 
 
 ### Get Items
 Syntax:  
-`sprLib.list(listName|listGUID).getItems()`
+`sprLib.list(listName|listGUID).getItems(options)`
 
 Returns:
 * Array of objects containing name/value pairs
@@ -182,6 +182,7 @@ Returns:
 | :------------ | :------- | :-------- | :-------------------- | :---------------------------------- |
 | `listCols`    | array *OR* object |  | column names to be returned | array of column names *OR* object (see below) |
 | `cache`       | boolean  | `false`   | cache settings        | Ex:`cache: true` |
+| `metadata`    | boolean  | `false`   | whether to return `__metadata` | Ex:`metadata: true` |
 | `queryFilter` | string   |           | query filter          | utilizes OData style [Query Operators](https://msdn.microsoft.com/en-us/library/office/fp142385.aspx#Anchor_7) |
 | `queryLimit`  | string   |           | max items to return   | 1-*N* |
 | `queryOrderby`| string   |           | column(s) to order by | Ex:`queryOrderby:Name` |
@@ -207,22 +208,17 @@ The `dataFunc` option allows you access to the entire result set and to return a
 #### Sample Code
 ```javascript
 // EX: Simple array of column names
-sprLib.list('Employees')
-.getItems(
-    ['Id', 'Name', 'Badge_x0020_Number']
-)
-.then(function(arrData){
-    console.table(arrData);
-})
-.catch(function(errMsg){ console.error(errMsg) });
+sprLib.list('Employees').getItems( ['Id','Name','Badge_x0020_Number'] )
+.then(arrData => console.table(arrData))
+.catch(errMsg => console.error(errMsg));
 
 // Result:
 /*
-.---------------------------------------------------------.
-|   __metadata    | Id  |    Name    | Badge_x0020_Number |
-|-----------------|-----|------------|--------------------|
-| [object Object] | 253 | Hal Jordan |              12345 |
-'---------------------------------------------------------'
+.---------------------------------------.
+| Id  |    Name    | Badge_x0020_Number |
+|-----|------------|--------------------|
+| 253 | Hal Jordan |              12345 |
+'---------------------------------------'
 */
 ```
 
@@ -231,8 +227,8 @@ sprLib.list('Employees')
 sprLib.list('Employees').getItems({
     listCols: ['Name', 'Badge_x0020_Number', 'Hire_x0020_Date']
 })
-.then(function(arrData){ console.table(arrData) })
-.catch(function(errMsg){ console.error(errMsg) });
+.then(arrData => console.table(arrData))
+.catch(errMsg => console.error(errMsg));
 ```
 
 ```javascript
@@ -464,6 +460,7 @@ Returns: Array of objects containing name/value pairs
 | `data`        | string  |             | data to be sent       | Ex:`data: {'type': 'SP.FieldDateTime'}` |
 | `cache`       | boolean | `false`     | cache settings        | Ex:`cache: true` |
 | `contentType` | string  | `application/json` | request header content-type | Only used with `type:'POST'` |
+| `metadata`    | boolea  | `false`     | whether to return `__metadata` | Ex:`metadata: true` |
 | `queryCols`   | string  |             | fields/columns to get | any available field from the SP REST API |
 | `queryFilter` | string  |             | query filter          | utilizes OData style [Query Operators](https://msdn.microsoft.com/en-us/library/office/fp142385.aspx#Anchor_7) Ex:`queryFilter: 'Salary lt 99000'` |
 | `queryLimit`  | string  | `1000`      | max items to return   | 1-5000. Ex:`queryLimit: 5000` |
@@ -479,8 +476,8 @@ sprLib.rest({
     queryOrderby: 'Title',
     queryLimit:   10
 })
-.then(function(arrayResults){ console.table(arrayResults) })
-.catch(function(errMsg){ console.error(errMsg) });
+.then(arrItems => console.table(arrItems))
+.catch(errMsg => console.error(errMsg));
 /*
 .------------------------------------------------------------------------------.
 |         Title          |       LoginName        | AllowMembersEditMembership |
