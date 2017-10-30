@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="en-us">
+<head>
+	<meta charset="utf-8">
+	<style>
+		h1 { margin-bottom:10px; }
+		.ms-webpartPage-root { border-spacing: 0px !important; /* FIX-O365 */ }
+		#boxSetup { margin-bottom: 20px; }
+		.subTitle.first { margin-top:0; }
+		.boxCode, .boxData {
+			font-family: "Andale Mono",Monaco,Consolas,"Courier New",monospace;
+			padding: 5px;
+			border: 1px solid #d7d7d7;
+			background: #f1f1f1;
+			min-height: 50px;
+			width: 100%;
+			overflow-x: auto;
+		}
+		.boxCode { background: #f2f9fc; }
+		.boxData { white-space: pre; font-size: 11px; }
+		.nowctr { white-space: nowrap !important; text-align: center !important; }
+		.subTitle {
+			display: inline-block;
+			font-family: "Roboto", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+			font-size: 20px;
+			color: #0088cc;
+			margin: 25px 0 10px 0;
+			text-transform: uppercase;
+			-webkit-user-select: none;  /* Chrome all / Safari all */
+			-moz-user-select: none;     /* Firefox all */
+			-ms-user-select: none;      /* IE 10+ */
+			user-select: none;          /* Likely future */
+		}
+
+		/* ------------------------------------------------------------------------- */
+		.sprlib-spinner {
+			display: inline-block;
+			height: 22px;
+			text-align: center;
+			white-space: nowrap;
+		}
+		.sprlib-spinner > div {
+			display: inline-block;
+			width:16px; height:16px;
+			background-color: #40b0df;
+			border: 3px solid #f2f9fc;
+			border-radius: 100%;
+			animation: sprlib-sk-bouncedelay 1.4s infinite ease-in-out both;
+		}
+		.sprlib-spinner .sprlib-bounce1 { animation-delay: -0.32s; }
+		.sprlib-spinner .sprlib-bounce2 { animation-delay: -0.16s; }
+		@keyframes sprlib-sk-bouncedelay { 0%, 80%, 100% {  transform: scale(0); } 40% { transform: scale(1.0); } }
+
+		td.code { font-family: Consolas, monospace; font-size: 11px; white-space: pre; }
+		#tabHist .iconSvg { cursor: pointer; }
+		#tabHist td.code { white-space: normal; }
+
+		.table {
+			display: table;
+			width: 100%;
+			margin: 0;
+			padding: 0;
+			box-sizing: border-box;
+			color: #0088cc;
+		}
+		.table > div {
+			display: table-cell;
+			padding: 2px 5px;
+			vertical-align: middle;
+		}
+
+		/* ------------------------------------------------------------------------- */
+		.flatBtn {
+			display: inline-block;
+			font-size: 11px !important;
+			letter-spacing: 0.25px;
+			color: #ffffff !important;
+			border: 0 !important;
+			padding: 8px 20px !important;
+			margin: 0 !important;
+			white-space: nowrap;
+			text-decoration: none;
+			text-transform: uppercase;
+			border-radius: 4px;
+			box-sizing: border-box;
+			cursor: pointer;
+			box-shadow: none;
+		}
+		.flatBtn:hover {
+			opacity: .75;
+			filter: alpha(opacity=75);
+		}
+		.flatBtn.small {
+			padding: 5px 10px !important;
+			font-size: 11px !important;
+			box-shadow: none;
+		}
+		.flatBtn.shadow {
+			box-shadow: 0 2px 5px 0 rgba(0,0,0,0.4) !important; /* new, fall 2013 */
+		}
+		/* ----- COLORS ----- */
+		.flatBtn-blueDk,   .flatBtn-blueDk:hover	{ background-color: #1A76A5 !important; }
+		.flatBtn-blueMd,   .flatBtn-blueMd:hover	{ background-color: #199FD2 !important; }
+		.flatBtn-blueLt,   .flatBtn-blueLt:hover	{ background-color: #41B2DC !important; }
+		.flatBtn-red,      .flatBtn-red:hover		{ background-color: #DB2814 !important; }
+		.flatBtn-orange,   .flatBtn-orange:hover	{ background-color: #E78733 !important; }
+		.flatBtn-greenLt,  .flatBtn-greenLt:hover	{ background-color: #7AB800 !important; }
+		.flatBtn-green,    .flatBtn-green:hover		{ background-color: #27AE60 !important; }
+
+		/* 2017-10 Brent SVG Images */
+		div.iconSvg {
+			display: inline-block;
+			background-size: contain;
+			max-width: 256px;
+			max-height: 256px;
+		}
+		div.iconSvg.size16 { width:16px; height:16px; }
+		div.iconSvg.size24 { width:24px; height:24px; }
+		div.iconSvg.size32 { width:32px; height:32px; }
+		div.iconSvg.size48 { width:48px; height:48px; }
+		div.iconSvg.yes, div.iconSvg.check {
+			background-image:
+				url(data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiA/PjxzdmcgaWQ9IkxheWVyXzEiIHN0eWxlPSJlbmFibGUtYmFja2dyb3VuZDpuZXcgMCAwIDUxMiA1MTI7IiB2ZXJzaW9uPSIxLjEiIHZpZXdCb3g9IjAgMCA1MTIgNTEyIiB4bWw6c3BhY2U9InByZXNlcnZlIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hsaW5rIj48c3R5bGUgdHlwZT0idGV4dC9jc3MiPi5zdDB7ZmlsbDojMkJCNjczO30uc3Qxe2ZpbGw6bm9uZTtzdHJva2U6I0ZGRkZGRjtzdHJva2Utd2lkdGg6MzA7c3Ryb2tlLW1pdGVybGltaXQ6MTA7fTwvc3R5bGU+PHBhdGggY2xhc3M9InN0MCIgZD0iTTQ4OSwyNTUuOWMwLTAuMiwwLTAuNSwwLTAuN2MwLTEuNiwwLTMuMi0wLjEtNC43YzAtMC45LTAuMS0xLjgtMC4xLTIuOGMwLTAuOS0wLjEtMS44LTAuMS0yLjcgIGMtMC4xLTEuMS0wLjEtMi4yLTAuMi0zLjNjMC0wLjctMC4xLTEuNC0wLjEtMi4xYy0wLjEtMS4yLTAuMi0yLjQtMC4zLTMuNmMwLTAuNS0wLjEtMS4xLTAuMS0xLjZjLTAuMS0xLjMtMC4zLTIuNi0wLjQtNCAgYzAtMC4zLTAuMS0wLjctMC4xLTFDNDc0LjMsMTEzLjIsMzc1LjcsMjIuOSwyNTYsMjIuOVMzNy43LDExMy4yLDI0LjUsMjI5LjVjMCwwLjMtMC4xLDAuNy0wLjEsMWMtMC4xLDEuMy0wLjMsMi42LTAuNCw0ICBjLTAuMSwwLjUtMC4xLDEuMS0wLjEsMS42Yy0wLjEsMS4yLTAuMiwyLjQtMC4zLDMuNmMwLDAuNy0wLjEsMS40LTAuMSwyLjFjLTAuMSwxLjEtMC4xLDIuMi0wLjIsMy4zYzAsMC45LTAuMSwxLjgtMC4xLDIuNyAgYzAsMC45LTAuMSwxLjgtMC4xLDIuOGMwLDEuNi0wLjEsMy4yLTAuMSw0LjdjMCwwLjIsMCwwLjUsMCwwLjdjMCwwLDAsMCwwLDAuMXMwLDAsMCwwLjFjMCwwLjIsMCwwLjUsMCwwLjdjMCwxLjYsMCwzLjIsMC4xLDQuNyAgYzAsMC45LDAuMSwxLjgsMC4xLDIuOGMwLDAuOSwwLjEsMS44LDAuMSwyLjdjMC4xLDEuMSwwLjEsMi4yLDAuMiwzLjNjMCwwLjcsMC4xLDEuNCwwLjEsMi4xYzAuMSwxLjIsMC4yLDIuNCwwLjMsMy42ICBjMCwwLjUsMC4xLDEuMSwwLjEsMS42YzAuMSwxLjMsMC4zLDIuNiwwLjQsNGMwLDAuMywwLjEsMC43LDAuMSwxQzM3LjcsMzk4LjgsMTM2LjMsNDg5LjEsMjU2LDQ4OS4xczIxOC4zLTkwLjMsMjMxLjUtMjA2LjUgIGMwLTAuMywwLjEtMC43LDAuMS0xYzAuMS0xLjMsMC4zLTIuNiwwLjQtNGMwLjEtMC41LDAuMS0xLjEsMC4xLTEuNmMwLjEtMS4yLDAuMi0yLjQsMC4zLTMuNmMwLTAuNywwLjEtMS40LDAuMS0yLjEgIGMwLjEtMS4xLDAuMS0yLjIsMC4yLTMuM2MwLTAuOSwwLjEtMS44LDAuMS0yLjdjMC0wLjksMC4xLTEuOCwwLjEtMi44YzAtMS42LDAuMS0zLjIsMC4xLTQuN2MwLTAuMiwwLTAuNSwwLTAuNyAgQzQ4OSwyNTYsNDg5LDI1Niw0ODksMjU1LjlDNDg5LDI1Niw0ODksMjU2LDQ4OSwyNTUuOXoiIGlkPSJYTUxJRF8zXyIvPjxnIGlkPSJYTUxJRF8xXyI+PGxpbmUgY2xhc3M9InN0MSIgaWQ9IlhNTElEXzJfIiB4MT0iMjEzLjYiIHgyPSIzNjkuNyIgeTE9IjM0NC4yIiB5Mj0iMTg4LjIiLz48bGluZSBjbGFzcz0ic3QxIiBpZD0iWE1MSURfNF8iIHgxPSIyMzMuOCIgeDI9IjE1NC43IiB5MT0iMzQ1LjIiIHkyPSIyNjYuMSIvPjwvZz48L3N2Zz4=);
+		}
+		div.iconSvg.no,  div.iconSvg.fail {
+			background-image:
+				url(data:image/svg+xml;utf8;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iaXNvLTg4NTktMSI/Pgo8IS0tIEdlbmVyYXRvcjogQWRvYmUgSWxsdXN0cmF0b3IgMTkuMC4wLCBTVkcgRXhwb3J0IFBsdWctSW4gLiBTVkcgVmVyc2lvbjogNi4wMCBCdWlsZCAwKSAgLS0+CjxzdmcgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB4bWxuczp4bGluaz0iaHR0cDovL3d3dy53My5vcmcvMTk5OS94bGluayIgdmVyc2lvbj0iMS4xIiBpZD0iQ2FwYV8xIiB4PSIwcHgiIHk9IjBweCIgdmlld0JveD0iMCAwIDUwIDUwIiBzdHlsZT0iZW5hYmxlLWJhY2tncm91bmQ6bmV3IDAgMCA1MCA1MDsiIHhtbDpzcGFjZT0icHJlc2VydmUiIHdpZHRoPSI1MTJweCIgaGVpZ2h0PSI1MTJweCI+CjxjaXJjbGUgc3R5bGU9ImZpbGw6I0Q3NUE0QTsiIGN4PSIyNSIgY3k9IjI1IiByPSIyNSIvPgo8cG9seWxpbmUgc3R5bGU9ImZpbGw6bm9uZTtzdHJva2U6I0ZGRkZGRjtzdHJva2Utd2lkdGg6MjtzdHJva2UtbGluZWNhcDpyb3VuZDtzdHJva2UtbWl0ZXJsaW1pdDoxMDsiIHBvaW50cz0iMTYsMzQgMjUsMjUgMzQsMTYgICAiLz4KPHBvbHlsaW5lIHN0eWxlPSJmaWxsOm5vbmU7c3Ryb2tlOiNGRkZGRkY7c3Ryb2tlLXdpZHRoOjI7c3Ryb2tlLWxpbmVjYXA6cm91bmQ7c3Ryb2tlLW1pdGVybGltaXQ6MTA7IiBwb2ludHM9IjE2LDE2IDI1LDI1IDM0LDM0ICAgIi8+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+Cjwvc3ZnPgo=);
+		}
+		div.iconSvg.xmark {
+			background-image:
+				url(data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iaXNvLTg4NTktMSI/PjxzdmcgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB4bWxuczp4bGluaz0iaHR0cDovL3d3dy53My5vcmcvMTk5OS94bGluayIgdmVyc2lvbj0iMS4xIiBpZD0iQ2FwYV8xIiB4PSIwcHgiIHk9IjBweCIgdmlld0JveD0iMCAwIDQ0OS45OTggNDQ5Ljk5OCIgc3R5bGU9ImVuYWJsZS1iYWNrZ3JvdW5kOm5ldyAwIDAgNDQ5Ljk5OCA0NDkuOTk4OyIgeG1sOnNwYWNlPSJwcmVzZXJ2ZSIgd2lkdGg9IjUxMnB4IiBoZWlnaHQ9IjUxMnB4Ij48Zz48Zz48cG9seWdvbiBwb2ludHM9IjQ0OS45NzQsMzQuODU1IDQxNS4xOTEsMCAyMjUuMDA3LDE5MC4xODQgMzQuODM5LDAgMC4wMjQsMzQuODM5IDE5MC4xOTIsMjI0Ljk5OSAgICAgMC4wMjQsNDE1LjE1OSAzNC44MzksNDQ5Ljk5OCAyMjUuMDA3LDI1OS43OTcgNDE1LjE5MSw0NDkuOTk4IDQ0OS45NzQsNDE1LjE0MyAyNTkuODMsMjI0Ljk5OSAgICIgZmlsbD0iI0Q4MDAyNyIvPjwvZz48L2c+PGc+PC9nPjxnPjwvZz48Zz48L2c+PGc+PC9nPjxnPjwvZz48Zz48L2c+PGc+PC9nPjxnPjwvZz48Zz48L2c+PGc+PC9nPjxnPjwvZz48Zz48L2c+PGc+PC9nPjxnPjwvZz48Zz48L2c+PC9zdmc+);
+		}
+		div.iconSvg.info, div.iconSvg.circle.info {
+			background-image:
+				url(data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiA/PjxzdmcgZGF0YS1uYW1lPSJMYXllciAxIiBpZD0iTGF5ZXJfMSIgdmlld0JveD0iMCAwIDMyIDMyIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxkZWZzPjxzdHlsZT4uY2xzLTF7ZmlsbDojN2RjY2ZjO308L3N0eWxlPjwvZGVmcz48dGl0bGUvPjxwYXRoIGNsYXNzPSJjbHMtMSIgZD0iTTE2LDFBMTUsMTUsMCwxLDAsMzEsMTYsMTUsMTUsMCwwLDAsMTYsMVptMiwyMmEyLDIsMCwwLDEtNCwwVjE2YTIsMiwwLDAsMSw0LDBaTTE2LDEyLjE5QTIuMTksMi4xOSwwLDEsMSwxOC4xOSwxMCwyLjE5LDIuMTksMCwwLDEsMTYsMTIuMTlaIi8+PC9zdmc+);
+		}
+		div.iconSvg.lock {
+			background-image:
+				url(data:image/svg+xml;utf8;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iaXNvLTg4NTktMSI/Pgo8IS0tIEdlbmVyYXRvcjogQWRvYmUgSWxsdXN0cmF0b3IgMTkuMC4wLCBTVkcgRXhwb3J0IFBsdWctSW4gLiBTVkcgVmVyc2lvbjogNi4wMCBCdWlsZCAwKSAgLS0+CjxzdmcgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB4bWxuczp4bGluaz0iaHR0cDovL3d3dy53My5vcmcvMTk5OS94bGluayIgdmVyc2lvbj0iMS4xIiBpZD0iQ2FwYV8xIiB4PSIwcHgiIHk9IjBweCIgdmlld0JveD0iMCAwIDU4IDU4IiBzdHlsZT0iZW5hYmxlLWJhY2tncm91bmQ6bmV3IDAgMCA1OCA1ODsiIHhtbDpzcGFjZT0icHJlc2VydmUiIHdpZHRoPSI1MTJweCIgaGVpZ2h0PSI1MTJweCI+CjxwYXRoIHN0eWxlPSJmaWxsOiNDN0NBQzc7c3Ryb2tlOiNDN0NBQzc7c3Ryb2tlLXdpZHRoOjI7c3Ryb2tlLW1pdGVybGltaXQ6MTA7IiBkPSJNNDIsMzJIMTVWMTMuNjAxQzE1LDYuNjUyLDIxLjA1NiwxLDI4LjUsMSAgUzQyLDYuNjUyLDQyLDEzLjYwMVYzMnogTTE5LDI4aDE5VjEzLjYwMUMzOCw4Ljg1OCwzMy43MzgsNSwyOC41LDVTMTksOC44NTgsMTksMTMuNjAxVjI4eiIvPgo8cmVjdCB4PSI4IiB5PSIyNiIgc3R5bGU9ImZpbGw6IzczODNCRjsiIHdpZHRoPSI0MiIgaGVpZ2h0PSIzMiIvPgo8cmVjdCB4PSIyOSIgeT0iMjYiIHN0eWxlPSJmaWxsOiM2ODc5QUY7IiB3aWR0aD0iMjEiIGhlaWdodD0iMzIiLz4KPHBvbHlnb24gc3R5bGU9ImZpbGw6I0VCQkExNjsiIHBvaW50cz0iNDIuNTg2LDU3IDQ5LDUwLjU4NiA0OSw0NyA0My40MTQsNDcgMzMuNDE0LDU3ICIvPgo8cG9seWdvbiBzdHlsZT0iZmlsbDojNEY1OTcwOyIgcG9pbnRzPSI5LDQ3IDksNTQuNTg2IDE2LjU4Niw0NyAiLz4KPHBvbHlnb24gc3R5bGU9ImZpbGw6IzQyNEE2MDsiIHBvaW50cz0iMzAuNTg2LDU3IDQwLjU4Niw0NyAzMS40MTQsNDcgMjEuNDE0LDU3ICIvPgo8cGF0aCBzdHlsZT0iZmlsbDojRUFDQzE4OyIgZD0iTTI4LjU4Niw0N2gtOS4xNzJsLTkuNzA3LDkuNzA3QzkuNTEyLDU2LjkwMiw5LjI1Niw1Nyw5LDU3aDkuNTg2TDI4LjU4Niw0N3oiLz4KPHBvbHlnb24gc3R5bGU9ImZpbGw6IzQyNEE2MDsiIHBvaW50cz0iNDksNTcgNDksNTMuNDE0IDQ1LjQxNCw1NyAiLz4KPHBvbHlnb24gc3R5bGU9ImZpbGw6IzRGNTk3MDsiIHBvaW50cz0iMjksNDkuNDE0IDIxLjQxNCw1NyAyOSw1NyAiLz4KPGc+CjwvZz4KPGc+CjwvZz4KPGc+CjwvZz4KPGc+CjwvZz4KPGc+CjwvZz4KPGc+CjwvZz4KPGc+CjwvZz4KPGc+CjwvZz4KPGc+CjwvZz4KPGc+CjwvZz4KPGc+CjwvZz4KPGc+CjwvZz4KPGc+CjwvZz4KPGc+CjwvZz4KPGc+CjwvZz4KPC9zdmc+Cg==);
+		}
+		div.iconSvg.reload, div.iconSvg.refresh {
+			background-image:
+				url(data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iaXNvLTg4NTktMSI/PjxzdmcgdmVyc2lvbj0iMS4xIiBpZD0iTGF5ZXJfMSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB4bWxuczp4bGluaz0iaHR0cDovL3d3dy53My5vcmcvMTk5OS94bGluayIgeD0iMHB4IiB5PSIwcHgiIHZpZXdCb3g9IjAgMCA1MTIuMDAyIDUxMi4wMDIiIHN0eWxlPSJlbmFibGUtYmFja2dyb3VuZDpuZXcgMCAwIDUxMi4wMDIgNTEyLjAwMjsiIHhtbDpzcGFjZT0icHJlc2VydmUiPjxwYXRoIHN0eWxlPSJmaWxsOiMwMDg4Y2M7IiB0cmFuc2Zvcm09InJvdGF0ZSg5MCAyNTYgMjU2KSIgZD0iTTQzNi44NjYsNDM2Ljg3MWM0OC4zMTItNDguMzExLDc0LjkyMS0xMTIuNTQ2LDc0LjkyMS0xODAuODcxIGMwLTE0MS4wMzktMTE0Ljc0NC0yNTUuNzg1LTI1NS43ODMtMjU1Ljc4NnY0OS41MDdjMTEzLjc0MSwwLjAwMiwyMDYuMjc2LDkyLjUzOSwyMDYuMjc2LDIwNi4yNzljMCw1NS4xMDEtMjEuNDU4LDEwNi45MDItNjAuNDIsMTQ1Ljg2NGwtNy41NzEsNy41NzFsLTY3LjU1Mi02Ny41NTJsMC4wMjEsMTcwLjA3NmwxNzAuMDk2LDAuMDQxbC02Ny41NTktNjcuNTU5TDQzNi44NjYsNDM2Ljg3MXoiLz48cGF0aCBzdHlsZT0iZmlsbDojMDA4OGNjOyIgdHJhbnNmb3JtPSJyb3RhdGUoOTAgMjU2IDI1NikiIGQ9Ik00OS43MjQsMjU2LjAwMWMwLTU1LjEwMSwyMS40NTgtMTA2LjkwMiw2MC40Mi0xNDUuODY0bDcuNTcxLTcuNTcxbDY3LjU1Miw2Ny41NTJMMTg1LjI0NSwwLjA0MUwxNS4xNDgsMGw2Ny41NTksNjcuNTU5bC03LjU3MSw3LjU3QzI2LjgyNCwxMjMuNDM5LDAuMjE1LDE4Ny42NzUsMC4yMTUsMjU1Ljk5OWMwLDE0MS4wMzksMTE0Ljc0NCwyNTUuNzg1LDI1NS43ODMsMjU1Ljc4NnYtNDkuNTA3QzE0Mi4yNTgsNDYyLjI3OCw0OS43MjQsMzY5Ljc0Miw0OS43MjQsMjU2LjAwMXoiLz48L3N2Zz4=);
+		}
+
+		.flex { display: flex; flex-wrap: nowrap; }
+		.flex > div { flex: 1 1 auto; }
+
+		/* Flex modernTabs (Fall-2017) */
+		.flexTabs {
+			width: 100%;
+			margin: 20px 0 10px 0;
+			font-family: Roboto, "Segoe UI", Helvetica, Arial, sans-serif;
+			border: 1px solid #d5d5d5;
+			box-shadow: 0px 4px 10px -5px rgba(0,0,0,0.5);
+			border-radius: 5px;
+		}
+		.flexTabs > ul {
+			display: flex;
+			background: #F6F6F6;
+		    list-style-type: none;
+		    margin: 0 !important; -webkit-margin-before: 0;  -moz-margin-before: 0;  -ms-margin-before: 0;
+		    padding: 0 !important;
+		    border-bottom: 1px solid #d5d5d5;
+		    border-radius: 5px 5px 0 0;
+		}
+		.flexTabs > ul > li {
+			flex: 1 0 auto;
+			box-sizing: border-box;
+		    cursor: pointer;
+		    text-shadow: 2px 2px #efefef;
+		    width: 25%;
+		    text-align: center;
+		    display: inline-block;
+			list-style-type: none;
+		    padding: 15px;
+		    font-size: 14px;
+		    color: #a7a7a7;
+		    text-transform: uppercase;
+		    border-bottom: 3px solid #F6F6F6;
+		    -webkit-user-select: none;
+		       -moz-user-select: none;
+		        -ms-user-select: none;
+		            user-select: none;
+		}
+		.flexTabs > ul > li.active {
+		    font-weight: bold;
+		    text-shadow: none;
+		    color: #0088CC;
+		    border-bottom: 3px solid #0088cc;
+		}
+		.flexTabs > div {
+		    display: none;
+		    margin: 0;
+		    padding: 20px;
+		    background: white;
+		    border-radius: 0 0 5px 5px;
+		}
+		.flexTabs > div.active { display: block; }
+		.flexTabs > div > .toolBar { width: 100%; min-height: 44px; display: table; margin-top: -20px; }
+		.flexTabs > div > .toolBar > div:first-child { display:table-cell; width:75%; text-align: left; padding:10px 0; vertical-align:middle; color:#bcd; }
+		.flexTabs > div > .toolBar > div:last-child  { display:table-cell; width:25%; text-align:right; padding:10px 0; vertical-align:middle; white-space:nowrap; }
+		.flexTabs > div > .toolBar button { border-radius: 2px; text-transform: none; }
+		.flexTabs > div > .toolBar img { vertical-align:middle; margin:-3px 3px 0 0; }
+
+		/* ===== Div Tables ===== */
+		.modernTable {
+			display: table;
+			width: 100%;
+			margin: 0; padding: 0;
+			color: rgb(0,149,221);
+			background: rgb(242,249,252);  /*#f4f7f8;*/
+			border: 1px #e7e7f7 solid;     /*#cee9f9;*/
+			border-radius: 5px;
+			box-sizing: border-box;
+		}
+		.modernTable > div {
+			display: table-cell;
+			padding: 10px 0 10px 20px;
+			vertical-align: middle;
+		}
+		.modernTable > div:last-child {
+			padding-right: 20px;
+		}
+		.modernTable div select {
+			width: 100%;
+		}
+		div.modernTable div.cellTitle, .modernTable div.cellTitle {
+			font-size: 16px;
+			margin: -2px 0 4px 0;
+			white-space: nowrap;
+		}
+		.modernTable label {
+			display: block;
+			white-space: nowrap;
+			text-transform: uppercase;
+			color: #bfcfdf;
+			font-size: 11px;
+			margin-bottom: 3px;
+		}
+
+		/* ------------------------------------------------------------------------- */
+		.tabModern {
+			font-family: "Segoe UI",Verdana,Arial,sans-serif;
+			width: 100%;
+			border-collapse: collapse;
+			margin: 0px;
+		}
+		.tabModern > tbody > tr > th, .tabModern > tbody > tr > td { border: 1px #f1f1f1 solid; }
+		.tabModern th.icon {
+			width: 1%;
+			padding: 0 4px;
+		}
+		.tabModern td.icon {
+			width: 1%;
+			padding: 0 4px 0 0;
+			background: #f8fbff;
+		}
+		.tabModern > thead > tr > th {
+			background: #E5F2FA;
+			border-left: 1px white solid;
+			border-bottom: 1px white solid;
+			border-top: 1px #e7e7f3 solid;
+			text-align: left;
+			padding: 8px;
+			font-size: 11px;
+			font-weight: normal;
+			color: #0090C0;
+			text-transform: uppercase;
+			white-space: nowrap;
+			vertical-align: middle;
+		}
+		.tabModern > thead > tr > th.title {
+		    background: #0088cc;
+		    text-align: center;
+		    padding: 10px;
+		    color: white;
+		    font-size: 14px;
+		    font-weight: bold;
+		}
+		.tabModern > thead > tr > th:first-child {
+			border-left: 1px #e7e7f3 solid;
+		}
+		.tabModern > thead > tr > th:last-child {
+			border-right: 1px #e7e7f3 solid;
+		}
+		.tabModern > tbody > tr > th {
+			text-align: left;
+			padding: 6px 10px;
+			background: #f2f9fc;
+			color: #0088cc;
+			box-sizing: border-box;
+			border: 1px solid white !important;
+		}
+		.tabModern > tbody > tr > td {
+			text-align: left;
+			padding: 6px 10px;
+			background: white;
+			box-sizing: border-box;
+		}
+		.tabModern > tbody > tr > td > a:link {
+			text-decoration: underline;
+		}
+		.tabModern > tfoot > tr > td { padding: 15px; text-align: center; }
+		.tabModern td.gray { background: #f7f7f7; }
+		.tabModern td.blue { background: #E5F2FA; }
+		.tabModern th.tabModernSection, .tabModern td.tabModernSection {
+			background: #E5F2FA !important;
+			text-align: center !important;
+			padding: 8px !important;
+			color: #0F5199;
+		}
+		.tabModern.shadow { box-shadow:2px 2px 6px 2px #aaa; }
+
+		/* tablesorter.css */
+		.tablesorter thead th {
+			border-left: 1px white solid !important;
+			border-right: 1px white solid !important;
+			border-top: 1px #e7e7f3 solid !important;
+			border-bottom: 1px #e7e7f3 solid !important;
+		}
+		.tablesorter thead th:first-child { border-left:  1px #e7e7f3 solid !important; }
+		.tablesorter thead th:last-child  { border-right: 1px #e7e7f3 solid !important; }
+		.tablesorter thead .tablesorter-header {
+			background-repeat: no-repeat;
+			background-position: right 8px center;
+			cursor: pointer;
+		}
+		.tablesorter thead .tablesorter-headerAsc      { background-color:#a9d4ef !important; color:#ffffff !important; background-image:url('data:image/gif;base64,R0lGODlhBwAEAIAAAP///////yH5BAEAAAEALAAAAAAHAAQAAAIHjGEJq8sOCwA7') !important; }
+		.tablesorter thead .tablesorter-headerDesc     { background-color:#a9d4ef !important; color:#ffffff !important; background-image:url('data:image/gif;base64,R0lGODlhBwAEAIAAAP///////yH5BAEAAAEALAAAAAAHAAQAAAIIhA+BGWoNWSgAOw') !important; }
+		.tablesorter thead .tablesorter-headerUnSorted { background-color:#E5F2FA !important; color:#0090C0 !important; background-image:url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAcAAAAJCAYAAAD+WDajAAAAKElEQVR42mNgQAYTDvxnwApAEjCMUwJFATYJrCbgtYtoo4lzLQ5/AgB5EEnhsdUsjwAAAABJRU5ErkJggg==') !important; }
+		.tablesorter > tbody > tr > td { border: 1px #F1F1F1 solid !important; color:#696969 !important; }
+		/* tablesorter - Make room for sort icons */
+		.tablesorter > thead > tr > th { padding: 6px 20px 6px 8px !important; }
+		.tablesorter > thead > tr > th.sorter-false { padding: 6px 8px !important; cursor: default; }
+		.tabModern > thead > tr > th.sorter-false { background-image: url('data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7') !important; }
+		/* icon.checkbox cells in tbody */
+		.tablesorter > tbody > tr > td.icon {
+			width: 1%;
+			background: #f8fbff;
+			text-align: center;
+			white-space: nowrap;
+			border-top:1px solid #fff !important;
+			border-bottom:1px solid #fff !important;
+			padding: 0 4px;
+			vertical-align: middle;
+		}
+		.tablesorter > tbody > tr > td.icon:last-child { border-bottom: 1px solid #F1F1F1; }
+	</style>
+
+	<script type="text/javascript" src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+	<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.29.0/js/jquery.tablesorter.min.js"></script>
+	<script type="text/javascript" src="https://rawgit.com/sorensen/ascii-table/master/ascii-table.js"></script>
+	<script type="text/javascript" src="https://rawgit.com/gitbrent/SpRestLib/master/dist/sprestlib.js"></script>
+
+	<script type="text/javascript">
+		$.ajaxSetup({ cache:false });
+		//
+		const APP_BLD = 20171028;
+		const HTML_SPINNER = '<div class="sprlib-spinner"><div class="sprlib-bounce1"></div><div class="sprlib-bounce2"></div><div class="sprlib-bounce3"></div></div>';
+		//
+		var gArrHistory = [];
+
+		// ==================================================================================================================
+
+		/**
+		* Push table data to client as csv file.
+		*/
+		function exportTabData(inTabName) {
+			var data = '';
+			var filename = 'SPRSandbox_'+ new Date().toISOString().split('.')[0].replace(/\D/g,'') +'.csv';
+
+			// STEP 1: Compile data
+			$('#'+inTabName+' tr').each(function(idx,row){
+				if ( $(row).is(':visible') ) {
+					$(row).find('th,td').each(function(idy,cell){ data += '"'+ $(cell).text().trim() + '",'; });
+					data = data.substring(0,data.length-1) + '\n';
+				}
+			});
+
+			// STEP 2: Export
+			var blob = new Blob([data], {type: "text/csv;charset=utf-8;"});
+			if ( navigator.msSaveBlob ) {
+				navigator.msSaveBlob(blob, filename);
+			}
+			else {
+				var link = document.createElement("a");
+				var url = URL.createObjectURL(blob);
+				link.setAttribute("href", url);
+				link.setAttribute("download", filename);
+				link.style = "visibility:hidden";
+				document.body.appendChild(link);
+				link.click();
+				document.body.removeChild(link);
+			}
+		}
+
+		function getAsciiTableStr(inResult) {
+			var arrResults = [];
+			var table;
+
+			// STEP 1: Transform object / Create headings
+			if ( inResult && !Array.isArray(inResult) && typeof inResult === 'object' ) {
+				Object.keys(inResult).forEach(key => {
+					arrResults.push({ 'name':key, 'value':( typeof inResult[key] === 'object' ? JSON.stringify(inResult[key]) : inResult[key].toString() ) });
+				});
+				table = new AsciiTable().setHeading( ['Prop Name','Prop Value'] );
+			}
+			else if ( Array.isArray(inResult) ) {
+				arrResults = inResult;
+				var arrColHeadings = [];
+				Object.keys(arrResults[0]).forEach(function(key,idx){
+					if ( typeof key === 'object' ) Object.keys(key).forEach(function(key,idx){ arrColHeadings.push(key) });
+					else arrColHeadings.push(key);
+				});
+				table = new AsciiTable().setHeading( arrColHeadings );
+			}
+
+			// STEP 2:
+			arrResults.forEach((obj,idx) => {
+				var vals = [];
+				$.each(obj, function(key,val){
+					if ( typeof val === 'object' && JSON.stringify(val).indexOf("__deferred") > 0 ) val = "[[__deferred]]";
+					if ( typeof val === 'object' && JSON.stringify(val).indexOf("__metadata") > 0 ) val = "[[__metadata]]";
+					vals.push( typeof val === 'object' ? JSON.stringify(val) : val );
+				});
+				table.addRow(vals);
+			});
+
+			return table.toString();
+		}
+
+		// ==================================================================================================================
+
+		function histClickRerun(ele) {
+			// STEP 1: Clear code
+			$('#sandboxCode').empty();
+
+			// STEP 2: Copy over code
+			$('#sandboxCode').text( gArrHistory.filter(obj => { return obj.id == $(ele).closest('tr').data('hist-id') })[0].code );
+
+			// STEP 3: Flip tabs
+			$('#navTabs li:first-child').click();
+		}
+
+		function histClickRemove(ele) {
+			// STEP 1: Remove row from hist object
+			gArrHistory = gArrHistory.filter(obj => { return obj.id != $(ele).closest('tr').data('hist-id') });
+
+			// STEP 2: Save new hist
+			if (gArrHistory) localStorage.setItem( "sprestlib-sandbox-hist", JSON.stringify(gArrHistory) );
+
+			// STEP 3: Remove table row
+			$(ele).closest('tr').remove();
+		}
+
+		// ==================================================================================================================
+
+		function execCodeAndShowResults(eleCode, eleData) {
+			// A:
+			$('#btnSubmit, #busy').toggle();
+			$('#'+eleData).html('Working...');
+
+			// B:
+			Promise.resolve()
+			.then(function(){
+				return eval( $('#'+eleCode).text() )
+			})
+			.then(function(results){
+				// A:
+				var objHist = {
+					id: new Date().toISOString(),
+					code: $('#'+eleCode).text().trim(),
+					total: ( results && !Array.isArray(results) && typeof results === 'object' ? 'object' : results.length ),
+					datetime: new Date().toLocaleString()
+				};
+
+				// B: Show results
+				if ( results ) {
+					$('#'+eleData).html( getAsciiTableStr(results) || '(No results)' );
+				}
+				else if ( !results || results.length == 0 ) {
+					$('#'+eleData).html( '(No results returned)' );
+				}
+				else {
+					$('#'+eleData).html( '(check console)' );
+					console.log( results );
+				}
+
+				// C: Add to History
+				gArrHistory.push(objHist);
+				localStorage.setItem( 'sprestlib-sandbox-hist', JSON.stringify(gArrHistory) );
+				popHistoryTable(objHist);
+
+				// D: UI Update
+				$('#btnSubmit, #busy').toggle();
+			})
+			.catch(function(strErr){
+				$('#'+eleData).html( '<h2 style="color:red">ERROR</h2>'+strErr );
+				$('#btnSubmit, #busy').toggle();
+			});
+		}
+
+		function popHistoryTable(objHist) {
+			var arrHist = ( objHist ? [objHist] : gArrHistory );
+
+			// STEP 1:
+			arrHist.forEach((objHist,idx) => {
+				// <div class="iconSvg size16 check"></div>
+				$('#tabHist tbody').prepend('<tr data-hist-id="'+ objHist.id +'">'
+					+ '<th><div class="flex">'
+					+ '<div style="margin-right:10px">'+'<div class="iconSvg size16 reload" title="Re-Run Code" onclick="histClickRerun(this)" ><a href="javascript:void(0);"></a></div>'+'</div>'
+					+ '<div                          >'+'<div class="iconSvg size16 xmark"  title="Remove Code" onclick="histClickRemove(this)"><a href="javascript:void(0);"></a></div>'+'</div>'
+					+ '</div></th>'
+					+ '<td class="code">'+ objHist.code +'</td>'
+					+ '<td class="nowctr">'+ objHist.total +'</td>'
+					+ '<td class="nowctr">'+ objHist.datetime +'</td>'
+					+ '</tr>'
+				);
+			});
+
+			// STEP 2: tablesorter
+			if ( $.tablesorter ) $('#tabHist').tablesorter({ sortList:[[3,1]] });
+		}
+
+		// ==================================================================================================================
+
+		function appStartup() {
+			// DEBUG
+			//$.getScript("/sites/dev/SiteAssets/js/sprestlib.js", function(){ console.log('sprLib.version = '+sprLib.version) });
+
+			// A: UI
+			document.title = 'SpRestLib Sandbox';
+
+			// B: Versions
+			$('#boxSetup > div:eq(0)').html( '<label>jQuery</label>'   + jQuery.fn.jquery );
+			$('#boxSetup > div:eq(1)').html( '<label>SpRestLib</label>'+ sprLib.version );
+			$('#boxSetup > div:eq(2)').html( '<label>Site URL</label>' + _spPageContextInfo.siteAbsoluteUrl );
+
+			// C: Prevent tabs from going rogue
+			$('#navTabs').css('max-width', $('#contentBox').width()+'px');
+
+			// D: Fetch/Populate History
+			gArrHistory = JSON.parse(localStorage.getItem("sprestlib-sandbox-hist") || '') || [];
+			if ( gArrHistory.length > 0 ) popHistoryTable();
+		}
+
+		// ==================================================================================================================
+		window.onload = function(){ SetFullScreenMode(true); appStartup(); }
+	</script>
+</head>
+<body>
+	<h1>SpRestLib Sandbox</h1>
+	<div id="boxSetup" class="modernTable">
+		<div></div>
+		<div></div>
+		<div></div>
+		<div style="text-align:center">
+			<button type="button" class="flatBtn flatBtn-blueMd"
+			onclick="$.getScript('/sites/dev/SiteAssets/js/sprestlib.js', function(){ console.log('sprLib.version = '+sprLib.version) });">
+			Reload sprestlib.js</button>
+		</div>
+	</div>
+
+	<div id="navTabs" class="flexTabs">
+		<ul>
+			<li onclick="$('#navTabs').find('> div, li').removeClass('active'); $(this).addClass('active'); $('#navtabCode').addClass('active');" class="active">Code Sandbox</li>
+			<li onclick="$('#navTabs').find('> div, li').removeClass('active'); $(this).addClass('active'); $('#navtabHist').addClass('active');">Code History</li>
+		</ul>
+
+		<div id="navtabCode" class="active">
+			<div class="subTitle first">Input</div>
+			<div id="sandboxCode" class="boxCode" contenteditable="true" spellcheck="false">
+				sprLib.site().lists()
+			</div>
+			<div style="text-align:left; padding:10px 0;">
+				<button id="btnSubmit" type="button" class="flatBtn flatBtn-green" style="width:300px" onclick="execCodeAndShowResults('sandboxCode','sandboxData')">Execute Sandbox Code</button>
+				<div id="busy" class="sprlib-spinner" style="display:none"><div class="sprlib-bounce1"></div><div class="sprlib-bounce2"></div><div class="sprlib-bounce3"></div></div>
+			</div>
+
+			<div class="subTitle">Results</div>
+			<div id="sandboxData" class="boxData"></div>
+		</div>
+
+		<div id="navtabHist">
+			<div class="subTitle first">History</div>
+
+			<table id="tabHist" class="tabModern">
+				<thead>
+					<tr>
+						<th style="width: 5%" class="sorter-false">Actions</th>
+						<th style="width:80%">Code</th>
+						<th style="width: 5%">Results</th>
+						<th style="width:10%">Timestamp</th>
+					</tr>
+				</thead>
+				<tbody></tbody>
+			</table>
+		</div>
+	</div>
+</body>
+</html>
