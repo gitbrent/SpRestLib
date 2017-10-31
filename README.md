@@ -154,7 +154,7 @@ and run this to load the SpRestLib bundle script dynamically:
 ```javascript
 // Load SpRestLib via CDN
 var script = document.createElement('script');
-script.src = "https://cdn.rawgit.com/gitbrent/SpRestLib/v1.2.1/dist/sprestlib.bundle.js"; 
+script.src = "https://cdn.rawgit.com/gitbrent/SpRestLib/v1.2.1/dist/sprestlib.bundle.js";
 document.getElementsByTagName('head')[0].appendChild(script);
 
 // Then try some methods
@@ -170,14 +170,11 @@ sprLib.user().info().then( objUser => (console.table ? console.table([objUser]) 
 
 ## List/Library
 * `sprLib.list(listName).getItems(options)` - Returns an array of item objects using a variety of possible options
-
 * `sprLib.list(listName).create(item)` - Create a new list item using JSON data
 * `sprLib.list(listName).update(item)` - Update an existing item using JSON data
 * `sprLib.list(listName).delete(id)`   - Delete an existing item by ID (permanently delete)
 * `sprLib.list(listName).recycle(id)`  - Recycle an existing item by ID (move to Recycle Bin)
-
 * `sprLib.list(listName).cols()` - Returns an array of column objects with useful info (name, datatype, etc.)
-
 * `sprLib.list(listName).info()` - Returns information about the List/Library (GUID, numberOfItems, etc.)
 
 ## Site Collection/Subsite
