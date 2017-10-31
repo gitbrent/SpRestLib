@@ -35,6 +35,8 @@ items (CRUD), execute REST calls, and gather user/group information.
     - [Include Bundle Script](#include-bundle-script)
     - [Install With Bower](#install-with-bower)
   - [Node.js](#nodejs)
+- [Library Test Drive](#library-test-drive)
+  - [SpRestLib via Console](#sprestlib-via-console)
 - [Method Overview](#method-overview)
   - [REST API](#rest-api)
   - [List/Library](#listlibrary)
@@ -82,7 +84,7 @@ items (CRUD), execute REST calls, and gather user/group information.
     - [Get Site Users](#get-site-users)
       - [Sample Code](#sample-code-9)
   - [User Methods](#user-methods)
-    - [Options](#options-2)
+    - [User Query Properties](#user-query-properties)
     - [Get User Information (`SPUser`)](#get-user-information-spuser)
       - [Sample Code](#sample-code-10)
     - [Get User Groups (`SPGroup`)](#get-user-groups-spgroup)
@@ -140,6 +142,25 @@ npm install sprestlib
 var sprLib = require("sprestlib");
 ```
 * Desktop: Compatible with Electron applications.
+
+
+**************************************************************************************************
+# Library Test Drive
+
+## SpRestLib via Console
+Want to try SpRestLib for yourself?  It's easy to do!  Just open an F12 developer window on any SP page
+and run this to load the SpRestLib bundle script dynamically:
+
+```javascript
+// Load SpRestLib via CDN
+var script = document.createElement('script');
+script.src = "https://cdn.rawgit.com/gitbrent/SpRestLib/v1.2.1/dist/sprestlib.bundle.js"; 
+document.getElementsByTagName('head')[0].appendChild(script);
+
+// Then try some methods
+sprLib.user().info().then( objUser => (console.table ? console.table([objUser]) : console.log(objUser)) );
+```
+
 
 **************************************************************************************************
 # Method Overview
