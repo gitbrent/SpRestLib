@@ -838,16 +838,16 @@ sprLib.site().users()
 
 **************************************************************************************************
 ## User Methods
-Omitting options will return information about the current user, otherwise, the specified user is returned.  
+Omitting a query property will return information about the current user, otherwise, the specified user is returned.  
 `sprLib.user()`  
 `sprLib.user(options)`
 
-### Options
-| Option   | Type     | Required? | Description           | Possible Values / Returns                             |
+### User Query Properties
+| Prop     | Type     | Required? | Description           | Possible Values / Returns                             |
 | :------- | :------- | :-------- | :-------------------- | :---------------------------------------------------- |
 | `id`     | number   |           | user id               | user id to query. Ex: `{id:99}`                       |
 | `email`  | string   |           | user email address    | user email to query. Ex: `{email:'brent@github.com'}` |
-| `login`  | string   |           | user login name       | user loginName to query. Ex: `{login:'i:0#.f|membership|brent@github.com'}` |
+| `login`  | string   |           | user login name       | user loginName to query. Ex: `{login:'AMERICAS\Bob_Ely'}` |
 | `title`  | string   |           | user title            | user title to query. Ex: `{title:'Brent Ely'}`        |
 
 ### Get User Information (`SPUser`)
@@ -855,7 +855,7 @@ Syntax:
 `sprLib.user().info()`  
 `sprLib.user(options).groups()`
 
-Returns: Object with name/value pairs containing information about the SharePoint user
+Returns: Object with SharePoint user (`SP.User`) properties.
 
 Note: *Uses the basic SP User service (not the Enterprise licensed User Profile service)*
 
