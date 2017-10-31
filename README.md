@@ -39,7 +39,7 @@ items (CRUD), execute REST calls, and gather user/group information.
   - [REST API](#rest-api)
   - [List/Library](#listlibrary)
   - [Site Collection/Subsite](#site-collectionsubsite)
-  - [User Info/Groups](#user-infogroups)
+  - [User Information](#user-information)
   - [Form Population](#form-population)
   - [Utility](#utility)
 - [Method Reference](#method-reference)
@@ -158,15 +158,15 @@ var sprLib = require("sprestlib");
 * `sprLib.list(listName).info()` - Returns information about the List/Library (GUID, numberOfItems, etc.)
 
 ## Site Collection/Subsite
-* `sprLib.site(siteUrl).info()` - Returns over a dozen site properties (ID, Owner, Language, Logo, etc.)
-* `sprLib.site(siteUrl).lists()` - Returns an array of the site's Lists/Libraries
-* `sprLib.site(siteUrl).perms()` - Returns an array of the site's Member/Roles objects
-* `sprLib.site(siteUrl).groups()` - Returns an array of the site's Groups and Members
-* `sprLib.site(siteUrl).roles()` - Returns an array of the site's Roles
+* `sprLib.site(siteUrl).info()`     - Returns over a dozen site properties (ID, Owner, Language, Logo, etc.)
+* `sprLib.site(siteUrl).lists()`    - Returns an array of the site's Lists/Libraries
+* `sprLib.site(siteUrl).perms()`    - Returns an array of the site's Member/Roles objects
+* `sprLib.site(siteUrl).groups()`   - Returns an array of the site's Groups and Members
+* `sprLib.site(siteUrl).roles()`    - Returns an array of the site's Roles
 * `sprLib.site(siteUrl).subsites()` - Returns an array of the site's Subsites
-* `sprLib.site(siteUrl).users()` - Returns an array of the site's Users and their base permissions
+* `sprLib.site(siteUrl).users()`    - Returns an array of the site's Users and their base permissions
 
-## User Info/Groups
+## User Information
 * `sprLib.user(options).info()`   - Returns user information object (Id, Title, Email, etc.)  ([SPUser](https://msdn.microsoft.com/en-us/library/microsoft.sharepoint.spuser.aspx))
 * `sprLib.user(options).groups()` - Returns user group objects (Id, Title, Owner, etc.)  ([SPGroup](https://msdn.microsoft.com/en-us/library/microsoft.sharepoint.spgroup.aspx))
 
