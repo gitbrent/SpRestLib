@@ -79,12 +79,14 @@ items (CRUD), execute REST calls, and gather user/group information.
       - [Sample Code](#sample-code-7)
     - [Get Site Subsites](#get-site-subsites)
       - [Sample Code](#sample-code-8)
+    - [Get Site Users](#get-site-users)
+      - [Sample Code](#sample-code-9)
   - [User Methods](#user-methods)
     - [Options](#options-2)
     - [Get User Information (`SPUser`)](#get-user-information-spuser)
-      - [Sample Code](#sample-code-9)
-    - [Get User Groups (`SPGroup`)](#get-user-groups-spgroup)
       - [Sample Code](#sample-code-10)
+    - [Get User Groups (`SPGroup`)](#get-user-groups-spgroup)
+      - [Sample Code](#sample-code-11)
   - [Form Binding](#form-binding)
     - [Data Binding Types](#data-binding-types)
     - [Data Binding Options](#data-binding-options)
@@ -167,8 +169,8 @@ var sprLib = require("sprestlib");
 * `sprLib.site(siteUrl).users()`    - Returns an array of the site's Users and their base permissions
 
 ## User Information
-* `sprLib.user(options).info()`   - Returns user information object (Id, Title, Email, etc.)  ([SPUser](https://msdn.microsoft.com/en-us/library/microsoft.sharepoint.spuser.aspx))
-* `sprLib.user(options).groups()` - Returns user group objects (Id, Title, Owner, etc.)  ([SPGroup](https://msdn.microsoft.com/en-us/library/microsoft.sharepoint.spgroup.aspx))
+* `sprLib.user(options).info()`   - Returns an object with `SP.User` user properties (`Id`, `Email`, `Login`, `Title`, etc.)
+* `sprLib.user(options).groups()` - Returns an object with `SP.Group` group properties (`Id`, `Owner`, `Title`, etc.)
 
 ## Form Population
 * `data-sprlib{options}` - Populates the parent tag using the options provided
@@ -721,8 +723,7 @@ sprLib.site().groups()
 
 
 ### Get Site Roles
-Syntax:
-
+Syntax:  
 `sprLib.site().roles()`  
 `sprLib.site(siteUrl).roles()`
 
@@ -758,22 +759,23 @@ sprLib.site().roles()
 
 
 ### Get Site Subsites
-Syntax:
+Syntax:  
 `sprLib.site().subsites()`  
 `sprLib.site(siteUrl).subsites()`
 
 Returns: Array of subsites under the current or specified location
 
-| Property Name                | Type     | Description                                      |
-| :--------------------------- | :------- | :----------------------------------------------- |
-| `Id`                         | GUID     | SP GUID                                          |
-| `Name`                       | string   | Role Name                                        |
+| Property Name    | Type     | Description                                        |
+| :--------------- | :------- | :------------------------------------------------- |
+| `Created`        | string   | Date (ISO format) that this Site was created       |
+| `Id`             | GUID     | SP GUID for this site                              |
+| `Language`       | number   | `SP.Language.lcid` property                        |
+| `Name`           | string   | Site Name                                          |
+| `Modified`       | string   | Date (ISO format) that this Site was last modified |
+| `SiteLogoUrl`    | string   | relative URL to site logo image                    |
+| `UrlAbs`         | string   | absolute URL of this site                          |
+| `UrlRel`         | boolean  | relative URL of this site                          |
 
-// TODO: CURR:
-
-| `Description`                | string   | Role Description                                 |
-| `Hidden`                     | boolean  | Whether this Role is hidden or not               |
-| `RoleTypeKind`               | number   | `SP.RoleDefinition.roleTypeKind` value           |
 
 #### Sample Code
 ```javascript
@@ -787,29 +789,50 @@ sprLib.site().subsites()
 |-------------|---------------------------------------------------|
 | Id          | 822555ab-9376-4a1b-925b-82dcc7bf3cbd              |
 | Name        | Sandbox                                           |
-| UrlAbs      | https://brent.sharepoint.com/sites/dev/sandbox    |
-| UrlRel      | /sites/dev/sandbox                                |
 | Created     | 2017-09-30T04:27:51                               |
 | Modified    | 2017-10-25T03:48:39Z                              |
 | Language    | 1033                                              |
 | SiteLogoUrl | /sites/dev/SiteAssets/sprestlib-logo.png          |
+| UrlAbs      | https://brent.sharepoint.com/sites/dev/sandbox    |
+| UrlRel      | /sites/dev/sandbox                                |
 '-----------------------------------------------------------------'
 */
 ```
 
 
+### Get Site Users
+Syntax:  
+`sprLib.site().users()`  
+`sprLib.site(siteUrl).users()`
 
+Returns: Array of site permissions
 
+| Property Name                | Type     | Description                                           |
+| :--------------------------- | :------- | :---------------------------------------------------- |
+| `Email`                      | string   | user email address                                    |
+| `Id`                         | GUID     | user ID                                               |
+| `IsSiteAdmin`                | object   | whether the user us a site collection admin (SCA)     |
+| `Groups`                     | array    | array of user's group objects with properties: (`Id`,`Title`) |
+| `LoginName`                  | string   | user LoginName                                        |
+| `PrincipalType`              | string   | Group, User, etc.                                     |
+| `Title`                      | string   | Title of the User                                     |
 
-
-
+#### Sample Code
 ```javascript
+sprLib.site().users()
+.then(function(arrayResults){ console.table(arrayResults) });
+
 /*
-// TODO: vvv ========================================================================
-* `sprLib.site(siteUrl).users()`    - Returns an array of the site's Users and their base permissions
-// TODO: ^^^ ========================================================================
+.-----------------------------------------------------------------------------------------------------------------------------------------.
+| Id |        Email        |          LoginName         | PrincipalType  |   Title   | IsSiteAdmin |                Groups                |
+|----|---------------------|----------------------------|----------------|-----------|-------------|--------------------------------------|
+|  9 | brent@microsoft.com | i:0#.f|brent@microsoft.com | User           | Brent Ely | true        | [{"Id":6,"Title":"Dev Site Owners"}] |
+|  3 |                     | c:0(.s|true                | Security Group | Everyone  | false       | []                                   |
+'-----------------------------------------------------------------------------------------------------------------------------------------'
 */
 ```
+
+
 
 
 
