@@ -495,21 +495,26 @@ Syntax:
 Returns: Array of list properties
 
 #### List Properties
-| Property Name        | Type     | Description                                             |
-| :------------------- | :------- | :------------------------------------------------------ |
-| `AllowContentTypes`  | boolean  | Whether `Allow management of content types?` is enabled |
-| `BaseTemplate`       | integer  | `SPListTemplateType` SP Base Template ID number - ex: `100` |
-| `BaseType`           | integer  | SP Base Type ID number - ex: `0` |
-| `Created`            | string   | Date the List/Library was created (ISO format)          |
-| `Description`        | string   | List/Library `Description`                              |
-DraftVersionVisibility
-// TODO: ^^ this and more from below
-| `EnableAttachments`  | boolean  | Whether users can attach files to items in this list    |
-| `ForceCheckout`      | boolean  | Whether Force checkout is enabled                       |
-| `Hidden`             | boolean  | Whether List is hidden                                  |
-| `Id`                 | GUID     | The SP GUID of the List                                 |
-| `ItemCount`          | number   | The number of Items in the List                         |
-| `Title`              | string   | The Title of the List/Library                           |
+| Property Name             | Type     | Description                                                 |
+| :------------------------ | :------- | :---------------------------------------------------------- |
+| `AllowContentTypes`       | boolean  | Whether `Allow management of content types?` is enabled     |
+| `BaseTemplate`            | integer  | `SPListTemplateType` SP Base Template ID number - ex: `100` |
+| `BaseType`                | integer  | SP Base Type ID number - ex: `0`                            |
+| `Created`                 | string   | Date the List/Library was created (ISO format)              |
+| `Description`             | string   | List/Library `Description`                                  |
+| `DraftVersionVisibility`  | number   | whether draft versions can be seen                          |
+| `EnableAttachments`       | boolean  | whether users can attach files to items in this list        |
+| `EnableFolderCreation`    | boolean  | whether users can create folders in this list/library       |
+| `EnableVersioning`        | boolean  | whether versioning is enabled for the items in this list    |
+| `ForceCheckout`           | boolean  | Whether Force checkout is enabled                           |
+| `Hidden`                  | boolean  | Whether List is hidden                                      |
+| `Id`                      | GUID     | The SP GUID of the List                                     |
+| `ItemCount`               | number   | The number of Items in the List                             |
+| `LastItemDeletedDate`       | string | Date (ISO format) an item was last deleted                  |
+| `LastItemModifiedDate`      | string | Date (ISO format) an item was last modified                 |
+| `LastItemUserModifiedDate`  | string | Date (ISO format) an item was last modified by a User       |
+| `ListItemEntityTypeFullName`| string | `SP.List.listItemEntityTypeFullName` property               |
+| `Title`                     | string | The Title of the List/Library                               |
 
 #### Sample Code
 ```javascript
@@ -551,7 +556,7 @@ sprLib.list('Employees').info()
 ## Site Methods
 
 ### Get Site Info
-Syntax:
+Syntax:  
 `sprLib.site().info()`  
 `sprLib.site(siteUrl).info()`
 
@@ -566,15 +571,15 @@ Returns: Array of site properties
 | `Created`                 | string   | Date (ISO format) the site was created                   |
 | `Description`             | string   | Site Description                                         |
 | `Id`                      | GUID     | The SP GUID of the Site                                  |
-| `Language`                | number   | An [SP.Language.lcid](https://msdn.microsoft.com/en-us/library/office/jj850866.aspx) value |
+| `Language`                | number   | `SP.Language.lcid` property                              |
 | `LastItemModifiedDate`    | string   | Date (ISO format) an item was last modified              |
 | `LastItemUserModifiedDate`| string   | Date (ISO format) an item was last modified by a User    |
 | `Owner`                   | object   | Object with Group properties (`Email`,`LoginName`,`Title`,`IsSiteAdmin`) |
 | `RequestAccessEmail`      | string   | Email that receives access requests for this site/subsite |
 | `SiteLogoUrl`             | string   | Relative URL to the site's logo image                     |
 | `Title`                   | string   | The Title of the Site/Subsite                             |
-| `Url`                     | string   | Absolute site URL |
-| `WebTemplate`             | string   | Web template name |
+| `Url`                     | string   | Absolute site URL                                         |
+| `WebTemplate`             | string   | Web template name                                         |
 
 #### Sample Code
 ```javascript
@@ -606,7 +611,7 @@ sprLib.site().info()
 ```
 
 ### Get Site Lists
-Syntax:
+Syntax:  
 `sprLib.site().lists()`  
 `sprLib.site(siteUrl).lists()`
 
@@ -616,7 +621,7 @@ Returns: Array of site lists
 | Property Name    | Type     | Description                                      |
 | :--------------- | :------- | :----------------------------------------------- |
 | `BaseTemplate`   | number   | `SP.List.baseTemplate` property value            |
-| `BaseType`       | number   | `SP.BaseType` value                              |
+| `BaseType`       | number   | `SP.BaseType` property value                     |
 | `Description`    | string   | Site Description                                 |
 | `Hidden`         | boolean  | Is list hidden?                                  |
 | `Id`             | GUID     | The SP GUID of the Site                          |
@@ -651,7 +656,7 @@ sprLib.site().lists()
 ```
 
 ### Get Site Permissions
-Syntax:
+Syntax:  
 `sprLib.site().perms()`  
 `sprLib.site(siteUrl).perms()`
 
@@ -682,7 +687,7 @@ sprLib.site().perms()
 
 
 ### Get Site Groups
-Syntax:
+Syntax:  
 `sprLib.site().groups()`  
 `sprLib.site(siteUrl).groups()`
 
@@ -717,6 +722,7 @@ sprLib.site().groups()
 
 ### Get Site Roles
 Syntax:
+
 `sprLib.site().roles()`  
 `sprLib.site(siteUrl).roles()`
 
