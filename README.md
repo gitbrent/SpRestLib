@@ -76,12 +76,16 @@ items (CRUD), execute REST calls, and gather user/group information.
       - [Perm Properties](#perm-properties)
       - [Sample Code](#sample-code-5)
     - [Get Site Groups](#get-site-groups)
+      - [Group Properties](#group-properties)
       - [Sample Code](#sample-code-6)
     - [Get Site Roles](#get-site-roles)
+      - [Role Properties](#role-properties)
       - [Sample Code](#sample-code-7)
     - [Get Site Subsites](#get-site-subsites)
+      - [Subsite Properties](#subsite-properties)
       - [Sample Code](#sample-code-8)
     - [Get Site Users](#get-site-users)
+      - [User Properties](#user-properties)
       - [Sample Code](#sample-code-9)
   - [User Methods](#user-methods)
     - [User Query Properties](#user-query-properties)
@@ -713,6 +717,7 @@ Syntax:
 
 Returns: Array of site permissions
 
+#### Group Properties
 | Property Name                | Type     | Description                                      |
 | :--------------------------- | :------- | :----------------------------------------------- |
 | `AllowMembersEditMembership` | boolean  | Whether members can edit the group               |
@@ -747,6 +752,7 @@ Syntax:
 
 Returns: Array of site permissions
 
+#### Role Properties
 | Property Name                | Type     | Description                                      |
 | :--------------------------- | :------- | :----------------------------------------------- |
 | `Description`                | string   | Role Description                                 |
@@ -783,6 +789,7 @@ Syntax:
 
 Returns: Array of subsites under the current or specified location
 
+#### Subsite Properties
 | Property Name    | Type     | Description                                        |
 | :--------------- | :------- | :------------------------------------------------- |
 | `Created`        | string   | Date (ISO format) that this Site was created       |
@@ -823,17 +830,18 @@ Syntax:
 `sprLib.site().users()`  
 `sprLib.site(siteUrl).users()`
 
-Returns: Array of site permissions
+Returns: Array of site users
 
-| Property Name                | Type     | Description                                           |
-| :--------------------------- | :------- | :---------------------------------------------------- |
-| `Email`                      | string   | user email address                                    |
-| `Id`                         | GUID     | user ID                                               |
-| `IsSiteAdmin`                | object   | whether the user us a site collection admin (SCA)     |
-| `Groups`                     | array    | array of user's group objects with properties: (`Id`,`Title`) |
-| `LoginName`                  | string   | user LoginName                                        |
-| `PrincipalType`              | string   | Group, User, etc.                                     |
-| `Title`                      | string   | Title of the User                                     |
+#### User Properties
+| Property Name                | Type     | Description                                                     |
+| :--------------------------- | :------- | :-------------------------------------------------------------- |
+| `Email`                      | string   | user email address                                              |
+| `Id`                         | number   | user Id                                                         |
+| `IsSiteAdmin`                | object   | whether the user us a site collection admin (SCA)               |
+| `Groups`                     | array    | array of user's group objects with properties: (`Id`,`Title`)   |
+| `LoginName`                  | string   | user LoginName                                                  |
+| `PrincipalType`              | string   | type of user: "Group", "User', etc.                             |
+| `Title`                      | string   | user Title                                                      |
 
 #### Sample Code
 ```javascript

@@ -9,7 +9,7 @@
 - *BREAKING CHANGE*: `version()` method removed! (use `version` property now)
 - `.list()` now accepts an object in addition to listname (string)
 - Added new `metadata` option to `list().getItems()` and `rest()` methods
-- Added new core method: `site()` - returns users, perms, subsites, etc.
+- Added new core method: `site()` - returns info, perms, users, groups, subsites, etc.
 
 
 
