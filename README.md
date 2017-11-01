@@ -795,8 +795,8 @@ Returns: Array of subsites under the current or specified location
 | `Created`        | string   | Date (ISO format) that this Site was created       |
 | `Id`             | GUID     | SP GUID for this site                              |
 | `Language`       | number   | `SP.Language.lcid` property                        |
-| `Name`           | string   | Site Name                                          |
 | `Modified`       | string   | Date (ISO format) that this Site was last modified |
+| `Name`           | string   | Site Name                                          |
 | `SiteLogoUrl`    | string   | relative URL to site logo image                    |
 | `UrlAbs`         | string   | absolute URL of this site                          |
 | `UrlRel`         | boolean  | relative URL of this site                          |

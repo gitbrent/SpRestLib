@@ -29,10 +29,15 @@
 		!!!==>> Check the img folder for screencaps of the SharePoint setup! <<==!!!
 	-->
 
+	<!--
+	<script type="text/javascript" src="https://cdn.rawgit.com/gitbrent/SpRestLib/v1.2.1/example/css/sprestlib.css"></script>
+	<script type="text/javascript" src="https://cdn.rawgit.com/gitbrent/SpRestLib/v1.2.1/example/css/sprestlib-demo.css"></script>
+	DEBUG Below
+	-->
 	<link rel="stylesheet" type="text/css" href="../SiteAssets/sprestlib/css/sprestlib.css">
 	<link rel="stylesheet" type="text/css" href="../SiteAssets/sprestlib/css/sprestlib-demo.css">
+	<!-- ^^^ DEBUG ^^^ -->
 	<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.8.3/themes/prism-coy.css">
-	<!-- <link rel="stylesheet" type="text/css" href="../SiteAssets/sprestlib/css/tablesorter.css"> -->
 
 	<script type="text/javascript" src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
 	<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.29.0/js/jquery.tablesorter.min.js"></script>
@@ -44,7 +49,7 @@
 
 	<script type="text/javascript">
 		$.ajaxSetup({ cache:false });
-		var APP_BLD = 20171022;
+		var APP_BLD = 20171031;
 		var HTML_SPINNER = '<div class="sprlib-spinner"><div class="sprlib-bounce1"></div><div class="sprlib-bounce2"></div><div class="sprlib-bounce3"></div></div>';
 
 		// ==================================================================================================================
@@ -333,6 +338,33 @@
 					if ( $.tablesorter ) $('#tabSiteSubsites').tablesorter({ sortList:[[0,0]] });
 
 				});
+
+				// G: Site Users
+				sprLib.site().users()
+				.then(function(arrUsers){
+					// G-1: Populate Users
+					arrUsers.forEach(function(user,idx){
+						let $row = $('<tr/>');
+						$row.append('<td>'+ user.Title +'</td>');
+						$row.append('<td>'+ user.PrincipalType +'</td>');
+						$row.append('<td>'+ user.LoginName +'</td>');
+						$row.append('<td>'+ user.Email +'</td>');
+						$row.append('<td class="nowctr">'+ (user.IsSiteAdmin ? 'Yes' : 'No') +'</td>');
+						$row.append('<td class="nowctr">'+ user.Groups.length +'</td>');
+						$row.append('<td class="showUsersGrp"></td>');
+						user.Groups.forEach(function(group,idx){
+							$row.find('td:last-child').append(
+								'<div class="itemBox">'
+								+ '<a href="../_layouts/15/people.aspx?MembershipGroupId='+ group.Id +'" target="_blank">'+ group.Title +'</a>'
+								+ '</div>'
+							);
+						});
+						$('#tabSiteUsers tbody').append( $row );
+					});
+
+					// G-2: This will fire before all the AJAX above, then count sorting wont work, etc.
+					if ( $.tablesorter ) $('#tabSiteUsers').tablesorter({ sortList:[[0,0]] });
+				});
 			}
 
 			// TAB: List
@@ -396,7 +428,7 @@
 		// ==================================================================================================================
 		$(document).ready(function(){
 			// **DEBUG**
-			// Dynamically load library as SP Online is *BAD* abut caching
+			// Dynamically load library as SP Online is *BAD* about caching
 			$.getScript("../SiteAssets/sprestlib/js/sprestlib.js", function(){ doPageLoad(); });
 		});
 	</script>
@@ -436,17 +468,17 @@
 						<div class="subTitle">JavaScript Library Check</div>
 						<div class="divTableRows">
 							<div id="libChkJquery">
-								<div><div class="iconSvg question size32"></div></div>
+								<div><div class="iconSvg circle question size32"></div></div>
 								<div>jQuery</div>
 								<div></div>
 							</div>
 							<div id="libChkSprLib">
-								<div><div class="iconSvg question size32"></div></div>
+								<div><div class="iconSvg circle question size32"></div></div>
 								<div>SpRestLib</div>
 								<div></div>
 							</div>
 							<div id="libChkTsorter">
-								<div><div class="iconSvg question size32"></div></div>
+								<div><div class="iconSvg circle question size32"></div></div>
 								<div>TableSorter</div>
 								<div></div>
 							</div>
@@ -456,13 +488,13 @@
 						<div class="subTitle">SharePoint Environment / Configuration</div>
 						<div class="divTableRows">
 							<div>
-								<div><div class="iconSvg info size32"></div></div><div>SpRestLib Base URL</div><div id="spBaseUrl"></div>
+								<div><div class="iconSvg circle info size32"></div></div><div>SpRestLib Base URL</div><div id="spBaseUrl"></div>
 							</div>
 							<div>
-								<div><div class="iconSvg info size32"></div></div><div>Current User/Perms</div><div id="spUserPerm">?</div>
+								<div><div class="iconSvg circle info size32"></div></div><div>Current User/Perms</div><div id="spUserPerm">?</div>
 							</div>
 							<div>
-								<div><div class="iconSvg info size32"></div></div><div>Current Date/Time</div><div id="spDateTime"></div>
+								<div><div class="iconSvg circle info size32"></div></div><div>Current Date/Time</div><div id="spDateTime"></div>
 							</div>
 						</div>
 					</div>
@@ -575,6 +607,28 @@
 							<tr>
 								<th>Name</th>
 								<th>Description</th>
+							</tr>
+						</thead>
+						<tbody></tbody>
+					</table>
+				</div>
+
+				<div class="subTitle" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
+					<div class="arrow"></div>Site Users
+				</div>
+				<div style="display:none">
+					<div><pre><code class="language-javascript">sprLib.site().users()</code></pre></div>
+
+					<table id="tabSiteUsers" class="tabModern">
+						<thead>
+							<tr>
+								<th>Title</th>
+								<th>PrincipalType</th>
+								<th>LoginName</th>
+								<th>Email</th>
+								<th>IsSiteAdmin</th>
+								<th>Groups</th>
+								<th class="sorter-false">Group Details</th>
 							</tr>
 						</thead>
 						<tbody></tbody>
