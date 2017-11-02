@@ -43,7 +43,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 (function(){
 	// APP VERSION/BUILD
 	var APP_VER = "1.3.0-beta";
-	var APP_BLD = "20171028";
+	var APP_BLD = "20171101";
 	var DEBUG = false; // (verbose mode/lots of logging)
 	// ENUMERATIONS
 	var ENUM_PRINCIPALTYPES = {
@@ -669,6 +669,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 
 		// TODO: list().perms()
 		// returns exactly what SP Perms page has (user/group, type, perm roles/levels)
+		// Eg: _layouts/15/user.aspx?obj=[listGUID]
 
 		/**
 		* Return array of column objects with info about each (title, REST/internal name, type, etc.)
@@ -690,12 +691,8 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 					// STEP 1: Gather fields
 					( arrData && arrData[0] && arrData[0].Fields && arrData[0].Fields.results ? arrData[0].Fields.results : [] )
 					.forEach(function(result,i){
-						// DESIGN: Only capture "user" columns (FYI: Type=17 are `Calculated` cols)
-						if (
-							result.InternalName == 'ID'
-							|| ( !result.Hidden && (result.CanBeDeleted || result.InternalName == 'Title') )
-							|| ( !result.CanBeDeleted && result.FieldTypeKind == 17 )
-						) {
+						// Filter: No Edit/Icon or internal cols (eg: '_ComplianceFlags')
+						if ( !result.Hidden && result.InternalName != 'Edit' && result.InternalName != 'DocIcon' && result.InternalName.indexOf('_') != 0 ) {
 							arrColumns.push({
 								dispName:     result.Title,
 								dataName:     result.InternalName,
@@ -1928,6 +1925,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 		}
 
 		// FIXME: CURRENT: NEXT: 20171028
+		// FIXME: target: 1.3.0
 		// TODO: Under .users() and .groups() - if no siteUrl, then return SiteCollection users/groups - otherwise just web/RoleAssignments!!
 		/*
 		{
