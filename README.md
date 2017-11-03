@@ -1,4 +1,4 @@
-[![Open Source Love](https://badges.frapsoft.com/os/v1/open-source.svg?v=103)](https://github.com/ellerbrock/open-source-badge/) [![MIT Licence](https://badges.frapsoft.com/os/mit/mit.svg?v=103)](https://opensource.org/licenses/mit-license.php) [![npm version](https://badge.fury.io/js/sprestlib.svg)](https://badge.fury.io/js/sprestlib)
+[![Open Source Love](https://badges.frapsoft.com/os/v1/open-source.svg?v=103)](https://github.com/ellerbrock/open-source-badge/) [![MIT Licence](https://badges.frapsoft.com/os/mit/mit.svg?v=103)](https://opensource.org/licenses/mit-license.php) [![npm version](https://img.shields.io/npm/v/sprestlib.svg)](https://www.npmjs.com/package/sprestlib)
 
 # SpRestLib
 
@@ -229,7 +229,7 @@ Returns: Array of objects containing name/value pairs
 | `data`        | string  |             | data to be sent       | Ex:`data: {'type': 'SP.FieldDateTime'}` |
 | `cache`       | boolean | `false`     | cache settings        | Ex:`cache: true` |
 | `contentType` | string  | `application/json` | request header content-type | Only used with `type:'POST'` |
-| `metadata`    | boolea  | `false`     | whether to return `__metadata` | Ex:`metadata: true` |
+| `metadata`    | boolean | `false`     | whether to return `__metadata` | Ex:`metadata: true` |
 | `queryCols`   | string  |             | fields/columns to get | any available field from the SP REST API |
 | `queryFilter` | string  |             | query filter          | utilizes OData style [Query Operators](https://msdn.microsoft.com/en-us/library/office/fp142385.aspx#Anchor_7) Ex:`queryFilter: 'Salary lt 99000'` |
 | `queryLimit`  | string  | `1000`      | max items to return   | 1-5000. Ex:`queryLimit: 5000` |
@@ -237,7 +237,7 @@ Returns: Array of objects containing name/value pairs
 
 ### Examples
 ```javascript
-// EX: Get site group info
+// EX: Get site collection groups
 sprLib.rest({
     url:          '/sites/dev/_api/web/sitegroups',
     queryCols:    ['Title','LoginName','AllowMembersEditMembership'],
@@ -257,11 +257,11 @@ sprLib.rest({
 '------------------------------------------------------------------------------'
 */
 
-// EX: Create a new List column
+// EX: Add a new column to a list/library using the REST API
 sprLib.rest({
     url:  "_api/web/lists/getbytitle('Employees')/fields",
-    type: "POST",
-    data: "{'__metadata':{'type':'SP.FieldDateTime'}, 'FieldTypeKind':4, 'Title':'Bonus Date', 'DisplayFormat':1 }"
+	data: "{'__metadata':{'type':'SP.FieldDateTime'}, 'FieldTypeKind':4, 'Title':'Bonus Date', 'DisplayFormat':1 }",
+    type: "POST"
 })
 .then(function(){ console.log("New column created!"); })
 .catch(function(errMsg){ console.error(errMsg) });
@@ -278,10 +278,11 @@ Lists can be accessed by either their name or their GUID:
 Syntax: `sprLib.list(listName)` or `sprLib.list(listGUID)`
 
 ### BaseUrl
-By default, the library defaults to the local directory.  There are occasions where operations would be pointed to other
-locations - reading from a subsite, etc. - and that can be done easily be passing a baseUrl parameter.
+By default, the base URL is set to where the host webpart is located (`_spPageContextInfo.webServerRelativeUrl`).
+However, there are occasions when reading from other locations - like a subsite - is desired. Use the `baseUrl`
+parameter to specify the desired location.
 
-Syntax: `sprLib.list({ listName:'name', baseUrl:'urlPath' })`
+Syntax: `sprLib.list({ listName:name, baseUrl:path })`
 
 Example:
 ```javascript
@@ -307,7 +308,7 @@ Returns:
 | `queryLimit`  | string   |           | max items to return   | 1-*N* |
 | `queryOrderby`| string   |           | column(s) to order by | Ex:`queryOrderby:Name` |
 
-NOTE: Omitting `listCols` will result in all List columns being returned (mimics SharePoint default behavior)
+NOTE: Omitting `listCols` will result in all List columns being returned (mimic SharePoint default behavior)
 
 #### listCols Object
 | Option        | Type     | Default   | Description           | Possible Values / Return Values     |
@@ -319,11 +320,11 @@ NOTE: Omitting `listCols` will result in all List columns being returned (mimics
 | `getVersions` | boolean  | `false`   | return append text versions in array | `true` or `false` |
 
 #### listCols dataFunc Option
-There are many times where you'll need more than a simple column value.  For example, I often provide a link to the InfoPath
+There are many times where you'll need more than a simple column value.  For example, providing a link to the InfoPath
 form so users can edit the item directly.
 
-The `dataFunc` option allows you access to the entire result set and to return any type of value.  See sample below where
-"editLink" is created.
+The `dataFunc` option allows you access to the entire result set, then return any type of value.  See the sample below where
+an "editLink" is created.
 
 #### Sample Code
 ```javascript
@@ -1046,11 +1047,14 @@ Promise.resolve()
 
 #### Example Logic
 * This example requires that both the user info and user group queries complete before we move on
-* The old AJAX callback method model required a lot more code to do the same thing!
+* The old AJAX callback method model required a lot more code to do this very thing!
 
 #### Example Code
 ```javascript
-Promise.all([ sprLib.user().info(), sprLib.user().groups() ])
+Promise.all([
+    sprLib.user().info(),
+    sprLib.user().groups()
+])
 .then(function(arrResults){
     // 'arrResults' holds the return values of both method calls above - in the order they were provided
     // Therefore, arrResults[0] holds user info() and arrResults[1] holds user groups()
