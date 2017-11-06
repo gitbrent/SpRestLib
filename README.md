@@ -736,11 +736,11 @@ sprLib.site().groups()
 
 /*
 .----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------.
-| Id |             Description            |         Title          |    OwnerTitle     |  PrincipalType   | AllowMembersEditMembership |                     Users                                         |
-|----|------------------------------------|------------------------|-------------------|------------------|----------------------------|-------------------------------------------------------------------|
-|  8 | contribute permissions: Dev Site   | Dev Site Members       | Dev Site Owners   | SharePoint Group | true                       | []                                                                |
-|  6 | full control permissions: Dev Site | Dev Site Owners        | Dev Site Owners   | SharePoint Group | false                      | [{"Id":99,"LoginName":"brent@microsoft.com","Title":"Brent Ely"}] |
-|  7 | read permissions: Dev Site         | Dev Site Visitors      | Dev Site Owners   | SharePoint Group | false                      | []                                                                |
+| Id |         Title          |  PrincipalType   |             Description            |    OwnerTitle     | AllowMembersEditMembership |                     Users                                         |
+|----|------------------------|------------------|------------------------------------|-------------------|----------------------------|-------------------------------------------------------------------|
+|  8 | Dev Site Members       | SharePoint Group | contribute permissions: Dev Site   | Dev Site Owners   | true                       | []                                                                |
+|  6 | Dev Site Owners        | Dev Site Owners  | full control permissions: Dev Site | SharePoint Group  | false                      | [{"Id":99,"LoginName":"brent@microsoft.com","Title":"Brent Ely"}] |
+|  7 | Dev Site Visitors      | Dev Site Owners  | read permissions: Dev Site         | SharePoint Group  | false                      | []                                                                |
 '----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------'
 */
 ```
