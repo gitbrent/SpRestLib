@@ -43,7 +43,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 (function(){
 	// APP VERSION/BUILD
 	var APP_VER = "1.3.0-beta";
-	var APP_BLD = "20171101";
+	var APP_BLD = "20171105";
 	var DEBUG = false; // (verbose mode/lots of logging)
 	// ENUMERATIONS
 	var ENUM_PRINCIPALTYPES = {
@@ -1679,7 +1679,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 	sprLib.site = function site(inUrl) {
 		// Variables
 		var newSite = {};
-		var strBaseUrl = (inUrl ? inUrl.replace(/\/+$/g,'/') : ''); // Guarantee that baseUrl will end with a forward slash
+		var strBaseUrl = (inUrl ? (inUrl+'/').replace(/\/+$/g,'/') : ''); // Guarantee that baseUrl will end with a forward slash
 
 		/**
 		* Get Site information:
@@ -1812,34 +1812,98 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 		}
 
 		/**
-		* Get SiteCollection Groups
+		* Get all Groups under the SiteCollection or the Groups under a given Subsite
+		*
+		* @example
+		* //.----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------.
+		* //| Id |             Description            |         Title          |    OwnerTitle     |  PrincipalType   | AllowMembersEditMembership |                     Users                                         |
+		* //|----|------------------------------------|------------------------|-------------------|------------------|----------------------------|-------------------------------------------------------------------|
+		* //|  8 | contribute permissions: Dev Site   | Dev Site Members       | Dev Site Owners   | SharePoint Group | true                       | []                                                                |
+		* //|  6 | full control permissions: Dev Site | Dev Site Owners        | Dev Site Owners   | SharePoint Group | false                      | [{"Id":99,"LoginName":"brent@microsoft.com","Title":"Brent Ely"}] |
+		* //|  7 | read permissions: Dev Site         | Dev Site Visitors      | Dev Site Owners   | SharePoint Group | false                      | []                                                                |
+		* //.----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------.
 		*
 		* @return {Promise} - return `Promise` containing Groups
 		*/
 		newSite.groups = function() {
 			return new Promise(function(resolve, reject) {
-				sprLib.rest({
-					url: strBaseUrl+'_api/web/siteGroups',
-					queryCols:
-						['Id','Description','Title','OwnerTitle','PrincipalType','AllowMembersEditMembership',
-						'Users/Id','Users/Title','Users/LoginName'],
-					queryLimit: 5000
-				})
-				.then(function(arrData){
-					// A: Filter internal/junk groups
-					if ( arrData && Array.isArray(arrData) ) {
-						arrData = arrData.filter(function(group){ return group.Title.indexOf('SharingLinks') == -1 });
-					}
+				var arrData = [];
+				var arrQuery = [];
 
-					// B: Decode PrincipalType
-					arrData.forEach(function(item,idx){ item.PrincipalType = ENUM_PRINCIPALTYPES[item.PrincipalType] || item.PrincipalType });
+				// LOGIC: If `inUrl` exists, then just get the Groups from that site, otherwise, return SiteCollection Groups
+				if ( inUrl ) {
+					var arrPromises = [];
 
-					// C: Resolve results (NOTE: empty array is the correct default result)
-					resolve( arrData || [] );
-				})
-				.catch(function(strErr){
-					reject( strErr );
-				});
+					// STEP 1: Get Groups and their Perms
+					sprLib.rest({
+						url: strBaseUrl+'_api/web/RoleAssignments',
+						queryCols: ['Member/Id','Member/Title','Member/Description','Member/OwnerTitle','Member/PrincipalType','Member/AllowMembersEditMembership'],
+						queryFilter: 'Member/PrincipalType eq 8',
+						queryLimit: 5000
+					})
+					.then(function(arrGroups){
+						// STEP 2: Create array of Groups and Promises
+						arrGroups.forEach(function(grp,idx){
+							// A: Create object
+							arrData.push({
+								Id: grp.Member.Id,
+								Title: grp.Member.Title,
+								Description: grp.Member.Description,
+								OwnerTitle: grp.Member.OwnerTitle,
+								PrincipalType: (ENUM_PRINCIPALTYPES[grp.Member.PrincipalType] || grp.Member.PrincipalType),
+								AllowMembersEditMembership: grp.Member.AllowMembersEditMembership,
+								Users: []
+							});
+
+							// B: Create Users promise
+							arrPromises.push(
+								sprLib.rest({
+									url: strBaseUrl+'_api/web/SiteGroups/GetById('+ grp.Member.Id +')/Users',
+									queryCols: ['Id','LoginName','Title'],
+									queryLimit: 5000
+								})
+							);
+						});
+
+						// STEP 3: Populate Group's Users
+						Promise.all(arrPromises)
+						.then(function(arrAllArrays,idx){
+							arrAllArrays.forEach(function(arrUsers,idx){
+								arrUsers.forEach(function(user,idy){ arrData[idx].Users.push({ Id:user.Id, LoginName:user.LoginName, Title:user.Title }); });
+							});
+
+							// Resolve results (NOTE: empty array is the correct default result)
+							resolve( arrData || [] );
+						});
+					})
+					.catch(function(strErr){
+						reject( strErr );
+					});
+				}
+				else {
+					sprLib.rest({
+						url: strBaseUrl+'_api/web/siteGroups',
+						queryCols:
+							['Id','Title','PrincipalType','Description','OwnerTitle','AllowMembersEditMembership',
+							'Users/Id','Users/Title','Users/LoginName'],
+						queryLimit: 5000
+					})
+					.then(function(arrData){
+						// A: Filter internal/junk groups
+						if ( arrData && Array.isArray(arrData) ) {
+							arrData = arrData.filter(function(group){ return group.Title.indexOf('SharingLinks') == -1 });
+						}
+
+						// B: Decode PrincipalType
+						arrData.forEach(function(item,idx){ item.PrincipalType = ENUM_PRINCIPALTYPES[item.PrincipalType] || item.PrincipalType });
+
+						// C: Resolve results (NOTE: empty array is the correct default result)
+						resolve( arrData || [] );
+					})
+					.catch(function(strErr){
+						reject( strErr );
+					});
+				}
 			});
 		}
 
@@ -1926,26 +1990,17 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 
 		// FIXME: CURRENT: NEXT: 20171028
 		// FIXME: target: 1.3.0
-		// TODO: Under .users() and .groups() - if no siteUrl, then return SiteCollection users/groups - otherwise just web/RoleAssignments!!
-		/*
-		{
-			// TODO: API: USERS (All Users under this webs or specified site URL)
-			sprLib.users = function users(inUrl) {
-				// Variables
-				var newSite = {};
-				var strBaseUrl = (inUrl ? inUrl.replace(/\/+$/g,'/') : ''); // Guarantee that baseUrl will end with a forward slash
+		/* TODO: API: USERS (All Users under this webs or specified site URL)
+		sprLib.users = function users(inUrl) {
+			// Variables
+			var newSite = {};
+			var strBaseUrl = (inUrl ? inUrl.replace(/\/+$/g,'/') : ''); // Guarantee that baseUrl will end with a forward slash
 
-				// REST: _api/web/RoleAssignments
-			}
-
-			// TODO: API: GROUPS
-			sprLib.groups = function groups(inUrl) {
-				// TODO: _api/web/RoleAssignments - then return Groups (and members) (and perms)?
-			}
+			// REST: _api/web/RoleAssignments
 		}
 		*/
 
-		// TODO: contentTypes & Features
+		// TODO: FUTURE: contentTypes & Features
 		/*
 			newSite.contentTypes = function() {
 				// ContentTypes: https://contoso.sharepoint.com/sites/dev/_api/web/ContentTypes
