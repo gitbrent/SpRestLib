@@ -65,7 +65,7 @@ items (CRUD), execute REST calls, and gather user/group information.
     - [Get List Info](#get-list-info)
       - [List Properties](#list-properties)
       - [Sample Code](#sample-code-2)
-  - [Site Methods](#site-methods)
+  - [Site Methods (`SPSite`)](#site-methods-spsite)
     - [Get Site Info](#get-site-info)
       - [Site Properties](#site-properties)
       - [Sample Code](#sample-code-3)
@@ -578,7 +578,7 @@ sprLib.list('Employees').info()
 
 
 **************************************************************************************************
-## Site Methods
+## Site Methods (`SPSite`)
 
 ### Get Site Info
 Syntax:  
@@ -716,7 +716,7 @@ Syntax:
 `sprLib.site().groups()`  
 `sprLib.site(siteUrl).groups()`
 
-Returns: Array of site permissions
+Returns: Array of site Groups
 
 #### Group Properties
 | Property Name                | Type     | Description                                      |
@@ -751,7 +751,7 @@ Syntax:
 `sprLib.site().roles()`  
 `sprLib.site(siteUrl).roles()`
 
-Returns: Array of site permissions
+Returns: Array of site Roles
 
 #### Role Properties
 | Property Name                | Type     | Description                                      |
