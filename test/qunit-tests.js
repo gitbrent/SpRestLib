@@ -2,7 +2,7 @@
  * NAME: qunit-test.js
  * DESC: tests for qunit-test.html (coded to my O365 Dev Site - YMMV)
  * AUTH: https://github.com/gitbrent/
- * DATE: Oct 25, 2017
+ * DATE: Nov 09, 2017
  *
  * HOWTO: Generate text tables for README etc.:
  * sprLib.list('Employees').getItems(['Id', 'Name', 'Badge_x0020_Number']).then(function(arrData){ console.log(getAsciiTableStr(arrData)) });
@@ -1183,6 +1183,28 @@ QUnit.module( "REST Methods" );
 		.then(function(arrayResults){
 			assert.ok( Object.keys(arrayResults[0]).length == 3, "arrayResults[0] has length == 3: "+ Object.keys(arrayResults[0]).length );
 			assert.ok( (arrayResults[0].Manager.Title), "arrayResults[0].Manager.Title exists: "+ arrayResults[0].Manager.Title );
+			assert.ok( getAsciiTableStr(arrayResults), `RESULTS:\n${getAsciiTableStr(arrayResults)}` );
+			done();
+		})
+		.catch(function(err){
+			assert.ok( (false), err );
+			done();
+		});
+	});
+
+	QUnit.test("sprLib.rest() ex: 'Expand multi-level test", function(assert){
+		var done = assert.async();
+		// TEST:
+		sprLib.rest({
+			url : "_api/web/RoleAssignments",
+			queryCols: ['PrincipalId','Member/Users/Id'],
+			queryFilter: 'Member/PrincipalType eq 8'
+		})
+		.then(function(arrayResults){
+			assert.ok( Object.keys(arrayResults[0]).length == 2, "arrayResults[0] has length == 2: "+ Object.keys(arrayResults[0]).length );
+			assert.ok( arrayResults[0].PrincipalId && arrayResults[0].Member, "arrayResults[0] has props 'PrincipalId' && 'Member': "+ Object.keys(arrayResults[0]) );
+			var arrItems = arrayResults.filter(obj => { return obj.Member.Users && obj.Member.Users.length > 0 });
+			assert.ok( (arrItems[0].Member.Users[0].Id), "arrItems[0].Member.Users[0].Id exists: "+ arrItems[0].Member.Users[0].Id );
 			assert.ok( getAsciiTableStr(arrayResults), `RESULTS:\n${getAsciiTableStr(arrayResults)}` );
 			done();
 		})

@@ -43,7 +43,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 (function(){
 	// APP VERSION/BUILD
 	var APP_VER = "1.3.0-beta";
-	var APP_BLD = "20171105";
+	var APP_BLD = "20171109";
 	var DEBUG = false; // (verbose mode/lots of logging)
 	// ENUMERATIONS
 	var ENUM_PRINCIPALTYPES = {
@@ -1449,9 +1449,10 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 					if ( Array.isArray(inOpt.queryCols) ) {
 						var objListCols = {};
 						inOpt.queryCols.forEach(function(colStr,i){
-							var strTmp = ( colStr.indexOf('/') > -1 ? colStr.substring(0,colStr.indexOf('/')) : colStr );
+							var strFieldName = ( colStr.indexOf('/') > -1 ? colStr.substring(0,colStr.indexOf('/')) : colStr );
 							// Handle cases where there are 2 expands from same column. Ex: 'Manager/Id' and 'Manager/Title'
-							objListCols[strTmp] = ( objListCols[strTmp] ? { dataName:objListCols[strTmp].dataName+','+colStr } : { dataName:colStr } );
+							// When fieldName already exists, just add subsequent fields to dataName so $select gets them - Ex: "Manager/Id,Manager/Title"
+							objListCols[strFieldName] = ( objListCols[strFieldName] ? { dataName:objListCols[strFieldName].dataName+','+colStr } : { dataName:colStr } );
 						});
 						inOpt.queryCols = objListCols;
 					}
@@ -1466,10 +1467,12 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 							else objAjaxQuery.url += ( objAjaxQuery.url.lastIndexOf(',') == objAjaxQuery.url.length-1 ? col.dataName : ','+col.dataName );
 							// 2:
 							if ( col.dataName.indexOf('/') > -1 ) {
-								var strFieldName = col.dataName.substring(0, col.dataName.indexOf('/'));
-								if ( arrExpands.indexOf(strFieldName) == -1 ) {
-									arrExpands.push( strFieldName );
-									strExpands += (strExpands == '' ? '' : ',') + strFieldName;
+								// `dataName` will be complete value passed in (Ex: 'Members/User/Id')
+								var strFieldName = col.dataName.substring(0, col.dataName.indexOf('/'));      // EX: 'Members/User/Id' -> 'Members'
+								var strExpandName = col.dataName.substring(0, col.dataName.lastIndexOf('/')); // EX: 'Members/User/Id' -> 'Members/User'
+								if ( arrExpands.indexOf(strExpandName) == -1 ) {
+									arrExpands.push( strExpandName );
+									strExpands += (strExpands == '' ? '' : ',') + strExpandName;
 								}
 							}
 						});
@@ -1558,12 +1561,15 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 				// A: Parse if needed
 				data = ( typeof data === 'string' && data.indexOf('{') == 0 ? JSON.parse(data) : data );
 
+				// If result is a single object, make it an array for pasing below (Ex: '_api/site/Owner/Id')
+				var arrObjResult = ( data && data.d && !data.d.results && typeof data.d === 'object' && Object.keys(data.d).length > 0 ? [data.d] : [] );
+
 				// B: Iterate over results
 				// NOTE: Depending upon which REST endpoint used, SP can return results in various forms (!)
 				// EX..: data.d.results is an [] of {}: [ {Title:'Brent Ely', Email:'Brent.Ely@microsoft.com'}, {}, {} ]
 				// NOTE: Ensure results are an object because SP will return an entire HTML page as a result in some error cases!
-				if ( data && data.d && data.d.results && typeof data.d.results === 'object' ) {
-					$.each(data.d.results, function(key,result){
+				if ( arrObjResult.length > 0 || (data && data.d && data.d.results && typeof data.d.results === 'object') ) {
+					$.each((arrObjResult.length > 0 ? arrObjResult : data.d.results), function(key,result){
 						var objRow = {};
 
 						if ( inOpt.queryCols ) {
@@ -1573,8 +1579,10 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 
 								// B.3.1: Get value(s) for this key
 
-								// Handle LookupMulti columns
-								if ( col.dataName && col.dataName.indexOf('/') > -1 && result[col.dataName.split('/')[0]].results ) {
+								// Handle Lookups that return an array of 'results' (eg: `LookupMulti`)
+								if ( col.dataName && col.dataName.indexOf('/') > -1
+									&& result[col.dataName.split('/')[0]] && result[col.dataName.split('/')[0]].results )
+								{
 									// A:
 									// NOTE: `listCols` can have "Dept/Id" and "Dept/Title", but SP only returns *ONE* result with both vals
 									// ....: So, skip any subsequent listCol's once results have been captured
@@ -1593,21 +1601,62 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 								}
 								// Handle Lookup/Person/Url/etc. Ex: 'Manager/Title'
 								else if ( col.dataName && col.dataName.indexOf('/') > -1 ) {
-									// A: Split lookup info object/field
-									arrCol = col.dataName.split('/');
-									// B: Remove extraneous metadata
-									if ( result[arrCol[0]].__metadata ) delete result[arrCol[0]].__metadata;
-									// B: Same for deferred. NOTE: Multi-Person fields return only a `{__deferred:{uri:'http...'}}` result when field is empty (ugh!)
-									if ( result[arrCol[0]].__deferred ) delete result[arrCol[0]].__deferred;
-									// C: Capture value
-									// CASE 1: `dataName` was used - in this case return the actual field user asked for
-									// Detect use of names listCols by comparing key to dataName
-									if ( key != arrCol[0] && key != col.dataName ) colVal = result[arrCol[0]][arrCol[1]];
-									// CASE 2: Other - in this case return the complete object (Ex: { Title:'Manager' })
-									// IMPORTANT: This de facto returns all the *other* fields queried. Eg: 'Manager/Id' and 'Manager/Title' were in cols
-									// We want to return a *single* object with these 2 elements, so they can be derefereced using 'Manger.Title' etc.
-									// Capture any-and-all columns returned (aside from removal of above)
-									else colVal = result[arrCol[0]];
+									// NOTE: While most lookups are single-level ('Manager/Title') there can be deeper levels as well ('Users/Member/Id')
+									// NOTE: dataName will be comma-sep fields when colName is an object with fields. (Ex: "Member/Users/Id,Member/Users/Title")
+									// Loop over each field. Ex: 'Member/Id,Member/Title'->['Member/Id','Member/Title']
+									col.dataName.split(',').forEach(function(strField,idx){
+										// A: Split lookup name
+										var arrKeys = strField.split('/');
+
+										// B: Remove extraneous `__metadata` and `__deferred` objects
+										if ( result[arrKeys[0]].__metadata ) delete result[arrKeys[0]].__metadata;
+										if ( result[arrKeys[0]].__deferred ) delete result[arrKeys[0]].__deferred;
+
+										// C: Some lookups return arrays. Ex: 'Member/Users/Id' result => { Member:{ Users:{ results:[] } } }
+										// HACK(ish): Avoid complex algorithm and only support up to 2-5 levels deep
+										var lastChild = null;
+										if ( arrKeys.length == 2 ) {
+											// C.1:
+											lastChild = result[arrKeys[0]];
+											if ( lastChild && typeof lastChild === 'object' && Object.keys(lastChild)[0] == 'results' ) {
+												result[arrKeys[0]] = lastChild.results;
+											}
+											// C.2: Capture value
+											// CASE 1: `dataName` was passed in by user: return the actual field user asked for.
+											// EXAMPLE: `Title: { dataName:'Member/Title' }` = return Title:Title (not a Member.Title object)
+											// NOTE: Detect use of names listCols by comparing key to dataName
+											if ( key != arrKeys[0] && key != col.dataName ) colVal = result[arrKeys[0]][arrKeys[1]];
+											// CASE 2: Other - in this case return the complete object (Ex: { Title:'Manager' })
+											// IMPORTANT: This de facto returns all the *other* fields queried. Eg: 'Manager/Id' and 'Manager/Title' were in cols
+											// We want to return a *single* object with these 2 elements, so they can be derefereced using 'Manger.Title' etc.
+											// Capture any-and-all columns returned (aside from removal of above)
+											else colVal = result[arrKeys[0]];
+										}
+										else if ( arrKeys.length == 3 ) {
+											// C.1:
+											lastChild = result[arrKeys[0]][arrKeys[1]];
+											if ( lastChild && typeof lastChild === 'object' && Object.keys(lastChild)[0] == 'results' ) {
+												result[arrKeys[0]][arrKeys[1]] = lastChild.results;
+											}
+											// C.2: Capture value
+											colVal = ( key != arrKeys[0] && key != col.dataName ? result[arrKeys[0]][arrKeys[1]][arrKeys[2]] : result[arrKeys[0]] );
+										}
+										else if ( arrKeys.length == 4 ) {
+											// C.1:
+											lastChild = result[arrKeys[0]][arrKeys[1]][arrKeys[2]];
+											if ( lastChild && typeof lastChild === 'object' && Object.keys(lastChild)[0] == 'results' ) {
+												result[arrKeys[0]][arrKeys[1]][arrKeys[2]] = lastChild.results;
+											}
+											// C.2: Capture value
+											colVal = ( key != arrKeys[0] && key != col.dataName ? result[arrKeys[0]][arrKeys[1]][arrKeys[2]][arrKeys[3]] : result[arrKeys[0]] );
+										}
+										else if ( arrKeys.length > 4 ) {
+											console.log('This is madness!!');
+										}
+
+										// D: LAST: Set value query field result value
+//										colVal = result[arrKeys[0]];
+									});
 
 									// D: Value clean-up (things like empty multi-person fields may end up being `{}`)
 									if ( typeof colVal === 'object' && !Array.isArray(colVal) && Object.keys(colVal).length == 0 ) colVal = [];
@@ -1617,7 +1666,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 									colVal = ( arrCol.length > 1 ? result[arrCol[0]][arrCol[1]] : result[arrCol[0]] );
 								}
 
-								// DESIGN: Not all values can be taken at return value - things like dates have to be turned into actual Date objects
+								// DESIGN: If `dataType` exists, then transform result
 								if ( col.dataType == 'DateTime' ) objRow[key] = new Date(colVal);
 								else objRow[key] = ( APP_OPTS.cleanColHtml && col.listDataType == 'string' ? colVal.replace(/<div(.|\n)*?>/gi,'').replace(/<\/div>/gi,'') : colVal );
 							});
@@ -1626,6 +1675,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 							$.each(result, function(key,val){ objRow[key] = val; });
 						}
 
+						// TODO: 20171107: Add `etag` option to return etag (check to ensure it exists, then set prop value)
 						if ( objRow.__metadata && !inOpt.metadata ) delete objRow.__metadata;
 						inOpt.spArrData.push( objRow );
 					});
@@ -1834,7 +1884,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 				if ( inUrl ) {
 					var arrPromises = [];
 
-					// STEP 1: Get Groups and their Perms
+					// STEP 1: Get Groups
 					sprLib.rest({
 						url: strBaseUrl+'_api/web/RoleAssignments',
 						queryCols: ['Member/Id','Member/Title','Member/Description','Member/OwnerTitle','Member/PrincipalType','Member/AllowMembersEditMembership'],
@@ -1965,26 +2015,48 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 		*/
 		newSite.users = function() {
 			return new Promise(function(resolve, reject) {
-				sprLib.rest({
-					url: strBaseUrl+'_api/web/siteUsers',
-					queryCols: ['Id','Email','LoginName','PrincipalType','Title','IsSiteAdmin','Groups/Id','Groups/Title'],
-					queryLimit: 5000
-				})
-				.then(function(arrData){
-					// A: Filter internal/junk users
-					if ( arrData && Array.isArray(arrData) ) {
-						arrData = arrData.filter(function(user){ return user.Title.indexOf('spocrwl') == -1 && user.Id < 1000000000 });
-					}
+				// LOGIC: If `inUrl` exists, then just get the Groups from that site, otherwise, return SiteCollection Groups
+				if ( inUrl ) {
+					// TODO: FIXME: CURR:
 
-					// B: Decode PrincipalType
-					arrData.forEach(function(item,idx){ item.PrincipalType = ENUM_PRINCIPALTYPES[item.PrincipalType] || item.PrincipalType });
+					// NOTE: A website's Users are: Users with RoleAssignments (if any), plus all users in Groups with RoleAssignments
 
-					// C: Resolve results (NOTE: empty array is the correct default result)
-					resolve( arrData || [] );
-				})
-				.catch(function(strErr){
-					reject( strErr );
-				});
+					// STEP 1: Get Users
+					sprLib.rest({
+						url: strBaseUrl+'_api/web/RoleAssignments',
+						queryCols: ['Member/Id','Member/Email','Member/LoginName','Member/PrincipalType','Member/Title','Member/IsSiteAdmin'],
+						queryFilter: 'Member/PrincipalType eq 1',
+						queryLimit: 5000
+					})
+
+					// MEmbers in group
+					sprLib.rest({ url:'_api/web/RoleAssignments', queryCols: ['PrincipalId','Member/Users/Id'], queryFilter: 'Member/PrincipalType eq 8' })
+					_api/web/roleAssignments(15)/Member/Users
+					Id, LoginName, Email, Title, IsSiteAdmin
+
+				}
+				else {
+					sprLib.rest({
+						url: strBaseUrl+'_api/web/SiteUsers',
+						queryCols: ['Id','Email','LoginName','PrincipalType','Title','IsSiteAdmin','Groups/Id','Groups/Title'],
+						queryLimit: 5000
+					})
+					.then(function(arrData){
+						// A: Filter internal/junk users
+						if ( arrData && Array.isArray(arrData) ) {
+							arrData = arrData.filter(function(user){ return user.Title.indexOf('spocrwl') == -1 && user.Id < 1000000000 });
+						}
+
+						// B: Decode PrincipalType
+						arrData.forEach(function(item,idx){ item.PrincipalType = ENUM_PRINCIPALTYPES[item.PrincipalType] || item.PrincipalType });
+
+						// C: Resolve results (NOTE: empty array is the correct default result)
+						resolve( arrData || [] );
+					})
+					.catch(function(strErr){
+						reject( strErr );
+					});
+				}
 			});
 		}
 
