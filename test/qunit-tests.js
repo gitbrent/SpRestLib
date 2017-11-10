@@ -1043,7 +1043,7 @@ QUnit.module( "LIST > ITEM GET Methods" );
 		['', [], [''], ['',''], {}].forEach(function(data,idx){
 			var done = assert.async();
 			// TEST:
-			sprLib.list('Employees').getItems(data)
+			sprLib.list('Employees').getItems({listCols:data, queryLimit:10})
 			.then(function(arrayResults){
 				assert.ok( arrayResults.length > 0        , "arrayResults is an Array and length > 0: "+ arrayResults.length );
 				assert.ok( getAsciiTableStr(arrayResults) , `RESULTS:\n${getAsciiTableStr(arrayResults)}`);
