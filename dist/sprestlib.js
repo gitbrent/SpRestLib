@@ -1653,9 +1653,6 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 										else if ( arrKeys.length > 4 ) {
 											console.log('This is madness!!');
 										}
-
-										// D: LAST: Set value query field result value
-//										colVal = result[arrKeys[0]];
 									});
 
 									// D: Value clean-up (things like empty multi-person fields may end up being `{}`)
@@ -2017,7 +2014,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 			return new Promise(function(resolve, reject) {
 				// LOGIC: If `inUrl` exists, then just get the Groups from that site, otherwise, return SiteCollection Groups
 				if ( inUrl ) {
-					// TODO: FIXME: CURR:
+// TODO: FIXME: CURR:
 
 					// NOTE: A website's Users are: Users with RoleAssignments (if any), plus all users in Groups with RoleAssignments
 
