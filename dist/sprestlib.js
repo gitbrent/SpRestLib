@@ -43,7 +43,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 (function(){
 	// APP VERSION/BUILD
 	var APP_VER = "1.3.0-beta";
-	var APP_BLD = "20171119";
+	var APP_BLD = "20171120";
 	var DEBUG = false; // (verbose mode/lots of logging)
 	// ENUMERATIONS
 	var ENUM_PRINCIPALTYPES = {
@@ -2009,6 +2009,11 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 		* Get SiteCollection (all) Users or Site (subsite) Users
 		*
 		* @example
+		* //.--------------------------------------------------------------------------------------------------------------------------------------.
+		* //| Id |               LoginName               |   Title   |        Email        | IsSiteAdmin |                 Groups                  |
+		* //|----|---------------------------------------|-----------|---------------------|-------------|-----------------------------------------|
+		* //|  9 | i:0#.f|membership|brent@microsoft.com | Brent Ely | brent@microsoft.com | true        | [{"Id":14,"Title":"Child Site Owners"}] |
+		* //'--------------------------------------------------------------------------------------------------------------------------------------'
 		*
 		* @return {Promise} - return `Promise` containing Users
 		*/
@@ -2037,36 +2042,39 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 					.then(function(arrAllArrays){
 						// STEP 1: Compile results
 						var arrSiteUsers = [];
-						var arrTempUsers = [];
 						var objTempUsers = {};
 
 						// A: Result is an array of user objects
 						// EX: [ {Member: {Id:9,Title:'Brent'}}, {Member:[...]} ]
 						arrAllArrays[0].forEach(function(obj,idx){
 							obj.Member.Groups = [];
-							arrTempUsers.push( obj.Member );
+							arrSiteUsers.push( obj.Member );
+							objTempUsers[obj.Member.Id] = obj.Member;
 						});
 
 						// B: Result is an array of `Member` objects
-						// EX: [ {Member: Id:1, Title:'Members', Users:[{Id:9,Title:'Brent'},{Id:10,Title:'Elon Musk'}]}, {Member:[...]} ]
+						// EX: [ {Member: {Id:1, Title:'Members', Users:[{Id:9,Title:'Brent'},{Id:10,Title:'Elon Musk'}]}}, {Member:[...]} ]
 						arrAllArrays[1].forEach(function(obj,idx){
 							if ( obj.Member.Users && obj.Member.Users.length > 0 ) {
 								obj.Member.Users.forEach(function(user,idy){
-									// A: Add group
-									if ( !user.Groups) user.Groups = [];
+									// A: Remove __metadata (if any - since it's in a sub-object, `metadata:false` will not guarantee absence)
+									if ( user.__metadata ) delete user.__metadata;
+
+									// B: Add group
+									if ( !user.Groups ) user.Groups = [];
 									user.Groups.push({ Id:obj.Member.Id, Title:obj.Member.Title });
 
-									// B: Add User (Ensure uniqueness)
+									// C: Add User or Add this Group to existing User (ensure uniqueness)
 									if ( !objTempUsers[user.Id] ) {
-										arrTempUsers.push( user );
-										objTempUsers[user.Id] = 'exists';
+										arrSiteUsers.push( user );
+										objTempUsers[user.Id] = obj.Member;
+									}
+									else {
+										objTempUsers[user.Id].Groups.push({ Id:obj.Member.Id, Title:obj.Member.Title });
 									}
 								});
 							}
 						});
-
-						// STEP 2: Filter out duplicates
-						arrTempUsers.forEach(function(user){ if (arrSiteUsers.indexOf(user) < 0) arrSiteUsers.push(user) });
 
 						// LAST: Resolve results (NOTE: empty array is the correct default result)
 						resolve( arrSiteUsers || [] );
