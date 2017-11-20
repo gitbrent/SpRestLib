@@ -43,7 +43,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 (function(){
 	// APP VERSION/BUILD
 	var APP_VER = "1.3.0-beta";
-	var APP_BLD = "20171109";
+	var APP_BLD = "20171119";
 	var DEBUG = false; // (verbose mode/lots of logging)
 	// ENUMERATIONS
 	var ENUM_PRINCIPALTYPES = {
@@ -1609,8 +1609,8 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 										var arrKeys = strField.split('/');
 
 										// B: Remove extraneous `__metadata` and `__deferred` objects
-										if ( result[arrKeys[0]].__metadata ) delete result[arrKeys[0]].__metadata;
-										if ( result[arrKeys[0]].__deferred ) delete result[arrKeys[0]].__deferred;
+										if ( result[arrKeys[0]] && result[arrKeys[0]].__metadata ) delete result[arrKeys[0]].__metadata;
+										if ( result[arrKeys[0]] && result[arrKeys[0]].__deferred ) delete result[arrKeys[0]].__deferred;
 
 										// C: Some lookups return arrays. Ex: 'Member/Users/Id' result => { Member:{ Users:{ results:[] } } }
 										// HACK(ish): Avoid complex algorithm and only support up to 2-5 levels deep
@@ -2006,7 +2006,9 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 		}
 
 		/**
-		* Get SiteCollection Users
+		* Get SiteCollection (all) Users or Site (subsite) Users
+		*
+		* @example
 		*
 		* @return {Promise} - return `Promise` containing Users
 		*/
@@ -2014,28 +2016,71 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 			return new Promise(function(resolve, reject) {
 				// LOGIC: If `inUrl` exists, then just get the Groups from that site, otherwise, return SiteCollection Groups
 				if ( inUrl ) {
-// TODO: FIXME: CURR:
-
 					// NOTE: A website's Users are: Users with RoleAssignments (if any), plus all users in Groups with RoleAssignments
+					// A: Get individual User grants/perms
+					// B: Get Members (Users) from Group grants/perms
+					// FIXME: LIMIT: Library only supports up to 5000 results!
+					Promise.all([
+						sprLib.rest({
+							url: strBaseUrl+'_api/web/RoleAssignments',
+							queryCols: ['Member/Id','Member/Email','Member/LoginName','Member/Title','Member/IsSiteAdmin'],
+							queryFilter: 'Member/PrincipalType eq 1',
+							queryLimit: 5000
+						}),
+						sprLib.rest({
+							url: strBaseUrl+'_api/web/RoleAssignments',
+							queryCols: ['Member/Id','Member/Title','Member/Users/Id','Member/Users/Email','Member/Users/LoginName','Member/Users/Title','Member/Users/IsSiteAdmin'],
+							queryFilter: 'Member/PrincipalType eq 8',
+							queryLimit: 5000
+						})
+					])
+					.then(function(arrAllArrays){
+						// STEP 1: Compile results
+						var arrSiteUsers = [];
+						var arrTempUsers = [];
+						var objTempUsers = {};
 
-					// STEP 1: Get Users
-					sprLib.rest({
-						url: strBaseUrl+'_api/web/RoleAssignments',
-						queryCols: ['Member/Id','Member/Email','Member/LoginName','Member/PrincipalType','Member/Title','Member/IsSiteAdmin'],
-						queryFilter: 'Member/PrincipalType eq 1',
-						queryLimit: 5000
+						// A: Result is an array of user objects
+						// EX: [ {Member: {Id:9,Title:'Brent'}}, {Member:[...]} ]
+						arrAllArrays[0].forEach(function(obj,idx){
+							obj.Member.Groups = [];
+							arrTempUsers.push( obj.Member );
+						});
+
+						// B: Result is an array of `Member` objects
+						// EX: [ {Member: Id:1, Title:'Members', Users:[{Id:9,Title:'Brent'},{Id:10,Title:'Elon Musk'}]}, {Member:[...]} ]
+						arrAllArrays[1].forEach(function(obj,idx){
+							if ( obj.Member.Users && obj.Member.Users.length > 0 ) {
+								obj.Member.Users.forEach(function(user,idy){
+									// A: Add group
+									if ( !user.Groups) user.Groups = [];
+									user.Groups.push({ Id:obj.Member.Id, Title:obj.Member.Title });
+
+									// B: Add User (Ensure uniqueness)
+									if ( !objTempUsers[user.Id] ) {
+										arrTempUsers.push( user );
+										objTempUsers[user.Id] = 'exists';
+									}
+								});
+							}
+						});
+
+						// STEP 2: Filter out duplicates
+						arrTempUsers.forEach(function(user){ if (arrSiteUsers.indexOf(user) < 0) arrSiteUsers.push(user) });
+
+						// LAST: Resolve results (NOTE: empty array is the correct default result)
+						resolve( arrSiteUsers || [] );
 					})
-
-					// MEmbers in group
-					sprLib.rest({ url:'_api/web/RoleAssignments', queryCols: ['PrincipalId','Member/Users/Id'], queryFilter: 'Member/PrincipalType eq 8' })
-					_api/web/roleAssignments(15)/Member/Users
-					Id, LoginName, Email, Title, IsSiteAdmin
-
+					.catch(function(strErr){
+						reject( strErr );
+					});
 				}
 				else {
+					// SiteCollection [All] Users
 					sprLib.rest({
 						url: strBaseUrl+'_api/web/SiteUsers',
-						queryCols: ['Id','Email','LoginName','PrincipalType','Title','IsSiteAdmin','Groups/Id','Groups/Title'],
+						queryCols: ['Id','Email','LoginName','Title','IsSiteAdmin','Groups/Id','Groups/Title'],
+						queryFilter: 'PrincipalType eq 1',
 						queryLimit: 5000
 					})
 					.then(function(arrData){
@@ -2043,9 +2088,6 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 						if ( arrData && Array.isArray(arrData) ) {
 							arrData = arrData.filter(function(user){ return user.Title.indexOf('spocrwl') == -1 && user.Id < 1000000000 });
 						}
-
-						// B: Decode PrincipalType
-						arrData.forEach(function(item,idx){ item.PrincipalType = ENUM_PRINCIPALTYPES[item.PrincipalType] || item.PrincipalType });
 
 						// C: Resolve results (NOTE: empty array is the correct default result)
 						resolve( arrData || [] );
