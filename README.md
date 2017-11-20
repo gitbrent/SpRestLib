@@ -831,17 +831,20 @@ Syntax:
 `sprLib.site().users()`  
 `sprLib.site(siteUrl).users()`
 
-Returns: Array of site users
+Returns: Array of users under the current or specified location
+
+Notes:
+* If siteUrl is omitted, then all users in the entire SiteCollection are returned. Otherwise, only the users
+under the given site are returned (all users with direct grants and all users within Groups that have site permissions).
 
 #### User Properties
 | Property Name                | Type     | Description                                                     |
 | :--------------------------- | :------- | :-------------------------------------------------------------- |
 | `Email`                      | string   | user email address                                              |
+| `Groups`                     | array    | array of user's group objects with properties: (`Id`,`Title`)   |
 | `Id`                         | number   | user Id                                                         |
 | `IsSiteAdmin`                | object   | whether the user us a site collection admin (SCA)               |
-| `Groups`                     | array    | array of user's group objects with properties: (`Id`,`Title`)   |
 | `LoginName`                  | string   | user LoginName                                                  |
-| `PrincipalType`              | string   | type of user: "Group", "User', etc.                             |
 | `Title`                      | string   | user Title                                                      |
 
 #### Sample Code
@@ -850,12 +853,11 @@ sprLib.site().users()
 .then(function(arrayResults){ console.table(arrayResults) });
 
 /*
-.-----------------------------------------------------------------------------------------------------------------------------------------.
-| Id |        Email        |          LoginName         | PrincipalType  |   Title   | IsSiteAdmin |                Groups                |
-|----|---------------------|----------------------------|----------------|-----------|-------------|--------------------------------------|
-|  9 | brent@microsoft.com | i:0#.f|brent@microsoft.com | User           | Brent Ely | true        | [{"Id":6,"Title":"Dev Site Owners"}] |
-|  3 |                     | c:0(.s|true                | Security Group | Everyone  | false       | []                                   |
-'-----------------------------------------------------------------------------------------------------------------------------------------'
+.------------------------------------------------------------------------------------------------------------------------.
+| Id |        Email        |          LoginName         |   Title   | IsSiteAdmin |                Groups                |
+|----|---------------------|----------------------------|-----------|-------------|--------------------------------------|
+|  9 | brent@microsoft.com | i:0#.f|brent@microsoft.com | Brent Ely | true        | [{"Id":6,"Title":"Dev Site Owners"}] |
+'------------------------------------------------------------------------------------------------------------------------'
 */
 ```
 
