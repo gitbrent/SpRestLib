@@ -1720,7 +1720,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 	// API: SITE (or WEB)
 	/**
 	* NOTE: `site` and `web` may be used interchangably (`/_api/site` is the top-level Web site and all its subsites)
-	* `web` is a secuable web resource (aka: a SP website)
+	* `web` is a securable web resource (aka: a SP website)
 	* https://msdn.microsoft.com/library/microsoft.sharepoint.spsite "top-level Web site and all its subsites. Each SPSite object, or site collection, is represented within an SPSiteCollection object"
 	*/
 	sprLib.site = function site(inUrl) {
@@ -1807,18 +1807,48 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 		}
 
 		/**
+		* Get Subsites
+		*
+		* @return {Promise} - return `Promise` containing Subsites
+		*/
+		newSite.subsites = function() {
+			return new Promise(function(resolve, reject) {
+				sprLib.rest({
+					url: strBaseUrl+'_api/web/webs',
+					queryCols: {
+						Id:				{ dataName:'Id'						,dispName:'Id'					},
+						Name:			{ dataName:'Title'					,dispName:'Subsite Name'		},
+						UrlAbs:			{ dataName:'Url'					,dispName:'Absolute URL'		},
+						UrlRel:			{ dataName:'ServerRelativeUrl'      ,dispNAme:'Relative URL'		},
+						Created:		{ dataName:'Created'				,dispName:'Date Created'		},
+						Modified:		{ dataName:'LastItemModifiedDate'	,dispName:'Date Last Modified'	},
+						Language:		{ dataName:'Language'				,dispName:'Language'			},
+						SiteLogoUrl:	{ dataName:'SiteLogoUrl'			,dispName:'Site Logo URL'		}
+					}
+				})
+				.then(function(arrData){
+					// A: Resolve results (NOTE: empty array is the correct default result)
+					resolve( arrData || [] );
+				})
+				.catch(function(strErr){
+					reject( strErr );
+				});
+			});
+		}
+
+		/**
 		* Get Site base permissions
 		* Returns array of obejcts with 2 keys: `Member` and `Roles`
 		*
 		* @example - sprLib.site().perms().then( arr => console.table(arr) );
-		.--------------------------------------------------------------------------------------------------------------------------------------------------.
-		|                                    Member                                    |                               Roles                               |
-		|------------------------------------------------------------------------------|-------------------------------------------------------------------|
-		| {"Title":"Brent Ely",   "PrincipalType":"User",            "PrincipalId":9}  | [{"Hidden":false,"Name":"Design"},{"Hidden":false,"Name":"Edit"}] |
-		| {"Title":"Dev Owners",  "PrincipalType":"SharePoint Group","PrincipalId":14} | [{"Hidden":false,"Name":"Full Control"}]                          |
-		| {"Title":"Dev Members", "PrincipalType":"SharePoint Group","PrincipalId":15} | [{"Hidden":false,"Name":"Edit"}]                                  |
-		| {"Title":"Dev Visitors","PrincipalType":"SharePoint Group","PrincipalId":16} | [{"Hidden":false,"Name":"Read"}]                                  |
-		'--------------------------------------------------------------------------------------------------------------------------------------------------'
+		* //.--------------------------------------------------------------------------------------------------------------------------------------------------.
+		* //|                                    Member                                    |                               Roles                               |
+		* //|------------------------------------------------------------------------------|-------------------------------------------------------------------|
+		* //| {"Title":"Brent Ely",   "PrincipalType":"User",            "PrincipalId":9}  | [{"Hidden":false,"Name":"Design"},{"Hidden":false,"Name":"Edit"}] |
+		* //| {"Title":"Dev Owners",  "PrincipalType":"SharePoint Group","PrincipalId":14} | [{"Hidden":false,"Name":"Full Control"}]                          |
+		* //| {"Title":"Dev Members", "PrincipalType":"SharePoint Group","PrincipalId":15} | [{"Hidden":false,"Name":"Edit"}]                                  |
+		* //| {"Title":"Dev Visitors","PrincipalType":"SharePoint Group","PrincipalId":16} | [{"Hidden":false,"Name":"Read"}]                                  |
+		* //'--------------------------------------------------------------------------------------------------------------------------------------------------'
 		*
 		* @return {Promise} - return `Promise` containing Site Permission object { Member:{}, Roles:[] }
 		*/
@@ -1848,6 +1878,27 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 					//.then(arrOwnerId => { return sprLib.rest({ url:site.UrlAbs+'/_api/web/SiteGroups/GetById('+ arrOwnerId[0].Id +')/Users', queryCols:['Title','Email'] }) })
 					//.then(arrUsers   => arrUsers.forEach((user,idx) => site.OwnersGroupUsers += ('<div class="itemBox">'+ user.Title +'<span style="display:none">; </span></div>') ))
 
+					// A: Resolve results (NOTE: empty array is the correct default result)
+					resolve( arrData || [] );
+				})
+				.catch(function(strErr){
+					reject( strErr );
+				});
+			});
+		}
+
+		/**
+		* Get SiteCollection Roles
+		*
+		* @return {Promise} - return `Promise` containing Roles
+		*/
+		newSite.roles = function() {
+			return new Promise(function(resolve, reject) {
+				sprLib.rest({
+					url: strBaseUrl+'_api/web/roleDefinitions',
+					queryCols: ['Id','Name','Description','RoleTypeKind','Hidden']
+				})
+				.then(function(arrData){
 					// A: Resolve results (NOTE: empty array is the correct default result)
 					resolve( arrData || [] );
 				})
@@ -1954,57 +2005,6 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 		}
 
 		/**
-		* Get SiteCollection Roles
-		*
-		* @return {Promise} - return `Promise` containing Roles
-		*/
-		newSite.roles = function() {
-			return new Promise(function(resolve, reject) {
-				sprLib.rest({
-					url: strBaseUrl+'_api/web/roleDefinitions',
-					queryCols: ['Id','Name','Description','RoleTypeKind','Hidden']
-				})
-				.then(function(arrData){
-					// A: Resolve results (NOTE: empty array is the correct default result)
-					resolve( arrData || [] );
-				})
-				.catch(function(strErr){
-					reject( strErr );
-				});
-			});
-		}
-
-		/**
-		* Get Subsites
-		*
-		* @return {Promise} - return `Promise` containing Subsites
-		*/
-		newSite.subsites = function() {
-			return new Promise(function(resolve, reject) {
-				sprLib.rest({
-					url: strBaseUrl+'_api/web/webs',
-					queryCols: {
-						Id:				{ dataName:'Id'						,dispName:'Id'					},
-						Name:			{ dataName:'Title'					,dispName:'Subsite Name'		},
-						UrlAbs:			{ dataName:'Url'					,dispName:'Absolute URL'		},
-						UrlRel:			{ dataName:'ServerRelativeUrl'      ,dispNAme:'Relative URL'		},
-						Created:		{ dataName:'Created'				,dispName:'Date Created'		},
-						Modified:		{ dataName:'LastItemModifiedDate'	,dispName:'Date Last Modified'	},
-						Language:		{ dataName:'Language'				,dispName:'Language'			},
-						SiteLogoUrl:	{ dataName:'SiteLogoUrl'			,dispName:'Site Logo URL'		}
-					}
-				})
-				.then(function(arrData){
-					// A: Resolve results (NOTE: empty array is the correct default result)
-					resolve( arrData || [] );
-				})
-				.catch(function(strErr){
-					reject( strErr );
-				});
-			});
-		}
-
-		/**
 		* Get SiteCollection (all) Users or Site (subsite) Users
 		*
 		* @example
@@ -2106,18 +2106,6 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 				}
 			});
 		}
-
-		// FIXME: CURRENT: NEXT: 20171028
-		// FIXME: target: 1.3.0
-		/* TODO: API: USERS (All Users under this webs or specified site URL)
-		sprLib.users = function users(inUrl) {
-			// Variables
-			var newSite = {};
-			var strBaseUrl = (inUrl ? inUrl.replace(/\/+$/g,'/') : ''); // Guarantee that baseUrl will end with a forward slash
-
-			// REST: _api/web/RoleAssignments
-		}
-		*/
 
 		// TODO: FUTURE: contentTypes & Features
 		/*
