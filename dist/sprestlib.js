@@ -1746,8 +1746,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 					sprLib.rest({
 						url: strBaseUrl+'_api/web',
 						queryCols: ['Id','Title','Description','Language','Created',
-							'LastItemModifiedDate','LastItemUserModifiedDate',
-							'RequestAccessEmail','SiteLogoUrl','Url','WebTemplate',
+							'LastItemModifiedDate','RequestAccessEmail','SiteLogoUrl','Url','WebTemplate',
 							'AssociatedOwnerGroup/Id',        'AssociatedMemberGroup/Id',        'AssociatedVisitorGroup/Id',
 							'AssociatedOwnerGroup/OwnerTitle','AssociatedMemberGroup/OwnerTitle','AssociatedVisitorGroup/OwnerTitle',
 							'AssociatedOwnerGroup/Title',     'AssociatedMemberGroup/Title',     'AssociatedVisitorGroup/Title'
