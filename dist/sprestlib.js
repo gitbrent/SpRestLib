@@ -43,7 +43,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 (function(){
 	// APP VERSION/BUILD
 	var APP_VER = "1.3.0-beta";
-	var APP_BLD = "20171120";
+	var APP_BLD = "20171121";
 	var DEBUG = false; // (verbose mode/lots of logging)
 	// ENUMERATIONS
 	var ENUM_PRINCIPALTYPES = {
@@ -2070,6 +2070,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 										objTempUsers[user.Id] = obj.Member;
 									}
 									else {
+										if ( !objTempUsers[user.Id].Groups ) objTempUsers[user.Id].Groups = [];
 										objTempUsers[user.Id].Groups.push({ Id:obj.Member.Id, Title:obj.Member.Title });
 									}
 								});
