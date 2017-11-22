@@ -2,7 +2,7 @@
  * NAME: qunit-test.js
  * DESC: tests for qunit-test.html (coded to my O365 Dev Site - YMMV)
  * AUTH: https://github.com/gitbrent/
- * DATE: Nov 09, 2017
+ * DATE: Nov 21, 2017
  *
  * HOWTO: Generate text tables for README etc.:
  * sprLib.list('Employees').getItems(['Id', 'Name', 'Badge_x0020_Number']).then(function(arrData){ console.log(getAsciiTableStr(arrData)) });
@@ -19,23 +19,36 @@ const RESTDEMO2 = '/sites/dev/sandbox/';
 const ARR_NAMES_FIRST = ['Jack','Mark','CutiePie','Steve','Barry','Clark','Diana','Star','Luke','Captain'];
 const ARR_NAMES_LAST  = ['Septiceye','Iplier','Martzia','Rodgers','Allen','Kent','Prince','Lord','Skywalker','Marvel'];
 const LIST_GUID2 = '23846527-218a-43a2-b5c1-7b55b6feb1a3';
+const SITE_GUID_SANDBOX = '822555db-9376-4c1c-925b-82dcc7bf3cbd';
 //
 var gTestUserId = 9;
 
-function getAsciiTableStr(arrayResults) {
-	var arrColHeadings = [];
+function getAsciiTableStr(inResult) {
+	var arrResults = [];
+	var table = "";
 
-	Object.keys(arrayResults[0]).forEach(function(key,idx){
-		if ( typeof key === 'object' ) Object.keys(key).forEach(function(key,idx){ arrColHeadings.push(key) });
-		else arrColHeadings.push(key);
-	});
+	// STEP 1: Transform object / Create headings
+	if ( inResult && !Array.isArray(inResult) && typeof inResult === 'object' ) {
+		Object.keys(inResult).forEach(key => {
+			arrResults.push({ 'name':key, 'value':( typeof inResult[key] === 'object' ? JSON.stringify(inResult[key]) : inResult[key].toString() ) });
+		});
+		table = new AsciiTable().setHeading( ['Prop Name','Prop Value'] );
+	}
+	else if ( Array.isArray(inResult) && inResult.length > 0 ) {
+		arrResults = inResult;
+		var arrColHeadings = [];
+		Object.keys(arrResults[0]).forEach(function(key,idx){
+			if ( typeof key === 'object' ) Object.keys(key).forEach(function(key,idx){ arrColHeadings.push(key) });
+			else arrColHeadings.push(key);
+		});
+		table = new AsciiTable().setHeading( arrColHeadings );
+	}
 
-	let table = new AsciiTable().setHeading( arrColHeadings );
-
-	arrayResults.forEach((obj,idx)=>{
+	arrResults.forEach((obj,idx)=>{
 		let vals = [];
 		$.each(obj, function(key,val){
 			if ( typeof val === 'object' && JSON.stringify(val).indexOf("__deferred") > 0 ) val = "[[__deferred]]";
+			//if ( typeof val === 'object' && JSON.stringify(val).indexOf("__metadata") > 0 ) val = "[[__metadata]]";
 			//vals.push( ( typeof val === 'object' && key != '__metadata' ? JSON.stringify(val) : val ) );
 			vals.push( typeof val === 'object' ? JSON.stringify(val) : val );
 		});
@@ -234,8 +247,8 @@ QUnit.module( "LIST > ITEM CRUD Methods" );
 				assert.ok( ( keys.length+2 == Object.keys(newObj).length ), "Object.keys().lengths equal: " + Object.keys(newObj).length );
 				assert.ok( true, "INPUT.: "+ keys.sort().toString() );
 				assert.ok( true, "OUTPUT: "+ Object.keys(newObj).sort().toString() );
-				assert.ok( getAsciiTableStr([json]), `RESULTS:\n${getAsciiTableStr([json])}` );
-				assert.ok( getAsciiTableStr([newObj]), `RESULTS:\n${getAsciiTableStr([newObj])}` );
+				assert.ok( getAsciiTableStr(json), `RESULTS:\n${getAsciiTableStr(json)}` );
+				assert.ok( getAsciiTableStr(newObj), `RESULTS:\n${getAsciiTableStr(newObj)}` );
 				assert.ok( true, "..." );
 				assert.ok( true, ".." );
 				assert.ok( true, "." );
@@ -1406,6 +1419,46 @@ QUnit.module( "REST > Parsing/Options Tests" );
 			});
 		});
 	});
+}
+
+// ================================================================================================
+QUnit.module( "SITE Methods" );
+// ================================================================================================
+{
+/*
+.info()
+.lists()
+.perms()
+.groups()
+.roles()
+.subsites()
+.users()
+*/
+
+	QUnit.test("sprLib.site().info()", function(assert){
+		var done = assert.async();
+		// TEST:
+		sprLib.site().info()
+		.then(function(objSite){
+			assert.ok( Object.keys(objSite).length == 14, "Object.keys(objSite).length == 14: "+ Object.keys(objSite).length );
+			assert.ok( (objSite.Id),    "objSite.Id    exists: '"+ objSite.Id    +"'");
+			assert.ok( (objSite.Title), "objSite.Title exists: '"+ objSite.Title +"'");
+			assert.ok( objSite.AssociatedOwnerGroup.Id && objSite.AssociatedOwnerGroup.Title && objSite.AssociatedMemberGroup.OwnerTitle, "objSite.AssociatedOwnerGroup has 3 props: "+ JSON.stringify(objSite.AssociatedOwnerGroup) );
+			assert.ok( objSite.AssociatedMemberGroup.Id && objSite.AssociatedMemberGroup.Title && objSite.AssociatedOwnerGroup.OwnerTitle, "objSite.AssociatedMemberGroup has 3 props: "+ JSON.stringify(objSite.AssociatedMemberGroup) );
+			assert.ok( objSite.AssociatedVisitorGroup.Id && objSite.AssociatedVisitorGroup.Title && objSite.AssociatedVisitorGroup.OwnerTitle, "objSite.AssociatedVisitorGroup has 3 props: "+ JSON.stringify(objSite.AssociatedVisitorGroup) );
+			assert.ok( objSite.Owner.LoginName && objSite.Owner.Title && objSite.Owner.Email && objSite.Owner.IsSiteAdmin, "objSite.Owner has 4 props: "+ JSON.stringify(objSite.Owner,' ',4) );
+			assert.ok( getAsciiTableStr(objSite), `RESULTS:\n${getAsciiTableStr(objSite)}` );
+			//
+			done();
+		})
+		.catch(function(err){
+			assert.ok( (false), err );
+			done();
+		});
+	});
+
+	// TODO test with GUID too! SITE_GUID_SANDBOX
+
 }
 
 // ================================================================================================
