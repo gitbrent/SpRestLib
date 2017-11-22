@@ -15,11 +15,13 @@ const BASEURL = _spPageContextInfo.siteServerRelativeUrl;
 const RESTROOT = '/sites/dev';
 const RESTDEMO1 = '/sites/dev/sandbox';
 const RESTDEMO2 = '/sites/dev/sandbox/';
+const SITEURL1 = '/sites/dev/sandbox/child1';
+const SITEURL2 = 'sandbox/child1';
+const SITEURL3 = '/sites/dev/sandbox/';
 //
 const ARR_NAMES_FIRST = ['Jack','Mark','CutiePie','Steve','Barry','Clark','Diana','Star','Luke','Captain'];
 const ARR_NAMES_LAST  = ['Septiceye','Iplier','Martzia','Rodgers','Allen','Kent','Prince','Lord','Skywalker','Marvel'];
 const LIST_GUID2 = '23846527-218a-43a2-b5c1-7b55b6feb1a3';
-const SITE_GUID_SANDBOX = '822555db-9376-4c1c-925b-82dcc7bf3cbd';
 //
 var gTestUserId = 9;
 
@@ -1425,40 +1427,215 @@ QUnit.module( "REST > Parsing/Options Tests" );
 QUnit.module( "SITE Methods" );
 // ================================================================================================
 {
-/*
-.info()
-.lists()
-.perms()
-.groups()
-.roles()
-.subsites()
-.users()
-*/
+	var arrTestUrls = [ null, SITEURL1, SITEURL2 ];
 
-	QUnit.test("sprLib.site().info()", function(assert){
-		var done = assert.async();
-		// TEST:
-		sprLib.site().info()
-		.then(function(objSite){
-			assert.ok( Object.keys(objSite).length == 14, "Object.keys(objSite).length == 14: "+ Object.keys(objSite).length );
-			assert.ok( (objSite.Id),    "objSite.Id    exists: '"+ objSite.Id    +"'");
-			assert.ok( (objSite.Title), "objSite.Title exists: '"+ objSite.Title +"'");
-			assert.ok( objSite.AssociatedOwnerGroup.Id && objSite.AssociatedOwnerGroup.Title && objSite.AssociatedMemberGroup.OwnerTitle, "objSite.AssociatedOwnerGroup has 3 props: "+ JSON.stringify(objSite.AssociatedOwnerGroup) );
-			assert.ok( objSite.AssociatedMemberGroup.Id && objSite.AssociatedMemberGroup.Title && objSite.AssociatedOwnerGroup.OwnerTitle, "objSite.AssociatedMemberGroup has 3 props: "+ JSON.stringify(objSite.AssociatedMemberGroup) );
-			assert.ok( objSite.AssociatedVisitorGroup.Id && objSite.AssociatedVisitorGroup.Title && objSite.AssociatedVisitorGroup.OwnerTitle, "objSite.AssociatedVisitorGroup has 3 props: "+ JSON.stringify(objSite.AssociatedVisitorGroup) );
-			assert.ok( objSite.Owner.LoginName && objSite.Owner.Title && objSite.Owner.Email && objSite.Owner.IsSiteAdmin, "objSite.Owner has 4 props: "+ JSON.stringify(objSite.Owner,' ',4) );
-			assert.ok( getAsciiTableStr(objSite), `RESULTS:\n${getAsciiTableStr(objSite)}` );
-			//
-			done();
-		})
-		.catch(function(err){
-			assert.ok( (false), err );
-			done();
+	// DESC: info()
+	QUnit.test("sprLib.site().info() - using both `()` and `(SITEURL1)`", function(assert){
+		arrTestUrls.forEach((ARG_SITE,idx)=>{
+			var done = assert.async();
+			// TEST:
+			sprLib.site(ARG_SITE).info()
+			.then(function(objSite){
+				assert.ok( Object.keys(objSite).length == 14, "Object.keys(objSite).length == 14: "+ Object.keys(objSite).length );
+				assert.ok( (objSite.Id),    "objSite.Id    exists: '"+ objSite.Id    +"'");
+				assert.ok( (objSite.Title), "objSite.Title exists: '"+ objSite.Title +"'");
+				assert.ok( objSite.AssociatedOwnerGroup.Id && objSite.AssociatedOwnerGroup.Title && objSite.AssociatedOwnerGroup.OwnerTitle, "objSite.AssociatedOwnerGroup has 3 props: "+ JSON.stringify(objSite.AssociatedOwnerGroup) );
+				assert.ok( objSite.AssociatedMemberGroup.Id && objSite.AssociatedMemberGroup.Title && objSite.AssociatedMemberGroup.OwnerTitle, "objSite.AssociatedMemberGroup has 3 props: "+ JSON.stringify(objSite.AssociatedMemberGroup) );
+				assert.ok( objSite.AssociatedVisitorGroup.Id && objSite.AssociatedVisitorGroup.Title && objSite.AssociatedVisitorGroup.OwnerTitle, "objSite.AssociatedVisitorGroup has 3 props: "+ JSON.stringify(objSite.AssociatedVisitorGroup) );
+				assert.ok( objSite.Owner.LoginName && objSite.Owner.Title && objSite.Owner.Email && objSite.Owner.IsSiteAdmin, "objSite.Owner has 4 props: "+ JSON.stringify(objSite.Owner,' ',4) );
+				assert.ok( getAsciiTableStr(objSite), `RESULTS:\n${getAsciiTableStr(objSite)}` );
+				assert.ok( true, `\n************************************************************\n`);
+				done();
+			})
+			.catch(function(err){
+				assert.ok( (false), err );
+				done();
+			});
 		});
 	});
 
-	// TODO test with GUID too! SITE_GUID_SANDBOX
+	// DESC: lists()
+	QUnit.test("sprLib.site().lists() - using both `()` and `(SITEURL1)`", function(assert){
+		arrTestUrls.forEach((ARG_SITE,idx)=>{
+			var done = assert.async();
+			// TEST:
+			sprLib.site(ARG_SITE).lists()
+			.then(function(arrResults){
+				var objItem = arrResults[0];
+				//
+				assert.ok( Object.keys(objItem).length == 10, "Object.keys(objItem).length == 10: "+ Object.keys(objItem).length );
+				assert.ok( (objItem.Id),    "objItem.Id    exists: '"+ objItem.Id    +"'");
+				assert.ok( (objItem.Title), "objItem.Title exists: '"+ objItem.Title +"'");
+				assert.ok( getAsciiTableStr(objItem), `RESULTS:\n${getAsciiTableStr(objItem)}` );
+				assert.ok( getAsciiTableStr(arrResults), `RESULTS:\n${getAsciiTableStr(arrResults)}` );
+				//
+				assert.ok( true, `\n************************************************************\n`);
+				done();
+			})
+			.catch(function(err){
+				assert.ok( (false), err );
+				done();
+			});
+		});
+	});
 
+	// DESC: perms()
+	QUnit.test("sprLib.site().perms() - using both `()` and `(SITEURL1)`", function(assert){
+		arrTestUrls.forEach((ARG_SITE,idx)=>{
+			var done = assert.async();
+			// TEST:
+			sprLib.site(ARG_SITE).perms()
+			.then(function(arrResults){
+				var objItem = arrResults[0];
+				//
+				assert.ok( Object.keys(objItem).length == 2, "Object.keys(objItem).length == 2: "+ Object.keys(objItem).length );
+				assert.ok( objItem.Member, "objItem.Member exists: '"+ JSON.stringify(objItem.Member) +"'");
+				assert.ok( objItem.Member.PrincipalId && objItem.Member.PrincipalType && objItem.Member.Title, "objItem.Member has 3 props: "+ JSON.stringify(objItem.Member) );
+				assert.ok( objItem.Roles && Array.isArray(objItem.Roles), "objItem.Roles exists and is an array: '"+ JSON.stringify(objItem.Roles) +"'");
+				assert.ok( Object.keys(objItem.Roles[0]).length == 2, "Object.keys(objItem.Roles[0]).length == 2: "+ JSON.stringify(objItem.Roles[0]) );
+				assert.ok( getAsciiTableStr(objItem), `RESULTS:\n${getAsciiTableStr(objItem)}` );
+				//
+				assert.ok( true, `\n************************************************************\n`);
+				done();
+			})
+			.catch(function(err){
+				assert.ok( (false), err );
+				done();
+			});
+		});
+	});
+
+	// DESC: groups()
+	QUnit.test("sprLib.site().groups() - using both `()` and `(SITEURL1)`", function(assert){
+		arrTestUrls.forEach((ARG_SITE,idx)=>{
+			var done = assert.async();
+			// TEST:
+			sprLib.site(ARG_SITE).groups()
+			.then(function(arrResults){
+				var objItem = arrResults[0];
+				//
+				assert.ok( Object.keys(objItem).length == 7, "Object.keys(objItem).length == 7: "+ Object.keys(objItem).length );
+				assert.ok( objItem.Users && Array.isArray(objItem.Users), "objItem.Users exists and is an array: "+ Array.isArray(objItem.Users) );
+				assert.ok( Object.keys(objItem.Users[0]).length == 3, "Object.keys(objItem.Users[0]).length == 3: "+ Object.keys(objItem.Users[0]).toString() );
+				assert.ok( getAsciiTableStr(arrResults), `RESULTS:\n${getAsciiTableStr(arrResults)}` );
+				//
+				assert.ok( true, `\n************************************************************\n`);
+				done();
+			})
+			.catch(function(err){
+				assert.ok( (false), err );
+				done();
+			});
+		});
+	});
+
+	// DESC: roles()
+	QUnit.test("sprLib.site().roles() - using both `()` and `(SITEURL1)`", function(assert){
+		arrTestUrls.forEach((ARG_SITE,idx)=>{
+			var done = assert.async();
+			// TEST:
+			sprLib.site(ARG_SITE).roles()
+			.then(function(arrResults){
+				var objItem = arrResults[0];
+				//
+				assert.ok( Object.keys(objItem).length == 5, "Object.keys(objItem).length == 5: "+ Object.keys(objItem).length );
+				assert.ok( getAsciiTableStr(arrResults), `RESULTS:\n${getAsciiTableStr(arrResults)}` );
+				//
+				assert.ok( true, `\n************************************************************\n`);
+				done();
+			})
+			.catch(function(err){
+				assert.ok( (false), err );
+				done();
+			});
+		});
+	});
+
+	// DESC: subsites()
+	QUnit.test("sprLib.site().subsites() - using both `()` and `(SITEURL3)`", function(assert){
+		[null,SITEURL3].forEach((ARG_SITE,idx)=>{
+			var done = assert.async();
+			// TEST:
+			sprLib.site(ARG_SITE).subsites()
+			.then(function(arrResults){
+				var objItem = arrResults[0];
+				//
+				assert.ok( Object.keys(objItem).length == 8, "Object.keys(objItem).length == 8: "+ Object.keys(objItem).length );
+				assert.ok( (objItem.Id),     "objItem.Id     exists: '"+ objItem.Id +"'");
+				assert.ok( (objItem.UrlAbs), "objItem.UrlAbs exists: '"+ objItem.UrlAbs +"'");
+				assert.ok( (objItem.UrlRel), "objItem.UrlRel exists: '"+ objItem.UrlRel +"'");
+				assert.ok( getAsciiTableStr(objItem), `RESULTS:\n${getAsciiTableStr(objItem)}` );
+				assert.ok( getAsciiTableStr(arrResults), `RESULTS:\n${getAsciiTableStr(arrResults)}` );
+				//
+				assert.ok( true, `\n************************************************************\n`);
+				done();
+			})
+			.catch(function(err){
+				assert.ok( (false), err );
+				done();
+			});
+		});
+	});
+
+	// DESC: users()
+	QUnit.test("sprLib.site().users() - using both `()` and `(SITEURL1)`", function(assert){
+		arrTestUrls.forEach((ARG_SITE,idx)=>{
+			var done = assert.async();
+			// TEST:
+			sprLib.site(ARG_SITE).users()
+			.then(function(arrResults){
+				var objItem = arrResults[0];
+				//
+				assert.ok( Object.keys(objItem).length == 6, "Object.keys(objItem).length == 6: "+ Object.keys(objItem).length );
+				assert.ok( objItem.Groups && Array.isArray(objItem.Groups), "objItem.Groups exists and is an array: "+ Array.isArray(objItem.Groups) );
+				assert.ok( Object.keys(objItem.Groups[0]).length == 2, "Object.keys(objItem.Groups[0]).length == 2: "+ Object.keys(objItem.Groups[0]).toString() );
+				assert.ok( getAsciiTableStr(arrResults), `RESULTS:\n${getAsciiTableStr(arrResults)}` );
+				//
+				assert.ok( true, `\n************************************************************\n`);
+				done();
+			})
+			.catch(function(err){
+				assert.ok( (false), err );
+				done();
+			});
+		});
+	});
+
+	// NEGATIVE: test URLs that should work and return current site
+	QUnit.test("sprLib.site().info() - JUNK TESTS", function(assert){
+		[null,'',undefined].forEach((junkUrl,idx)=>{
+			var done = assert.async();
+			// TEST:
+			sprLib.site(junkUrl).info()
+			.then(function(arrResults){
+				assert.ok( getAsciiTableStr(arrResults), `RESULTS:\n${getAsciiTableStr(arrResults)}` );
+				assert.ok( true, `\n************************************************************\n`);
+				done();
+			})
+			.catch(function(err){
+				assert.ok( (false), err );
+				done();
+			});
+		});
+	});
+
+	// NEGATIVE: test BAD locations that should throw errors
+	QUnit.test("sprLib.site().info() - JUNK TESTS", function(assert){
+		['/junk/url','junk',999].forEach((junkUrl,idx)=>{
+			var done = assert.async();
+			// TEST:
+			sprLib.site(junkUrl).info()
+			.then(function(arrResults){
+				assert.ok( getAsciiTableStr(arrResults), `RESULTS:\n${getAsciiTableStr(arrResults)}` );
+				assert.ok( false, `\n************************************************************\n`);
+				done();
+			})
+			.catch(function(err){
+				assert.ok( true, err );
+				done();
+			});
+		});
+	});
 }
 
 // ================================================================================================
