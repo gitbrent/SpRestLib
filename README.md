@@ -3,12 +3,12 @@
 # SpRestLib
 
 ## JavaScript Library for SharePoint REST Web Services
-Enables rapid development of SharePoint Apps/Add-ins using the JavaScript SharePoint App Model. This
-library provides a clean, concise API that simplifies async REST interaction. Easily read/write List
-items (CRUD), execute REST calls, and gather user/group information.
+Provides a clean, concise API that greatly simplifies asynchronous REST interaction with SharePoint. Easily read/write List
+items (CRUD), execute REST calls, and gather site/user/group information. Enables rapid development of SharePoint Apps/Add-ins
+using the JavaScript SharePoint App Model.  
 
 ### Features:
-* Simple  - Most REST/Web Service interaction can be done in a couple of lines of code
+* Simple  - Most REST/Web Service interaction can be done in a few lines of code
 * Modern  - Lightweight, pure JavaScript solution
 * Elegant - Utilizes the new [ES6 Promise](http://www.datchley.name/es6-promises/) architecture for asynchronous operations
 * Robust  - Built for [SharePoint 2013 API](https://msdn.microsoft.com/en-us/library/office/jj860569.aspx) and [OData v3](http://www.odata.org/documentation/odata-version-3-0/)
@@ -17,7 +17,7 @@ items (CRUD), execute REST calls, and gather user/group information.
 * List Methods - Create, read, update, and delete (CRUD) List/Library items with a single line of code
 * REST Methods - Run ad-hoc REST calls to any [SharePoint REST API](https://msdn.microsoft.com/en-us/library/office/dn268594.aspx) endpoint
 * User Methods - Get User information (ID, Email, LoginName, Groups, etc.)
-* Site Methods - Get Site information (Lists, Groups, Users, Roles, Subsites and Site Permissions)
+* Site Methods - Get Site information (Lists, Groups, Users, Roles, Subsites and Permissions)
 * Form Population - Populate form elements using data-bind declarative binding system like Knockout or AngluarJS
 
 ### Supported Environments:
@@ -152,16 +152,17 @@ var sprLib = require("sprestlib");
 # Library Test Drive
 
 ## SpRestLib via Console
-Want to try SpRestLib for yourself?  It's easy to do!  Just open an F12 developer window on any SP page
-and run this to load the SpRestLib bundle script dynamically:
+Want to try SpRestLib on your site?  
+Just open an F12 developer window on any page under your SharePoint site and run the following snippet
+that will load the SpRestLib bundle script dynamically:
 
 ```javascript
-// Load SpRestLib via CDN
+// 1: Load SpRestLib via CDN
 var script = document.createElement('script');
 script.src = "https://cdn.rawgit.com/gitbrent/SpRestLib/v1.2.1/dist/sprestlib.bundle.js";
 document.getElementsByTagName('head')[0].appendChild(script);
 
-// Then try some methods
+// 2: Try some library methods
 sprLib.user().info().then( objUser => (console.table ? console.table([objUser]) : console.log(objUser)) );
 ```
 
