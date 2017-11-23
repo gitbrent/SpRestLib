@@ -7,7 +7,7 @@ Provides a clean, concise API that greatly simplifies asynchronous REST interact
 items (CRUD), execute REST calls, and gather site/user/group information. Enables rapid development of SharePoint Apps/Add-ins
 using the JavaScript SharePoint App Model.  
 
-### Features:
+### Library Features:
 * Simple  - Most REST/Web Service interaction can be done in a few lines of code
 * Modern  - Lightweight, pure JavaScript solution
 * Elegant - Utilizes the new [ES6 Promise](http://www.datchley.name/es6-promises/) architecture for asynchronous operations
@@ -156,7 +156,7 @@ var sprLib = require("sprestlib");
 ## SpRestLib via Console
 Want to try SpRestLib on your site?  
 Just open an F12 developer window on any page under your SharePoint site and run the following snippet
-that will load the SpRestLib bundle script dynamically:
+to load the SpRestLib bundle script dynamically:
 
 ```javascript
 // 1: Load SpRestLib via CDN
@@ -176,9 +176,14 @@ sprLib.user().info().then( objUser => (console.table ? console.table([objUser]) 
 
 What makes a good library great?  The ability to chain and group asynchronous operations!
 
-SpRestLib not only provides a simple REST interface, it also delivers next-generation async operation handling.
+SpRestLib not only provides a simple REST interface, it also delivers next-generation
+async operation handling via [ES6 Promises](http://www.datchley.name/es6-promises/).
 
-SharePoint applications and utilities frequently require many operations be done (e.g.: read from many lists at startup) or steps be performed (e.g.: get an item, then do further operations depending upon the result). The way we've done this until recently is by using callbacks, which are now obsolete.  Promises wait until the previous query completes, which makes async operations easy to chain without any callbacks.
+SharePoint applications frequently perform lots of operations (e.g.: read from many lists at startup)
+or perform sequential steps (e.g.: get an item, then do further operations depending upon the result).
+Until recently, using callbacks was the standard way to handle async completion, but with Promises
+(which all SpRestLib methods return) operations can be easily chained by using `then()`, making your code
+much easier to write and maintain.
 
 See the [Async Operations via Promises](#async-operations-via-promises) section for more information and examples.
 
@@ -237,14 +242,10 @@ sprLib.user().info()
 ## REST API Methods
 Returns the results of a given REST call to any [SharePoint REST API](https://msdn.microsoft.com/en-us/library/office/dn268594.aspx)
 
-Use the `sprLib.rest()` interface to GET or PORT to any of the dozens of available SP REST API Endpoints.
+Use the `sprLib.rest()` interface to GET or POST to any of the dozens of available SP REST API Endpoints.
 
 The available REST service endpoints can add Users to Groups, create columns in a List/Library, enumerate site properties
 and other super useful functions.
-
-**Get Results**  
-Calling the SharePoint REST APIs directly via AJAX calls will return results in different forms (some are `data.d` while others are `data.d.results`)
-whereas SpRestLib always returns consistent results in the form of array of objects with name/value pairs.
 
 Syntax:  
 `sprLib.rest(options)`
