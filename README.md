@@ -180,16 +180,16 @@ SpRestLib not only provides a simple REST interface, it also delivers next-gener
 
 SharePoint applications and utilities frequently require many operations be done (e.g.: read from many lists at startup) or steps be performed (e.g.: get an item, then do further operations depending upon the result). The way we've done this until recently is by using callbacks, which are now obsolete.  Promises wait until the previous query completes, which makes async operations easy to chain without any callbacks.
 
-See the [Async Operations via Promises](#async-operations-via-promises) section for more information.
+See the [Async Operations via Promises](#async-operations-via-promises) section for more information and examples.
 
 ```javascript
-// A: Get current user's ID
+// EX: Get the current user's ID, then get their Tasks
 sprLib.user().info()
 .then(function(objUser){
-	return sprLib.list('Tasks').getItems({ listCols:['Id','Title'], queryFilter:'Owner/Id eq ' + objUser.Id });
+    return sprLib.list('Tasks').getItems({ queryFilter:'Owner/Id eq ' + objUser.Id });
 })
 .then(function(arrItems){
-	console.log("Current user's Tasks = " + arrItems.length);
+    console.log("Current user's Tasks = " + arrItems.length);
 })
 .catch(errMsg => console.error(errMsg));
 ```
