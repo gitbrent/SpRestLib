@@ -261,7 +261,7 @@ sprLib.rest({
 // EX: Add a new column to a list/library using the REST API
 sprLib.rest({
     url:  "_api/web/lists/getbytitle('Employees')/fields",
-	data: "{'__metadata':{'type':'SP.FieldDateTime'}, 'FieldTypeKind':4, 'Title':'Bonus Date', 'DisplayFormat':1 }",
+    data: "{'__metadata':{'type':'SP.FieldDateTime'}, 'FieldTypeKind':4, 'Title':'Bonus Date', 'DisplayFormat':1 }",
     type: "POST"
 })
 .then(function(){ console.log("New column created!"); })
@@ -612,7 +612,6 @@ Returns: Array of site properties
 sprLib.site().info()
 .then(function(objSite){ console.table([objSite]) });
 
-// RESULT:
 /*
 .-------------------------------------------------------------------------------------------------------------------------------------.
 |        Prop Name         |                                                Prop Value                                                |
@@ -663,7 +662,6 @@ sprLib.site().lists()
 .then(function(arr){ console.table([arr[0]]) });
 
 /*
-// EX: List object
 .-----------------------------------------------------.
 |  Prop Name   |              Prop Value              |
 |--------------|--------------------------------------|
@@ -740,8 +738,8 @@ sprLib.site().groups()
 | Id |         Title          |  PrincipalType   |             Description            |    OwnerTitle     | AllowMembersEditMembership |                     Users                                         |
 |----|------------------------|------------------|------------------------------------|-------------------|----------------------------|-------------------------------------------------------------------|
 |  8 | Dev Site Members       | SharePoint Group | contribute permissions: Dev Site   | Dev Site Owners   | true                       | []                                                                |
-|  6 | Dev Site Owners        | Dev Site Owners  | full control permissions: Dev Site | SharePoint Group  | false                      | [{"Id":99,"LoginName":"brent@microsoft.com","Title":"Brent Ely"}] |
-|  7 | Dev Site Visitors      | Dev Site Owners  | read permissions: Dev Site         | SharePoint Group  | false                      | []                                                                |
+|  6 | Dev Site Owners        | SharePoint Group | full control permissions: Dev Site | SharePoint Group  | false                      | [{"Id":99,"LoginName":"brent@microsoft.com","Title":"Brent Ely"}] |
+|  7 | Dev Site Visitors      | SharePoint Group | read permissions: Dev Site         | SharePoint Group  | false                      | []                                                                |
 '----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------'
 */
 ```
@@ -752,7 +750,7 @@ Syntax:
 `sprLib.site().roles()`  
 `sprLib.site(siteUrl).roles()`
 
-Returns: Array of site Roles
+Returns: Array of SiteCollection Roles (result is the same if siteUrl is provided)
 
 #### Role Properties
 | Property Name                | Type     | Description                                      |
@@ -868,22 +866,24 @@ sprLib.site().users()
 
 **************************************************************************************************
 ## User Methods
-Omitting a query property will return information about the current user, otherwise, the specified user is returned.  
+Syntax:  
 `sprLib.user()`  
 `sprLib.user(options)`
 
+Usage: Omitting options will return information about the current user, otherwise, the specified user is returned.  
+
 ### User Query Properties
-| Prop     | Type     | Required? | Description           | Possible Values / Returns                             |
-| :------- | :------- | :-------- | :-------------------- | :---------------------------------------------------- |
-| `id`     | number   |           | user id               | user id to query. Ex: `{id:99}`                       |
-| `email`  | string   |           | user email address    | user email to query. Ex: `{email:'brent@github.com'}` |
-| `login`  | string   |           | user login name       | user loginName to query. Ex: `{login:'AMERICAS\Bob_Ely'}` |
-| `title`  | string   |           | user title            | user title to query. Ex: `{title:'Brent Ely'}`        |
+| Prop     | Type     | Required? | Description           | Possible Values                                             |
+| :------- | :------- | :-------- | :-------------------- | :---------------------------------------------------------- |
+| `id`     | number   |           | user id               | user id to query. Ex: `{id:99}`                             |
+| `email`  | string   |           | user email address    | user email to query. Ex: `{email:'brent@github.com'}`       |
+| `login`  | string   |           | user login name       | user loginName to query. Ex: `{login:'AMERICAS\Brent_Ely'}` |
+| `title`  | string   |           | user title            | user title to query. Ex: `{title:'Brent Ely'}`              |
 
 ### Get User Information (`SPUser`)
-Syntax:
+Syntax:  
 `sprLib.user().info()`  
-`sprLib.user(options).groups()`
+`sprLib.user(options).info()`
 
 Returns: Object with SharePoint user (`SP.User`) properties.
 
@@ -910,7 +910,7 @@ sprLib.user({ email:'brent@microsoft.com' }).info()
 ```
 
 ### Get User Groups (`SPGroup`)
-Syntax:
+Syntax:  
 `sprLib.user().groups()`  
 `sprLib.user(options).groups()`
 
