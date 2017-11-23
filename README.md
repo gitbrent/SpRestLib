@@ -37,6 +37,8 @@ using the JavaScript SharePoint App Model.
   - [Node.js](#nodejs)
 - [Library Test Drive](#library-test-drive)
   - [SpRestLib via Console](#sprestlib-via-console)
+- [Promise You Will Love It](#promise-you-will-love-it)
+  - [JavaScript Promises Have Arrived](#javascript-promises-have-arrived)
 - [Method Overview](#method-overview)
   - [REST API](#rest-api)
   - [List/Library](#listlibrary)
@@ -168,6 +170,33 @@ sprLib.user().info().then( objUser => (console.table ? console.table([objUser]) 
 
 
 **************************************************************************************************
+# Promise You Will Love It
+
+## JavaScript Promises Have Arrived
+
+What makes a good library great?  The ability to chain and group asynchronous operations!
+
+SpRestLib not only provides a simple REST interface, it also delivers next-generation async operation handling.
+
+SharePoint applications and utilities frequently require many operations be done (e.g.: read from many lists at startup) or steps be performed (e.g.: get an item, then do further operations depending upon the result). The way we've done this until recently is by using callbacks, which are now obsolete.  Promises wait until the previous query completes, which makes async operations easy to chain without any callbacks.
+
+See the [Async Operations via Promises](#async-operations-via-promises) section for more information.
+
+```javascript
+// A: Get current user's ID
+sprLib.user().info()
+.then(function(objUser){
+	return sprLib.list('Tasks').getItems({ listCols:['Id','Title'], queryFilter:'Owner/Id eq ' + objUser.Id });
+})
+.then(function(arrItems){
+	console.log("Current user's Tasks = " + arrItems.length);
+})
+.catch(errMsg => console.error(errMsg));
+```
+
+
+
+**************************************************************************************************
 # Method Overview
 
 ## REST API
@@ -217,7 +246,7 @@ and other super useful functions.
 Calling the SharePoint REST APIs directly via AJAX calls will return results in different forms (some are `data.d` while others are `data.d.results`)
 whereas SpRestLib always returns consistent results in the form of array of objects with name/value pairs.
 
-Syntax
+Syntax:  
 `sprLib.rest(options)`
 
 Returns: Array of objects containing name/value pairs
