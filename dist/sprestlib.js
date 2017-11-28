@@ -29,10 +29,10 @@
 
 /*
 DEVLIST:
- - Add `$skip` (https://sharepoint.stackexchange.com/questions/45719/paging-using-rest-odata-with-sp-2013)
- -- @see: https://dev.office.com/sharepoint/docs/sp-add-ins/use-odata-query-operations-in-sharepoint-rest-requests#page-through-returned-items
- -- Only working SOLN is to get '__next' URI from results (or store prev ID and construct a similar URI using code)
- -- Very ugly and not at all elegant
+- Add `$skip` (https://sharepoint.stackexchange.com/questions/45719/paging-using-rest-odata-with-sp-2013)
+-- @see: https://dev.office.com/sharepoint/docs/sp-add-ins/use-odata-query-operations-in-sharepoint-rest-requests#page-through-returned-items
+? SOLN: use new opts: `skipId` & `skipLimit`
+? SOLN: then we can construct: "items?$skiptoken=Paged=TRUE&p_ID="+ 2 +"&$select=ID&$orderby=ID&$top=" + 2
 
  - Add `Intl` (i18n) support (its supported in IE11!!) - Date and Currency formats are awesome (add Direction for our R->L users too?)
 */
@@ -42,8 +42,8 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 
 (function(){
 	// APP VERSION/BUILD
-	var APP_VER = "1.3.0-beta";
-	var APP_BLD = "20171121";
+	var APP_VER = "1.3.0";
+	var APP_BLD = "20171122";
 	var DEBUG = false; // (verbose mode/lots of logging)
 	// ENUMERATIONS
 	var ENUM_PRINCIPALTYPES = {

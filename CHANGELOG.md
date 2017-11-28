@@ -1,17 +1,14 @@
 # Change Log
 
-## [v1.3.0](https://github.com/gitbrent/sprestlib/tree/v1.3.0) (2017-11-??)
+## [v1.3.0](https://github.com/gitbrent/sprestlib/tree/v1.3.0) (2017-11-27)
 [Full Changelog](https://github.com/gitbrent/sprestlib/compare/v1.2.1...v1.3.0)
 
-**Fixed Bugs:**
 **Implemented Enhancements:**
-- *BREAKING CHANGE*: `list().baseUrl()` removed! (use `baseUrl` param to `list()` now)
-- *BREAKING CHANGE*: `version()` method removed! (use `version` property now)
+- *BREAKING CHANGE*: `list().baseUrl()` removed! (new: `baseUrl` param to `list()`)
+- *BREAKING CHANGE*: `version()` method removed! (new: `sprLib.version` property)
 - `.list()` now accepts an object in addition to listname (string)
 - Added new `metadata` option to `list().getItems()` and `rest()` methods
-- Added new core method: `site()` - returns info, perms, users, groups, subsites, etc.
-
-
+- Added new Site methods: `site()` - returns info, perms, users, groups, subsites, etc.
 
 
 
