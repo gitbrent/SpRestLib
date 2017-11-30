@@ -313,11 +313,11 @@ By default, the base URL is set to where the host webpart is located (`_spPageCo
 However, there are occasions when reading from other locations - like a subsite - is desired. Use the `baseUrl`
 parameter to specify the desired location.
 
-Syntax: `sprLib.list({ listName:name, baseUrl:path })`
+Syntax: `sprLib.list({ name:name, baseUrl:path })`
 
 Example:
 ```javascript
-sprLib.list({ listName:'Employees', baseUrl:'/sites/HumanResources/devtest/' })
+sprLib.list({ name:'Employees', baseUrl:'/sites/HumanResources/devtest/' })
 ```
 
 
