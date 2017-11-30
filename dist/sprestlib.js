@@ -100,11 +100,13 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 	var APP_OPTS = {
 		baseUrl:         '..',
 		busySpinnerHtml: '<div class="sprlib-spinner"><div class="sprlib-bounce1"></div><div class="sprlib-bounce2"></div><div class="sprlib-bounce3"></div></div>',
+		cache:           false,
 		cleanColHtml:    true,
 		currencyChar:    '$',
 		language:        'en',
 		maxRetries:      2,
 		maxRows:         1000,
+		metadata:        false,
 		nodeCookie:      '',
 		nodeServer:      '',
 		retryAfter:      1000
@@ -816,9 +818,8 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 				// Handle: `$filter` only accepts single quote (%27), double-quote (%22) will fail, so transform if needed
 				if ( inObj.queryFilter ) inObj.queryFilter = inObj.queryFilter.replace(/\"/gi,"'");
 
-				// TODO: check for dupe col names! ['Name','Name']
-
 				// STEP 2: Parse options/cols / Set Internal Arrays
+				// NOTE: Duplicate col names dont bother SP, so there's no test/fix for that condition
 				{
 					// CASE 1: Option: single string col name
 					if ( typeof inObj === 'string' || typeof inObj === 'number' ) {
@@ -866,10 +867,6 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 					// CASE 5: No listCols - create when needed
 					else if ( !inObj.listCols ) inObj.listCols = {};
 
-					// AJAX OPTIONS:
-					inObj.cache = inObj.cache || false;
-					// TODO: change 'false' to DEF_CACHE
-
 					// Add internal data objects
 					inObj.spArrData = [];
 					inObj.spObjData = {};
@@ -883,8 +880,8 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 						var objAjaxQuery = {
 							url     : _urlBase+"/items",
 							type    : "GET",
-							cache   : inObj.cache,
-							metadata: inObj.metadata || false,
+							cache   : inObj.cache || APP_OPTS.cache,
+							metadata: inObj.metadata || APP_OPTS.metadata,
 							headers : { "Accept":"application/json;odata=verbose", "X-RequestDigest":$("#__REQUESTDIGEST").val() }
 						};
 						var arrExpands = [], strExpands = "";
@@ -1410,8 +1407,8 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 		return new Promise(function(resolve, reject) {
 			// STEP 1: Options setup
 			inOpt = inOpt || {};
-			inOpt.cache = inOpt.cache || false;
-			inOpt.metadata = inOpt.metadata || false;
+			inOpt.cache = inOpt.cache || APP_OPTS.cache;
+			inOpt.metadata = inOpt.metadata || APP_OPTS.metadata;
 			inOpt.type = inOpt.restType || inOpt.type || "GET";
 			inOpt.url = (inOpt.restUrl || inOpt.url || APP_OPTS.baseUrl).replace(/\"/g, "'");
 			//
