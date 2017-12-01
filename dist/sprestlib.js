@@ -606,7 +606,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 	* sprLib.baseUrl();
 	* @returns '/sites/devtest'
 	*
-	* @param {string} inStrDate - URL to use as the root of API calls
+	* @param {string} `inStr` - URL to use as the root of API calls
 	* @return {string} Return value of APP_OPTS.baseUrl
 	*/
 	sprLib.baseUrl = function baseUrl(inStr) {
@@ -620,10 +620,10 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 
 	// API: LIST (CRUD + getItems)
 	/**
-	* @param inOpts (string) - required - List Name or List GUID
+	* @param `inOpts` (string) - required - List Name or List GUID
 	* @example - string - sprLib.list('Documents');
 	*
-	* @param inOpts (object) - required - { `name`, [`baseUrl`] }
+	* @param `inOpts` (object) - required - { `name`, [`baseUrl`] }
 	* @example - string - sprLib.list({ name:'23846527-228a-41a2-b5c1-7b55b6fea1a3' });
 	* @example - string - sprLib.list({ name:'Documents' });
 	* @example - string - sprLib.list({ name:'Documents', baseUrl:'/sites/dev/sandbox' });
@@ -1204,12 +1204,12 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 		*   __metadata: { type:"SP.Data.EmployeesListItem", etag:10 },
 		*   Id: 1,
 		*   Name: 'updated by sprLib.list().update()',
-		* 	Hire_x0020_Date: new Date()
+		*   Hire_x0020_Date: new Date()
 		* })
 		* .then(function(objItem){ console.table(objItem) })
 		* .catch(function(strErr){ console.error(strErr)  });
 		*
-		* @param {object} inObj - The item to update, in regular SharePoint JSON format
+		* @param {object} `jsonData` - The item to update, in regular SharePoint JSON format
 		*
 		* @return {object} Return newly created item in JSON format (return the data result from SharePoint).
 		*/
@@ -1274,10 +1274,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 		* This operation is permanent (item does not go into Recycle Bin)!
 		*
 		* @example - with etag
-		* sprLib.list('Employees').delete({
-		*   __metadata: { etag:10 },
-		*   Id: 1
-		* })
+		* sprLib.list('Employees').delete({ __metadata: { etag:10 }, Id:1 })
 		* .then(function(){ console.log('Deleted!') })
 		* .catch(function(strErr){ console.error(strErr)  });
 		*
@@ -1349,7 +1346,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 		* @example - simple ID (number or string)
 		* sprLib.list('Employees').recycle(123)
 		*
-		* @return {number} Return the `id` just deleted.
+		* @return {number} Return the `id` just recycled.
 		*/
 		_newList.recycle = function(intID) {
 			return new Promise(function(resolve,reject) {
