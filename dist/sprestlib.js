@@ -43,7 +43,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 (function(){
 	// APP VERSION/BUILD
 	var APP_VER = "1.4.0-beta";
-	var APP_BLD = "20171129";
+	var APP_BLD = "20171204";
 	var DEBUG = false; // (verbose mode/lots of logging)
 	// ENUMERATIONS
 	var ENUM_PRINCIPALTYPES = {
@@ -627,10 +627,12 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 	* @example - string - sprLib.list({ name:'23846527-228a-41a2-b5c1-7b55b6fea1a3' });
 	* @example - string - sprLib.list({ name:'Documents' });
 	* @example - string - sprLib.list({ name:'Documents', baseUrl:'/sites/dev/sandbox' });
+	* @example - string - sprLib.list({ name:'Documents', baseUrl:'/sites/dev/sandbox', requestDigest:'8675309,05 Dec 2017 01:23:45 -0000' });
 	*/
 	sprLib.list = function list(inOpts) {
 		var _newList = {};
 		var _urlBase = "_api/lists";
+		var _requestDigest = $("#__REQUESTDIGEST").val();
 
 		// A: Param check
 		if ( inOpts && typeof inOpts === 'string' ) {
@@ -640,6 +642,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 		else if ( inOpts && typeof inOpts === 'object' && Object.keys(inOpts).length > 0 && inOpts.name ) {
 			_urlBase = (inOpts.baseUrl ? inOpts.baseUrl.replace(/\/+$/,'')+'/_api/lists' : _urlBase);
 			_urlBase += ( gRegexGUID.test(inOpts.name) ? "(guid'"+ inOpts.name +"')" : "/getbytitle('"+ inOpts.name.replace(/\s/gi,'%20') +"')" );
+			if ( inOpts.requestDigest ) _requestDigest = inOpts.requestDigest;
 		}
 		else {
 			console.error("ERROR: A 'listName' or 'listGUID' is required! EX: `sprLib.list('Employees')` or `sprLib.list({ name:'Employees' })`");
@@ -815,7 +818,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 				inObj = inObj || {};
 				// Deal with garbage here instead of in parse
 				if ( inObj == '' || inObj == [] ) inObj = {};
-				// Handle: `$filter` only accepts single quote (%27), double-quote (%22) will fail, so transform if needed
+				// Handle: `$filter` only accepts single quote (%27), double-quote (%22) will fail, so transform as needed
 				if ( inObj.queryFilter ) inObj.queryFilter = inObj.queryFilter.replace(/\"/gi,"'");
 
 				// STEP 2: Parse options/cols / Set Internal Arrays
@@ -882,7 +885,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 							type    : "GET",
 							cache   : inObj.cache || APP_OPTS.cache,
 							metadata: inObj.metadata || APP_OPTS.metadata,
-							headers : { "Accept":"application/json;odata=verbose", "X-RequestDigest":$("#__REQUESTDIGEST").val() }
+							headers : { "Accept":"application/json;odata=verbose", "X-RequestDigest":_requestDigest }
 						};
 						var arrExpands = [], strExpands = "";
 
@@ -1169,7 +1172,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 						url     : _urlBase +"/items",
 						data    : JSON.stringify(jsonData),
 						metadata: true,
-						headers : { "Accept":"application/json;odata=verbose", "X-RequestDigest":$("#__REQUESTDIGEST").val() }
+						headers : { "Accept":"application/json;odata=verbose", "X-RequestDigest":_requestDigest }
 					})
 					.then(function(arrData){
 						if ( arrData && arrData[0] ) {
@@ -1247,7 +1250,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 						headers : {
 							"X-HTTP-Method"  : "MERGE",
 							"Accept"         : "application/json;odata=verbose",
-							"X-RequestDigest": $("#__REQUESTDIGEST").val(),
+							"X-RequestDigest": _requestDigest,
 							"IF-MATCH"       : ( jsonData.__metadata.etag ? jsonData.__metadata.etag : "*" )
 						}
 					})
@@ -1318,7 +1321,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 						headers : {
 							"X-HTTP-Method"  : "MERGE",
 							"Accept"         : "application/json;odata=verbose",
-							"X-RequestDigest": $("#__REQUESTDIGEST").val(),
+							"X-RequestDigest": _requestDigest,
 							"IF-MATCH"       : ( jsonData.__metadata.etag ? jsonData.__metadata.etag : "*" )
 						}
 					})
@@ -1358,7 +1361,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 					type    : "POST",
 					url     : _urlBase +"/items("+ intID.toString() +")/recycle()",
 					metadata: true,
-					headers : { "Accept":"application/json; odata=verbose", "X-RequestDigest":$("#__REQUESTDIGEST").val() }
+					headers : { "Accept":"application/json;odata=verbose", "X-RequestDigest":_requestDigest }
 				})
 				.then(function(){
 					// SP returns the item guid for Recycle operations
@@ -1417,7 +1420,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 				url    : inOpt.url,
 				type   : inOpt.type,
 				cache  : inOpt.cache,
-				headers: inOpt.headers || { "Accept":"application/json;odata=verbose", "X-RequestDigest":$("#__REQUESTDIGEST").val() }
+				headers: inOpt.headers || { "Accept":"application/json;odata=verbose", "X-RequestDigest":inOpt.requestDigest || $("#__REQUESTDIGEST").val() }
 			};
 			// Add `data` if included
 			if ( inOpt.data ) objAjaxQuery.data = inOpt.data;
@@ -1698,7 +1701,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 					.then(function(){
 						if (DEBUG) console.log('err-403: token renewed');
 						// Some operations (ex: CRUD) will include the token value in header. It must be refreshed as well (or the new tolem is pointless!)
-						if ( inOpt.headers && inOpt.headers['X-RequestDigest'] ) inOpt.headers['X-RequestDigest'] = $("#__REQUESTDIGEST").val();
+						if ( inOpt.headers && inOpt.headers['X-RequestDigest'] ) inOpt.headers['X-RequestDigest'] = inOpt.requestDigest || $("#__REQUESTDIGEST").val();
 						gRetryCounter++;
 						sprLib.rest(inOpt);
 					});
