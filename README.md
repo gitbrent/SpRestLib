@@ -266,6 +266,7 @@ Returns: Array of objects containing name/value pairs
 | `queryFilter` | string  |             | query filter          | utilizes OData style [Query Operators](https://msdn.microsoft.com/en-us/library/office/fp142385.aspx#Anchor_7) Ex:`queryFilter: 'Salary lt 99000'` |
 | `queryLimit`  | string  | `1000`      | max items to return   | 1-5000. Ex:`queryLimit: 5000` |
 | `queryOrderby`| string  |             | column(s) to order by | Ex:`queryOrderby: Name` |
+| `requestDigest` | string | `$('#__REQUESTDIGEST`).val() | Form Digest Value | The `X-RequestDigest` header value (SP Auth) |
 
 ### Examples
 ```javascript
@@ -307,20 +308,22 @@ sprLib.rest({
 ## List/Library Methods (`SPList`)
 Lists can be accessed by either their name or their GUID:  
 
-Syntax: `sprLib.list(listName)` or `sprLib.list(listGUID)`
+Syntax: `sprLib.list(listName)`
+Syntax: `sprLib.list(listGUID)`
+Syntax: `sprLib.list({ name:name, baseUrl:path })`
+Syntax: `sprLib.list({ name:name, baseUrl:path, requestDigest:formDigestValue })`
 
-### BaseUrl
+### Options
+| Prop            | Type   | Required? | Default                      | Description           | Possible Values                               |
+| :-------------- | :----- | :-------- | :--------------------------- | :-------------------- | :----------------------------------- |
+| `name`          | string | Y         |                              | list name or guid     | Ex:`{'name': 'Employees'}`     |
+| `baseUrl`       | string |           | (current location)           | data to be sent       | Ex:`{'baseUrl': '/sites/dev'}` |
+| `requestDigest` | string |           | `$('#__REQUESTDIGEST`).val() | `X-RequestDigest` header value (SP Auth) | Ex:`{'requestDigest': 'ABC123'}` |
+
+#### Options: BaseUrl
 By default, the base URL is set to where the host webpart is located (`_spPageContextInfo.webServerRelativeUrl`).
 However, there are occasions when reading from other locations - like a subsite - is desired. Use the `baseUrl`
 parameter to specify the desired location.
-
-Syntax: `sprLib.list({ name:name, baseUrl:path })`
-
-Example:
-```javascript
-sprLib.list({ name:'Employees', baseUrl:'/sites/HumanResources/devtest/' })
-```
-
 
 ### Get Items
 Syntax:  
