@@ -1,5 +1,15 @@
 # Change Log
 
+## [v1.4.0](https://github.com/gitbrent/sprestlib/tree/v1.4.0) (2017-12-??)
+[Full Changelog](https://github.com/gitbrent/sprestlib/compare/v1.3.0...v1.4.0)
+
+**Implemented Enhancements:**
+- Add new option for auth DigestToken [\#6](https://github.com/gitbrent/sprestlib/issues/6) ([Wireliner](https://github.com/Wireliner))
+
+
+
+
+
 ## [v1.3.0](https://github.com/gitbrent/sprestlib/tree/v1.3.0) (2017-11-27)
 [Full Changelog](https://github.com/gitbrent/sprestlib/compare/v1.2.1...v1.3.0)
 
