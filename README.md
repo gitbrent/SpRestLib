@@ -308,10 +308,10 @@ sprLib.rest({
 ## List/Library Methods (`SPList`)
 Lists can be accessed by either their name or their GUID:  
 
-Syntax: `sprLib.list(listName)`
-Syntax: `sprLib.list(listGUID)`
-Syntax: `sprLib.list({ name:name, baseUrl:path })`
-Syntax: `sprLib.list({ name:name, baseUrl:path, requestDigest:formDigestValue })`
+Syntax: `sprLib.list(listName)`  
+Syntax: `sprLib.list(listGUID)`  
+Syntax: `sprLib.list({ name:name, baseUrl:path })`  
+Syntax: `sprLib.list({ name:name, baseUrl:path, requestDigest:formDigestValue })`  
 
 ### Options
 | Prop            | Type   | Required? | Default                      | Description           | Possible Values                               |
