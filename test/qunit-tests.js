@@ -1424,6 +1424,43 @@ QUnit.module( "REST > Parsing/Options Tests" );
 }
 
 // ================================================================================================
+QUnit.module( "requestDigest Tests" );
+// ================================================================================================
+{
+	var _digest = "";
+	var _testId = "";
+
+	QUnit.test("requestDigest Test 1: Test `requestDigest`", function(assert){
+		// A:
+		var done = assert.async();
+
+		// B: Test
+		Promise.all([
+			sprLib.rest({ url:'_api/contextinfo', type:'POST' }),
+			sprLib.list('Employees').getItems({ listCols:'Id', queryLimit:'1' })
+		])
+		.then(function(arrAllArrays){
+			_digest = arrAllArrays[0][0].GetContextWebInformation.FormDigestValue;
+			_testId = arrAllArrays[1][0].Id;
+
+			assert.ok( _digest, "_digest: "+ _digest );
+			assert.ok( _digest != $('#__REQUESTDIGEST').val(), "_digest != $('#__REQUESTDIGEST').val(): "+ $('#__REQUESTDIGEST').val() );
+
+			sprLib.list({ name:'Employees', requestDigest:_digest }).update({ ID:_testId, Title:'FDV Test' })
+			.then(function(objData){
+				assert.ok( objData.Id && objData.Title, "objData.Id && objData.Title: "+ objData.Id +'/'+ objData.Title );
+				assert.ok(true, `RESULTS:\n${getAsciiTableStr(objData)}\n************************************************************\n`);
+				done();
+			});
+		})
+		.catch(function(err){
+			assert.ok( (false), err );
+			done();
+		});
+	});
+}
+
+// ================================================================================================
 QUnit.module( "SITE Methods" );
 // ================================================================================================
 {
