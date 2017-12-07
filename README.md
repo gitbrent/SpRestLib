@@ -397,7 +397,7 @@ sprLib.list('Employees').getItems({
         empId:      { dataName:'ID' },
         badgeNum:   { dataName:'Badge_x0020_Number' },
         appendText: { dataName:'Versioned_x0020_Comments', getVersions:true },
-        editLink:   { dataFunc:function(objItem){ return '<a href="/sites/dev/Lists/Employees/DispForm.aspx?ID='+objItem.ID+'">View Emp</a>' } }
+        viewLink:   { dataFunc:function(objItem){ return '<a href="/sites/dev/Lists/Employees/DispForm.aspx?ID='+objItem.ID+'">View Emp</a>' } }
     },
     queryFilter:  'Salary gt 100000',
     queryOrderby: 'Hire_x0020_Date',
@@ -409,11 +409,11 @@ sprLib.list('Employees').getItems({
 // RESULT:
 /*
 .--------------------------------------------------------------------------------------------------------------------------------.
-| empId | badgeNum |            appendText              |                                editLink                                |
+| empId | badgeNum |            appendText              |                                viewLink                                |
 |-------|----------|------------------------------------|------------------------------------------------------------------------|
 |   334 |  1497127 | ["20170624:Update","20170601:New"] | <a href="/sites/dev/Lists/Employees/DispForm.aspx?ID=334">View Emp</a> |
-|   339 |  1497924 | ["Not here yet", "Emp created"]    | <a href="/sites/dev/Lists/Employees/DispForm.aspx?ID=334">View Emp</a> |
-|   350 |  1497927 | ["Vice President promotion"]       | <a href="/sites/dev/Lists/Employees/DispForm.aspx?ID=334">View Emp</a> |
+|   339 |  1497924 | ["Not here yet", "Emp created"]    | <a href="/sites/dev/Lists/Employees/DispForm.aspx?ID=339">View Emp</a> |
+|   350 |  1497927 | ["Vice President promotion"]       | <a href="/sites/dev/Lists/Employees/DispForm.aspx?ID=350">View Emp</a> |
 '--------------------------------------------------------------------------------------------------------------------------------'
 */
 ```
@@ -473,9 +473,6 @@ sprLib.list('Employees')
 ### Delete Item
 Syntax:
 `sprLib.list(listName|listGUID).delete(itemId)`
-
-Options:
-* if `__metadata.etag` is not provided, this is equivalent to force:true (`etag:'"*"'` is used)
 
 Returns:
 ID of the item just deleted
@@ -549,37 +546,36 @@ sprLib.list('Employees').cols()
 ```
 
 ### Get List Info
-Syntax:
-`sprLib.list(listName|listGUID).info()`
+Syntax: `sprLib.list(listName|listGUID).info()`
 
 Returns: Array of list properties
 
 #### List Properties
-| Property Name             | Type     | Description                                                 |
-| :------------------------ | :------- | :---------------------------------------------------------- |
-| `AllowContentTypes`       | boolean  | Whether `Allow management of content types?` is enabled     |
-| `BaseTemplate`            | integer  | `SPListTemplateType` SP Base Template ID number - ex: `100` |
-| `BaseType`                | integer  | SP Base Type ID number - ex: `0`                            |
-| `Created`                 | string   | Date the List/Library was created (ISO format)              |
-| `Description`             | string   | List/Library `Description`                                  |
-| `DraftVersionVisibility`  | number   | whether draft versions can be seen                          |
-| `EnableAttachments`       | boolean  | whether users can attach files to items in this list        |
-| `EnableFolderCreation`    | boolean  | whether users can create folders in this list/library       |
-| `EnableVersioning`        | boolean  | whether versioning is enabled for the items in this list    |
-| `ForceCheckout`           | boolean  | Whether Force checkout is enabled                           |
-| `Hidden`                  | boolean  | Whether List is hidden                                      |
-| `Id`                      | GUID     | The SP GUID of the List                                     |
-| `ItemCount`               | number   | The number of Items in the List                             |
-| `LastItemDeletedDate`       | string | Date (ISO format) an item was last deleted                  |
-| `LastItemModifiedDate`      | string | Date (ISO format) an item was last modified                 |
-| `LastItemUserModifiedDate`  | string | Date (ISO format) an item was last modified by a User       |
-| `ListItemEntityTypeFullName`| string | `SP.List.listItemEntityTypeFullName` property               |
-| `Title`                     | string | The Title of the List/Library                               |
+| Property Name               | Type     | Description                                                 |
+| :-------------------------- | :------- | :---------------------------------------------------------- |
+| `AllowContentTypes`         | boolean  | Whether `Allow management of content types?` is enabled     |
+| `BaseTemplate`              | integer  | `SPListTemplateType` SP Base Template ID number - ex: `100` |
+| `BaseType`                  | integer  | SP Base Type ID number - ex: `0`                            |
+| `Created`                   | string   | Date the List/Library was created (ISO format)              |
+| `Description`               | string   | List/Library `Description`                                  |
+| `DraftVersionVisibility`    | number   | whether draft versions can be seen                          |
+| `EnableAttachments`         | boolean  | whether users can attach files to items in this list        |
+| `EnableFolderCreation`      | boolean  | whether users can create folders in this list/library       |
+| `EnableVersioning`          | boolean  | whether versioning is enabled for the items in this list    |
+| `ForceCheckout`             | boolean  | Whether Force checkout is enabled                           |
+| `Hidden`                    | boolean  | Whether List is hidden                                      |
+| `Id`                        | GUID     | The SP GUID of the List                                     |
+| `ItemCount`                 | number   | The number of Items in the List                             |
+| `LastItemDeletedDate`       | string   | Date (ISO format) an item was last deleted                  |
+| `LastItemModifiedDate`      | string   | Date (ISO format) an item was last modified                 |
+| `LastItemUserModifiedDate`  | string   | Date (ISO format) an item was last modified by a User       |
+| `ListItemEntityTypeFullName`| string   | `SP.List.listItemEntityTypeFullName` property               |
+| `Title`                     | string   | The Title of the List/Library                               |
 
 #### Sample Code
 ```javascript
 sprLib.list('Employees').info()
-.then(function(object){ console.table(object) });
+.then(function(object){ console.table([object]) });
 
 // RESULT:
 /*
