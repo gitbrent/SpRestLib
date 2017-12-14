@@ -43,7 +43,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 (function(){
 	// APP VERSION/BUILD
 	var APP_VER = "1.4.0-beta";
-	var APP_BLD = "20171204";
+	var APP_BLD = "20171213";
 	var DEBUG = false; // (verbose mode/lots of logging)
 	// ENUMERATIONS
 	var ENUM_PRINCIPALTYPES = {
@@ -873,7 +873,6 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 					// Add internal data objects
 					inObj.spArrData = [];
 					inObj.spObjData = {};
-					inObj.spObjMeta = {};
 				}
 
 				// STEP 3: Start data fetch Promise chain
@@ -889,13 +888,24 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 						};
 						var arrExpands = [], strExpands = "";
 
-						// STEP 1: Start building REST Endpoint URL
-						{
-							// If columns were provided, start a select query
-							if ( inObj.listCols && Object.keys(inObj.listCols).length > 0 ) objAjaxQuery.url += "?$select=";
+						// STEP 1: Deal with next/paging
+						if ( inObj.queryNext ) {
+							// REQ-CHECK:
+							if ( typeof inObj.queryNext !== 'object' || !inObj.queryNext.pID || !inObj.queryNext.top ) {
+								inObj.queryNext = null;
+								console.log('ERROR: queryNext should be an object with `pID` and `top`. EX: `{"pID":"200","top":"100"}`');
+							}
 						}
 
-						// STEP 2: Keep building REST Endpoint URL
+						// STEP 2: Start building REST Endpoint URL
+						{
+							// Next requires a special URL
+							if ( inObj.queryNext && inObj.listCols && Object.keys(inObj.listCols).length > 0 ) objAjaxQuery.url += '?%24skiptoken=Paged%3dTRUE%26p_ID%3d'+ inObj.queryNext.pID +'&%24select=';
+							// If columns were provided, start a select query
+							else if ( inObj.listCols && Object.keys(inObj.listCols).length > 0 ) objAjaxQuery.url += "?$select=";
+						}
+
+						// STEP 3: Keep building REST Endpoint URL
 						{
 							// A: Add columns
 							$.each(inObj.listCols, function(key,col){
@@ -913,22 +923,27 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 								}
 							});
 
-							// B: Add maxrows (if any) or use default b/c SP2013 default is a paltry 100 rows!
-							objAjaxQuery.url += (objAjaxQuery.url.indexOf('?$') > -1 ? '&':'?') + '$top=' + ( inObj.queryLimit ? inObj.queryLimit : APP_OPTS.maxRows );
-
-							// C: Add expand (if any)
+							// B: Add expand (if any)
 							if ( strExpands ) objAjaxQuery.url += (objAjaxQuery.url.indexOf('?$') > -1 ? '&':'?') + '$expand=' + strExpands;
 
-							// D: Add filter (if any)
+							// C: Add filter (if any)
 							if ( inObj.queryFilter ) {
 								objAjaxQuery.url += (objAjaxQuery.url.indexOf('?$') > -1 ? '&':'?') + '$filter=' + ( inObj.queryFilter.indexOf('%') == -1 ? encodeURI(inObj.queryFilter) : inObj.queryFilter );
 							}
 
-							// E: Add orderby (if any)
+							// D: Add orderby (if any)
 							if ( inObj.queryOrderby ) objAjaxQuery.url += (objAjaxQuery.url.indexOf('?$') > -1 ? '&':'?') + '$orderby=' + inObj.queryOrderby;
+
+							// E: Add maxrows / Next support (if any) or use default b/c SP2013 default is a paltry 100 rows!
+							if ( inObj.queryNext ) {
+								objAjaxQuery.url += '&p_ID='+ inObj.queryNext.pID +'&$top='+ inObj.queryNext.top;
+							}
+							else {
+								objAjaxQuery.url += (objAjaxQuery.url.indexOf('?$') > -1 ? '&':'?') + '$top=' + ( inObj.queryLimit ? inObj.queryLimit : APP_OPTS.maxRows );
+							}
 						}
 
-						// STEP 3: Send AJAX REST query
+						// STEP 4: Send AJAX REST query
 						sprLib.rest(objAjaxQuery)
 						.then(function(arrResults){
 							// A: Add all cols is none provided (aka:"fetch all")
@@ -968,7 +983,12 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 									}
 								}
 
-								// B.3: Capture query results
+								// B.3: Skip/Next/Paging support
+								if ( result.__next ) {
+									objRow['__next'] = result.__next;
+								}
+
+								// B.4: Capture query results
 								$.each(inObj.listCols, function(key,col){
 									var arrCol = [];
 									var colVal = "";
@@ -1035,13 +1055,12 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 									if ( col.getVersions ) objRow[key] = [];
 								});
 
-								// 4: Set data
+								// B.5: Set data
 								// 4.A: Result row
 								inObj.spArrData.push( objRow );
-								// 4.B: Create data object if we have ID (for lookups w/o spArrData.filter)
+								// B.5: Create data object if we have ID (for lookups w/o spArrData.filter)
 								if ( intID ) {
 									inObj.spObjData[intID] = objRow;
-									inObj.spObjMeta[intID] = ( result.__metadata || {} );
 								}
 							});
 
@@ -1407,12 +1426,11 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 		return new Promise(function(resolve, reject) {
 			// STEP 1: Options setup
 			inOpt = inOpt || {};
-			inOpt.cache = inOpt.cache || APP_OPTS.cache;
-			inOpt.metadata = inOpt.metadata || APP_OPTS.metadata;
-			inOpt.type = inOpt.restType || inOpt.type || "GET";
-			inOpt.url = (inOpt.restUrl || inOpt.url || APP_OPTS.baseUrl).replace(/\"/g, "'");
-			//
 			inOpt.spArrData = [];
+			inOpt.cache    = inOpt.cache    || APP_OPTS.cache;
+			inOpt.metadata = inOpt.metadata || APP_OPTS.metadata;
+			inOpt.type     = inOpt.restType || inOpt.type || "GET";
+			inOpt.url      = (inOpt.restUrl || inOpt.url || APP_OPTS.baseUrl).replace(/\"/g, "'");
 
 			// STEP 2: Setup vars
 			var arrExpands = [], strExpands = "";
@@ -1478,7 +1496,8 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 
 				// queryLimit: Add maxrows (b/c default in SP2013 is a paltry 100 rows)
 				// NOTE: Only applies to GET types (POST with this param are obv. invalid!)
-				if ( (inOpt.queryFilter || objAjaxQuery.url.toLowerCase().indexOf('$select') > -1) && inOpt.url.toLowerCase().indexOf('$top') == -1 && inOpt.type == "GET" ) {
+				if ( (inOpt.queryFilter || objAjaxQuery.url.toLowerCase().indexOf('$select') > -1)
+					&& inOpt.url.toLowerCase().indexOf('$top') == -1 && inOpt.type == "GET" ) {
 					objAjaxQuery.url += ( (objAjaxQuery.url.indexOf('?')>0?'&':'?')+'$top=' + ( inOpt.queryLimit ? inOpt.queryLimit : APP_OPTS.maxRows ) );
 				}
 
@@ -1671,6 +1690,21 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 
 						// TODO: 20171107: Add `etag` option to return etag (check to ensure it exists, then set prop value)
 						if ( objRow.__metadata && !inOpt.metadata ) delete objRow.__metadata;
+
+						// C: Support "next" functionality
+						if ( data.d.__next ) {
+							var objSkip = { pID:'', top:'' };
+							data.d.__next.split('&').forEach(function(str,idx){
+								if ( str.indexOf('p_ID%3d') > -1 ) {
+									objSkip.pID = str.split('&')[0].split('%3d')[2];
+								}
+								else if ( str.indexOf('%24top=') > -1 ) {
+									objSkip.top = str.substring(str.lastIndexOf('=')+1);
+								}
+							});
+							if ( objSkip.pID && objSkip.top ) objRow.__next = objSkip;
+						}
+
 						inOpt.spArrData.push( objRow );
 					});
 				}

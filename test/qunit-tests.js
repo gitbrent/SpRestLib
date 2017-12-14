@@ -2,7 +2,7 @@
  * NAME: qunit-test.js
  * DESC: tests for qunit-test.html (coded to my O365 Dev Site - YMMV)
  * AUTH: https://github.com/gitbrent/
- * DATE: Nov 21, 2017
+ * DATE: Dec 13, 2017
  *
  * HOWTO: Generate text tables for README etc.:
  * sprLib.list('Employees').getItems(['Id', 'Name', 'Badge_x0020_Number']).then(function(arrData){ console.log(getAsciiTableStr(arrData)) });
@@ -713,7 +713,7 @@ QUnit.module( "LIST > ITEM GET Methods" );
 			queryFilter: "Departments_x0020_Supported ne null"
 		})
 		.then(function(arrayResults){
-			assert.ok( Object.keys(arrayResults[0]).length == 3, "arrayResults[0] has length == 3: "+ Object.keys(arrayResults[0]).length );
+			assert.ok( Object.keys(arrayResults[0]).filter(key=>{return key.indexOf('_')!=0}).length == 3, "arrayResults[0] (no '__meta/__next') has length == 3: "+ Object.keys(arrayResults[0]).length );
 			assert.ok( !isNaN(arrayResults[0].depsArr[0].Id), "arrayResults[0].depsArr[0].Id is a number: "+ arrayResults[0].depsArr[0].Id );
 			assert.ok( getAsciiTableStr(arrayResults), `RESULTS:\n${getAsciiTableStr(arrayResults)}`);
 			done();
@@ -734,7 +734,7 @@ QUnit.module( "LIST > ITEM GET Methods" );
 			queryFilter: "Departments_x0020_Supported ne null"
 		})
 		.then(function(arrayResults){
-			assert.ok( Object.keys(arrayResults[0]).length == 3                  , "arrayResults[0] has length == 3: "+ Object.keys(arrayResults[0]).length );
+			assert.ok( Object.keys(arrayResults[0]).filter(key=>{return key.indexOf('_')!=0}).length == 3, "arrayResults[0] (no '__meta/__next') has length == 3: "+ Object.keys(arrayResults[0]).length );
 			assert.ok( (arrayResults[0].Manager.Title)                           , "arrayResults[0].Manager.Title exists: "+ JSON.stringify(arrayResults[0].Manager.Title) );
 			assert.ok( Array.isArray(arrayResults[0].Departments_x0020_Supported), "arrayResults[0].Dep[..]ted is an array: true" );
 			assert.ok( (arrayResults[0].Departments_x0020_Supported[0].Id)       , "arrayResults[0].Dep[..]ted[0].Id exists: "+ JSON.stringify(arrayResults[0].Departments_x0020_Supported[0].Id) );
@@ -768,7 +768,7 @@ QUnit.module( "LIST > ITEM GET Methods" );
 		])
 		.then(function(arrayResults){
 			var res1 = arrayResults[0];
-			assert.ok( Object.keys(res1[0]).length == 2, "res1[0] has length == 2: "+ Object.keys(res1[0]).length );
+			assert.ok( Object.keys(res1[0]).filter(key=>{return key.indexOf('_')!=0}).length == 2, "res1[0] (no '__meta/__next') has length == 2: "+ Object.keys(res1[0]).length );
 			assert.ok(
 				!isNaN( res1[0].Departments_x0020_Supported[0].Id ),
 				"res1[0].Departments_x0020_Supported[0].Id is a number: "+ res1[0].Departments_x0020_Supported[0].Id
@@ -781,7 +781,7 @@ QUnit.module( "LIST > ITEM GET Methods" );
 
 			// Empty Multi-Lookup fields should be an empty array `[]`
 			var res2 = arrayResults[1];
-			assert.ok( Object.keys(res2[0]).length == 2, "res2[0] has length == 2: "+ Object.keys(res2[0]).length );
+			assert.ok( Object.keys(res2[0]).filter(key=>{return key.indexOf('_')!=0}).length == 2, "res2[0] (no '__meta/__next') has length == 2: "+ Object.keys(res2[0]).length );
 			assert.ok(
 				(Array.isArray(res2[0].Departments_x0020_Supported) && res2[0].Departments_x0020_Supported.length == 0),
 				"res2[0].Departments_x0020_Supported == []: "+ res2[0].Departments_x0020_Supported
@@ -814,14 +814,14 @@ QUnit.module( "LIST > ITEM GET Methods" );
 		])
 		.then(function(arrayResults){
 			var res1 = arrayResults[0];
-			assert.ok( Object.keys(res1[0]).length == 2, "res1[0] has length == 2: "+ Object.keys(res1[0]).length );
+			assert.ok( Object.keys(res1[0]).filter(key=>{return key.indexOf('_')!=0}).length == 2, "res1[0] (no '__meta/__next') has length == 2: "+ Object.keys(res1[0]).length );
 			assert.ok( !isNaN(res1[0].Mentored_x0020_Team_x0020_Member[0].ID), "res1[0].Mentored_x0020_Team_x0020_Member[0].ID is a number: "+ res1[0].Mentored_x0020_Team_x0020_Member[0].ID );
 			assert.ok( (res1[0].Mentored_x0020_Team_x0020_Member[0].Title), "res1[0].Mentored_x0020_Team_x0020_Member[0].Title exists: "+ res1[0].Mentored_x0020_Team_x0020_Member[0].Title );
 			assert.ok( getAsciiTableStr(res1), `RESULTS:\n${getAsciiTableStr(res1)}`);
 
 			// Empty Person/Lookup fields should be null
 			var res2 = arrayResults[1];
-			assert.ok( Object.keys(res2[0]).length == 2, "res2[0] has length == 2: "+ Object.keys(res2[0]).length );
+			assert.ok( Object.keys(res2[0]).filter(key=>{return key.indexOf('_')!=0}).length == 2, "res2[0] (no '__meta/__next') has length == 2: "+ Object.keys(res2[0]).length );
 			assert.ok( (res2[0].Mentored_x0020_Team_x0020_Member == null), "res2[0].Mentored_x0020_Team_x0020_Member == null: "+ res2[0].Mentored_x0020_Team_x0020_Member );
 			assert.ok( getAsciiTableStr(res2), `RESULTS:\n${getAsciiTableStr(res2)}`);
 
@@ -877,9 +877,9 @@ QUnit.module( "LIST > ITEM GET Methods" );
 				queryLimit: 1
 			})
 			.then(function(arrayResults){
-				assert.ok( Object.keys(arrayResults[0]).length == 1, "arrayResults[0] has length == 1: "+ Object.keys(arrayResults[0]).length );
-				assert.ok( (arrayResults[0].Name)                  , "arrayResults[0].Name exists: "+ JSON.stringify(arrayResults[0].Name) );
-				assert.ok( getAsciiTableStr(arrayResults)          , `RESULTS:\n${getAsciiTableStr(arrayResults)}`);
+				assert.ok( Object.keys(arrayResults[0]).filter(key=>{return key.indexOf('_')!=0}).length == 1, "arrayResults[0] (no '__meta/__next') has length == 1: "+ Object.keys(arrayResults[0]).length );
+				assert.ok( (arrayResults[0].Name)        , "arrayResults[0].Name exists: "+ JSON.stringify(arrayResults[0].Name) );
+				assert.ok( getAsciiTableStr(arrayResults), `RESULTS:\n${getAsciiTableStr(arrayResults)}`);
 				done();
 			})
 			.catch(function(errorMessage){
@@ -905,9 +905,9 @@ QUnit.module( "LIST > ITEM GET Methods" );
 				queryLimit: 1
 			})
 			.then(function(arrayResults){
-				assert.ok( Object.keys(arrayResults[0]).length == 1, "arrayResults[0] has length == 1: "+ Object.keys(arrayResults[0]).length );
-				assert.ok( (arrayResults[0].Name)                  , "arrayResults[0].Name exists: "+ JSON.stringify(arrayResults[0].Name) );
-				assert.ok( getAsciiTableStr(arrayResults)          , `RESULTS:\n${getAsciiTableStr(arrayResults)}`);
+				assert.ok( Object.keys(arrayResults[0]).filter(key=>{return key.indexOf('_')!=0}).length == 1, "arrayResults[0] (no '__meta/__next') has length == 1: "+ Object.keys(arrayResults[0]).length );
+				assert.ok( (arrayResults[0].Name)        , "arrayResults[0].Name exists: "+ JSON.stringify(arrayResults[0].Name) );
+				assert.ok( getAsciiTableStr(arrayResults), `RESULTS:\n${getAsciiTableStr(arrayResults)}`);
 				done();
 			})
 			.catch(function(errorMessage){
@@ -1026,19 +1026,19 @@ QUnit.module( "LIST > ITEM GET Methods" );
 			.then(function(arrayResults){
 				var result = arrayResults[0];
 				assert.ok( true, "Negative Test: getVersions=false\n------------------" );
-				assert.ok( Object.keys(result[0]).length == 3, "result[0] has length == 43: "+ Object.keys(result[0]).length );
+				assert.ok( Object.keys(result[0]).filter(key=>{return key.indexOf('_')!=0}).length == 3, "result[0] (no '__meta/__next') has length == 3: "+ Object.keys(result[0]).length );
 				assert.ok( (true), "result[0].Versioned_x0020_Comments: "+ result[0].Versioned_x0020_Comments );
 				assert.ok( getAsciiTableStr(result), `RESULTS:\n${getAsciiTableStr(result)}` );
 
 				var result = arrayResults[1];
 				assert.ok( true, "TEST: getVersions with keyname-1\n------------------" );
-				assert.ok( Object.keys(result[0]).length == 1, "result[0] has length == 1: "+ Object.keys(result[0]).length );
+				assert.ok( Object.keys(result[0]).filter(key=>{return key.indexOf('_')!=0}).length == 1, "result[0] (no '__meta/__next') has length == 1: "+ Object.keys(result[0]).length );
 				assert.ok( (true), "result[0].appendText: "+ result[0].appendText );
 				assert.ok( getAsciiTableStr(result), `RESULTS:\n${getAsciiTableStr(result)}` );
 
 				var result = arrayResults[2];
 				assert.ok( true, "TEST: getVersions with keyname-2\n------------------" );
-				assert.ok( Object.keys(result[0]).length == 1, "result[0] has length == 1: "+ Object.keys(result[0]).length );
+				assert.ok( Object.keys(result[0]).filter(key=>{return key.indexOf('_')!=0}).length == 1, "result[0] (no '__meta/__next') has length == 1: "+ Object.keys(result[0]).length );
 				assert.ok( (true), "result[0].Versioned_x0020_Comments: "+ result[0].Versioned_x0020_Comments );
 				assert.ok( (true), "result[0].VC is Array(): "+ Array.isArray(result[0].Versioned_x0020_Comments) );
 				assert.ok( getAsciiTableStr(result), `RESULTS:\n${getAsciiTableStr(result)}` );
@@ -1155,7 +1155,7 @@ QUnit.module( "REST Methods" );
 			type: "GET"
 		})
 		.then(function(arrayResults){
-			assert.ok( Object.keys(arrayResults[0]).length == 3, "arrayResults[0] has length == 3: "+ Object.keys(arrayResults[0]).length );
+			assert.ok( Object.keys(arrayResults[0]).filter(key=>{return key.indexOf('_')!=0}).length == 3, "arrayResults[0] (no '__meta/__next') has length == 3: "+ Object.keys(arrayResults[0]).length );
 			assert.ok( (arrayResults[0].Manager.Title), "arrayResults[0].Manager.Title exists: "+ arrayResults[0].Manager.Title );
 			assert.ok( arrayResults.length == 5, "arrayResults has length == 5: "+ arrayResults.length );
 			assert.ok( getAsciiTableStr(arrayResults), `RESULTS:\n${getAsciiTableStr(arrayResults)}` );
@@ -1175,7 +1175,7 @@ QUnit.module( "REST Methods" );
 		})
 		.then(function(arrayResults){
 			// NOTE: Running your own select results in raw results (sprLib only parses `queryCols`). Ex: `{"Title":"Brent Ely"}`
-			assert.ok( Object.keys(arrayResults[0]).length == 2, "arrayResults[0] has length == 2: "+ Object.keys(arrayResults[0]).length );
+			assert.ok( Object.keys(arrayResults[0]).filter(key=>{return key.indexOf('_')!=0}).length == 2, "arrayResults[0] (no '__meta/__next') has length == 2: "+ Object.keys(arrayResults[0]).length );
 			assert.ok( arrayResults[0].Manager, "arrayResults[0].Manager: "+ arrayResults[0].Manager );
 			assert.ok( arrayResults.length == 5, "arrayResults has length == 5: "+ arrayResults.length );
 			assert.ok( getAsciiTableStr(arrayResults), `RESULTS:\n${getAsciiTableStr(arrayResults)}` );
