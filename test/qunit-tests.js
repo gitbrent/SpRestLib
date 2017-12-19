@@ -2,7 +2,7 @@
  * NAME: qunit-test.js
  * DESC: tests for qunit-test.html (coded to my O365 Dev Site - YMMV)
  * AUTH: https://github.com/gitbrent/
- * DATE: Dec 13, 2017
+ * DATE: Dec 18, 2017
  *
  * HOWTO: Generate text tables for README etc.:
  * sprLib.list('Employees').getItems(['Id', 'Name', 'Badge_x0020_Number']).then(function(arrData){ console.log(getAsciiTableStr(arrData)) });
@@ -1052,6 +1052,60 @@ QUnit.module( "LIST > ITEM GET Methods" );
 		});
 	});
 
+	QUnit.test("sprLib.getItems() 50: `__next` test", function(assert){
+		var done = assert.async();
+		var intLastID = 0;
+
+		sprLib.list('Departments').getItems({ listCols:['Id','Title'], queryOrderby:'ID', queryLimit:5 })
+		.then(arrayResults => {
+			assert.ok( Object.keys(arrayResults[0]).length == 3, "Object.keys(arrayResults[0]) length == 3: "+ Object.keys(arrayResults[0]).length );
+			assert.ok( (arrayResults[0].__next ), "arrayResults[0].__next exists: "+ JSON.stringify(arrayResults[0].__next) );
+			assert.ok( getAsciiTableStr(arrayResults) , `RESULTS:\n${getAsciiTableStr(arrayResults)}`);
+			//
+			intLastID = arrayResults[arrayResults.length-1].Id;
+			return sprLib.list('Departments').getItems({ queryNext:arrayResults[0].__next, listCols:['Id','Title'], queryOrderby:'ID', queryLimit:5 })
+		})
+		.then(arrayResults => {
+			assert.ok( intLastID+1 == arrayResults[0].Id, "intLastID+1 == arrayResults[0].Id: "+ (intLastID+1) +" ?=? "+ arrayResults[0].Id );
+			assert.ok( Object.keys(arrayResults[0]).length == 3, "Object.keys(arrayResults[0]) length == 3: "+ Object.keys(arrayResults[0]).length );
+			assert.ok( (arrayResults[0].__next ), "arrayResults[0].__next exists: "+ JSON.stringify(arrayResults[0].__next) );
+			assert.ok( getAsciiTableStr(arrayResults) , `RESULTS:\n${getAsciiTableStr(arrayResults)}`);
+			//
+			intLastID = arrayResults[arrayResults.length-1].Id;
+			return sprLib.list('Departments').getItems({ queryNext:arrayResults[0].__next, listCols:['Id','Title'], queryOrderby:'ID', queryLimit:5 })
+		})
+		.then(arrayResults => {
+			assert.ok( intLastID+1 == arrayResults[0].Id, "intLastID+1 == arrayResults[0].Id: "+ (intLastID+1) +" ?=? "+ arrayResults[0].Id );
+			assert.ok( Object.keys(arrayResults[0]).length == 3, "Object.keys(arrayResults[0]) length == 3: "+ Object.keys(arrayResults[0]).length );
+			assert.ok( (arrayResults[0].__next ), "arrayResults[0].__next exists: "+ JSON.stringify(arrayResults[0].__next) );
+			assert.ok( getAsciiTableStr(arrayResults) , `RESULTS:\n${getAsciiTableStr(arrayResults)}`);
+			//
+			intLastID = arrayResults[arrayResults.length-1].Id;
+			return sprLib.list('Departments').getItems({ queryNext:arrayResults[0].__next, listCols:['Id','Title'], queryOrderby:'ID', queryLimit:5 })
+		})
+		.then(arrayResults => {
+			assert.ok( intLastID+1 == arrayResults[0].Id, "intLastID+1 == arrayResults[0].Id: "+ (intLastID+1) +" ?=? "+ arrayResults[0].Id );
+			assert.ok( getAsciiTableStr(arrayResults) , `RESULTS:\n${getAsciiTableStr(arrayResults)}`);
+			//
+			done();
+		})
+		.catch(function(errorMessage){
+			assert.ok( (false), errorMessage );
+			done();
+		});
+	});
+
+	/*
+	sprLib.list('Departments')
+	.getItems({
+		listCols:['Id', 'Title'],
+		queryOrderby: 'Id',
+		querySkip: 5
+	})
+	.then(function(arrayResults){
+		console.log( arrayResults );
+	});
+	*/
 
 	// JUNK TESTS:
 	QUnit.test("sprLib.getItems() 99: Junk/Empty .list() param test", function(assert){
@@ -1070,19 +1124,6 @@ QUnit.module( "LIST > ITEM GET Methods" );
 			});
 		});
 	});
-
-	// TODO: querySkip
-	/*
-	sprLib.list('Departments')
-	.getItems({
-		listCols:['Id', 'Title'],
-		queryOrderby: 'Id',
-		querySkip: 5
-	})
-	.then(function(arrayResults){
-		console.log( arrayResults );
-	});
-	*/
 }
 
 // ================================================================================================

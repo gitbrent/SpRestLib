@@ -43,7 +43,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 (function(){
 	// APP VERSION/BUILD
 	var APP_VER = "1.4.0-beta";
-	var APP_BLD = "20171213";
+	var APP_BLD = "20171218";
 	var DEBUG = false; // (verbose mode/lots of logging)
 	// ENUMERATIONS
 	var ENUM_PRINCIPALTYPES = {
@@ -924,15 +924,15 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 							});
 
 							// B: Add expand (if any)
-							if ( strExpands ) objAjaxQuery.url += (objAjaxQuery.url.indexOf('?$') > -1 ? '&':'?') + '$expand=' + strExpands;
+							if ( strExpands ) objAjaxQuery.url += (objAjaxQuery.url.indexOf('?') > -1 ? '&':'?') + '$expand=' + strExpands;
 
 							// C: Add filter (if any)
 							if ( inObj.queryFilter ) {
-								objAjaxQuery.url += (objAjaxQuery.url.indexOf('?$') > -1 ? '&':'?') + '$filter=' + ( inObj.queryFilter.indexOf('%') == -1 ? encodeURI(inObj.queryFilter) : inObj.queryFilter );
+								objAjaxQuery.url += (objAjaxQuery.url.indexOf('?') > -1 ? '&':'?') + '$filter=' + ( inObj.queryFilter.indexOf('%') == -1 ? encodeURI(inObj.queryFilter) : inObj.queryFilter );
 							}
 
 							// D: Add orderby (if any)
-							if ( inObj.queryOrderby ) objAjaxQuery.url += (objAjaxQuery.url.indexOf('?$') > -1 ? '&':'?') + '$orderby=' + inObj.queryOrderby;
+							if ( inObj.queryOrderby ) objAjaxQuery.url += (objAjaxQuery.url.indexOf('?') > -1 ? '&':'?') + '$orderby=' + inObj.queryOrderby;
 
 							// E: Add maxrows / Next support (if any) or use default b/c SP2013 default is a paltry 100 rows!
 							if ( inObj.queryNext ) {
