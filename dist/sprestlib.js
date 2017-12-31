@@ -27,23 +27,13 @@
 |*|  SOFTWARE.
 \*/
 
-/*
-DEVLIST:
-- Add `$skip` (https://sharepoint.stackexchange.com/questions/45719/paging-using-rest-odata-with-sp-2013)
--- @see: https://dev.office.com/sharepoint/docs/sp-add-ins/use-odata-query-operations-in-sharepoint-rest-requests#page-through-returned-items
-? SOLN: use new opts: `skipId` & `skipLimit`
-? SOLN: then we can construct: "items?$skiptoken=Paged=TRUE&p_ID="+ 2 +"&$select=ID&$orderby=ID&$top=" + 2
-
- - Add `Intl` (i18n) support (its supported in IE11!!) - Date and Currency formats are awesome (add Direction for our R->L users too?)
-*/
-
 // Detect Node.js
 var NODEJS = ( typeof module !== 'undefined' && module.exports );
 
 (function(){
 	// APP VERSION/BUILD
 	var APP_VER = "1.4.0-beta";
-	var APP_BLD = "20171218";
+	var APP_BLD = "20171231";
 	var DEBUG = false; // (verbose mode/lots of logging)
 	// ENUMERATIONS
 	var ENUM_PRINCIPALTYPES = {
@@ -757,10 +747,11 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 		* |---------------|---------|-------|-------------------|----------------------|
 		* | `listCols`    | array   | no    | array of column names in OData style | `listCols: ['Name', 'Badge_x0020_Number']` |
 		* | `listCols`    | object  | no    | object with column properties | `listCols: { badge: { dataName:'Badge_x0020_Number' } }` |
-		* | `metadata`    | boolean | no    | whether to return `__metadata` | `metadata: true }` |
+		* | `metadata`    | boolean | no    | whether to return `__metadata` | `metadata: true` |
 		* | `queryFilter` | string  | no    | OData style filter    | `ID eq 1`, `Badge_x0020_Number eq 1234` |
-		* | `queryOrderby`| string  | no    | OData style order by  | `Badge_x0020_Number`, `Badge_x0020_Number desc` [asc sort is SP2013 default] |
 		* | `queryLimit`  | number  | no    | OData style row limit | `10` would limit number of rows returned to 10 |
+		* | `queryNext`   | object  | no    | Next/Skip options (paging) | `{ prevId:5000, maxItems:1000 }` |
+		* | `queryOrderby`| string  | no    | OData style order by  | `Badge_x0020_Number`, `Badge_x0020_Number desc` [asc sort is SP2013 default] |
 		*
 		* @example - no args - omitting listCols/arguments means "return all" (mirrors SP behavior)
 		* sprLib.list('Employees').getItems()
@@ -891,16 +882,16 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 						// STEP 1: Deal with next/paging
 						if ( inObj.queryNext ) {
 							// REQ-CHECK:
-							if ( typeof inObj.queryNext !== 'object' || !inObj.queryNext.pID || !inObj.queryNext.top ) {
+							if ( typeof inObj.queryNext !== 'object' || !inObj.queryNext.prevId || !inObj.queryNext.maxItems ) {
 								inObj.queryNext = null;
-								console.log('ERROR: queryNext should be an object with `pID` and `top`. EX: `{"pID":"200","top":"100"}`');
+								console.log('ERROR: queryNext should be an object with `prevId` and `maxItems`. EX: `{"prevId":200,"maxItems":100}`');
 							}
 						}
 
 						// STEP 2: Start building REST Endpoint URL
 						{
 							// Next requires a special URL
-							if ( inObj.queryNext && inObj.listCols && Object.keys(inObj.listCols).length > 0 ) objAjaxQuery.url += '?%24skiptoken=Paged%3dTRUE%26p_ID%3d'+ inObj.queryNext.pID +'&%24select=';
+							if ( inObj.queryNext && inObj.listCols && Object.keys(inObj.listCols).length > 0 ) objAjaxQuery.url += '?%24skiptoken=Paged%3dTRUE%26p_ID%3d'+ inObj.queryNext.prevId +'&%24select=';
 							// If columns were provided, start a select query
 							else if ( inObj.listCols && Object.keys(inObj.listCols).length > 0 ) objAjaxQuery.url += "?$select=";
 						}
@@ -936,7 +927,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 
 							// E: Add maxrows / Next support (if any) or use default b/c SP2013 default is a paltry 100 rows!
 							if ( inObj.queryNext ) {
-								objAjaxQuery.url += '&p_ID='+ inObj.queryNext.pID +'&$top='+ inObj.queryNext.top;
+								objAjaxQuery.url += '&p_ID='+ inObj.queryNext.prevId +'&$top='+ inObj.queryNext.maxItems;
 							}
 							else {
 								objAjaxQuery.url += (objAjaxQuery.url.indexOf('?$') > -1 ? '&':'?') + '$top=' + ( inObj.queryLimit ? inObj.queryLimit : APP_OPTS.maxRows );
@@ -1693,16 +1684,16 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 
 						// C: Support "next" functionality
 						if ( data.d.__next ) {
-							var objSkip = { pID:'', top:'' };
+							var objSkip = { prevId:'', maxItems:'' };
 							data.d.__next.split('&').forEach(function(str,idx){
 								if ( str.indexOf('p_ID%3d') > -1 ) {
-									objSkip.pID = str.split('&')[0].split('%3d')[2];
+									objSkip.prevId = str.split('&')[0].split('%3d')[2];
 								}
 								else if ( str.indexOf('%24top=') > -1 ) {
-									objSkip.top = str.substring(str.lastIndexOf('=')+1);
+									objSkip.maxItems = str.substring(str.lastIndexOf('=')+1);
 								}
 							});
-							if ( objSkip.pID && objSkip.top ) objRow.__next = objSkip;
+							if ( objSkip.prevId && objSkip.maxItems ) objRow.__next = objSkip;
 						}
 
 						inOpt.spArrData.push( objRow );

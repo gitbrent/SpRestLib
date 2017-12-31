@@ -334,14 +334,16 @@ Returns:
 * `__metadata` is always included in the results array (to enable further operations, use of Etag, etc.)
 
 #### Options
-| Option        | Type     | Default   | Description           | Possible Values / Returns           |
-| :------------ | :------- | :-------- | :-------------------- | :---------------------------------- |
-| `listCols`    | array *OR* object |  | column names to be returned | array of column names *OR* object (see below) |
-| `cache`       | boolean  | `false`   | cache settings        | Ex:`cache: true` |
-| `metadata`    | boolean  | `false`   | whether to return `__metadata` | Ex:`metadata: true` |
-| `queryFilter` | string   |           | query filter          | utilizes OData style [Query Operators](https://msdn.microsoft.com/en-us/library/office/fp142385.aspx#Anchor_7) |
-| `queryLimit`  | string   |           | max items to return   | 1-*N* |
-| `queryOrderby`| string   |           | column(s) to order by | Ex:`queryOrderby:Name` |
+| Option        | Type     | Default   | Description                         | Possible Values / Returns                  |
+| :------------ | :------- | :-------- | :---------------------------------- | :----------------------------------------- |
+| `listCols`    | array    |           | array of column names (OData style) | `listCols: ['Name', 'Badge_x0020_Number']` |
+| `listCols`    | object   |           | object with column properties       | `listCols: { badge: { dataName:'Badge_x0020_Number' } }` |
+| `cache`       | boolean  | `false`   | cache settings                      | Ex:`cache: true` |
+| `metadata`    | boolean  | `false`   | whether to return `__metadata`      | Ex:`metadata: true` |
+| `queryFilter` | string   |           | query filter                        | utilizes OData style [Query Operators](https://msdn.microsoft.com/en-us/library/office/fp142385.aspx#Anchor_7) |
+| `queryLimit`  | string   |           | max items to return                    | 1-*N* |
+| `queryNext`   | object   |           | object with Next/Skip options (paging) | `prevId` (1-N), `maxItems` (1-5000) Ex:`{ prevId:5000, maxItems:1000 }` |
+| `queryOrderby`| string   |           | column(s) to order by                  | Ex:`queryOrderby:Name` |
 
 NOTE: Omitting `listCols` will result in all List columns being returned (mimic SharePoint default behavior)
 
@@ -415,6 +417,42 @@ sprLib.list('Employees').getItems({
 |   339 |  1497924 | ["Not here yet", "Emp created"]    | <a href="/sites/dev/Lists/Employees/DispForm.aspx?ID=339">View Emp</a> |
 |   350 |  1497927 | ["Vice President promotion"]       | <a href="/sites/dev/Lists/Employees/DispForm.aspx?ID=350">View Emp</a> |
 '--------------------------------------------------------------------------------------------------------------------------------'
+*/
+```
+
+```javascript
+// EX: Using paging/next/skip
+
+// Anytime there are more results than what was returned, an `__next` object will be included. Keep passing these in subsequent queries to get all results.
+sprLib.list('Departments').getItems({ listCols:['Id','Created'], queryLimit:5 });
+// RESULT:
+/*
+.-----------------------------------------------------------.
+|            __next             | Id |       Created        |
+|-------------------------------|----|----------------------|
+| {"prevId":"5","maxItems":"5"} |  1 | 2016-12-04T21:58:47Z |
+| {"prevId":"5","maxItems":"5"} |  2 | 2016-12-04T21:59:07Z |
+| {"prevId":"5","maxItems":"5"} |  3 | 2016-12-04T21:59:20Z |
+| {"prevId":"5","maxItems":"5"} |  4 | 2016-12-04T21:59:36Z |
+| {"prevId":"5","maxItems":"5"} |  5 | 2016-12-04T21:59:49Z |
+'-----------------------------------------------------------'
+*/
+
+sprLib.list('Departments').getItems({
+    listCols:  ['Id','Created'],
+    queryNext: {'prevId':5, 'maxItems':5}
+});
+// RESULT:
+/*
+.------------------------------------------------------------.
+|             __next             | Id |       Created        |
+|--------------------------------|----|----------------------|
+| {"prevId":"10","maxItems":"5"} |  6 | 2017-06-01T03:19:01Z |
+| {"prevId":"10","maxItems":"5"} |  7 | 2017-12-14T05:00:10Z |
+| {"prevId":"10","maxItems":"5"} |  8 | 2017-12-14T05:00:34Z |
+| {"prevId":"10","maxItems":"5"} |  9 | 2017-12-14T05:00:59Z |
+| {"prevId":"10","maxItems":"5"} | 10 | 2017-12-14T05:01:15Z |
+'------------------------------------------------------------'
 */
 ```
 
