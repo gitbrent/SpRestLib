@@ -2,7 +2,7 @@
  * NAME: qunit-test.js
  * DESC: tests for qunit-test.html (coded to my O365 Dev Site - YMMV)
  * AUTH: https://github.com/gitbrent/
- * DATE: Dec 18, 2017
+ * DATE: Dec 31, 2017
  *
  * HOWTO: Generate text tables for README etc.:
  * sprLib.list('Employees').getItems(['Id', 'Name', 'Badge_x0020_Number']).then(function(arrData){ console.log(getAsciiTableStr(arrData)) });
@@ -1052,7 +1052,7 @@ QUnit.module( "LIST > ITEM GET Methods" );
 		});
 	});
 
-	QUnit.test("sprLib.getItems() 50: `__next` test", function(assert){
+	QUnit.test("sprLib.getItems() 50: `queryNext` with return values", function(assert){
 		var done = assert.async();
 		var intLastID = 0;
 
@@ -1095,17 +1095,39 @@ QUnit.module( "LIST > ITEM GET Methods" );
 		});
 	});
 
-	/*
-	sprLib.list('Departments')
-	.getItems({
-		listCols:['Id', 'Title'],
-		queryOrderby: 'Id',
-		querySkip: 5
-	})
-	.then(function(arrayResults){
-		console.log( arrayResults );
+	QUnit.test("sprLib.getItems() 51: `queryNext` using options", function(assert){
+		var done = assert.async();
+		var intMax = 5;
+
+		// TEST:
+		Promise.resolve()
+		.then(function(){
+			return sprLib.list('Departments').getItems({ listCols:'Id', queryOrderby:'ID' });
+		})
+		.then(function(arrayResults){
+			var numPrevId = arrayResults[0].Id;
+
+			sprLib.list('Departments')
+			.getItems({
+				listCols    : 'Id',
+				queryOrderby: 'Id',
+				queryNext   : { prevId:numPrevId, maxItems:intMax }
+			})
+			.then(function(arrayResults){
+				assert.ok( arrayResults[0].Id > numPrevId, 'arrayResults[0].Id > numPrevId: '+ arrayResults[0].Id+'/'+numPrevId );
+				assert.ok( arrayResults.length == intMax, 'arrayResults.length == intMax:'+arrayResults.length );
+				assert.ok( arrayResults[0].__next, 'arrayResults[0].__next: '+ JSON.stringify(arrayResults[0].__next) );
+				assert.ok( arrayResults[0].__next.prevId == arrayResults[arrayResults.length-1].Id, 'arrayResults[0].__next.prevId == arrayResults[arrayResults.length-1].Id: '+ arrayResults[0].__next.prevId+'/'+arrayResults[arrayResults.length-1].Id );
+				assert.ok( arrayResults[0].__next.maxItems == intMax, 'arrayResults[0].__next.maxItems == intMax: '+ arrayResults[0].__next.maxItems+'/'+intMax );
+				assert.ok( getAsciiTableStr(arrayResults) , `RESULTS:\n${getAsciiTableStr(arrayResults)}`);
+				done();
+			})
+		})
+		.catch(function(errorMessage){
+			assert.ok( (false), errorMessage );
+			done();
+		});
 	});
-	*/
 
 	// JUNK TESTS:
 	QUnit.test("sprLib.getItems() 99: Junk/Empty .list() param test", function(assert){
