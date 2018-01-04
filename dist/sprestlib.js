@@ -6,7 +6,7 @@
 |*|
 |*|  This library is released under the MIT Public License (MIT)
 |*|
-|*|  SpRestLib (C) 2016-2017 Brent Ely -- https://github.com/gitbrent
+|*|  SpRestLib (C) 2016-2018 Brent Ely -- https://github.com/gitbrent
 |*|
 |*|  Permission is hereby granted, free of charge, to any person obtaining a copy
 |*|  of this software and associated documentation files (the "Software"), to deal
@@ -33,7 +33,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 (function(){
 	// APP VERSION/BUILD
 	var APP_VER = "1.4.0-beta";
-	var APP_BLD = "20171231";
+	var APP_BLD = "20180103";
 	var DEBUG = false; // (verbose mode/lots of logging)
 	// ENUMERATIONS
 	var ENUM_PRINCIPALTYPES = {
@@ -605,7 +605,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 
 		// CASE 2: Act as a SETTER
 		APP_OPTS.baseUrl = inStr;
-		if (DEBUG) console.log('APP_OPTS.baseUrl set to: '+inStr);
+		if (DEBUG) console.log('APP_OPTS.baseUrl = '+APP_OPTS.baseUrl);
 	}
 
 	// API: LIST (CRUD + getItems)
@@ -642,8 +642,8 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 		}
 
 		/**
-		* Used after `.create()` if no {type} was provided (enables us to continue using the object in subsequnt operations)
-		* Used internally when users send CRUD methods objects without `__metadata.type`
+		* Used after `.create()` if no {type} was provided (enables ontinued use of the object in subsequent operations)
+		* Used internally when users send CRUD methods objects without a `__metadata.type` value
 		*/
 		function getListItemType() {
 			return new Promise(function(resolve, reject) {
@@ -813,7 +813,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 				if ( inObj.queryFilter ) inObj.queryFilter = inObj.queryFilter.replace(/\"/gi,"'");
 
 				// STEP 2: Parse options/cols / Set Internal Arrays
-				// NOTE: Duplicate col names dont bother SP, so there's no test/fix for that condition
+				// NOTE: Duplicate col names dont bother SP, so there is no test/fix for that condition below
 				{
 					// CASE 1: Option: single string col name
 					if ( typeof inObj === 'string' || typeof inObj === 'number' ) {
