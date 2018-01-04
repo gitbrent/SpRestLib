@@ -1700,7 +1700,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 					});
 				}
 				// EX..: data.d or data is an [object]: { listTitle:'Game Systems', numberOfItems:25 }
-				else if ( (data && data.d ? data.d : (data ? data : false)) && typeof (data.d || data) === 'object' ) {
+				else if ( (data && data.d ? data.d : (data ? data : false)) && typeof (data.d || data) === 'object' && Object.keys(data.d || data).length > 0 ) {
 					var objRow = {};
 
 					$.each((data.d || data), function(key,result){ objRow[key] = result; });
