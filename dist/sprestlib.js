@@ -33,7 +33,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 (function(){
 	// APP VERSION/BUILD
 	var APP_VER = "1.4.0-beta";
-	var APP_BLD = "20180103";
+	var APP_BLD = "20180104";
 	var DEBUG = false; // (verbose mode/lots of logging)
 	// ENUMERATIONS
 	var ENUM_PRINCIPALTYPES = {
@@ -866,7 +866,14 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 					inObj.spObjData = {};
 				}
 
-				// STEP 3: Start data fetch Promise chain
+				// STEP 3: Check for `getVersions` option, as we need to force 'inObj.metadata' to true to get the List GUID of owssvr query next
+				if ( typeof inObj.listCols === 'object' && Object.keys(inObj.listCols).length > 0 ) {
+					$.each(inObj.listCols, function(key,obj){
+						if ( obj.getVersions ) inObj.metadata = true;
+					});
+				}
+
+				// STEP 4: Start data fetch Promise chain
 				Promise.resolve()
 				.then(function(){
 					return new Promise(function(resolve, reject) {
@@ -1099,8 +1106,9 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 											var rowNote = ($(row).attr('ows_'+objCol.dataName) || '');
 											if ( rowNote ) {
 												if ( rowNote != prvComm ) {
+													// IE11: Convert date to ISO-8601 format or IE will fail using date like '2017-01-02 12:34:55'
 													inObj.spObjData[intID][objCol.keyName].push({
-														verDate: new Date($(row).attr('ows_Modified')).toISOString(),
+														verDate: new Date($(row).attr('ows_Modified').replace(' ','T')).toISOString(),
 														verName: $(row).attr('ows_Editor').substring($(row).attr('ows_Editor').indexOf("#")+1),
 														verText: rowNote
 													});
@@ -1111,7 +1119,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 													// (so author and date are correct - older ones are ModifiedBy folks who Modified *OTHER* fields! - oldest is true author!)
 													inObj.spObjData[intID][objCol.keyName].pop();
 													inObj.spObjData[intID][objCol.keyName].push({
-														verDate: new Date($(row).attr('ows_Modified')).toISOString(),
+														verDate: new Date($(row).attr('ows_Modified').replace(' ','T')).toISOString(),
 														verName: $(row).attr('ows_Editor').substring($(row).attr('ows_Editor').indexOf("#")+1),
 														verText: rowNote
 													});
@@ -1565,13 +1573,13 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 				});
 			})
 			.then(function(data){
-				// A: Parse if needed
+				// A: Parse string to JSON if needed
 				data = ( typeof data === 'string' && data.indexOf('{') == 0 ? JSON.parse(data) : data );
 
-				// If result is a single object, make it an array for pasing below (Ex: '_api/site/Owner/Id')
+				// B: If result is a single object, make it an array for pasing below (Ex: '_api/site/Owner/Id')
 				var arrObjResult = ( data && data.d && !data.d.results && typeof data.d === 'object' && Object.keys(data.d).length > 0 ? [data.d] : [] );
 
-				// B: Iterate over results
+				// C: Iterate over results
 				// NOTE: Depending upon which REST endpoint used, SP can return results in various forms (!)
 				// EX..: data.d.results is an [] of {}: [ {Title:'Brent Ely', Email:'Brent.Ely@microsoft.com'}, {}, {} ]
 				// NOTE: Ensure results are an object because SP will return an entire HTML page as a result in some error cases!
@@ -1708,8 +1716,14 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 					if ( objRow.__metadata && !inOpt.metadata ) delete objRow.__metadata;
 					inOpt.spArrData.push( objRow );
 				}
+				else {
+					// IE11: When using jQuery AJAX for AppendText/Versions/getVersions, the `data` result must be parsed directly (no conversion) using `$(data).find("z:row")`
+					if ( objAjaxQuery.url.toLowerCase().indexOf('owssvr.dll') > -1 && objAjaxQuery.url.toLowerCase().indexOf('includeversions=true') > -1 ) {
+						inOpt.spArrData.push( data );
+					}
+				}
 
-				// C:
+				// D:
 				resolve( inOpt.spArrData );
 			})
 			.catch(function(strErr){
