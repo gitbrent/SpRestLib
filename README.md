@@ -328,7 +328,7 @@ However, there are occasions when reading from other locations - like a subsite 
 parameter to specify the desired location.
 
 #### Options: requestDigest
-By default, the request digest is set to the `#__REQUESTDIGEST` form element value if one exists (e.g.: WebPart in an .aspx page).
+By default, the request digest is set to the `<input id="__REQUESTDIGEST">` form element value if one exists (e.g.: WebPart in an .aspx page).
 Security tokens are required for certain SharePoint operations like creating or updating List items. If your application is not inside
 a SharePoint .aspx page, you will need to obtain the digest value and pass it when it's needed.
 
