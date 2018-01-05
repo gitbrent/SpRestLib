@@ -318,9 +318,9 @@ Syntax: `sprLib.list({ name:name, baseUrl:path, requestDigest:formDigestValue })
 ### Options
 | Prop            | Type   | Required? | Description                              | Possible Values                |
 | :-------------- | :----- | :-------- | :--------------------------------------- | :----------------------------- |
-| `name`          | string |     Y     | list name or guid                        | Ex:`{'name': 'Employees'}`     |
+| `name`          | string |     Y     | list name or GUID                        | Ex:`{'name': 'Employees'}`     |
 | `baseUrl`       | string |           | data to be sent                          | Ex:`{'baseUrl': '/sites/dev'}` |
-| `requestDigest` | string |           | `X-RequestDigest` header (SP Auth Token) | Ex:`'requestDigest':'ABC123'`  |
+| `requestDigest` | string |           | the request form digest security token   | Ex:`'requestDigest':'ABC123'`  |
 
 #### Options: baseUrl
 By default, the base URL is set to where the host webpart is located (`_spPageContextInfo.webServerRelativeUrl`).
