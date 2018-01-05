@@ -51,9 +51,11 @@ using the JavaScript SharePoint App Model.
     - [Options](#options)
     - [Examples](#examples)
   - [List/Library Methods (`SPList`)](#listlibrary-methods-splist)
-    - [BaseUrl](#baseurl)
+    - [Options](#options-1)
+      - [Options: baseUrl](#options-baseurl)
+      - [Options: requestDigest](#options-requestdigest)
     - [Get Items](#get-items)
-      - [Options](#options-1)
+      - [Options](#options-2)
       - [listCols Object](#listcols-object)
       - [listCols dataFunc Option](#listcols-datafunc-option)
       - [Sample Code](#sample-code)
@@ -257,7 +259,7 @@ Returns: Array of objects containing name/value pairs
 | Option        | Type    | Default     | Description           | Possible Values / Returns           |
 | :------------ | :------ | :---------- | :-------------------- | :---------------------------------- |
 | `url`         | string  | current url | REST API endpoint     | full or relative url. See: [SharePoint REST API](https://msdn.microsoft.com/en-us/library/office/dn268594.aspx) |
-| `type`        | string  | `GET`       | rest type             | `GET` or `POST`. Ex:`type: 'POST'` |
+| `type`        | string  | `GET`       | rest operation type   | `GET` or `POST`. Ex:`type: 'POST'` |
 | `data`        | string  |             | data to be sent       | Ex:`data: {'type': 'SP.FieldDateTime'}` |
 | `cache`       | boolean | `false`     | cache settings        | Ex:`cache: true` |
 | `contentType` | string  | `application/json` | request header content-type | Only used with `type:'POST'` |
@@ -314,16 +316,27 @@ Syntax: `sprLib.list({ name:name, baseUrl:path })`
 Syntax: `sprLib.list({ name:name, baseUrl:path, requestDigest:formDigestValue })`  
 
 ### Options
-| Prop            | Type   | Required? | Default                      | Description           | Possible Values                               |
-| :-------------- | :----- | :-------- | :--------------------------- | :-------------------- | :----------------------------------- |
-| `name`          | string | Y         |                              | list name or guid     | Ex:`{'name': 'Employees'}`     |
-| `baseUrl`       | string |           | (current location)           | data to be sent       | Ex:`{'baseUrl': '/sites/dev'}` |
-| `requestDigest` | string |           | `$('#__REQUESTDIGEST`).val() | `X-RequestDigest` header value (SP Auth) | Ex:`{'requestDigest': 'ABC123'}` |
+| Prop            | Type   | Required? | Description                              | Possible Values                |
+| :-------------- | :----- | :-------- | :--------------------------------------- | :----------------------------- |
+| `name`          | string |     Y     | list name or guid                        | Ex:`{'name': 'Employees'}`     |
+| `baseUrl`       | string |           | data to be sent                          | Ex:`{'baseUrl': '/sites/dev'}` |
+| `requestDigest` | string |           | `X-RequestDigest` header (SP Auth Token) | Ex:`'requestDigest':'ABC123'`  |
 
-#### Options: BaseUrl
+#### Options: baseUrl
 By default, the base URL is set to where the host webpart is located (`_spPageContextInfo.webServerRelativeUrl`).
 However, there are occasions when reading from other locations - like a subsite - is desired. Use the `baseUrl`
 parameter to specify the desired location.
+
+#### Options: requestDigest
+By default, the request digest is set to the `#__REQUESTDIGEST` form element value if one exists (e.g.: WebPart in an .aspx page).
+Security tokens are required for certain SharePoint operations like creating or updating List items. If your application is not inside
+a SharePoint .aspx page, you will need to obtain the digest value and pass it when it's needed.
+
+Example: How to obtain a FormDigestValue
+```javascript
+sprLib.rest({ url:'_api/contextinfo', type:'POST' })
+.then(arr => console.log(arr[0].GetContextWebInformation.FormDigestValue) );
+```
 
 ### Get Items
 Syntax:  
