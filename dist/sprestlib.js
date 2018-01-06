@@ -33,7 +33,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 (function(){
 	// APP VERSION/BUILD
 	var APP_VER = "1.4.0-beta";
-	var APP_BLD = "20180104";
+	var APP_BLD = "20180105";
 	var DEBUG = false; // (verbose mode/lots of logging)
 	// ENUMERATIONS
 	var ENUM_PRINCIPALTYPES = {
@@ -610,34 +610,38 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 
 	// API: LIST (CRUD + getItems)
 	/**
-	* @param `inOpts` (string) - required - List Name or List GUID
+	* @param `inOpt` (string) - required - ListName or ListGUID
 	* @example - string - sprLib.list('Documents');
 	*
-	* @param `inOpts` (object) - required - { `name`, [`baseUrl`] }
+	* @param `inOpt` (object) - required - { `name`, [`baseUrl`] }
 	* @example - string - sprLib.list({ name:'23846527-228a-41a2-b5c1-7b55b6fea1a3' });
+	* @example - string - sprLib.list({ guid:'23846527-228a-41a2-b5c1-7b55b6fea1a3' });
 	* @example - string - sprLib.list({ name:'Documents' });
 	* @example - string - sprLib.list({ name:'Documents', baseUrl:'/sites/dev/sandbox' });
 	* @example - string - sprLib.list({ name:'Documents', baseUrl:'/sites/dev/sandbox', requestDigest:'8675309,05 Dec 2017 01:23:45 -0000' });
 	*/
-	sprLib.list = function list(inOpts) {
+	sprLib.list = function list(inOpt) {
 		var _newList = {};
 		var _urlBase = "_api/lists";
 		var _requestDigest = $("#__REQUESTDIGEST").val();
+		inOpt = inOpt || {};
+		// Allow `guid` as a synonym for `name` per user request
+		if ( inOpt.guid ) inOpt.name = inOpt.guid;
 
 		// A: Param check
-		if ( inOpts && typeof inOpts === 'string' ) {
+		if ( inOpt && typeof inOpt === 'string' ) {
 			// DESIGN: Accept either [ListName] or [ListGUID]
-			_urlBase += ( gRegexGUID.test(inOpts) ? "(guid'"+ inOpts +"')" : "/getbytitle('"+ inOpts.replace(/\s/gi,'%20') +"')" );
+			_urlBase += ( gRegexGUID.test(inOpt) ? "(guid'"+ inOpt +"')" : "/getbytitle('"+ inOpt.replace(/\s/gi,'%20') +"')" );
 		}
-		else if ( inOpts && typeof inOpts === 'object' && Object.keys(inOpts).length > 0 && inOpts.name ) {
-			_urlBase = (inOpts.baseUrl ? inOpts.baseUrl.replace(/\/+$/,'')+'/_api/lists' : _urlBase);
-			_urlBase += ( gRegexGUID.test(inOpts.name) ? "(guid'"+ inOpts.name +"')" : "/getbytitle('"+ inOpts.name.replace(/\s/gi,'%20') +"')" );
-			if ( inOpts.requestDigest ) _requestDigest = inOpts.requestDigest;
+		else if ( inOpt && typeof inOpt === 'object' && Object.keys(inOpt).length > 0 && inOpt.name ) {
+			_urlBase = (inOpt.baseUrl ? inOpt.baseUrl.replace(/\/+$/,'')+'/_api/lists' : _urlBase);
+			_urlBase += ( gRegexGUID.test(inOpt.name) ? "(guid'"+ inOpt.name +"')" : "/getbytitle('"+ inOpt.name.replace(/\s/gi,'%20') +"')" );
+			if ( inOpt.requestDigest ) _requestDigest = inOpt.requestDigest;
 		}
 		else {
 			console.error("ERROR: A 'listName' or 'listGUID' is required! EX: `sprLib.list('Employees')` or `sprLib.list({ name:'Employees' })`");
 			console.error('ARGS:');
-			console.error(inOpts);
+			console.error(inOpt);
 			return null;
 		}
 
@@ -2327,10 +2331,10 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 	}
 
 	// API: NODEJS: Setup
-	sprLib.nodeConfig = function nodeConfig(inOpts){
-		inOpts = (inOpts && typeof inOpts === 'object' ? inOpts : {});
-		APP_OPTS.nodeCookie = inOpts.cookie || '';
-		APP_OPTS.nodeServer = inOpts.server || '';
+	sprLib.nodeConfig = function nodeConfig(inOpt){
+		inOpt = (inOpt && typeof inOpt === 'object' ? inOpt : {});
+		APP_OPTS.nodeCookie = inOpt.cookie || '';
+		APP_OPTS.nodeServer = inOpt.server || '';
 	}
 
 	/* ===============================================================================================

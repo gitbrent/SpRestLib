@@ -312,15 +312,18 @@ Lists can be accessed by either their name or their GUID:
 
 Syntax: `sprLib.list(listName)`  
 Syntax: `sprLib.list(listGUID)`  
+Syntax: `sprLib.list({ name:name })`  
+Syntax: `sprLib.list({ guid:GUID })`  
 Syntax: `sprLib.list({ name:name, baseUrl:path })`  
 Syntax: `sprLib.list({ name:name, baseUrl:path, requestDigest:formDigestValue })`  
 
 ### Options
-| Prop            | Type   | Required? | Description                              | Possible Values                |
-| :-------------- | :----- | :-------- | :--------------------------------------- | :----------------------------- |
-| `name`          | string |     Y     | list name or GUID                        | Ex:`{'name': 'Employees'}`     |
-| `baseUrl`       | string |           | data to be sent                          | Ex:`{'baseUrl': '/sites/dev'}` |
-| `requestDigest` | string |           | the request form digest security token   | Ex:`'requestDigest':'ABC123'`  |
+| Prop            | Type   | Required? | Description                              | Possible Values                  |
+| :-------------- | :----- | :-------- | :--------------------------------------- | :------------------------------- |
+| `name`          | string |     Y     | list name or list GUID                   | Ex:`{'name': 'Employees'}`       |
+| `guid`          | string |           | list GUID (convenience alias for name)   | Ex:`{'guid': '8675309-ab3d-ef87b08e09e1'}` |
+| `baseUrl`       | string |           | data to be sent                          | Ex:`{'baseUrl': '/sites/dev'}`   |
+| `requestDigest` | string |           | the request form digest security token   | Ex:`{'requestDigest': 'ABC123'}` |
 
 #### Options: baseUrl
 By default, the base URL is set to where the host webpart is located (`_spPageContextInfo.webServerRelativeUrl`).
