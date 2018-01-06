@@ -322,7 +322,7 @@ Syntax: `sprLib.list({ name:name, baseUrl:path, requestDigest:formDigestValue })
 | :-------------- | :----- | :-------- | :--------------------------------------- | :------------------------------- |
 | `name`          | string |     Y     | list name or list GUID                   | Ex:`{'name': 'Employees'}`       |
 | `guid`          | string |           | list GUID (convenience alias for name)   | Ex:`{'guid': '8675309-ab3d-ef87b08e09e1'}` |
-| `baseUrl`       | string |           | data to be sent                          | Ex:`{'baseUrl': '/sites/dev'}`   |
+| `baseUrl`       | string |           | the base url                             | Ex:`{'baseUrl': '/sites/dev'}`   |
 | `requestDigest` | string |           | the request form digest security token   | Ex:`{'requestDigest': 'ABC123'}` |
 
 #### Options: baseUrl
@@ -957,12 +957,13 @@ Syntax:
 Usage: Omitting options will return information about the current user, otherwise, the specified user is returned.  
 
 ### User Query Properties
-| Prop     | Type     | Required? | Description           | Possible Values                                             |
-| :------- | :------- | :-------- | :-------------------- | :---------------------------------------------------------- |
-| `id`     | number   |           | user id               | user id to query. Ex: `{id:99}`                             |
-| `email`  | string   |           | user email address    | user email to query. Ex: `{email:'brent@github.com'}`       |
-| `login`  | string   |           | user login name       | user loginName to query. Ex: `{login:'AMERICAS\Brent_Ely'}` |
-| `title`  | string   |           | user title            | user title to query. Ex: `{title:'Brent Ely'}`              |
+| Prop      | Type   | Required? | Description           | Possible Values                                             |
+| :-------- | :----- | :-------- | :-------------------- | :---------------------------------------------------------- |
+| `baseUrl` | string |           | the base url          | Ex:`{'baseUrl': '/sites/dev'}`                              |
+| `id`      | number |           | user id               | user id to query. Ex: `{id:99}`                             |
+| `email`   | string |           | user email address    | user email to query. Ex: `{email:'brent@github.com'}`       |
+| `login`   | string |           | user login name       | user loginName to query. Ex: `{login:'AMERICAS\Brent_Ely'}` |
+| `title`   | string |           | user title            | user title to query. Ex: `{title:'Brent Ely'}`              |
 
 ### Get User Information (`SPUser`)
 Syntax:  
