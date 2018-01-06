@@ -1779,7 +1779,9 @@ QUnit.module( "USER Methods" );
 			});
 		});
 
-		[ '', {}, {id:999}, {email:'junk@email.com'}, {login:'totally not a real login'}, {title:'totally not a real name'} ]
+		// TODO: separate test for `[ '', {} ]` as those will return current user
+
+		[ {id:999}, {email:'junk@email.com'}, {login:'totally not a real login'}, {title:'totally not a real name'} ]
 		.forEach(function(param,idx){
 			QUnit.test('sprLib.user('+ JSON.stringify(param) +').info()', function(assert){
 				var done = assert.async();
@@ -1787,7 +1789,7 @@ QUnit.module( "USER Methods" );
 				sprLib.user(param).info()
 				.then(function(objUser){
 					assert.ok( typeof objUser === 'object', "Pass: objUser is object type: " + typeof objUser );
-					assert.ok( Object.keys(objUser).length == 0	,"Pass: keys.length == 0 - " + Object.keys(objUser).length );
+					assert.ok( Object.keys(objUser).length == 0,"Pass: `keys(objUser).length == 0` -> " + Object.keys(objUser).length );
 					done();
 				});
 			});
@@ -1797,7 +1799,8 @@ QUnit.module( "USER Methods" );
 				// TEST:
 				sprLib.user(param).groups()
 				.then(function(arrGroups){
-					assert.ok( arrGroups.length == 0, "arrGroups length == 0: "+ arrGroups.length +" - "+ arrGroups.toString() );
+					assert.ok( Array.isArray(arrGroups), "Pass: Array.isArray(arrGroups): " + Array.isArray(arrGroups) );
+					assert.ok( arrGroups.length == 0, "Pass: `arrGroups.length == 0` -> "+ arrGroups.length );
 					done();
 				});
 			});

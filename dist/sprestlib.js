@@ -2184,19 +2184,27 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 
 	// API: USER (Current or Query User by Props)
 	sprLib.user = function user(inOpt) {
-		// STEP 1: Variables
-		var newUser = {};
-		var strDynUrl = "_api/Web/CurrentUser?";
+		var _newUser = {};
+		var _urlBase = "_api/Web";
+		var _urlRest = "/CurrentUser?"; // Default to current user if no options were provided
 
-		// STEP 2: Build query URL based on whether its current user (no parameter) or a passed in object
+		// A: Options
+		if ( inOpt && typeof inOpt === 'object' && Object.keys(inOpt).length > 0 && inOpt.baseUrl ) {
+			_urlBase = ( inOpt.baseUrl.toString().replace(/\/+$/,'') + '/_api/Web');
+		}
+
+		// B: Build query URL based on whether its current user (no parameter) or a passed in object
 		// NOTE: Use CurrentUser service as it is included in SP-Foundation and will work for everyone
 		// ....: (Users will need SP-Enterprise for UserProfiles service to work)
 		// NOTE: `_api/Web/GetUserById()` for non-existant users results in a heinous error 500 that chokes jQuery.ajax.fail(),
 		// ....: so dont use it, or check user id with `siteusers?$filter` first!
-		if      ( inOpt && inOpt['id']    ) strDynUrl = "_api/Web/siteusers?$filter=Id%20eq%20"+           inOpt['id']    +"&";
-		else if ( inOpt && inOpt['email'] ) strDynUrl = "_api/web/siteusers?$filter=Email%20eq%20%27"+     inOpt['email'] +"%27&";
-		else if ( inOpt && inOpt['login'] ) strDynUrl = "_api/web/siteusers?$filter=LoginName%20eq%20%27"+ inOpt['login'].replace(/#/g,'%23') +"%27&";
-		else if ( inOpt && inOpt['title'] ) strDynUrl = "_api/web/siteusers?$filter=Title%20eq%20%27"+     inOpt['title'] +"%27&";
+		if      ( inOpt && inOpt.id    ) _urlRest = "/siteusers?$filter=Id%20eq%20"+           inOpt.id    +"&";
+		else if ( inOpt && inOpt.email ) _urlRest = "/siteusers?$filter=Email%20eq%20%27"+     inOpt.email +"%27&";
+		else if ( inOpt && inOpt.login ) _urlRest = "/siteusers?$filter=LoginName%20eq%20%27"+ inOpt.login.replace(/#/g,'%23') +"%27&";
+		else if ( inOpt && inOpt.title ) _urlRest = "/siteusers?$filter=Title%20eq%20%27"+     inOpt.title +"%27&";
+
+		// C: Complete URL
+		_urlRest = _urlBase + _urlRest;
 
 		/**
 		* Get user info: (`Id`, `Email`, `IsSiteAdmin`, `LoginName`, `PrincipalType`, `Title`)
@@ -2209,17 +2217,10 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 		*
 		* @return {Promise} - return `Promise` containing User info object
 		*/
-		newUser.info = function() {
+		_newUser.info = function() {
 			return new Promise(function(resolve, reject) {
-				// A: Handle case when options have empty/null/undef params
-				if ( inOpt == '' || (inOpt && !inOpt['id'] && !inOpt['email'] && !inOpt['login'] && !inOpt['title']) ) {
-					resolve( {} );
-					return;
-				}
-
-				// B:
 				sprLib.rest({
-					url    : strDynUrl + "$select=Id,Title,Email,LoginName,IsSiteAdmin,PrincipalType",
+					url    : _urlRest + "$select=Id,Title,Email,LoginName,IsSiteAdmin,PrincipalType",
 					headers: { "Accept":"application/json;odata=verbose" },
 					type   : "GET",
 					cache  : false
@@ -2251,17 +2252,10 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 		*
 		* @return {Promise} - Return `Promise` containing Group(s) info (`Id`, `Title`)
 		*/
-		newUser.groups = function() {
+		_newUser.groups = function() {
 			return new Promise(function(resolve, reject) {
-				// A: Handle case when options have empty/null/undef params
-				if ( inOpt == '' || (inOpt && !inOpt['id'] && !inOpt['email'] && !inOpt['login'] && !inOpt['title']) ) {
-					resolve( [] );
-					return;
-				}
-
-				// B:
 				sprLib.rest({
-					url    : strDynUrl + "$select=Groups/Id,Groups/Title,Groups/Description,Groups/LoginName,Groups/OwnerTitle&$expand=Groups",
+					url    : _urlRest + "$select=Groups/Id,Groups/Title,Groups/Description,Groups/LoginName,Groups/OwnerTitle&$expand=Groups",
 					headers: { "Accept":"application/json;odata=verbose" },
 					type   : "GET",
 					cache  : false
@@ -2290,7 +2284,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 			});
 		}
 
-		// TODO: Add newUser.profile - that will work when users have Enterpise license/access to User-Profile-Service
+		// TODO: Add _newUser.profile - works when users have Enterpise license/access to User-Profile-Service
 		// FUTURE: add ability to fetch individual properties (`Manager` etc)
 		// http://sharepoint.stackexchange.com/questions/207422/getting-user-profile-property-with-dash-in-name-with-rest-api
 		// User Profile service - https://msdn.microsoft.com/en-us/library/office/dn790354.aspx
@@ -2322,7 +2316,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 		*/
 
 		// LAST: Return this List to enable chaining
-		return newUser;
+		return _newUser;
 	}
 
 	// API: UTILITY: Token
