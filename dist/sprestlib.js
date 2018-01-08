@@ -33,7 +33,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 (function(){
 	// APP VERSION/BUILD
 	var APP_VER = "1.4.0-beta";
-	var APP_BLD = "20180105";
+	var APP_BLD = "20180107";
 	var DEBUG = false; // (verbose mode/lots of logging)
 	// ENUMERATIONS
 	var ENUM_PRINCIPALTYPES = {
@@ -98,6 +98,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 		maxRows:         1000,
 		metadata:        false,
 		nodeCookie:      '',
+		nodeEnabled:     true,
 		nodeServer:      '',
 		retryAfter:      1000
 	};
@@ -1524,7 +1525,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 			Promise.resolve()
 			.then(function(){
 				return new Promise(function(resolve, reject) {
-					if ( NODEJS ) {
+					if ( NODEJS && !APP_OPTS.nodeEnabled ) {
 						objAjaxQuery.headers["Cookie"] = APP_OPTS.nodeCookie;
 						delete objAjaxQuery.headers["X-RequestDigest"];
 						var options = {
@@ -1736,7 +1737,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 				// var strErrCode = jqXHR.status.toString();
 				// var strSpeCode = $.parseJSON(jqXHR.responseText).error['code'].split(',')[0];
 				// INFO: ( strErrCode == '403' && strSpeCode == '-2130575252' )
-				if ( !NODEJS && typeof strErr == 'string' && strErr.indexOf('(403)') > -1 && gRetryCounter <= APP_OPTS.maxRetries ) {
+				if ( !(NODEJS && !APP_OPTS.nodeEnabled) && typeof strErr == 'string' && strErr.indexOf('(403)') > -1 && gRetryCounter <= APP_OPTS.maxRetries ) {
 					Promise.resolve()
 					.then(function(){
 						return sprLib.renewSecurityToken();
@@ -2327,8 +2328,9 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 	// API: NODEJS: Setup
 	sprLib.nodeConfig = function nodeConfig(inOpt){
 		inOpt = (inOpt && typeof inOpt === 'object' ? inOpt : {});
-		APP_OPTS.nodeCookie = inOpt.cookie || '';
-		APP_OPTS.nodeServer = inOpt.server || '';
+		APP_OPTS.nodeCookie  = inOpt.cookie || '';
+		APP_OPTS.nodeEnabled = (typeof inOpt.nodeEnabled !== 'undefined' ? inOpt.nodeEnabled : true);
+		APP_OPTS.nodeServer  = inOpt.server || '';
 	}
 
 	/* ===============================================================================================

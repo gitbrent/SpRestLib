@@ -114,6 +114,8 @@ using the JavaScript SharePoint App Model.
     - [Async Grouping](#async-grouping)
       - [Example Logic](#example-logic-1)
       - [Example Code](#example-code-1)
+- [Integration with Other Libraries](#integration-with-other-libraries)
+  - [Integration with Angular/Typescript/Webpack](#integration-with-angulartypescriptwebpack)
 - [Issues / Suggestions](#issues--suggestions)
 - [Special Thanks](#special-thanks)
 - [License](#license)
@@ -1150,6 +1152,20 @@ Promise.all([
     console.log( "Current User Groups count: " + arrResults[1].length );
 });
 ```
+
+
+
+**************************************************************************************************
+# Integration with Other Libraries
+
+## Integration with Angular/Typescript/Webpack
+
+The library may detect your app as a Node.js application, which utilizes a different AJAX
+call and authentication. If your application is embedded in an .aspx page, disable Node
+detection to have the library operate in browser mode.  
+`sprLib.nodeConfig({ nodeEnabled:false });`
+
+Current discussions: [Issue #9](https://github.com/gitbrent/SpRestLib/issues/9) and [Issue #10](https://github.com/gitbrent/SpRestLib/issues/10)
 
 
 
