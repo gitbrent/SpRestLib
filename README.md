@@ -1165,7 +1165,7 @@ call and authentication. If your application is embedded in an .aspx page, disab
 detection to have the library operate in browser mode.  
 `sprLib.nodeConfig({ nodeEnabled:false });`
 
-Current discussions: [Issue #9](https://github.com/gitbrent/SpRestLib/issues/9) and [Issue #10](https://github.com/gitbrent/SpRestLib/issues/10)
+Issue/Discussion: [Issue #9](https://github.com/gitbrent/SpRestLib/issues/9)
 
 
 
