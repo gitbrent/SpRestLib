@@ -139,6 +139,10 @@ using the JavaScript SharePoint App Model.
 <script lang="javascript" src="https://yourhost.com/subsite/SiteAssets/js/sprestlib.bundle.js"></script>
 ```
 *Bundle includes all required libraries (SpRestLib + jQuery and Promises)*
+```javascript
+<script lang="javascript" src="https://yourhost.com/subsite/SiteAssets/js/sprestlib.bundle-ui.js"></script>
+```
+*Bundle includes all required libraries (SpRestLib and SpRestLib-UI + jQuery and Promises)*
 
 ### Install With Bower
 ```javascript
@@ -1023,7 +1027,8 @@ sprLib.user().groups()
 
 **************************************************************************************************
 ## Form Binding
-Perform control/form binding with an AngluarJS-like syntax made especially for SharePoint Web Services.
+Include the optional `sprestlib-ui.js` library to perform control/form binding with an
+AngluarJS-like syntax made especially for SharePoint Web Services.
 
 Many different HTML tags can be populated by adding an `data-sprlib` property to many HTML element types.
 
