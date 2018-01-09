@@ -1190,6 +1190,6 @@ When reporting issues, please include a code snippet or a link demonstrating the
 **************************************************************************************************
 # License
 
-Copyright &copy; 2016-2017 [Brent Ely](https://github.com/gitbrent/SpRestLib)
+Copyright &copy; 2016-2018 [Brent Ely](https://github.com/gitbrent/SpRestLib)
 
 [MIT](https://github.com/gitbrent/SpRestLib/blob/master/LICENSE)

@@ -32,8 +32,8 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 
 (function(){
 	// APP VERSION/BUILD
-	var APP_VER = "1.4.0-beta";
-	var APP_BLD = "20180107";
+	var APP_VER = "1.4.0";
+	var APP_BLD = "20180108";
 	var DEBUG = false; // (verbose mode/lots of logging)
 	// ENUMERATIONS
 	var ENUM_PRINCIPALTYPES = {

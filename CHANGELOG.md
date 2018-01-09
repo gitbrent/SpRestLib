@@ -1,12 +1,13 @@
 # Change Log
 
-## [v1.4.0](https://github.com/gitbrent/sprestlib/tree/v1.4.0) (2018-01-??)
+## [v1.4.0](https://github.com/gitbrent/sprestlib/tree/v1.4.0) (2018-01-08)
 [Full Changelog](https://github.com/gitbrent/sprestlib/compare/v1.3.0...v1.4.0)
 
 **Implemented Enhancements:**
+- Add paging/skip/next ability to getItems() [\#4](https://github.com/gitbrent/sprestlib/issues/4) ([Wireliner](https://github.com/Wireliner))
 - Error in list(listname).create(data) [\#5](https://github.com/gitbrent/sprestlib/issues/5) ([Wireliner](https://github.com/Wireliner))
 - Add new option for auth DigestToken [\#6](https://github.com/gitbrent/sprestlib/issues/6) ([Wireliner](https://github.com/Wireliner))
-- Add new option for guid to list() [\#7](https://github.com/gitbrent/sprestlib/issues/7) ([YakQin](https://github.com/YakQin))
+- Add new 'guid' option to list() [\#7](https://github.com/gitbrent/sprestlib/issues/7) ([YakQin](https://github.com/YakQin))
 - Add new 'baseUrl' option to user() [\#8](https://github.com/gitbrent/sprestlib/issues/8) ([YakQin](https://github.com/YakQin))
 - Add new 'nodeEnabled' option for Angular/etc [\#9](https://github.com/gitbrent/sprestlib/issues/9) ([ra6hi9](https://github.com/ra6hi9))
 
