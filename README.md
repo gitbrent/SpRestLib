@@ -138,11 +138,11 @@ using the JavaScript SharePoint App Model.
 ```javascript
 <script lang="javascript" src="https://yourhost.com/subsite/SiteAssets/js/sprestlib.bundle.js"></script>
 ```
-*Bundle includes all required libraries (SpRestLib + jQuery and Promises)*
+*`bundle` includes all required libraries (SpRestLib + jQuery and Promises)*
 ```javascript
 <script lang="javascript" src="https://yourhost.com/subsite/SiteAssets/js/sprestlib.bundle-ui.js"></script>
 ```
-*Bundle includes all required libraries (SpRestLib and SpRestLib-UI + jQuery and Promises)*
+*`bundle-ui` includes all required libraries (SpRestLib and SpRestLib-UI + jQuery and Promises)*
 
 ### Install With Bower
 ```javascript
