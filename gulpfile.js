@@ -4,9 +4,19 @@ var gulp       = require('gulp'),
     ignore     = require('gulp-ignore'),
     uglify     = require('gulp-uglify');
 
-gulp.task('build', function () {
+gulp.task('build', function(){
     gulp.src(['lib/jquery.min.js', 'lib/promise.min.js', 'dist/sprestlib.js'])
         .pipe(concat('sprestlib.bundle.js'))
+        .pipe(sourcemaps.init())
+        .pipe(ignore.exclude(["**/*.map"]))
+        .pipe(uglify())
+        .pipe(sourcemaps.write('./'))
+        .pipe(gulp.dest('dist/'));
+});
+
+gulp.task('build-ui', function(){
+    gulp.src(['lib/jquery.min.js', 'lib/promise.min.js', 'dist/sprestlib.js', 'dist/sprestlib-ui.js'])
+        .pipe(concat('sprestlib.bundle-ui.js'))
         .pipe(sourcemaps.init())
         .pipe(ignore.exclude(["**/*.map"]))
         .pipe(uglify())
