@@ -72,6 +72,10 @@
 		updatingEnd: { 'background-color':'', 'color':'' }
 	};
 
+	/* TODO:
+	- Add `Intl` (i18n) support (its supported in IE11!!) - Date and Currency formats are awesome (add Direction for our R->L users too?)
+	*/
+
 	/* ===============================================================================================
 	|
 	#     #
@@ -511,6 +515,11 @@
 
 	if ( $ && $(document) ) {
 		$(document).ready(function(){
+			if ( !sprLib ) {
+				console.error("Error: `sprLib` not found! sprestlib-ui requires sprestlib.js");
+				return;
+			}
+
 			doShowBusySpinners();
 			doPopulateDataBinds();
 		});
