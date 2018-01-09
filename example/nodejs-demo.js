@@ -1,10 +1,11 @@
 /*
  * NAME: nodejs-demo.js
  * AUTH: Brent Ely (https://github.com/gitbrent/)
- * DATE: Sep 07, 2017
  * DESC: Demonstrate SpRestLib on Node.js
  * REQS: Node 4.x + `npm install sprestlib`
  * EXEC: `node nodejs-demo.js (sp-username) (sp-password) {sp-hostUrl}`
+ * VER.: 1.4.0
+ * REL.: 20180108
  * REFS: HOWTO: Authenticate to SharePoint Online (*.sharepoint.com)
  * - https://allthatjs.com/2012/03/28/remote-authentication-in-sharepoint-online/
  * - http://paulryan.com.au/2014/spo-remote-authentication-rest/
@@ -34,7 +35,7 @@ else {
 // Lets go
 console.log('\nStarting demo...');
 console.log('================================================================================');
-console.log(`> SpRestLib version: ${sprLib.version()}\n`); // Loaded okay?
+console.log(`> SpRestLib version: ${sprLib.version}\n`); // Loaded okay?
 
 // Office365/On-Prem/Hosted Vars
 var SP_USER = process.argv[2];
@@ -153,6 +154,7 @@ Promise.resolve()
 
 	// B: SpRestLib also needs the full path to your site
 	sprLib.baseUrl('/sites/dev/');
+	//console.log( 'sprLib.baseUrl = '+ sprLib.baseUrl() );
 
 	// C: Now run all the sprLib API calls you want
 	return sprLib.user().info();

@@ -605,7 +605,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 		if ( typeof inStr !== 'string' || inStr == '' || !inStr ) return APP_OPTS.baseUrl;
 
 		// CASE 2: Act as a SETTER
-		APP_OPTS.baseUrl = inStr;
+		APP_OPTS.baseUrl = inStr.replace(/\/+$/,'');
 		if (DEBUG) console.log('APP_OPTS.baseUrl = '+APP_OPTS.baseUrl);
 	}
 
@@ -1525,7 +1525,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 			Promise.resolve()
 			.then(function(){
 				return new Promise(function(resolve, reject) {
-					if ( NODEJS && !APP_OPTS.nodeEnabled ) {
+					if ( NODEJS && APP_OPTS.nodeEnabled ) {
 						objAjaxQuery.headers["Cookie"] = APP_OPTS.nodeCookie;
 						delete objAjaxQuery.headers["X-RequestDigest"];
 						var options = {
