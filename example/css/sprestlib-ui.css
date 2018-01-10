@@ -1,0 +1,24 @@
+/*
+ * NAME: sprestlib-ui.css
+ * VER.: 1.0.0
+ * REL.: 20180109
+ * SRC.: [CSS Spinners](https://github.com/tobiasahlin/SpinKit/)
+ */
+
+.sprlib-spinner {
+	display: block;
+	height: 16px;
+	text-align: center;
+	white-space: nowrap;
+}
+.sprlib-spinner > div {
+	display: inline-block;
+	width:16px; height:16px;
+	background-color: #40b0df;
+	border: 3px solid #f2f9fc;
+	border-radius: 100%;
+	animation: sprlib-sk-bouncedelay 1.4s infinite ease-in-out both;
+}
+.sprlib-spinner .sprlib-bounce1 { animation-delay: -0.32s; }
+.sprlib-spinner .sprlib-bounce2 { animation-delay: -0.16s; }
+@keyframes sprlib-sk-bouncedelay { 0%, 80%, 100% {  transform: scale(0); } 40% { transform: scale(1.0); } }

@@ -354,7 +354,11 @@ div.iconSvg.white.link {
 	font-size: 1.4rem;
 	border: 1px solid #d7e7f7;
 }
-#tabSetup .divTableRows > div > div { padding: 15px; background: #f2f9fc; }
+#tabSetup .divTableRows > div > div {
+	padding: 15px;
+	background: #f2f9fc;
+	white-space: nowrap;
+}
 #tabSetup .divTableRows > div > div:first-child { width:1%; }
 
 #tabForm #tabHtmlElements.divTableRows { border: 0; }

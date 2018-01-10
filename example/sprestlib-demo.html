@@ -173,6 +173,9 @@
 
 			// TAB: Setup
 			{
+				// SP: User
+				sprLib.user().info().then(function(objUser){ $('#spUserPerm').text(objUser.Title) });
+
 				// SP: Datetime Stamp
 				$('#spDateTime').text( new Date().toLocaleString() );
 
@@ -490,7 +493,7 @@
 								<div><div class="iconSvg circle info size32"></div></div><div>SpRestLib Base URL</div><div id="spBaseUrl"></div>
 							</div>
 							<div>
-								<div><div class="iconSvg circle info size32"></div></div><div>Current User/Perms</div><div id="spUserPerm">?</div>
+								<div><div class="iconSvg circle info size32"></div></div><div>Current User</div><div id="spUserPerm">?</div>
 							</div>
 							<div>
 								<div><div class="iconSvg circle info size32"></div></div><div>Current Date/Time</div><div id="spDateTime"></div>
