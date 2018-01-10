@@ -16,7 +16,7 @@ gulp.task('build', function(){
 
 gulp.task('build-ui', function(){
     gulp.src(['lib/jquery.min.js', 'lib/promise.min.js', 'dist/sprestlib.js', 'dist/sprestlib-ui.js'])
-        .pipe(concat('sprestlib.bundle-ui.js'))
+        .pipe(concat('sprestlib-ui.bundle.js'))
         .pipe(sourcemaps.init())
         .pipe(ignore.exclude(["**/*.map"]))
         .pipe(uglify())
