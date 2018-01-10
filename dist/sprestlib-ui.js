@@ -31,7 +31,7 @@
 	// APP VERSION/BUILD
 	var APP_VER = "1.0.0-beta";
 	var APP_BLD = "20180109";
-	var SPR_LIB = "1.4.0";
+	var SPR_REQ = "1.4.0+";
 	var DEBUG = false; // (verbose mode/lots of logging)
 	// APP MESSAGE STRINGS (Internationalization)
 	var APP_STRINGS = {
@@ -71,6 +71,10 @@
 		updatingErr: { 'background-color':'#e2999c', 'color':'#fff' },
 		updatingEnd: { 'background-color':'', 'color':'' }
 	};
+
+	// SPRESTLIB-UI Setup
+	sprLib.ui = {};
+	sprLib.ui.version = APP_VER+'-'+APP_BLD;
 
 	/* TODO:
 	- Add `Intl` (i18n) support (its supported in IE11!!) - Date and Currency formats are awesome (add Direction for our R->L users too?)
@@ -147,6 +151,93 @@
 	|
 	==================================================================================================
 	*/
+
+	// TODO: Unimplemented/undocumented/undemoed
+	function doParseFormIntoJson(inModel, inEleId) {
+		// TODO: Validate/Update/Document for post-1.0.0
+		var objReturn = {
+			jsonSpData: {},
+			jsonFormat: {}
+		};
+		var strCol = "";
+
+		// STEP 1: REALITY-CHECK:
+		if ( $('#'+inEleId).length == 0 ) {
+			var strTemp = 'parseForm ERROR:\n\n'+ inEleId +' does not exist!';
+			( inModel.onFail ) ? inModel.onFail(strTemp) : console.error(strTemp);
+			return null;
+		}
+
+		// STEP 2: Parse all form fields into SP-JSON and Formatted values
+		$('#'+inEleId+' [data-bind]').each(function(i,tag){
+			// A: Get column name for this field
+			// Determine which type of binding we are dealing with:
+			// CASE 1: <input type="text" data-bind='{"col":"firstName"}'>
+			if ( $(this).data('bind').col )
+				strCol = $(this).data('bind').col;
+			// CASE 2: <input type="text" data-bind='{"text":{"model":"Employees", "cols":["firstName"]}}'>
+			else if ( $(this).data('bind')[Object.keys($(this).data('bind'))[0]].cols && $.isArray($(this).data('bind')[Object.keys($(this).data('bind'))[0]].cols) )
+				strCol = $(this).data('bind')[Object.keys($(this).data('bind'))[0]].cols[0];
+			else return;
+
+			// B: Handle fields not in Model (user may want some additional info inserted, etc.)
+			var dataName = ( inModel.listCols[strCol] ? inModel.listCols[strCol].dataName : strCol );
+
+			// C: Handle various element types
+			// TODO: add new HTML5 tags
+
+			// CASE: <checkbox>
+			if ( $(this).is(':checkbox') ) {
+				objReturn.jsonSpData[dataName] = $(this).prop('checked');
+				objReturn.jsonFormat[strCol] = APP_STRINGS[APP_OPTS.language][$(this).prop('checked').toString()];
+			}
+			// CASE: <jquery-ui datepicker>
+			else if ( $(this).val() && $(this).hasClass('hasDatepicker') ) {
+				objReturn.jsonSpData[dataName] = $(this).datepicker('getDate').toISOString();
+				objReturn.jsonFormat[strCol] = ( inModel.listCols[strCol].dateFormat ? bdeLib.localDateStrFromSP(null,$(this).datepicker('getDate'),inModel.listCols[strCol].dateFormat) : $(this).datepicker('getDate').toISOString() );
+			}
+			// CASE: <select:single>
+			else if ( $(this).val() && $(this).prop('type') == 'select-one' ) {
+				objReturn.jsonSpData[dataName] = ($(this).data('type') && ($(this).data('type') == 'num' || $(this).data('type') == 'pct')) ? Number($(this).val()) : $(this).val().toString();
+				objReturn.jsonFormat[strCol] = objReturn.jsonSpData[dataName];
+			}
+			// CASE: <select:multiple>
+			else if ( $(this).val() && $(this).prop('type') == 'select-multiple' ) {
+				// TODO: This is for multi-lookup!  Multi-choice w/b different - add code!
+				// EX: (SP2013/16): { "SkillsId": { "__metadata":{"type":"Collection(Edm.Int32)"}, "results":[1,2,3] } }
+				var arrIds = [];
+				$.each($(this).val(), function(i,val){ arrIds.push( Number(val) ); });
+				objReturn.jsonSpData[dataName] = { "__metadata":{"type":"Collection(Edm.Int32)"}, "results":arrIds };
+				objReturn.jsonFormat[strCol] = arrIds.toString();
+			}
+			// CASE: <radiobutton>
+			else if ( $(this).val() && $(this).is(':radio') ) {
+				// TODO: FUTURE: Add radiobutton, get value by name or whatever
+			}
+			// CASE: <textarea>
+			else if ( $(this).text() && $(this).prop('tagName').toUpperCase() == 'TEXTAREA' ) {
+				objReturn.jsonSpData[dataName] = $(this).text();
+				objReturn.jsonFormat[strCol] = $(this).text();
+			}
+			// CASE: (everything else - excluding buttons)
+			else if ( $(this).val() && $(this).prop('type') != 'submit' && $(this).prop('type') != 'reset' && $(this).prop('type') != 'button' ) {
+				objReturn.jsonSpData[dataName] = $(this).val();
+				objReturn.jsonFormat[strCol] = $(this).val();
+			}
+			// CASE: No value
+			else {
+				objReturn.jsonFormat[strCol] = '';
+			}
+
+			// D: Special Cases:
+			if ( $(this).val() && inModel.listCols[strCol] && inModel.listCols[strCol].isNumPct ) {
+				objReturn.jsonFormat[strCol] = ( Number( $(this).val() ) * 100 ) + '%';
+			}
+		});
+
+		// LAST:
+		return objReturn;
+	}
 
 	function doShowBusySpinners() {
 		// STEP 1: TABLE
@@ -236,7 +327,7 @@
 				});
 				if ( data.filter && data.filter.col && objListData[data.list].cols.indexOf(data.filter.col) == -1 )
 					objListData[data.list].cols.push( data.filter.col );
-				if ( data.text  && objListData[data.list].cols.indexOf(data.text)  == -1 )
+				if ( data.text && objListData[data.list].cols.indexOf(data.text)  == -1 )
 					objListData[data.list].cols.push( data.text  );
 				if ( data.value && objListData[data.list].cols.indexOf(data.value) == -1 )
 					objListData[data.list].cols.push( data.value );
@@ -252,6 +343,7 @@
 						arrTags.filter(function(tag){ return tag.list == list }).map(function(tag){ tag.data = data });
 					})
 					.catch(function(err){
+						// TODO: (Show error test in element?)
 						console.log('TODO: bad list! or some err! set data to null and keep going!');
 					})
 				);
@@ -414,92 +506,6 @@
 		});
 	}
 
-	function doParseFormIntoJson(inModel, inEleId) {
-		// TODO: Validate/Update/Document for post-1.0.0
-		var objReturn = {
-			jsonSpData: {},
-			jsonFormat: {}
-		};
-		var strCol = "";
-
-		// STEP 1: REALITY-CHECK:
-		if ( $('#'+inEleId).length == 0 ) {
-			var strTemp = 'parseForm ERROR:\n\n'+ inEleId +' does not exist!';
-			( inModel.onFail ) ? inModel.onFail(strTemp) : console.error(strTemp);
-			return null;
-		}
-
-		// STEP 2: Parse all form fields into SP-JSON and Formatted values
-		$('#'+inEleId+' [data-bind]').each(function(i,tag){
-			// A: Get column name for this field
-			// Determine which type of binding we are dealing with:
-			// CASE 1: <input type="text" data-bind='{"col":"firstName"}'>
-			if ( $(this).data('bind').col )
-				strCol = $(this).data('bind').col;
-			// CASE 2: <input type="text" data-bind='{"text":{"model":"Employees", "cols":["firstName"]}}'>
-			else if ( $(this).data('bind')[Object.keys($(this).data('bind'))[0]].cols && $.isArray($(this).data('bind')[Object.keys($(this).data('bind'))[0]].cols) )
-				strCol = $(this).data('bind')[Object.keys($(this).data('bind'))[0]].cols[0];
-			else return;
-
-			// B: Handle fields not in Model (user may want some additional info inserted, etc.)
-			var dataName = ( inModel.listCols[strCol] ? inModel.listCols[strCol].dataName : strCol );
-
-			// C: Handle various element types
-			// TODO: add new HTML5 tags
-
-			// CASE: <checkbox>
-			if ( $(this).is(':checkbox') ) {
-				objReturn.jsonSpData[dataName] = $(this).prop('checked');
-				objReturn.jsonFormat[strCol] = APP_STRINGS[APP_OPTS.language][$(this).prop('checked').toString()];
-			}
-			// CASE: <jquery-ui datepicker>
-			else if ( $(this).val() && $(this).hasClass('hasDatepicker') ) {
-				objReturn.jsonSpData[dataName] = $(this).datepicker('getDate').toISOString();
-				objReturn.jsonFormat[strCol] = ( inModel.listCols[strCol].dateFormat ? bdeLib.localDateStrFromSP(null,$(this).datepicker('getDate'),inModel.listCols[strCol].dateFormat) : $(this).datepicker('getDate').toISOString() );
-			}
-			// CASE: <select:single>
-			else if ( $(this).val() && $(this).prop('type') == 'select-one' ) {
-				objReturn.jsonSpData[dataName] = ($(this).data('type') && ($(this).data('type') == 'num' || $(this).data('type') == 'pct')) ? Number($(this).val()) : $(this).val().toString();
-				objReturn.jsonFormat[strCol] = objReturn.jsonSpData[dataName];
-			}
-			// CASE: <select:multiple>
-			else if ( $(this).val() && $(this).prop('type') == 'select-multiple' ) {
-				// TODO: This is for multi-lookup!  Multi-choice w/b different - add code!
-				// EX: (SP2013/16): { "SkillsId": { "__metadata":{"type":"Collection(Edm.Int32)"}, "results":[1,2,3] } }
-				var arrIds = [];
-				$.each($(this).val(), function(i,val){ arrIds.push( Number(val) ); });
-				objReturn.jsonSpData[dataName] = { "__metadata":{"type":"Collection(Edm.Int32)"}, "results":arrIds };
-				objReturn.jsonFormat[strCol] = arrIds.toString();
-			}
-			// CASE: <radiobutton>
-			else if ( $(this).val() && $(this).is(':radio') ) {
-				// TODO: FUTURE: Add radiobutton, get value by name or whatever
-			}
-			// CASE: <textarea>
-			else if ( $(this).text() && $(this).prop('tagName').toUpperCase() == 'TEXTAREA' ) {
-				objReturn.jsonSpData[dataName] = $(this).text();
-				objReturn.jsonFormat[strCol] = $(this).text();
-			}
-			// CASE: (everything else - excluding buttons)
-			else if ( $(this).val() && $(this).prop('type') != 'submit' && $(this).prop('type') != 'reset' && $(this).prop('type') != 'button' ) {
-				objReturn.jsonSpData[dataName] = $(this).val();
-				objReturn.jsonFormat[strCol] = $(this).val();
-			}
-			// CASE: No value
-			else {
-				objReturn.jsonFormat[strCol] = '';
-			}
-
-			// D: Special Cases:
-			if ( $(this).val() && inModel.listCols[strCol] && inModel.listCols[strCol].isNumPct ) {
-				objReturn.jsonFormat[strCol] = ( Number( $(this).val() ) * 100 ) + '%';
-			}
-		});
-
-		// LAST:
-		return objReturn;
-	}
-
 	/* ===============================================================================================
 	|
 	#######           ######                          #
@@ -516,7 +522,7 @@
 	if ( $ && $(document) ) {
 		$(document).ready(function(){
 			if ( !sprLib ) {
-				console.error("Error: `sprLib` not found! sprestlib-ui requires sprestlib.js");
+				console.error("Error: `sprLib` not found! sprestlib-ui.js requires sprestlib.js\n(TIP: use `sprestlib-ui.bundle.js` it has everything!)");
 				return;
 			}
 
