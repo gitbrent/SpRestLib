@@ -1,9 +1,10 @@
 /*
- * NAME: sprestlib.css
- * VER.: 0.11.0
- * REL.: 20170609
+ * NAME: sprestlib-ui.css
+ * VER.: 1.0.0
+ * REL.: 20180109
  * SRC.: [CSS Spinners](https://github.com/tobiasahlin/SpinKit/)
  */
+
 .sprlib-spinner {
 	display: block;
 	height: 16px;
