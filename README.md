@@ -132,13 +132,17 @@ using the JavaScript SharePoint App Model.
 <script lang="javascript" src="https://yourhost.com/subsite/SiteAssets/js/jquery.min.js"></script>
 <script lang="javascript" src="https://yourhost.com/subsite/SiteAssets/js/sprestlib.js"></script>
 ```
-*IE11 support requires a Promises polyfill as well (included in the `libs` folder)*
+* *IE11 support requires a Promises polyfill as well (included in the `libs` folder)*
 
 ### Include Bundle Script
 ```javascript
 <script lang="javascript" src="https://yourhost.com/subsite/SiteAssets/js/sprestlib.bundle.js"></script>
 ```
-*Bundle includes all required libraries (SpRestLib + jQuery and Promises)*
+* *`sprestlib.bundle.js` includes all required libraries (SpRestLib + jQuery and Promises)*
+```javascript
+<script lang="javascript" src="https://yourhost.com/subsite/SiteAssets/js/sprestlib-ui.bundle.js"></script>
+```
+* *`sprestlib-ui.bundle.js` includes all required libraries plus UI (SpRestLib and SpRestLib-UI + jQuery and Promises)*
 
 ### Install With Bower
 ```javascript
@@ -1023,7 +1027,8 @@ sprLib.user().groups()
 
 **************************************************************************************************
 ## Form Binding
-Perform control/form binding with an AngluarJS-like syntax made especially for SharePoint Web Services.
+Include the optional `sprestlib-ui.js` library to perform control/form binding with an
+AngluarJS-like syntax made especially for SharePoint Web Services.
 
 Many different HTML tags can be populated by adding an `data-sprlib` property to many HTML element types.
 
@@ -1038,18 +1043,23 @@ The following HTML element tags can be populated:
 * table: a table or tbody can be populates with 1+ columns
 
 ### Data Binding Options
-| Option        | Type    | Required? | Description             | Possible Values / Returns           |
+| Option        | Type    | Required? | Description             | Possible Values                     |
 | :------------ | :------ | :-------- | :---------------------- | :---------------------------------- |
-| `list`        | string  | yes       | List or Library name    |   |
-| `cols`        | array   |           | columns to be populated |   |
-| `text`        | string  |           | text string to show     |   |
-| `value`       | string  |           | value string to show    |   |
-| `filter`      | string  |           | query filter value      | Ex: `filter="ID eq 100"`  |
-| `tablesorter` | string  |           | whether to add jQuery TableFilter to table |   |
-| `options`     | string  |           | table/tbody options     | `showBusySpinner` |
+| `list`        | string  | yes       | List or Library name    | Ex:`list: "Employees"`              |
+| `cols`        | array   |           | columns to be selected  | Ex:`cols: ["ID","Title"]`           |
+| `filter`      | string  |           | query filter value      | Ex:`filter: {"col":"ID", "op":"eq", "val":"99"}` |
+| `limit`       | integer |           | max items to return     | Ex:`limit: 100`                      |
+| `options`     | string  |           | table/tbody options     | Ex:`showBusy: true`                  |
+| `tablesorter` | string  |           | add tableSorter library | (only applies to tables)             |
+| `text`        | string  |           | text string to show     | (only for select). Ex:`text:"Title"` |
+| `value`       | string  |           | value string to show    | (only for select). Ex:`value:"ID"`   |
 
 #### Examples
 ```html
+<!-- table/tbody -->
+<table data-sprlib='{ "foreach": {"list":"Employees", "filter":{"col":"Active", "op":"eq", "val":true}}, "options":{"showBusySpinner":true} }'>
+<tbody data-sprlib='{ "foreach": {"list":"Employees", "cols":["Name","Utilization_x0020_Pct"] } }'></tbody>
+
 <!-- select -->
 <select data-sprlib='{ "list":"Employees", "value":"Id", "text":"Name" }'></select>
 
@@ -1058,10 +1068,6 @@ The following HTML element tags can be populated:
 
 <!-- static elements span, div, etc. -->
 <span data-sprlib='{ "list":"Employees", "value":"Name", "filter":{"col":"Name", "op":"eq", "val":"Brent Ely"} }'></span>
-
-<!-- table/tbody -->
-<table data-sprlib='{ "foreach": {"list":"Employees", "filter":{"col":"Active", "op":"eq", "val":true}}, "options":{"showBusySpinner":true} }'>
-<tbody data-sprlib='{ "foreach": {"list":"Employees", "cols":["Name","Utilization_x0020_Pct"] } }'></tbody>
 ```
 
 

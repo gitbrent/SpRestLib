@@ -6,7 +6,7 @@
 	<meta name="website"     content="https://github.com/gitbrent/SpRestLib/">
 	<meta name="keywords"    content="SpRestLib, JavaScript, js-sharepoint, OData, REST, SharePoint 2013, SP2013, SharePoint 2016, SP2016, SharePoint Online">
 	<meta name="description" content="Content Editor WebPart to showcase SpRestLib features and capabilities">
-	<meta name="revised"     content="Oct 31, 2017">
+	<meta name="revised"     content="20180109">
 
 	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300">
 	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:700">
@@ -30,8 +30,8 @@
 	-->
 
 	<!--
-	<script type="text/javascript" src="https://cdn.rawgit.com/gitbrent/SpRestLib/v1.2.1/example/css/sprestlib.css"></script>
-	<script type="text/javascript" src="https://cdn.rawgit.com/gitbrent/SpRestLib/v1.2.1/example/css/sprestlib-demo.css"></script>
+	<script type="text/javascript" src="https://cdn.rawgit.com/gitbrent/SpRestLib/v1.5.0/example/css/sprestlib.css"></script>
+	<script type="text/javascript" src="https://cdn.rawgit.com/gitbrent/SpRestLib/v1.5.0/example/css/sprestlib-demo.css"></script>
 	DEBUG Below
 	-->
 	<link rel="stylesheet" type="text/css" href="../SiteAssets/sprestlib/css/sprestlib.css">
@@ -44,12 +44,12 @@
 	<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.8.3/prism.min.js"></script>
 	<script type="text/javascript" src="https://cdn.rawgit.com/sorensen/ascii-table/v0.0.9/ascii-table.min.js"></script>
 	<!-- DEBUG:
-	<script type="text/javascript" src="https://cdn.rawgit.com/gitbrent/SpRestLib/v1.2.1/dist/sprestlib.bundle.js"></script>
+	<script type="text/javascript" src="https://cdn.rawgit.com/gitbrent/SpRestLib/v1.4.0/dist/sprestlib.bundle.js"></script>
 	-->
 
 	<script type="text/javascript">
 		$.ajaxSetup({ cache:false });
-		var APP_BLD = 20171031;
+		var APP_BLD = 20180109;
 		var HTML_SPINNER = '<div class="sprlib-spinner"><div class="sprlib-bounce1"></div><div class="sprlib-bounce2"></div><div class="sprlib-bounce3"></div></div>';
 
 		// ==================================================================================================================
@@ -173,6 +173,9 @@
 
 			// TAB: Setup
 			{
+				// SP: User
+				sprLib.user().info().then(function(objUser){ $('#spUserPerm').text(objUser.Title) });
+
 				// SP: Datetime Stamp
 				$('#spDateTime').text( new Date().toLocaleString() );
 
@@ -448,7 +451,6 @@
 				<li onclick="$('#navTabs').find('> div, li').removeClass('active'); $(this).addClass('active'); $('#tabUser').addClass('active');">User Methods</li>
 				<li onclick="$('#navTabs').find('> div, li').removeClass('active'); $(this).addClass('active'); $('#tabRest').addClass('active');">REST API Calls</li>
 				<li onclick="$('#navTabs').find('> div, li').removeClass('active'); $(this).addClass('active'); $('#tabSand').addClass('active');">Code Sandbox</li>
-				<!--<li onclick="$('#navTabs').find('> div, li').removeClass('active'); $(this).addClass('active'); $('#tabForm').addClass('active');">Binding / Population</li>-->
 			</ul>
 
 			<div id="tabSetup" data-tab="Setup" class="active">
@@ -491,7 +493,7 @@
 								<div><div class="iconSvg circle info size32"></div></div><div>SpRestLib Base URL</div><div id="spBaseUrl"></div>
 							</div>
 							<div>
-								<div><div class="iconSvg circle info size32"></div></div><div>Current User/Perms</div><div id="spUserPerm">?</div>
+								<div><div class="iconSvg circle info size32"></div></div><div>Current User</div><div id="spUserPerm">?</div>
 							</div>
 							<div>
 								<div><div class="iconSvg circle info size32"></div></div><div>Current Date/Time</div><div id="spDateTime"></div>
@@ -634,79 +636,6 @@
 						<tbody></tbody>
 					</table>
 				</div>
-			</div>
-
-			<div id="tabForm" data-tab="Data Binding">
-				<div class="subTitle" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
-					<div class="arrow active"></div>HTML Elements
-				</div>
-				<div id="tabHtmlElements" class="divTableRows testGroup">
-					<div>
-						<div><div id="htmlEleSpanCode"><pre><code class="language-html"></code></pre></div></div>
-						<div><div id="htmlEleSpanHtml"></div></div>
-					</div>
-					<div>
-						<div><div id="htmlEleTextCode"><pre><code class="language-html"></code></pre></div></div>
-						<div><div id="htmlEleTextHtml"></div></div>
-					</div>
-					<div>
-						<div><div id="htmlEleSel1Code"><pre><code class="language-html"></code></pre></div></div>
-						<div><div id="htmlEleSel1Html"></div></div>
-					</div>
-					<div>
-						<div><div id="htmlEleSel2Code"><pre><code class="language-html"></code></pre></div></div>
-						<div><div id="htmlEleSel2Html"></div></div>
-					</div>
-				</div>
-				<!-- Populate HTML elements before doc.ready is fired -->
-				<script type="text/javascript">
-					var htmlEleSpan = '<span id="eleSpan" data-sprlib=\'\n  { "list":"Employees", "value":"Name", "filter":{"col":"Badge_x0020_Number", "op":"eq", "val":"666"} }\'>\n</span>';
-					$('#htmlEleSpanCode pre code').text( htmlEleSpan );
-					$('#htmlEleSpanHtml').html( htmlEleSpan.replace('\n','') );
-
-					var htmlEleText = '<input type="text" data-sprlib=\'{ "list":"Departments", "value":"Title" }\'></input>';
-					$('#htmlEleTextCode pre code').text( htmlEleText );
-					$('#htmlEleTextHtml').html( htmlEleText );
-
-					var htmlEleSel1 = '<select data-sprlib=\'{ "list":"Employees", "value":"Id", "text":"Name" }\'></select>';
-					$('#htmlEleSel1Code pre code').text( htmlEleSel1 );
-					$('#htmlEleSel1Html').html( htmlEleSel1 );
-
-					var htmlEleSel2 = '<select data-sprlib=\'{ "list":"Employees", "value":"Name", "text":"Id" }\'></select>';
-					$('#htmlEleSel2Code pre code').text( htmlEleSel2 );
-					$('#htmlEleSel2Html').html( htmlEleSel2 );
-				</script>
-
-				<div class="subTitle" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
-					<div class="arrow active"></div>Tables
-				</div>
-				<div>
-					<div id="htmlEleTab1Code"><pre><code class="language-html"></code></pre></div>
-					<div id="htmlEleTab1Html" style="margin-bottom:20px"></div>
-
-					<div id="htmlEleTab2Code"><pre><code class="language-html"></code></pre></div>
-					<div id="htmlEleTab2Html" style="margin-bottom:20px"></div>
-
-					<div id="htmlEleTab3Code"><pre><code class="language-html"></code></pre></div>
-					<div id="htmlEleTab3Html"></div>
-				</div>
-				<!-- Populate HTML elements before doc.ready is fired -->
-				<script type="text/javascript">
-					var htmlEleTab1 = '<table data-sprlib=\'{ "list":"Departments", "cols":["Id","Title"], "showBusy":true }\'></table>';
-					$('#htmlEleTab1Code pre code').text( htmlEleTab1 );
-					$('#htmlEleTab1Html').html( htmlEleTab1 );
-
-					var htmlEleTab2 = '<table data-sprlib=\'{ "list":"Departments", "cols":["Title","Modified"], "showBusy":true }\'></table>';
-					$('#htmlEleTab2Code pre code').text( htmlEleTab2 );
-					$('#htmlEleTab2Html').html( htmlEleTab2 );
-
-					var htmlEleTab3 = '<table border="0" cellpadding="0" cellspacing="0">\n'
-						+ '  <thead><tr><th>Emp ID</th><th>Employee Name</th><th>Badge #</th></tr></thead>\n'
-						+ '  <tbody data-sprlib=\'{ "list":"Employees", "cols":["Id","Name","Badge_x0020_Number"], "showBusy":true }\'></tbody>\n'
-						+ '</table>';
-					$('#htmlEleTab3Code pre code').text( htmlEleTab3 );
-					$('#htmlEleTab3Html').html( htmlEleTab3 );
-				</script>
 			</div>
 
 			<div id="tabList" data-tab="List Methods">
