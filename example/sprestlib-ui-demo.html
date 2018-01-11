@@ -247,17 +247,17 @@
 				</div>
 				<!-- Populate HTML elements before doc.ready is fired -->
 				<script type="text/javascript">
-					var htmlEleTab1 = '<table class="tabModern" data-sprlib=\'{ "list":"Departments", "cols":["Id","Title"], "showBusy":true }\'></table>';
+					var htmlEleTab1 = '<table class="tabModern" data-sprlib=\'{ "list":"Departments", "cols":["Id","Title"], "limit":10 }\'></table>';
 					$('#htmlEleTab1Code pre code').text( htmlEleTab1 );
 					$('#htmlEleTab1Html').html( htmlEleTab1 );
 
-					var htmlEleTab2 = '<table class="tabModern" data-sprlib=\'{ "list":"Departments", "cols":["Title","Modified"], "showBusy":true }\'></table>';
+					var htmlEleTab2 = '<table class="tabModern" data-sprlib=\'{ "list":"Departments", "cols":["Title","Modified"], "limit":11 }\'></table>';
 					$('#htmlEleTab2Code pre code').text( htmlEleTab2 );
 					$('#htmlEleTab2Html').html( htmlEleTab2 );
 
 					var htmlEleTab3 = '<table class="tabModern" border="0" cellpadding="0" cellspacing="0">\n'
 						+ '  <thead><tr><th>Emp ID</th><th>Employee Name</th><th>Badge #</th></tr></thead>\n'
-						+ '  <tbody data-sprlib=\'{ "list":"Employees", "cols":["Id","Name","Badge_x0020_Number"], "showBusy":true }\'></tbody>\n'
+						+ '  <tbody data-sprlib=\'{ "list":"Employees", "cols":["Id","Name","Badge_x0020_Number"], "limit":12 }\'></tbody>\n'
 						+ '</table>';
 					$('#htmlEleTab3Code pre code').text( htmlEleTab3 );
 					$('#htmlEleTab3Html').html( htmlEleTab3 );
@@ -312,7 +312,6 @@
 					$('#htmlEleSel2Code pre code').text( htmlEleSel2 );
 					$('#htmlEleSel2Html').html( htmlEleSel2 );
 				</script>
-
 			</div>
 		</div>
 	</div>
