@@ -1038,9 +1038,9 @@ Syntax:
 ### Data Binding Types
 
 The following HTML element tags can be populated:
-* select: populates 1+ options
-* static element (span, p, etc.): populates a single plain text value
-* table: a table or tbody can be populates with 1+ columns
+* select: `select` can be populated with various text/value options
+* table: `table` or `tbody` can be populated with 1-n SharePoint List columns
+* other: (`input`, `p`, `span`, etc.): populates a single, plain text value
 
 ### Data Binding Options
 | Option        | Type    | Required? | Description             | Possible Values                     |
