@@ -1043,16 +1043,16 @@ The following HTML element tags can be populated:
 * other: (`input`, `p`, `span`, etc.): populates a single, plain text value
 
 ### Data Binding Options
-| Option        | Type    | Required? | Description             | Possible Values                     |
-| :------------ | :------ | :-------- | :---------------------- | :---------------------------------- |
-| `list`        | string  | yes       | List or Library name    | Ex:`list: "Employees"`              |
-| `cols`        | array   |           | columns to be selected  | Ex:`cols: ["ID","Title"]`           |
-| `filter`      | string  |           | query filter value      | Ex:`filter: {"col":"ID", "op":"eq", "val":"99"}` |
-| `limit`       | integer |           | max items to return     | Ex:`limit: 100`                      |
-| `options`     | string  |           | table/tbody options     | Ex:`showBusy: true`                  |
-| `tablesorter` | string  |           | add tableSorter library | (only applies to tables)             |
-| `text`        | string  |           | text string to show     | (only for select). Ex:`text:"Title"` |
-| `value`       | string  |           | value string to show    | (only for select). Ex:`value:"ID"`   |
+| Option        | Type    | Description                    | Possible Values                     |
+| :------------ | :------ | :----------------------------- | :---------------------------------- |
+| `list`        | string  | **required** list/library name | Ex:`list: "Employees"`              |
+| `cols`        | array   | columns to be selected         | Ex:`cols: ["ID","Title"]`           |
+| `filter`      | string  | query filter value             | Ex:`filter: {"col":"ID", "op":"eq", "val":"99"}` |
+| `limit`       | integer | max items to return            | Ex:`limit: 100`                      |
+| `options`     | string  | table/tbody options            | Ex:`showBusy: true`                  |
+| `tablesorter` | string  | add jquery TableSorter plugin  | (only for tables)                    |
+| `text`        | string  | text string to show            | (only for select). Ex:`text:"Title"` |
+| `value`       | string  | value string to show           | (only for select). Ex:`value:"ID"`   |
 
 #### Examples
 ```html
