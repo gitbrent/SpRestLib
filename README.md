@@ -1043,18 +1043,23 @@ The following HTML element tags can be populated:
 * table: a table or tbody can be populates with 1+ columns
 
 ### Data Binding Options
-| Option        | Type    | Required? | Description             | Possible Values / Returns           |
+| Option        | Type    | Required? | Description             | Possible Values                     |
 | :------------ | :------ | :-------- | :---------------------- | :---------------------------------- |
-| `list`        | string  | yes       | List or Library name    |   |
-| `cols`        | array   |           | columns to be populated |   |
-| `text`        | string  |           | text string to show     |   |
-| `value`       | string  |           | value string to show    |   |
-| `filter`      | string  |           | query filter value      | Ex: `filter="ID eq 100"`  |
-| `tablesorter` | string  |           | whether to add jQuery TableFilter to table |   |
-| `options`     | string  |           | table/tbody options     | `showBusySpinner` |
+| `list`        | string  | yes       | List or Library name    | Ex:`list: "Employees"`              |
+| `cols`        | array   |           | columns to be selected  | Ex:`cols: ["ID","Title"]`           |
+| `filter`      | string  |           | query filter value      | Ex:`filter: {"col":"ID", "op":"eq", "val":"99"}` |
+| `limit`       | integer |           | max items to return     | Ex:`limit: 100`                      |
+| `options`     | string  |           | table/tbody options     | Ex:`showBusy: true`                  |
+| `tablesorter` | string  |           | add tableSorter library | (only applies to tables)             |
+| `text`        | string  |           | text string to show     | (only for select). Ex:`text:"Title"` |
+| `value`       | string  |           | value string to show    | (only for select). Ex:`value:"ID"`   |
 
 #### Examples
 ```html
+<!-- table/tbody -->
+<table data-sprlib='{ "foreach": {"list":"Employees", "filter":{"col":"Active", "op":"eq", "val":true}}, "options":{"showBusySpinner":true} }'>
+<tbody data-sprlib='{ "foreach": {"list":"Employees", "cols":["Name","Utilization_x0020_Pct"] } }'></tbody>
+
 <!-- select -->
 <select data-sprlib='{ "list":"Employees", "value":"Id", "text":"Name" }'></select>
 
@@ -1063,10 +1068,6 @@ The following HTML element tags can be populated:
 
 <!-- static elements span, div, etc. -->
 <span data-sprlib='{ "list":"Employees", "value":"Name", "filter":{"col":"Name", "op":"eq", "val":"Brent Ely"} }'></span>
-
-<!-- table/tbody -->
-<table data-sprlib='{ "foreach": {"list":"Employees", "filter":{"col":"Active", "op":"eq", "val":true}}, "options":{"showBusySpinner":true} }'>
-<tbody data-sprlib='{ "foreach": {"list":"Employees", "cols":["Name","Utilization_x0020_Pct"] } }'></tbody>
 ```
 
 
