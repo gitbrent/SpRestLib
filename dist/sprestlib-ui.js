@@ -30,7 +30,7 @@
 (function(){
 	// APP VERSION/BUILD
 	var APP_VER = "1.0.0-beta";
-	var APP_BLD = "20180110";
+	var APP_BLD = "20180111";
 	var SPRLIB_REQ = "1.4.0+";
 	var DEBUG = false; // (verbose mode/lots of logging)
 	// APP MESSAGE STRINGS (Internationalization)
@@ -71,6 +71,15 @@
 		updatingErr: { 'background-color':'#e2999c', 'color':'#fff' },
 		updatingEnd: { 'background-color':'', 'color':'' }
 	};
+	var APP_DATE_FORMATS = {
+		"US": "Ex: 02/14/2018 09:15:01",
+		"DATE": "",
+		"TIME": "",
+		"YYYYMMDD": "",
+		"INTLTIME": "",
+		"INTL": "",
+		"ISO": ""
+	};
 
 	// SPRESTLIB-UI Setup
 	sprLib.ui = {};
@@ -109,9 +118,9 @@
 		// REALITY-CHECK:
 		if ( !inDate ) return '';
 
-		var dateLocal = new Date(inDate);
-		dateMM = dateLocal.getMonth() + 1; dateDD = dateLocal.getDate(); dateYY = dateLocal.getFullYear();
-		h = dateLocal.getHours(); m = dateLocal.getMinutes(); s = dateLocal.getSeconds();
+		var dateTemp = new Date(inDate);
+		dateMM = dateTemp.getMonth() + 1; dateDD = dateTemp.getDate(); dateYY = dateTemp.getFullYear();
+		h = dateTemp.getHours(); m = dateTemp.getMinutes(); s = dateTemp.getSeconds();
 		//
 		if (inType == "US") {
 			strFinalDate = (dateMM<=9 ? '0' + dateMM : dateMM) + "/" + (dateDD<=9 ? '0' + dateDD : dateDD) + "/" + dateYY + " " + (h<=9 ? '0' + h : h) + ":" + (m<=9 ? '0' + m : m) + ":" + (s<=9 ? '0' + s : s);
@@ -126,10 +135,10 @@
 			strFinalDate = dateYY +"-"+ (dateMM<=9 ? '0' + dateMM : dateMM) +"-"+ (dateDD<=9 ? '0' + dateDD : dateDD) + " " + (h<=9 ? '0' + h : h) + ":" + (m<=9 ? '0' + m : m) + ":" + (s<=9 ? '0' + s : s);
 		}
 		else if (inType == "INTLTIME") {
-			strFinalDate = MONTHS[dateLocal.getMonth()] + " " + (dateDD<=9 ? '0' + dateDD : dateDD) + ", " + dateYY + " " + (h<=9 ? '0' + h : h) + ":" + (m<=9 ? '0' + m : m) + ":" + (s<=9 ? '0' + s : s);
+			strFinalDate = MONTHS[dateTemp.getMonth()] + " " + (dateDD<=9 ? '0' + dateDD : dateDD) + ", " + dateYY + " " + (h<=9 ? '0' + h : h) + ":" + (m<=9 ? '0' + m : m) + ":" + (s<=9 ? '0' + s : s);
 		}
 		else if (inType == "INTL") {
-			strFinalDate = MONTHS[dateLocal.getMonth()] + " " + (dateDD<=9 ? '0' + dateDD : dateDD) + ", " + dateYY;
+			strFinalDate = MONTHS[dateTemp.getMonth()] + " " + (dateDD<=9 ? '0' + dateDD : dateDD) + ", " + dateYY;
 		}
 		else if (inType == "ISO") {
 			strFinalDate = dateYY +"-"+ (dateMM<=9 ? '0' + dateMM : dateMM) +"-"+ (dateDD<=9 ? '0' + dateDD : dateDD) +"T"+ (h<=9 ? '0' + h : h) + ":" + (m<=9 ? '0' + m : m) + ":" + (s<=9 ? '0' + s : s) + ".000Z";
@@ -268,9 +277,10 @@
 		// Loop over all HTML tags with sprlib data properties
 		$('[data-sprlib]').each(function(idx,tag){
 			if (DEBUG) { console.log('--------------------'); console.log('Found tag: '+$(tag).prop('tagName')+' - id: '+$(tag).prop('id')); }
+			var arrColNames = [];
 			var objTagData = {};
 
-			// A: Parse `data-sprlib` from this tag
+			// STEP 1: Parse `data-sprlib` from this tag
 			try {
 				// A: Retrieve object (NOTE: jQuery returns an JSON-type object automatically (no JSON.parse required))
 				objTagData = $(tag).data('sprlib');
@@ -299,11 +309,28 @@
 				return;
 			}
 
-			// B: Set/Validate options
+			// STEP 2: Set/Validate options
 			if ( objTagData.cols ) {
-				// NOTE: if `col` is in text/value, then add it to cols!
-				if ( objTagData.text  && objTagData.cols.indexOf(objTagData.text)  == -1 ) objTagData.cols.push(objTagData.text);
-				if ( objTagData.value && objTagData.cols.indexOf(objTagData.value) == -1 ) objTagData.cols.push(objTagData.value);
+				// 1:
+				if ( Array.isArray(objTagData.cols) ) {
+					objTagData.cols.forEach(function(col,idx){
+						if ( typeof col === 'string' ) arrColNames.push(col);
+						else if ( typeof col === 'object' ) {
+							if ( !col.hasOwnProperty('name') ) {
+								// TODO: better error msg (show in tag, etc.)
+								console.error("Error: column object lacks `name` property. Ex:`cols: [{name:'HireDate'}]`");
+								console.error(col);
+							}
+							else {
+								arrColNames.push(col.name);
+							}
+						}
+					});
+				}
+
+				// 2: If a column is in a [select] text/value, then add it to cols!
+				if ( objTagData.text  && objTagData.cols.indexOf(objTagData.text)  == -1 ) arrColNames.push(objTagData.text);
+				if ( objTagData.value && objTagData.cols.indexOf(objTagData.value) == -1 ) arrColNames.push(objTagData.value);
 			}
 
 			if ( objTagData.filter ) {
@@ -318,23 +345,23 @@
 				}
 			}
 
-			// C: Query and Populate tag
+			// STEP 3: Query and Populate tag
 			if (DEBUG) { console.log('objTagData: '); console.log(objTagData); }
 			sprLib.list(objTagData.list).getItems({
-				listCols:     objTagData.cols,
+				listCols:     arrColNames,
 				queryFilter:  objTagData.filter  || null,
 				queryLimit:   objTagData.limit   || null,
 				queryOrderby: objTagData.orderby || null,
 				metadata:     false
 			})
 			.then(function(arrItems){
-				// A: Capture query results
+				// 3.A: Capture query results
 				objTagData.data = arrItems;
 
-				// B: Remove any temporary UI items now that this element is being populated
+				// 3.B: Remove any temporary UI items now that this element is being populated
 				$(tag).find('.sprlibuiTemp').remove();
 
-				// C: Find/Populate element bound to this LIST object
+				// 3.C: Find/Populate element bound to this LIST object
 				if ( $(tag).is('select') || $(tag).is('table') || $(tag).is('tbody') ) {
 					if ( $(tag).is('select') ) {
 						if ( !objTagData.text && !objTagData.value ) {
@@ -346,88 +373,90 @@
 						});
 					}
 					else if ( $(tag).is('table') || $(tag).is('tbody') ) {
-						// A: Prepare table
-						// CASE 1: <table>
-						if ( $(tag).is('table') ) {
-							// A: Destroy tablesorter before modifying table
-							if ( objTagData.tableSorter && $.tablesorter ) $(tag).trigger("destroy");
+						// 3.C.1: Prepare table
+						{
+							// CASE 1: <table>
+							if ( $(tag).is('table') ) {
+								// A: Destroy tablesorter before modifying table
+								if ( objTagData.tableSorter && $.tablesorter ) $(tag).trigger("destroy");
 
-							// B: Add or Empty <thead>
-							( $(tag).find('> thead').length == 0 ) ? $(tag).prepend('<thead/>') : $(tag).find('> thead').empty();
+								// B: Add or Empty <thead>
+								( $(tag).find('> thead').length == 0 ) ? $(tag).prepend('<thead/>') : $(tag).find('> thead').empty();
 
-							// C: Populate <thead>
-							var $row = $('<tr/>');
-							$.each(objTagData.cols, function(key,col){
-								if ( !col.hidden ) $row.append('<th>'+ (col.dispName || col) +'</th>');
-							});
-							$(tag).find('> thead').append( $row );
+								// C: Populate <thead>
+								var $row = $('<tr/>');
+								$.each(objTagData.cols, function(key,col){
+									if ( !col.hidden ) $row.append('<th>'+ (col.dispName || col.name || col) +'</th>');
+								});
+								$(tag).find('> thead').append( $row );
 
-							// D: Add or Empty <tbody>
-							( $(tag).find('> tbody').length == 0 ) ? $(tag).append('<tbody/>') : $(tag).find('> tbody').empty();
+								// D: Add or Empty <tbody>
+								( $(tag).find('> tbody').length == 0 ) ? $(tag).append('<tbody/>') : $(tag).find('> tbody').empty();
 
-							// E: Set loop fill object
-							objTable = $(tag);
+								// E: Set loop fill object
+								objTable = $(tag);
+							}
+							// CASE 2: <tbody>
+
+							else if ( $(tag).is('tbody') ) {
+								$(tag).empty();
+								objTable = $(tag).parent('table');
+							}
 						}
-						// CASE 2: <tbody>
-						else if ( $(tag).is('tbody') ) {
-							$(tag).empty();
-							objTable = $(tag).parent('table');
-						}
 
-						// B: Add each table row
+						// 3.C.2: Add each table row
 						objTagData.data.forEach(function(arrData,i){
 							// 1: Add row
 							isFilterPassed = false;
 							var $newRow = $('<tr/>');
 
-							// 2: Add cells to new row (add blank and populate instead of .append'ing them bc we need to guarantee order eg: col->col)
-							objTagData.cols.forEach(function(idx,col){ $newRow.append('<td/>') });
-
-							// 3: Populate row cells
+							// 2: Populate row cells
 							$.each(arrData, function(key,val){
-								// TODO: HELP: howto use these "op" lookups in an actual if? (eval?)
-								// FIXME: Filtering: "filter": {"col":"active", "op":"eq", "val":false}} }
+								var $cell = $('<td/>');
 
 								// A: Filtering: Check if filtering, if not give green light
+								// FIXME: Filtering: "filter": {"col":"active", "op":"eq", "val":false}} }
+								// TODO: should we use same object filter everywhere like in tables?
 								if ( !objFilter.col || ( objFilter.col == key && objFilter.op == "eq" && objFilter.val == val ) ) isFilterPassed = true;
 
-								// B: Add row cells
-								// If's b/c we could be given a simple array of col names or a complex object
-								if ( objTagData.cols.indexOf(key) > -1 ) {
-									$newRow.find('td:nth-child('+ (objTagData.cols.indexOf(key)+1) +')').text( val );
-								}
-								else if ( objTagData.cols[key] && !objTagData.cols[key].hidden ) {
-									// A: Stringify boolean values (true/false)
-									if ( typeof val === 'boolean' ) val = val.toString().replace('true','Yes').replace('false','No');
+								// B: Populate and style cell for this result/column
+								objTagData.cols.forEach(function(col){
+									if ( typeof col === 'string' && objTagData.cols.indexOf(key) > -1 ) {
+										//$newRow.find('td:nth-child('+ (objTagData.cols.indexOf(key)+1) +')').text( val );
+										$cell.text( val );
+									}
+									else if ( col.hasOwnProperty('name') && col.name == key ) {
+										// A: Stringify boolean values (true/false)
+										if ( typeof val === 'boolean' ) val = val.toString().replace('true','Yes').replace('false','No');
 
-									// B: Create cell
-									var $cell = $('<td/>');
-									if      ( val && objTagData.cols[key].isNumPct && !isNaN(val) )               $cell.text( Math.round(val*100)+'%' );
-									else if ( val && objTagData.cols[key].dataType == 'Currency' && !isNaN(val) ) $cell.text( formatCurrency(val) );
-									else if ( val && objTagData.cols[key].dataType == 'DateTime' )                $cell.text( formatDate(val, (objTagData.cols[key].dateFormat||'INTL')) );
-									else                                                                      $cell.text( (val || '') );
+										// B: Create cell
+										if      ( val && col.isNumPct && !isNaN(val) )               $cell.text( Math.round(val*100)+'%' );
+										else if ( val && col.dataType == 'Currency' && !isNaN(val) ) $cell.text( formatCurrency(val) );
+										else if ( val && col.dataType == 'DateTime' )                $cell.text( formatDate(val, (col.dateFormat||'INTL')) );
+										// FIXME: get format working!
+										else if ( val && Object.keys(APP_DATE_FORMATS).indexOf(col.format) > -1 ) $cell.text( formatDate(val,(col.format||'INTL')) );
+										else                                                         $cell.text( (val || '') );
 
-									// C: Add CSS dispStyle and/or dispClass (if any)
-									if ( objTagData.cols[key].dispClass ) { $cell.addClass( objTagData.cols[key].dispClass ); }
-									if ( objTagData.cols[key].dispStyle ) {
-										try {
-											if ( typeof JSON.parse(objTagData.cols[key].dispStyle) === 'object' ) $cell.css( JSON.parse(objTagData.cols[key].dispStyle) );
-										}
-										catch(ex) {
-											var strTemp = 'PARSE ERROR:\n'
-												+ 'Unable to parse [JSON.parse] and/or set the css dispStyle for data model: '+ bindJSON[bindOper].model +'\n\n'
-												+ '* model dispStyle value:\n'+ objTagData.cols[key].dispStyle +'\n'
-												+ '* correct syntax ex:\n{"width":"1%", "white-space":"nowrap"}\n\n'
-												+ ex;
-											reject(strTemp);
+										// C: Add CSS style and/or dispClass (if any)
+										if ( col.class ) { $cell.addClass( col.class ); }
+										if ( col.style ) {
+											try {
+												if ( typeof JSON.parse(col.style) === 'object' ) $cell.css( JSON.parse(col.style) );
+											}
+											catch(ex) {
+												var strTemp = 'PARSE ERROR:\n'
+													+ 'Unable to parse [JSON.parse] and/or set the css style for data model: '+ bindJSON[bindOper].model +'\n\n'
+													+ '* model style value:\n'+ col.style +'\n'
+													+ '* correct syntax ex:\n{"width":"1%", "white-space":"nowrap"}\n\n'
+													+ ex;
+												console.error(strTemp);
+											}
 										}
 									}
+								});
 
-									// D: Add cell to row
-									//$newRow.append( $cell );
-									// TODO: TEST Below!! where we use above works great
-									$newRow.find('td:nth-child('+ (objTagData.cols.indexOf(key)+1) +')').text( val );
-								}
+								// C: Add cell to row (NOTE: Ignore `__next`, `__metadata`, etc.)
+								if ( key.indexOf('__') == -1 ) $newRow.append( $cell );
 							});
 
 							// 3: Add new table row if filter matched and only if the cell(s) were populated
@@ -435,13 +464,13 @@
 							if ( isFilterPassed ) $(objTable).find('> tbody').append( $newRow );
 						});
 
-						// C: OPTIONS: Setup tablesorter
+						// 3.C.3: OPTIONS: tablesorter
 						if ( objTagData.tableSorter && $.tablesorter ) {
 							objTagData.tablesorter({ sortList:objTagData.tableSorter.sortList }); // Sort by (Col#/Asc=0,Desc=1)
 							objTagData.tableSorter.htmlEle = $(objTable);
 						}
 
-						// D: Show message when no rows
+						// 3.C.4: Last: Show message when no rows
 						if ( $(objTable).find('tbody tr').length == 0 ) {
 							$(objTable).find('tbody').append('<tr><td colspan="'+ $(objTable).find('thead th').length +'" style="color:#ccc; text-align:center;">'+ APP_STRINGS[APP_OPTS.language].noRows +'</td></tr>');
 						}
