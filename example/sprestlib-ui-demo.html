@@ -6,7 +6,7 @@
 	<meta name="website"     content="https://github.com/gitbrent/SpRestLib/">
 	<meta name="keywords"    content="SpRestLib, JavaScript, js-sharepoint, OData, REST, SharePoint 2013, SP2013, SharePoint 2016, SP2016, SharePoint Online">
 	<meta name="description" content="Content Editor WebPart to showcase SpRestLib-UI features and capabilities">
-	<meta name="revised"     content="20180110">
+	<meta name="revised"     content="20180111">
 
 	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300">
 	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:700">
@@ -251,13 +251,13 @@
 					$('#htmlEleTab1Code pre code').text( htmlEleTab1 );
 					$('#htmlEleTab1Html').html( htmlEleTab1 );
 
-					var htmlEleTab2 = '<table class="tabModern" data-sprlib=\'{ "list":"Departments", "cols":["Title","Modified"], "limit":11 }\'></table>';
+					var htmlEleTab2 = '<table class="tabModern" data-sprlib=\'{ "list":"Departments", "cols":["Title",{"name":"Modified","format":"INTLTIME"}], "limit":11 }\'></table>';
 					$('#htmlEleTab2Code pre code').text( htmlEleTab2 );
 					$('#htmlEleTab2Html').html( htmlEleTab2 );
 
 					var htmlEleTab3 = '<table class="tabModern" border="0" cellpadding="0" cellspacing="0">\n'
 						+ '  <thead><tr><th>Emp ID</th><th>Employee Name</th><th>Badge #</th></tr></thead>\n'
-						+ '  <tbody data-sprlib=\'{ "list":"Employees", "cols":["Id","Name","Badge_x0020_Number"], "limit":12 }\'></tbody>\n'
+						+ '  <tbody data-sprlib=\'{ "list":"Employees", "cols":["Id","Name",{"name":"Badge_x0020_Number","class":"nowctr"}], "limit":12 }\'></tbody>\n'
 						+ '</table>';
 					$('#htmlEleTab3Code pre code').text( htmlEleTab3 );
 					$('#htmlEleTab3Html').html( htmlEleTab3 );
