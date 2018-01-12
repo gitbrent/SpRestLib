@@ -1043,22 +1043,24 @@ The following HTML element tags can be populated:
 * other: (`input`, `p`, `span`, etc.): populates a single, plain text value
 
 ### Data Binding Options
-| Option        | Type    | Description                    | Possible Values                     |
-| :------------ | :------ | :----------------------------- | :---------------------------------- |
-| `list`        | string  | **required** list/library name | Ex:`list: "Employees"`              |
-| `cols`        | array   | columns to be selected         | Ex:`cols: ["ID","Title"]`           |
-| `filter`      | string  | query filter value             | Ex:`filter: {"col":"ID", "op":"eq", "val":"99"}` |
-| `limit`       | integer | max items to return            | Ex:`limit: 100`                      |
-| `options`     | string  | table/tbody options            | Ex:`showBusy: true`                  |
-| `tablesorter` | string  | add jquery TableSorter plugin  | (only for tables)                    |
-| `text`        | string  | text string to show            | (only for select). Ex:`text:"Title"` |
-| `value`       | string  | value string to show           | (only for select). Ex:`value:"ID"`   |
+| Option        | Type    | Description                    | Possible Values                                                   |
+| :------------ | :------ | :----------------------------- | :---------------------------------------------------------------- |
+| `list`        | string  | **REQUIRED** list/library name | Ex:`list: "Employees"`                                            |
+| `cols`        | array   | columns to be selected         | Ex:`cols: ["ID","Title"]`                                         |
+| `filter`      | string  | query filter value             | Ex:`filter: {"col":"ID", "op":"eq", "val":"99"}`                  |
+| `format`      | string  | date format option             | Any of: `US`,`DATE`,`INTL`,`INTLTIME`,`ISO`. Ex:`format: "INTL"`  |
+| `limit`       | integer | max items to return            | Ex:`limit: 100`                                                   |
+| `options`     | string  | table/tbody options            | Ex:`showBusy: true`                                               |
+| `tablesorter` | string  | add jquery TableSorter plugin  | (only for tables)                                                 |
+| `text`        | string  | text string to show            | (only for select). Ex:`text:"Title"`                              |
+| `value`       | string  | value string to show           | (only for select). Ex:`value:"ID"`                                |
 
 #### Examples
 ```html
 <!-- table/tbody -->
-<table data-sprlib='{ "foreach": {"list":"Employees", "filter":{"col":"Active", "op":"eq", "val":true}}, "options":{"showBusySpinner":true} }'>
-<tbody data-sprlib='{ "foreach": {"list":"Employees", "cols":["Name","Utilization_x0020_Pct"] } }'></tbody>
+<table data-sprlib='{ "list":"Employees", "filter":{"col":"Active", "op":"eq", "val":true}}, "options":{"showBusySpinner":true} }'>
+<tbody data-sprlib='{ "list":"Employees", "cols":["Name","Utilization_x0020_Pct"] } }'></tbody>
+<table data-sprlib='{ "list":"Departments", "cols":["Title",{"name":"Modified","format":"INTLTIME"}], "limit":10 }\'></table>
 
 <!-- select -->
 <select data-sprlib='{ "list":"Employees", "value":"Id", "text":"Name" }'></select>
@@ -1077,7 +1079,7 @@ The following HTML element tags can be populated:
 Refreshes the SharePoint page security digest token.  
 `sprLib.renewSecurityToken()`
 
-Starting in SP2013, .aspx pages include a security digest token in a hidden input element that will expire
+Starting in SP2013, `.aspx` pages include a security digest token in a hidden input element that will expire
 after 30 minutes (by default).
 
 This method allows the refresh of this value, which can be useful in certain cases.
