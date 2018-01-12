@@ -33,7 +33,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 (function(){
 	// APP VERSION/BUILD
 	var APP_VER = "1.5.0-beta";
-	var APP_BLD = "20180109";
+	var APP_BLD = "20180111";
 	var DEBUG = false; // (verbose mode/lots of logging)
 	// ENUMERATIONS
 	var ENUM_PRINCIPALTYPES = {
@@ -728,8 +728,8 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 				// STEP 1: Param Setup
 				// B: DESIGN/OPTION: If no etag is provided, consider it a force (a faux {OPTION})
 				jsonData.__metadata = jsonData.__metadata || {};
-				// Ensure we dont pass an etag
-				delete jsonData.__metadata.etag;
+				delete jsonData.__metadata.etag; // Ensure we dont pass an etag
+				delete jsonData.__next; // sprLib may return `next` which in turn may be passed here subsequently - its invalid, so remove it
 
 				// STEP 2: Create item
 				Promise.resolve()
@@ -803,8 +803,8 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 				delete jsonData.ID; delete jsonData.Id; delete jsonData.iD; delete jsonData.id;
 				// B: DESIGN/OPTION: If no etag is provided, consider it a force (a faux {OPTION})
 				jsonData.__metadata = jsonData.__metadata || {};
-				// Ensure we dont pass junk as etag or SP will error
-				if ( jsonData.__metadata.etag == "" || jsonData.__metadata.etag == null ) delete jsonData.__metadata.etag;
+				if ( jsonData.__metadata.etag == "" || jsonData.__metadata.etag == null ) delete jsonData.__metadata.etag; // Ensure junk isnt passed, as etag on SP will error
+				delete jsonData.__next; // sprLib may return `next` which in turn may be passed here subsequently - its invalid, so remove it
 
 				// STEP 2: Update item
 				Promise.resolve()
@@ -875,8 +875,8 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 				delete jsonData.ID; delete jsonData.Id; delete jsonData.iD; delete jsonData.id;
 				// B: DESIGN/OPTION: If no etag is provided, consider it a force (a faux {OPTION})
 				jsonData.__metadata = jsonData.__metadata || {};
-				// Ensure we dont pass junk as etag or SP will error
-				if ( jsonData.__metadata.etag == "" || jsonData.__metadata.etag == null ) delete jsonData.__metadata.etag;
+				if ( jsonData.__metadata.etag == "" || jsonData.__metadata.etag == null ) delete jsonData.__metadata.etag; // Ensure junk isnt passed, as etag on SP will error
+				delete jsonData.__next; // sprLib may return `next` which in turn may be passed here subsequently - its invalid, so remove it
 
 				// STEP 2: Update item
 				Promise.resolve()
