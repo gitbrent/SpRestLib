@@ -30,7 +30,7 @@
 (function(){
 	// APP VERSION/BUILD
 	var APP_VER = "1.0.0-beta";
-	var APP_BLD = "20180111";
+	var APP_BLD = "20180114";
 	var SPRLIB_REQ = "1.4.0+";
 	var DEBUG = false; // (verbose mode/lots of logging)
 	// APP MESSAGE STRINGS (Internationalization)
@@ -86,7 +86,9 @@
 	sprLib.ui.version = APP_VER+'-'+APP_BLD;
 
 	/* TODO:
-	- Add `Intl` (i18n) support (its supported in IE11!!) - Date and Currency formats are awesome (add Direction for our R->L users too?)
+	* Add On-demand/Ad-hoc support (enable parsing/population *after* page is loaded)
+	* Add support for callback, so users can do things after the element is populated (Select a default, show a total somewhere, etc.)
+	* Add `Intl` (i18n) support (its supported in IE11!!) - Date and Currency formats are awesome (add Direction for our R->L users too?)
 	*/
 
 	/* ===============================================================================================
@@ -287,20 +289,18 @@
 
 				// B: Ignore garbage tags or tags w/o a `list`
 				if ( typeof objTagData !== 'object' || !objTagData.list ) {
-					if (DEBUG) {
-						console.log('**Warning** this tag has `data-sprlib` but is defective: its data is not an object, or it lacks the `list` prop');
-						console.log(objTagData);
-						console.log(typeof objTagData);
-						console.log(objTagData.list ? objTagData.list : '!objTagData.list does not exist!');
-					}
+					console.log('**Warning** this tag has `data-sprlib` but is defective: its data is not an object, or it lacks the `list` prop');
+					console.log(objTagData);
+					console.log(typeof objTagData);
+					console.log(objTagData.list ? objTagData.list : '!objTagData.list does not exist!');
 					return;
 				}
 			}
 			catch(ex) {
-				console.log( 'Unable to ingest data-sprlib!' + '\n' );
-				console.log( 'tag.: ' + $(tag)[0].outerHTML + '\n' );
-				console.log( 'data: ' );
-				console.log( $(tag).data('sprlib') );
+				console.log('Unable to ingest data-sprlib!' + '\n' );
+				console.log('tag.: ' + $(tag)[0].outerHTML + '\n' );
+				console.log('data: ' );
+				console.log($(tag).data('sprlib') );
 				/* TODO: better err msg?
 				var strTemp = 'PARSE ERROR:\n\n(text requires "model"/"cols")\n'
 					+ 'Your code:\n'+ $(tag)['context'].outerHTML.replace(/\&quot\;/gi,'"') +'\n\n'
@@ -349,9 +349,9 @@
 			if (DEBUG) { console.log('objTagData: '); console.log(objTagData); }
 			sprLib.list(objTagData.list).getItems({
 				listCols:     arrColNames,
-				queryFilter:  objTagData.filter  || null,
-				queryLimit:   objTagData.limit   || null,
-				queryOrderby: objTagData.orderby || null,
+				queryFilter:  objTagData.filter || null,
+				queryLimit:   objTagData.limit  || null,
+				queryOrderby: objTagData.order  || null,
 				metadata:     false
 			})
 			.then(function(arrItems){
@@ -421,10 +421,19 @@
 
 								// B: Populate and style cell for this result/column
 								objTagData.cols.forEach(function(col){
-									if ( typeof col === 'string' && objTagData.cols.indexOf(key) > -1 ) {
-										//$newRow.find('td:nth-child('+ (objTagData.cols.indexOf(key)+1) +')').text( val );
-										$cell.text( val );
+									// CASE: "Title" or "Author/ID"
+									if ( typeof col === 'string' ) {
+										// FIXME: Current support is only for: 1-level deep (no User/Group/ID queries, etc.)
+										if ( col.indexOf("/") > -1 && col.split("/").length == 2) {
+											// `key='Manager'` val=`{Title:'Brent'}`
+											if ( key == col.split("/")[0] && val && val[col.split("/")[1]] ) $cell.text( val[col.split("/")[1]] );
+										}
+										else if ( objTagData.cols.indexOf(key) > -1 ) {
+											$cell.text( val );
+										}
 									}
+									// CASE: {name:"Title"} or {name:"Author/ID"}
+									// TODO: handle `Author/Title` etc. (SEE ABOVE)
 									else if ( col.hasOwnProperty('name') && col.name == key ) {
 										// A: Stringify boolean values (true/false)
 										if ( typeof val === 'boolean' ) val = val.toString().replace('true','Yes').replace('false','No');
@@ -439,19 +448,7 @@
 
 										// C: Add CSS style and/or dispClass (if any)
 										if ( col.class ) { $cell.addClass( col.class ); }
-										if ( col.style ) {
-											try {
-												if ( typeof JSON.parse(col.style) === 'object' ) $cell.css( JSON.parse(col.style) );
-											}
-											catch(ex) {
-												var strTemp = 'PARSE ERROR:\n'
-													+ 'Unable to parse [JSON.parse] and/or set the css style for data model: '+ bindJSON[bindOper].model +'\n\n'
-													+ '* model style value:\n'+ col.style +'\n'
-													+ '* correct syntax ex:\n{"width":"1%", "white-space":"nowrap"}\n\n'
-													+ ex;
-												console.error(strTemp);
-											}
-										}
+										if ( col.style ) { $cell.css( col.style ); }
 									}
 								});
 
@@ -481,9 +478,16 @@
 					if ( $(tag).is('input[type="text"]') ) $(tag).val( objTagData.data[0][objTagData.value] );
 					else if ( $(tag).not('input') ) $(tag).text( objTagData.data[0][objTagData.value] );
 				}
-
 			})
 			.catch(function(strErr){
+				if ( $(tag).is('table') || $(tag).is('tbody') ) {
+					if ( $(tag).find('tbody').length == 0 ) $(tag).append('<tbody/>');
+					$(tag).find('tbody').append(
+						'<tr>'
+						+ '<td style="padding:10px; color:white; background:lightcoral;" colspan="'+ ($(tag).find('thead th').length > 0 ? (arrColNames.length || $(tag).find('thead th').length) : 1) +'">'
+						+ strErr +'</td></tr>'
+					);
+				}
 				// TODO: show error in tag
 				console.error(strErr);
 			});
