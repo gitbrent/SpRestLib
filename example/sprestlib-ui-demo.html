@@ -224,40 +224,53 @@
 			</div>
 
 			<div id="tabUITable" data-tab="Data Binding: Table">
+				<!-- EXAMPLE 1 -->
 				<div class="subTitle" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
-					<div class="arrow active"></div>Example 1:
+					<div class="arrow active"></div>Example 1: (via `&lt;table&gt;`): All <code>Departments</code> items
 				</div>
 				<div>
 					<div id="htmlEleTab1Code"><pre><code class="language-html"></code></pre></div>
 					<div id="htmlEleTab1Html" style="margin-bottom:20px"></div>
 				</div>
+
+				<!-- EXAMPLE 2 -->
 				<div class="subTitle" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
-					<div class="arrow"></div>Example 2:
+					<div class="arrow"></div>Example 2: (via `&lt;tbody&gt;`): All <code>Departments</code> items - complex column object + using `class` &amp; `format`
 				</div>
 				<div style="display:none">
 					<div id="htmlEleTab2Code"><pre><code class="language-html"></code></pre></div>
 					<div id="htmlEleTab2Html" style="margin-bottom:20px"></div>
 				</div>
+
+				<!-- EXAMPLE 3 -->
 				<div class="subTitle" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
-					<div class="arrow"></div>Example 3:
+					<div class="arrow"></div>Example 3: (via `&lt;table&gt;`): Last 10 Modified Employees - `"format":"INTLTIME"`
 				</div>
 				<div style="display:none">
 					<div id="htmlEleTab3Code"><pre><code class="language-html"></code></pre></div>
 					<div id="htmlEleTab3Html"></div>
 				</div>
+
 				<!-- Populate HTML elements before doc.ready is fired -->
 				<script type="text/javascript">
-					var htmlEleTab1 = '<table class="tabModern" data-sprlib=\'{ "list":"Departments", "cols":["Id","Title"], "limit":10, "showBusy":true }\'></table>';
+					var htmlEleTab1 = '<table class="tabModern" data-sprlib=\'{ "list":"Departments", "cols":["Id","Title"], "limit":100, "showBusy":true }\'></table>';
 					$('#htmlEleTab1Code pre code').text( htmlEleTab1 );
 					$('#htmlEleTab1Html').html( htmlEleTab1 );
 
-					var htmlEleTab2 = '<table class="tabModern" data-sprlib=\'{ "list":"Departments", "cols":["Title",{"name":"Modified","format":"INTLTIME"}], "limit":11 }\'></table>';
+					var htmlEleTab2 = '<table class="tabModern" border="0" cellpadding="0" cellspacing="0">\n'
+						+ '  <thead>\n    <tr><th>Department Title</th><th>Last Modified By</th><th>Last Modified</th></tr>\n  </thead>\n'
+						+ '  <tbody data-sprlib=\'{ "list":"Departments", "cols":["Title","Editor/Title",{"name":"Modified","format":"INTLTIME","class":"nowctr"}], "limit":100 }\'></tbody>\n'
+						+ '</table>';
 					$('#htmlEleTab2Code pre code').text( htmlEleTab2 );
 					$('#htmlEleTab2Html').html( htmlEleTab2 );
 
-					var htmlEleTab3 = '<table class="tabModern" border="0" cellpadding="0" cellspacing="0">\n'
-						+ '  <thead><tr><th>Emp ID</th><th>Employee Name</th><th>Badge #</th></tr></thead>\n'
-						+ '  <tbody data-sprlib=\'{ "list":"Employees", "cols":["Id","Name",{"name":"Badge_x0020_Number","class":"nowctr"}], "limit":12 }\'></tbody>\n'
+					var htmlEleTab3 = '<table \n  class="tabModern" \n'
+						+ '  data-sprlib=\'{\n'
+						+ '    "list": "Employees",\n'
+						+ '    "cols": [ "Title", "Manager/Title", {"name":"Modified", "format":"INTLTIME", "style":"width:5%"} ],\n'
+						+ '   "order": "Modified desc",\n'
+						+ '   "limit": 10\n'
+						+ '  }\'>\n'
 						+ '</table>';
 					$('#htmlEleTab3Code pre code').text( htmlEleTab3 );
 					$('#htmlEleTab3Html').html( htmlEleTab3 );
