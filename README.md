@@ -98,9 +98,12 @@ using the JavaScript SharePoint App Model.
     - [Get User Groups (`SPGroup`)](#get-user-groups-spgroup)
       - [Sample Code](#sample-code-11)
   - [Form Binding](#form-binding)
-    - [Data Binding Types](#data-binding-types)
-    - [Data Binding Options](#data-binding-options)
-      - [Examples](#examples-1)
+    - [Supported HTML Tags](#supported-html-tags)
+    - [HTML Tag Properties](#html-tag-properties)
+      - [HTML Tag Properties: Table](#html-tag-properties-table)
+      - [HTML Tag Properties: Select](#html-tag-properties-select)
+      - [HTML Tag Properties: Cols Options](#html-tag-properties-cols-options)
+    - [Examples](#examples-1)
   - [Utility Methods](#utility-methods)
 - [Node.js and SharePoint Online](#nodejs-and-sharepoint-online)
   - [Connect To Office 365/SharePoint Online With Node.js](#connect-to-office-365sharepoint-online-with-nodejs)
@@ -1035,35 +1038,54 @@ Many different HTML tags can be populated by adding an `data-sprlib` property to
 Syntax:
 `<tag data-sprlib='{ options }'>`
 
-### Data Binding Types
+### Supported HTML Tags
 
 The following HTML element tags can be populated:
 * select: `select` can be populated with various text/value options
 * table: `table` or `tbody` can be populated with 1-n SharePoint List columns
 * other: (`input`, `p`, `span`, etc.): populates a single, plain text value
 
-### Data Binding Options
+### HTML Tag Properties
+| Name          | Type    | Description                    | Possible Values                                      |
+| :------------ | :------ | :----------------------------- | :--------------------------------------------------- |
+| `list`        | string  | **REQUIRED** list/library name | Ex:`"list": "Employees"`                             |
+| `cols`        | array   | columns to be selected         | Ex:`"cols": ["ID","Title"]`                          |
+| `filter`      | string  | query filter value             | Ex:`"filter": {"col":"ID", "op":"eq", "val":"99"}`   |
+| `limit`       | integer | max items to return            | Ex:`"limit": 100`                                    |
+| `options`     | string  | table/tbody options            | (see below)                                          |
+`showBusy`
+
+* `cols` is an array of either strings (Ex: `cols: ["ID","Title"]`), objects (Ex: `cols: [{"name":"Title"}]`) or a combination of the two (see Options below)
+
+#### HTML Tag Properties: Table
+| Name          | Type    | Description                    | Possible Values                                                   |
+| :------------ | :------ | :----------------------------- | :---------------------------------------------------------------- |
+| `tablesorter` | string  | add jquery TableSorter plugin  | (only for tables)                                                 |
+
+#### HTML Tag Properties: Select
 | Option        | Type    | Description                    | Possible Values                                                   |
 | :------------ | :------ | :----------------------------- | :---------------------------------------------------------------- |
-| `list`        | string  | **REQUIRED** list/library name | Ex:`list: "Employees"`                                            |
-| `cols`        | array   | columns to be selected         | Ex:`cols: ["ID","Title"]`                                         |
-| `filter`      | string  | query filter value             | Ex:`filter: {"col":"ID", "op":"eq", "val":"99"}`                  |
-| `format`      | string  | date format option             | Any of: `US`,`DATE`,`INTL`,`INTLTIME`,`ISO`. Ex:`format: "INTL"`  |
-| `limit`       | integer | max items to return            | Ex:`limit: 100`                                                   |
-| `options`     | string  | table/tbody options            | Ex:`showBusy: true`                                               |
-| `tablesorter` | string  | add jquery TableSorter plugin  | (only for tables)                                                 |
 | `text`        | string  | text string to show            | (only for select). Ex:`text:"Title"`                              |
 | `value`       | string  | value string to show           | (only for select). Ex:`value:"ID"`                                |
 
-#### Examples
+#### HTML Tag Properties: Cols Options
+| Option        | Type    | Description                    | Possible Values                                                   |
+| :------------ | :------ | :----------------------------- | :---------------------------------------------------------------- |
+| `name`        | string  | the OData column name          | Examples: `"Title"`, `"Hire_x0020_Date"`, `"AssignedTo/Email"`    |
+| `class`       | string  | CSS class name to use          | Ex:`"class":"highlight"`                                          |
+| `format`      | string  | date format option             | Any of: `US`,`DATE`,`INTL`,`INTLTIME`,`ISO`. Ex:`format: "INTL"`  |
+| `label`       | string  | text for table header          | (only for table tags without thead) show "Hire Date" instead of "Hire_x0020_Date", etc. |
+| `style`       | string  | CSS style to use               | Ex:`"style":"width:50%; color:red;"`                              |
+
+### Examples
 ```html
 <!-- table/tbody -->
-<table data-sprlib='{ "list":"Employees", "filter":{"col":"Active", "op":"eq", "val":true}}, "options":{"showBusySpinner":true} }'>
-<tbody data-sprlib='{ "list":"Employees", "cols":["Name","Utilization_x0020_Pct"] } }'></tbody>
-<table data-sprlib='{ "list":"Departments", "cols":["Title",{"name":"Modified","format":"INTLTIME"}], "limit":10 }\'></table>
+<table data-sprlib='{ "list":"Employees", "cols":["Name"], "filter":{"col":"Active", "op":"eq", "val":true}} }'>
+<table data-sprlib='{ "list":"Employees", "cols":["Name",{"name":"Utilization_x0020_Pct","label":"Util%"}] } }'></tbody>
+<tbody data-sprlib='{ "list":"Departments", "cols":["Title",{"name":"Modified","format":"INTLTIME"}], "limit":10 }\'></table>
 
 <!-- select -->
-<select data-sprlib='{ "list":"Employees", "value":"Id", "text":"Name" }'></select>
+<select data-sprlib='{ "list":"Employees", "value":"Id", "text":"Name", "options":{"showBusy":true} }'></select>
 
 <!-- input -->
 <input type="text" data-sprlib='{ "list":"Departments", "value":"Title" }' placeholder="Departments.Title"></input>
