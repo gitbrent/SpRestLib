@@ -6,7 +6,7 @@
 	<meta name="website"     content="https://github.com/gitbrent/SpRestLib/">
 	<meta name="keywords"    content="SpRestLib, JavaScript, js-sharepoint, OData, REST, SharePoint 2013, SP2013, SharePoint 2016, SP2016, SharePoint Online">
 	<meta name="description" content="Content Editor WebPart to showcase SpRestLib-UI features and capabilities">
-	<meta name="revised"     content="20180111">
+	<meta name="revised"     content="20180118">
 
 	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300">
 	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:700">
@@ -49,7 +49,7 @@
 
 	<script type="text/javascript">
 		$.ajaxSetup({ cache:false });
-		var APP_BLD = 20171031;
+		var APP_BLD = 20180118;
 		var HTML_SPINNER = '<div class="sprlib-spinner"><div class="sprlib-bounce1"></div><div class="sprlib-bounce2"></div><div class="sprlib-bounce3"></div></div>';
 
 		// ==================================================================================================================
@@ -259,7 +259,7 @@
 
 					var htmlEleTab2 = '<table class="tabModern" border="0" cellpadding="0" cellspacing="0">\n'
 						+ '  <thead>\n    <tr><th>Department Title</th><th>Last Modified By</th><th>Last Modified</th></tr>\n  </thead>\n'
-						+ '  <tbody data-sprlib=\'{ "list":"Departments", "cols":["Title","Editor/Title",{"name":"Modified","format":"INTLTIME","class":"nowctr"}], "limit":100 }\'></tbody>\n'
+						+ '  <tbody data-sprlib=\'{ "list":"Departments", "cols":["Title","Editor/Title",{"name":"Modified","format":"INTLTIME","class":"nowctr","style":"width:5%"}] }\'></tbody>\n'
 						+ '</table>';
 					$('#htmlEleTab2Code pre code').text( htmlEleTab2 );
 					$('#htmlEleTab2Html').html( htmlEleTab2 );
@@ -267,7 +267,7 @@
 					var htmlEleTab3 = '<table \n  class="tabModern" \n'
 						+ '  data-sprlib=\'{\n'
 						+ '    "list": "Employees",\n'
-						+ '    "cols": [ "Title", "Manager/Title", {"name":"Modified", "format":"INTLTIME", "style":"width:5%"} ],\n'
+						+ '    "cols": [ "Title", {"name":"Manager/Title", "label":"Manager"}, {"name":"Modified", "format":"INTLTIME", "style":"width:5%; white-space:nowrap;"} ],\n'
 						+ '   "order": "Modified desc",\n'
 						+ '   "limit": 10\n'
 						+ '  }\'>\n'
@@ -291,6 +291,16 @@
 						<div><div id="htmlEleSel2Html"></div></div>
 					</div>
 				</div>
+				<!-- Populate HTML elements before doc.ready is fired -->
+				<script type="text/javascript">
+				var htmlEleSel1 = '<select data-sprlib=\'{ "list":"Employees", "value":"Id", "text":"Name", "order":"ID desc", "limit":20 }\'></select>';
+				$('#htmlEleSel1Code pre code').text( htmlEleSel1 );
+				$('#htmlEleSel1Html').html( htmlEleSel1 );
+
+				var htmlEleSel2 = '<select data-sprlib=\'{ "list":"Employees", "value":"Name", "text":"Id", "limit":30 }\'></select>';
+				$('#htmlEleSel2Code pre code').text( htmlEleSel2 );
+				$('#htmlEleSel2Html').html( htmlEleSel2 );
+				</script>
 			</div>
 
 			<div id="tabUIMisc" data-tab="Data Binding: Misc">
@@ -316,14 +326,6 @@
 					var htmlEleText = '<input type="text" data-sprlib=\'{ "list":"Departments", "value":"Title" }\'></input>';
 					$('#htmlEleTextCode pre code').text( htmlEleText );
 					$('#htmlEleTextHtml').html( htmlEleText );
-
-					var htmlEleSel1 = '<select data-sprlib=\'{ "list":"Employees", "value":"Id", "text":"Name" }\'></select>';
-					$('#htmlEleSel1Code pre code').text( htmlEleSel1 );
-					$('#htmlEleSel1Html').html( htmlEleSel1 );
-
-					var htmlEleSel2 = '<select data-sprlib=\'{ "list":"Employees", "value":"Name", "text":"Id" }\'></select>';
-					$('#htmlEleSel2Code pre code').text( htmlEleSel2 );
-					$('#htmlEleSel2Html').html( htmlEleSel2 );
 				</script>
 			</div>
 		</div>

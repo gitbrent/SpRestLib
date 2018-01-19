@@ -386,7 +386,7 @@
 								// C: Populate <thead>
 								var $row = $('<tr/>');
 								$.each(objTagData.cols, function(key,col){
-									if ( !col.hidden ) $row.append('<th>'+ (col.dispName || col.name || col) +'</th>');
+									if ( !col.hidden ) $row.append('<th>'+ (col.label || col.name || col) +'</th>');
 								});
 								$(tag).find('> thead').append( $row );
 
@@ -397,14 +397,13 @@
 								objTable = $(tag);
 							}
 							// CASE 2: <tbody>
-
 							else if ( $(tag).is('tbody') ) {
 								$(tag).empty();
 								objTable = $(tag).parent('table');
 							}
 						}
 
-						// 3.C.2: Add each table row
+						// 3.C.2: Add table rows
 						objTagData.data.forEach(function(arrData,i){
 							// 1: Add row
 							isFilterPassed = false;
@@ -440,15 +439,21 @@
 
 										// B: Create cell
 										if      ( val && col.isNumPct && !isNaN(val) )               $cell.text( Math.round(val*100)+'%' );
+										// FIXME: get formatting working! (remove `dataType` below, use format)
 										else if ( val && col.dataType == 'Currency' && !isNaN(val) ) $cell.text( formatCurrency(val) );
 										else if ( val && col.dataType == 'DateTime' )                $cell.text( formatDate(val, (col.dateFormat||'INTL')) );
-										// FIXME: get format working!
 										else if ( val && Object.keys(APP_DATE_FORMATS).indexOf(col.format) > -1 ) $cell.text( formatDate(val,(col.format||'INTL')) );
 										else                                                         $cell.text( (val || '') );
 
 										// C: Add CSS style and/or dispClass (if any)
 										if ( col.class ) { $cell.addClass( col.class ); }
-										if ( col.style ) { $cell.css( col.style ); }
+										if ( col.style ) {
+											col.style.split(';').forEach(function(style){
+												if ( style.indexOf(':') && style.split(':').length == 2 ) {
+													$cell.css(style.split(':')[0].toString().trim(), style.split(':')[1].toString().trim());
+												}
+											});
+										}
 									}
 								});
 
