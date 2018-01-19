@@ -1053,23 +1053,23 @@ The following HTML element tags can be populated:
 | `filter`      | string  | query filter value             | Ex:`"filter": {"col":"ID", "op":"eq", "val":"99"}`   |
 | `limit`       | integer | max items to return            | Ex:`"limit": 100`                                    |
 | `options`     | string  | table/tbody options            | (see below)                                          |
-`showBusy`
+| `showBusy`    | boolean | show busy animation during load | (shows CSS animation before control loads)          |
 
 * `cols` is an array of either strings (Ex: `cols: ["ID","Title"]`), objects (Ex: `cols: [{"name":"Title"}]`) or a combination of the two (see Options below)
 
 #### HTML Tag Properties: Table
 | Name          | Type    | Description                    | Possible Values                                                   |
 | :------------ | :------ | :----------------------------- | :---------------------------------------------------------------- |
-| `tablesorter` | string  | add jquery TableSorter plugin  | (only for tables)                                                 |
+| `tablesorter` | string  | add jQuery TableSorter plugin  | (only for tables). Adds the jQuery tableSorter library to table   |
 
 #### HTML Tag Properties: Select
-| Option        | Type    | Description                    | Possible Values                                                   |
+| Name          | Type    | Description                    | Possible Values                                                   |
 | :------------ | :------ | :----------------------------- | :---------------------------------------------------------------- |
 | `text`        | string  | text string to show            | (only for select). Ex:`text:"Title"`                              |
 | `value`       | string  | value string to show           | (only for select). Ex:`value:"ID"`                                |
 
 #### HTML Tag Properties: Cols Options
-| Option        | Type    | Description                    | Possible Values                                                   |
+| Name          | Type    | Description                    | Possible Values                                                   |
 | :------------ | :------ | :----------------------------- | :---------------------------------------------------------------- |
 | `name`        | string  | the OData column name          | Examples: `"Title"`, `"Hire_x0020_Date"`, `"AssignedTo/Email"`    |
 | `class`       | string  | CSS class name to use          | Ex:`"class":"highlight"`                                          |
