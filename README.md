@@ -1085,7 +1085,7 @@ The following HTML element tags can be populated:
 <tbody data-sprlib='{ "list":"Departments", "cols":["Title",{"name":"Modified","format":"INTLTIME"}], "limit":10 }\'></table>
 
 <!-- select -->
-<select data-sprlib='{ "list":"Employees", "value":"Id", "text":"Name", "options":{"showBusy":true} }'></select>
+<select data-sprlib='{ "list":"Employees", "value":"Id", "text":"Name", "showBusy":true }'></select>
 
 <!-- input -->
 <input type="text" data-sprlib='{ "list":"Departments", "value":"Title" }' placeholder="Departments.Title"></input>
