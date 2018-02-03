@@ -12,9 +12,7 @@ gulp.task('build', function(){
         .pipe(uglify())
         .pipe(sourcemaps.write('./'))
         .pipe(gulp.dest('dist/'));
-});
 
-gulp.task('build-ui', function(){
     gulp.src(['lib/jquery.min.js', 'lib/promise.min.js', 'dist/sprestlib.js', 'dist/sprestlib-ui.js'])
         .pipe(concat('sprestlib-ui.bundle.js'))
         .pipe(sourcemaps.init())
@@ -22,4 +20,9 @@ gulp.task('build-ui', function(){
         .pipe(uglify())
         .pipe(sourcemaps.write('./'))
         .pipe(gulp.dest('dist/'));
+
+    gulp.src(['dist/sprestlib.js'])
+        .pipe(concat('sprestlib.min.js'))
+        .pipe(uglify())
+        .pipe(gulp.dest('dist'));
 });

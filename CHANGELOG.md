@@ -4,6 +4,10 @@
 [Full Changelog](https://github.com/gitbrent/sprestlib/compare/v1.4.0...v1.5.0)
 
 **Implemented Enhancements:**
+- Form binding/population spun off into separate `sprestlib-ui.js` library
+- Added new dist file - minified library: `sprestlib.min.js`
+
+
 
 
 
