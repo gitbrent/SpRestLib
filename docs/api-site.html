@@ -1,0 +1,330 @@
+<html lang="en"><head><meta charset="utf-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><title>Site (SPSite) Methods · SpRestLib</title><meta name="viewport" content="width=device-width"/><meta name="generator" content="Docusaurus"/><meta property="og:title" content="Site (SPSite) Methods · SpRestLib"/><meta property="og:type" content="website"/><meta property="og:url" content="https://gitbrent.github.io/SpRestLib/index.html"/><meta property="og:description" content="**************************************************************************************************"/><link rel="shortcut icon" href="/SpRestLib/img/favicon.png"/><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/hybrid.min.css"/><script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script><link rel="stylesheet" href="/SpRestLib/css/main.css"/></head><body class="sideNavVisible"><div class="fixedHeaderContainer"><div class="headerWrapper wrapper"><header><a href="/SpRestLib/"><img class="logo" src="/SpRestLib/img/sprestlib.svg"/><h2 class="headerTitle">SpRestLib</h2></a><div class="navigationWrapper navigationSlider"><nav class="slidingNav"><ul class="nav-site nav-site-internal"><li><a href="https://github.com/gitbrent/SpRestLib/releases" target="_self">Download</a></li><li><a href="/SpRestLib/docs/installation.html" target="_self">Get Started</a></li><li><a href="/SpRestLib/docs/api-rest.html" target="_self">API Documentation</a></li><li><a href="https://github.com/gitbrent/SpRestLib/" target="_self">GitHub</a></li></ul></nav></div></header></div></div><div class="navPusher"><div class="docMainWrapper wrapper"><div class="container docsNavContainer" id="docsNav"><nav class="toc"><div class="toggleNav"><section class="navWrapper wrapper"><div class="navBreadcrumb wrapper"><div class="navToggle" id="navToggler"><i></i></div><h2><i>›</i><span>API Reference</span></h2></div><div class="navGroups"><div class="navGroup navGroupActive"><h3>Get Started</h3><ul><li class="navListItem"><a class="navItem" href="/SpRestLib/docs/installation.html">Installation</a></li><li class="navListItem"><a class="navItem" href="/SpRestLib/docs/promises.html">Promise You Will Love It</a></li></ul></div><div class="navGroup navGroupActive"><h3>Features</h3><ul><li class="navListItem"><a class="navItem" href="/SpRestLib/docs/feat-integration.html">Library Integration</a></li><li class="navListItem"><a class="navItem" href="/SpRestLib/docs/feat-promises.html">Promise-based Operations</a></li><li class="navListItem"><a class="navItem" href="/SpRestLib/docs/feat-node.html">SharePoint via Node.js</a></li><li class="navListItem"><a class="navItem" href="/SpRestLib/docs/feat-utilities.html">Utility Methods</a></li></ul></div><div class="navGroup navGroupActive"><h3>API Reference</h3><ul><li class="navListItem"><a class="navItem" href="/SpRestLib/docs/api-rest.html">REST API Methods</a></li><li class="navListItem"><a class="navItem" href="/SpRestLib/docs/api-list.html">List/Library (SPList) Methods</a></li><li class="navListItem navListItemActive"><a class="navItem navItemActive" href="/SpRestLib/docs/api-site.html">Site (SPSite) Methods</a></li><li class="navListItem"><a class="navItem" href="/SpRestLib/docs/api-user.html">User Methods</a></li></ul></div><div class="navGroup navGroupActive"><h3>SpRestLib UI</h3><ul><li class="navListItem"><a class="navItem" href="/SpRestLib/docs/ui-form-binding.html">Form Binding</a></li></ul></div></div></section></div><script>
+          var toggler = document.getElementById('navToggler');
+          var nav = document.getElementById('docsNav');
+          toggler.onclick = function() {
+            nav.classList.toggle('docsSliderActive');
+          };
+        </script></nav></div><div class="container mainContainer"><div class="wrapper"><div class="post"><header class="postHeader"><h1>Site (SPSite) Methods</h1></header><article><div><span><hr>
+<p>Table of Contents</p>
+<ul>
+<li><a href="#syntax">Syntax</a></li>
+<li><a href="#get-site-info">Site Info</a>
+<ul>
+<li><a href="#site-properties">Site Properties</a></li>
+<li><a href="#sample-code-3">Sample Code</a></li>
+</ul></li>
+<li><a href="#get-site-lists">Site Lists</a>
+<ul>
+<li><a href="#list-properties-1">List Properties</a></li>
+<li><a href="#sample-code-4">Sample Code</a></li>
+</ul></li>
+<li><a href="#get-site-permissions">Site Permissions</a>
+<ul>
+<li><a href="#perm-properties">Perm Properties</a></li>
+<li><a href="#sample-code-5">Sample Code</a></li>
+</ul></li>
+<li><a href="#get-site-groups">Site Groups</a>
+<ul>
+<li><a href="#group-properties">Group Properties</a></li>
+<li><a href="#sample-code-6">Sample Code</a></li>
+</ul></li>
+<li><a href="#get-site-roles">Site Roles</a>
+<ul>
+<li><a href="#role-properties">Role Properties</a></li>
+<li><a href="#sample-code-7">Sample Code</a></li>
+</ul></li>
+<li><a href="#get-site-subsites">Site Subsites</a>
+<ul>
+<li><a href="#subsite-properties">Subsite Properties</a></li>
+<li><a href="#sample-code-8">Sample Code</a></li>
+</ul></li>
+<li><a href="#get-site-users">Site Users</a>
+<ul>
+<li><a href="#user-properties">User Properties</a></li>
+<li><a href="#sample-code-9">Sample Code</a></li>
+</ul></li>
+</ul>
+<hr>
+<h2><a class="anchor" aria-hidden="true" name="syntax"></a><a href="#syntax" aria-hidden="true" class="hash-link" ><svg aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Syntax</h2>
+<p><code>sprLib.site().info()</code>  <br>
+<code>sprLib.site(siteUrl).info()</code></p>
+<p>Returns: Array of site properties</p>
+<h3><a class="anchor" aria-hidden="true" name="site-properties"></a><a href="#site-properties" aria-hidden="true" class="hash-link" ><svg aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Site Properties</h3>
+<table>
+<thead>
+<tr><th style="text-align:left">Property Name</th><th style="text-align:left">Type</th><th style="text-align:left">Description</th></tr>
+</thead>
+<tbody>
+<tr><td style="text-align:left"><code>AssociatedMemberGroup</code></td><td style="text-align:left">object</td><td style="text-align:left">Object with Group properties (<code>Id</code>,<code>Title</code>,<code>OwnerTitle</code>)</td></tr>
+<tr><td style="text-align:left"><code>AssociatedOwnerGroup</code></td><td style="text-align:left">object</td><td style="text-align:left">Object with Group properties (<code>Id</code>,<code>Title</code>,<code>OwnerTitle</code>)</td></tr>
+<tr><td style="text-align:left"><code>AssociatedVisitorGroup</code></td><td style="text-align:left">object</td><td style="text-align:left">Object with Group properties (<code>Id</code>,<code>Title</code>,<code>OwnerTitle</code>)</td></tr>
+<tr><td style="text-align:left"><code>Created</code></td><td style="text-align:left">string</td><td style="text-align:left">Date (ISO format) the site was created</td></tr>
+<tr><td style="text-align:left"><code>Description</code></td><td style="text-align:left">string</td><td style="text-align:left">Site Description</td></tr>
+<tr><td style="text-align:left"><code>Id</code></td><td style="text-align:left">GUID</td><td style="text-align:left">The SP GUID of the Site</td></tr>
+<tr><td style="text-align:left"><code>Language</code></td><td style="text-align:left">number</td><td style="text-align:left"><code>SP.Language.lcid</code> property</td></tr>
+<tr><td style="text-align:left"><code>LastItemModifiedDate</code></td><td style="text-align:left">string</td><td style="text-align:left">Date (ISO format) an item was last modified</td></tr>
+<tr><td style="text-align:left"><code>LastItemUserModifiedDate</code></td><td style="text-align:left">string</td><td style="text-align:left">Date (ISO format) an item was last modified by a User</td></tr>
+<tr><td style="text-align:left"><code>Owner</code></td><td style="text-align:left">object</td><td style="text-align:left">Object with Group properties (<code>Email</code>,<code>LoginName</code>,<code>Title</code>,<code>IsSiteAdmin</code>)</td></tr>
+<tr><td style="text-align:left"><code>RequestAccessEmail</code></td><td style="text-align:left">string</td><td style="text-align:left">Email that receives access requests for this site/subsite</td></tr>
+<tr><td style="text-align:left"><code>SiteLogoUrl</code></td><td style="text-align:left">string</td><td style="text-align:left">Relative URL to the site's logo image</td></tr>
+<tr><td style="text-align:left"><code>Title</code></td><td style="text-align:left">string</td><td style="text-align:left">The Title of the Site/Subsite</td></tr>
+<tr><td style="text-align:left"><code>Url</code></td><td style="text-align:left">string</td><td style="text-align:left">Absolute site URL</td></tr>
+<tr><td style="text-align:left"><code>WebTemplate</code></td><td style="text-align:left">string</td><td style="text-align:left">Web template name</td></tr>
+</tbody>
+</table>
+<h3><a class="anchor" aria-hidden="true" name="sample-code"></a><a href="#sample-code" aria-hidden="true" class="hash-link" ><svg aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Sample Code</h3>
+<pre><code class="hljs css javascript">sprLib.site().info()
+.then(<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">objSite</span>)</span>{ <span class="hljs-built_in">console</span>.table([objSite]) });
+
+<span class="hljs-comment">/*
+.-------------------------------------------------------------------------------------------------------------------------------------.
+|        Prop Name         |                                                Prop Value                                                |
+|--------------------------|----------------------------------------------------------------------------------------------------------|
+| AssociatedMemberGroup    | {"Id":8,"Title":"Dev Site Members","OwnerTitle":"Dev Site Owners"}                                       |
+| AssociatedOwnerGroup     | {"Id":6,"Title":"Dev Site Owners","OwnerTitle":"Dev Site Owners"}                                        |
+| AssociatedVisitorGroup   | {"Id":7,"Title":"Dev Site Visitors","OwnerTitle":"Dev Site Owners"}                                      |
+| Created                  | 2016-08-16T14:53:31.327                                                                                  |
+| Description              | Main O365 Dev Site for SpRestLib.                                                                        |
+| Id                       | 123b4f37-6a13-4bc8-869a-08b5e4b7c058                                                                     |
+| Language                 | 1033                                                                                                     |
+| LastItemModifiedDate     | 2017-10-28T23:06:13Z                                                                                     |
+| LastItemUserModifiedDate | 2017-10-28T23:06:13Z                                                                                     |
+| RequestAccessEmail       | someone@example.com                                                                                      |
+| SiteLogoUrl              | /sites/dev/SiteAssets/images/sample_company_logo.png                                                     |
+| Title                    | SpRestLib Dev Site                                                                                       |
+| Url                      | https://brent.sharepoint.com/sites/dev                                                                   |
+| WebTemplate              | STS                                                                                                      |
+| Owner                    | {"LoginName":"brent@microsoft.com","Title":"Brent Ely","Email":"brent@microsoft.com","IsSiteAdmin":true} |
+'-------------------------------------------------------------------------------------------------------------------------------------'
+*/</span>
+</code></pre>
+<h2><a class="anchor" aria-hidden="true" name="get-site-lists"></a><a href="#get-site-lists" aria-hidden="true" class="hash-link" ><svg aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Get Site Lists</h2>
+<p>Syntax:<br>
+<code>sprLib.site().lists()</code>  <br>
+<code>sprLib.site(siteUrl).lists()</code></p>
+<p>Returns: Array of site lists</p>
+<h3><a class="anchor" aria-hidden="true" name="list-properties"></a><a href="#list-properties" aria-hidden="true" class="hash-link" ><svg aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>List Properties</h3>
+<table>
+<thead>
+<tr><th style="text-align:left">Property Name</th><th style="text-align:left">Type</th><th style="text-align:left">Description</th></tr>
+</thead>
+<tbody>
+<tr><td style="text-align:left"><code>BaseTemplate</code></td><td style="text-align:left">number</td><td style="text-align:left"><code>SP.List.baseTemplate</code> property value</td></tr>
+<tr><td style="text-align:left"><code>BaseType</code></td><td style="text-align:left">number</td><td style="text-align:left"><code>SP.BaseType</code> property value</td></tr>
+<tr><td style="text-align:left"><code>Description</code></td><td style="text-align:left">string</td><td style="text-align:left">Site Description</td></tr>
+<tr><td style="text-align:left"><code>Hidden</code></td><td style="text-align:left">boolean</td><td style="text-align:left">Is list hidden?</td></tr>
+<tr><td style="text-align:left"><code>Id</code></td><td style="text-align:left">GUID</td><td style="text-align:left">The SP GUID of the Site</td></tr>
+<tr><td style="text-align:left"><code>ImageUrl</code></td><td style="text-align:left">string</td><td style="text-align:left">Relative URL to the site's SharePoint logo image</td></tr>
+<tr><td style="text-align:left"><code>ItemCount</code></td><td style="text-align:left">number</td><td style="text-align:left">Total items in the List/Library</td></tr>
+<tr><td style="text-align:left"><code>ParentWebUrl</code></td><td style="text-align:left">string</td><td style="text-align:left">Relative URL of parent web site</td></tr>
+<tr><td style="text-align:left"><code>RootFolder</code></td><td style="text-align:left">string</td><td style="text-align:left">RootFolder.ServerRelativeUrl</td></tr>
+<tr><td style="text-align:left"><code>Title</code></td><td style="text-align:left">string</td><td style="text-align:left">Title of the Site/Subsite</td></tr>
+</tbody>
+</table>
+<h3><a class="anchor" aria-hidden="true" name="sample-code"></a><a href="#sample-code" aria-hidden="true" class="hash-link" ><svg aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Sample Code</h3>
+<pre><code class="hljs css javascript">sprLib.site().lists()
+.then(<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">arr</span>)</span>{ <span class="hljs-built_in">console</span>.table([arr[<span class="hljs-number">0</span>]]) });
+
+<span class="hljs-comment">/*
+.-----------------------------------------------------.
+|  Prop Name   |              Prop Value              |
+|--------------|--------------------------------------|
+| Id           | 8fda2798-daba-497d-9840-df87b08e09c1 |
+| Title        | Employees                            |
+| Description  |                                      |
+| ParentWebUrl | /sites/dev                           |
+| ItemCount    | 238                                  |
+| Hidden       | false                                |
+| ImageUrl     | /_layouts/15/images/itgen.png?rev=44 |
+| BaseType     | 0                                    |
+| BaseTemplate | 100                                  |
+| RootFolder   | /sites/dev/Lists/Employees           |
+'-----------------------------------------------------'
+*/</span>
+</code></pre>
+<h2><a class="anchor" aria-hidden="true" name="get-site-permissions"></a><a href="#get-site-permissions" aria-hidden="true" class="hash-link" ><svg aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Get Site Permissions</h2>
+<p>Syntax:<br>
+<code>sprLib.site().perms()</code>  <br>
+<code>sprLib.site(siteUrl).perms()</code></p>
+<p>Returns: Array of site permissions</p>
+<h3><a class="anchor" aria-hidden="true" name="perm-properties"></a><a href="#perm-properties" aria-hidden="true" class="hash-link" ><svg aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Perm Properties</h3>
+<table>
+<thead>
+<tr><th style="text-align:left">Property Name</th><th style="text-align:left">Type</th><th style="text-align:left">Description</th></tr>
+</thead>
+<tbody>
+<tr><td style="text-align:left"><code>Member</code></td><td style="text-align:left">object</td><td style="text-align:left">object with Member properties (<code>Title</code>,<code>PrincipalId</code>,<code>PrincipalType</code>)</td></tr>
+<tr><td style="text-align:left"><code>Roles</code></td><td style="text-align:left">object</td><td style="text-align:left">array of Role objects with properties: (<code>Name</code>,<code>Hidden</code>)</td></tr>
+</tbody>
+</table>
+<h3><a class="anchor" aria-hidden="true" name="sample-code"></a><a href="#sample-code" aria-hidden="true" class="hash-link" ><svg aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Sample Code</h3>
+<pre><code class="hljs css javascript">sprLib.site().perms()
+.then(<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">arrayResults</span>)</span>{ <span class="hljs-built_in">console</span>.table(arrayResults) });
+
+<span class="hljs-comment">/*
+.-----------------------------------------------------------------------------------------------------------------------------------------------------------.
+|                                        Member                                         |                               Roles                               |
+|---------------------------------------------------------------------------------------|-------------------------------------------------------------------|
+| {"Title":"Excel Services Viewers","PrincipalType":"SharePoint Group","PrincipalId":5} | [{"Hidden":false,"Name":"View Only"}]                             |
+| {"Title":"Dev Site Owners","PrincipalType":"SharePoint Group","PrincipalId":6}        | [{"Hidden":false,"Name":"Full Control"}]                          |
+| {"Title":"Dev Site Visitors","PrincipalType":"SharePoint Group","PrincipalId":7}      | [{"Hidden":false,"Name":"Read"}]                                  |
+| {"Title":"Dev Site Members","PrincipalType":"SharePoint Group","PrincipalId":8}       | [{"Hidden":false,"Name":"Design"},{"Hidden":false,"Name":"Edit"}] |
+'-----------------------------------------------------------------------------------------------------------------------------------------------------------'
+*/</span>
+</code></pre>
+<h2><a class="anchor" aria-hidden="true" name="get-site-groups"></a><a href="#get-site-groups" aria-hidden="true" class="hash-link" ><svg aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Get Site Groups</h2>
+<p>Syntax:<br>
+<code>sprLib.site().groups()</code>  <br>
+<code>sprLib.site(siteUrl).groups()</code></p>
+<p>Returns: Array of site Groups</p>
+<h3><a class="anchor" aria-hidden="true" name="group-properties"></a><a href="#group-properties" aria-hidden="true" class="hash-link" ><svg aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Group Properties</h3>
+<table>
+<thead>
+<tr><th style="text-align:left">Property Name</th><th style="text-align:left">Type</th><th style="text-align:left">Description</th></tr>
+</thead>
+<tbody>
+<tr><td style="text-align:left"><code>AllowMembersEditMembership</code></td><td style="text-align:left">boolean</td><td style="text-align:left">Whether members can edit the group</td></tr>
+<tr><td style="text-align:left"><code>Description</code></td><td style="text-align:left">string</td><td style="text-align:left">Group Description</td></tr>
+<tr><td style="text-align:left"><code>Id</code></td><td style="text-align:left">GUID</td><td style="text-align:left">Group ID</td></tr>
+<tr><td style="text-align:left"><code>OwnerTitle</code></td><td style="text-align:left">string</td><td style="text-align:left">Owner Title</td></tr>
+<tr><td style="text-align:left"><code>PrincipalType</code></td><td style="text-align:left">string</td><td style="text-align:left">Group, User, etc.</td></tr>
+<tr><td style="text-align:left"><code>Title</code></td><td style="text-align:left">string</td><td style="text-align:left">Title of the Group</td></tr>
+<tr><td style="text-align:left"><code>Users</code></td><td style="text-align:left">object</td><td style="text-align:left">array of User objects with properties: (<code>Id</code>,<code>LoginName</code>,<code>Title</code>)</td></tr>
+</tbody>
+</table>
+<h3><a class="anchor" aria-hidden="true" name="sample-code"></a><a href="#sample-code" aria-hidden="true" class="hash-link" ><svg aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Sample Code</h3>
+<pre><code class="hljs css javascript">sprLib.site().groups()
+.then(<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">arrayResults</span>)</span>{ <span class="hljs-built_in">console</span>.table(arrayResults) });
+
+<span class="hljs-comment">/*
+.----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------.
+| Id |         Title          |  PrincipalType   |             Description            |    OwnerTitle     | AllowMembersEditMembership |                     Users                                         |
+|----|------------------------|------------------|------------------------------------|-------------------|----------------------------|-------------------------------------------------------------------|
+|  8 | Dev Site Members       | SharePoint Group | contribute permissions: Dev Site   | Dev Site Owners   | true                       | []                                                                |
+|  6 | Dev Site Owners        | SharePoint Group | full control permissions: Dev Site | SharePoint Group  | false                      | [{"Id":99,"LoginName":"brent@microsoft.com","Title":"Brent Ely"}] |
+|  7 | Dev Site Visitors      | SharePoint Group | read permissions: Dev Site         | SharePoint Group  | false                      | []                                                                |
+'----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------'
+*/</span>
+</code></pre>
+<h2><a class="anchor" aria-hidden="true" name="get-site-roles"></a><a href="#get-site-roles" aria-hidden="true" class="hash-link" ><svg aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Get Site Roles</h2>
+<p>Syntax:<br>
+<code>sprLib.site().roles()</code>  <br>
+<code>sprLib.site(siteUrl).roles()</code></p>
+<p>Returns: Array of SiteCollection Roles (result is the same if siteUrl is provided)</p>
+<h3><a class="anchor" aria-hidden="true" name="role-properties"></a><a href="#role-properties" aria-hidden="true" class="hash-link" ><svg aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Role Properties</h3>
+<table>
+<thead>
+<tr><th style="text-align:left">Property Name</th><th style="text-align:left">Type</th><th style="text-align:left">Description</th></tr>
+</thead>
+<tbody>
+<tr><td style="text-align:left"><code>Description</code></td><td style="text-align:left">string</td><td style="text-align:left">Role Description</td></tr>
+<tr><td style="text-align:left"><code>Hidden</code></td><td style="text-align:left">boolean</td><td style="text-align:left">Whether this Role is hidden or not</td></tr>
+<tr><td style="text-align:left"><code>Id</code></td><td style="text-align:left">GUID</td><td style="text-align:left">Role ID</td></tr>
+<tr><td style="text-align:left"><code>Name</code></td><td style="text-align:left">string</td><td style="text-align:left">Role Name</td></tr>
+<tr><td style="text-align:left"><code>RoleTypeKind</code></td><td style="text-align:left">number</td><td style="text-align:left"><code>SP.RoleDefinition.roleTypeKind</code> value</td></tr>
+</tbody>
+</table>
+<h3><a class="anchor" aria-hidden="true" name="sample-code"></a><a href="#sample-code" aria-hidden="true" class="hash-link" ><svg aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Sample Code</h3>
+<pre><code class="hljs css javascript">sprLib.site().roles()
+.then(<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">arrayResults</span>)</span>{ <span class="hljs-built_in">console</span>.table(arrayResults) });
+
+<span class="hljs-comment">/*
+.-------------------------------------------------------------------------------------------------------------------.
+|     Id     |      Name      |                         Description                         | RoleTypeKind | Hidden |
+|------------|----------------|-------------------------------------------------------------|--------------|--------|
+| 1073741829 | Full Control   | Has full control.                                           |            5 | false  |
+| 1073741828 | Design         | Can view, add, update, delete, approve, and customize.      |            4 | false  |
+| 1073741830 | Edit           | Can add, edit and delete lists and items and documents.     |            6 | false  |
+| 1073741827 | Contribute     | Can view, add, update, and delete list items and documents. |            3 | false  |
+| 1073741826 | Read           | Can view pages and list items and download documents.       |            2 | false  |
+| 1073741825 | Limited Access | Can view specific lists, document libraries, list items...  |            1 | true   |
+| 1073741924 | View Only      | Can view pages, list items, and documents.                  |            0 | false  |
+'-------------------------------------------------------------------------------------------------------------------'
+*/</span>
+</code></pre>
+<h2><a class="anchor" aria-hidden="true" name="get-site-subsites"></a><a href="#get-site-subsites" aria-hidden="true" class="hash-link" ><svg aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Get Site Subsites</h2>
+<p>Syntax:<br>
+<code>sprLib.site().subsites()</code>  <br>
+<code>sprLib.site(siteUrl).subsites()</code></p>
+<p>Returns: Array of subsites under the current or specified location</p>
+<h3><a class="anchor" aria-hidden="true" name="subsite-properties"></a><a href="#subsite-properties" aria-hidden="true" class="hash-link" ><svg aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Subsite Properties</h3>
+<table>
+<thead>
+<tr><th style="text-align:left">Property Name</th><th style="text-align:left">Type</th><th style="text-align:left">Description</th></tr>
+</thead>
+<tbody>
+<tr><td style="text-align:left"><code>Created</code></td><td style="text-align:left">string</td><td style="text-align:left">Date (ISO format) that this Site was created</td></tr>
+<tr><td style="text-align:left"><code>Id</code></td><td style="text-align:left">GUID</td><td style="text-align:left">SP GUID for this site</td></tr>
+<tr><td style="text-align:left"><code>Language</code></td><td style="text-align:left">number</td><td style="text-align:left"><code>SP.Language.lcid</code> property</td></tr>
+<tr><td style="text-align:left"><code>Modified</code></td><td style="text-align:left">string</td><td style="text-align:left">Date (ISO format) that this Site was last modified</td></tr>
+<tr><td style="text-align:left"><code>Name</code></td><td style="text-align:left">string</td><td style="text-align:left">Site Name</td></tr>
+<tr><td style="text-align:left"><code>SiteLogoUrl</code></td><td style="text-align:left">string</td><td style="text-align:left">relative URL to site logo image</td></tr>
+<tr><td style="text-align:left"><code>UrlAbs</code></td><td style="text-align:left">string</td><td style="text-align:left">absolute URL of this site</td></tr>
+<tr><td style="text-align:left"><code>UrlRel</code></td><td style="text-align:left">boolean</td><td style="text-align:left">relative URL of this site</td></tr>
+</tbody>
+</table>
+<h3><a class="anchor" aria-hidden="true" name="sample-code"></a><a href="#sample-code" aria-hidden="true" class="hash-link" ><svg aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Sample Code</h3>
+<pre><code class="hljs css javascript">sprLib.site().subsites()
+.then(<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">arrayResults</span>)</span>{ <span class="hljs-built_in">console</span>.table(arrayResults[<span class="hljs-number">0</span>]) });
+
+<span class="hljs-comment">/*
+// Subsite Object
+.-----------------------------------------------------------------.
+|  Prop Name  |                    Prop Value                     |
+|-------------|---------------------------------------------------|
+| Id          | 822555ab-9376-4a1b-925b-82dcc7bf3cbd              |
+| Name        | Sandbox                                           |
+| Created     | 2017-09-30T04:27:51                               |
+| Modified    | 2017-10-25T03:48:39Z                              |
+| Language    | 1033                                              |
+| SiteLogoUrl | /sites/dev/SiteAssets/sprestlib-logo.png          |
+| UrlAbs      | https://brent.sharepoint.com/sites/dev/sandbox    |
+| UrlRel      | /sites/dev/sandbox                                |
+'-----------------------------------------------------------------'
+*/</span>
+</code></pre>
+<h2><a class="anchor" aria-hidden="true" name="get-site-users"></a><a href="#get-site-users" aria-hidden="true" class="hash-link" ><svg aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Get Site Users</h2>
+<p>Syntax:<br>
+<code>sprLib.site().users()</code>  <br>
+<code>sprLib.site(siteUrl).users()</code></p>
+<p>Returns: Array of users under the current or specified location</p>
+<p>Notes:</p>
+<ul>
+<li>If siteUrl is omitted, then all users in the entire SiteCollection are returned. Otherwise, only the users
+under the given site are returned (all users with direct grants and all users within Groups that have site permissions).</li>
+</ul>
+<h3><a class="anchor" aria-hidden="true" name="user-properties"></a><a href="#user-properties" aria-hidden="true" class="hash-link" ><svg aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>User Properties</h3>
+<table>
+<thead>
+<tr><th style="text-align:left">Property Name</th><th style="text-align:left">Type</th><th style="text-align:left">Description</th></tr>
+</thead>
+<tbody>
+<tr><td style="text-align:left"><code>Email</code></td><td style="text-align:left">string</td><td style="text-align:left">user email address</td></tr>
+<tr><td style="text-align:left"><code>Groups</code></td><td style="text-align:left">array</td><td style="text-align:left">array of user's group objects with properties: (<code>Id</code>,<code>Title</code>)</td></tr>
+<tr><td style="text-align:left"><code>Id</code></td><td style="text-align:left">number</td><td style="text-align:left">user Id</td></tr>
+<tr><td style="text-align:left"><code>IsSiteAdmin</code></td><td style="text-align:left">object</td><td style="text-align:left">whether the user us a site collection admin (SCA)</td></tr>
+<tr><td style="text-align:left"><code>LoginName</code></td><td style="text-align:left">string</td><td style="text-align:left">user LoginName</td></tr>
+<tr><td style="text-align:left"><code>Title</code></td><td style="text-align:left">string</td><td style="text-align:left">user Title</td></tr>
+</tbody>
+</table>
+<h3><a class="anchor" aria-hidden="true" name="sample-code"></a><a href="#sample-code" aria-hidden="true" class="hash-link" ><svg aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Sample Code</h3>
+<pre><code class="hljs css javascript">sprLib.site().users()
+.then(<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">arrayResults</span>)</span>{ <span class="hljs-built_in">console</span>.table(arrayResults) });
+
+<span class="hljs-comment">/*
+.------------------------------------------------------------------------------------------------------------------------.
+| Id |        Email        |          LoginName         |   Title   | IsSiteAdmin |                Groups                |
+|----|---------------------|----------------------------|-----------|-------------|--------------------------------------|
+|  9 | brent@microsoft.com | i:0#.f|brent@microsoft.com | Brent Ely | true        | [{"Id":6,"Title":"Dev Site Owners"}] |
+'------------------------------------------------------------------------------------------------------------------------'
+*/</span>
+</code></pre>
+</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="api-list.html">← List/Library (SPList) Methods</a><a class="docs-next button" href="api-user.html">User Methods →</a></div></div></div></div><footer class="nav-footer" id="footer"><section class="sitemap"><a href="/SpRestLib/" class="nav-home"><img src="/SpRestLib/img/sprestlib.svg" alt="SpRestLib" width="66" height="58"/></a><div><h5>Docs</h5><a href="/SpRestLib/docs/en/installation.html">Getting Started</a><a href="/SpRestLib/docs/en/api-rest.html">SharePoint API Reference</a><a href="/SpRestLib/docs/en/feat-promises.html">About JavaScript Promises</a></div><div><h5>Community</h5><a href="https://github.com/gitbrent/sprestlib/issues" target="_blank">GitHub Issues</a><a href="http://stackoverflow.com/questions/tagged/sprestlib" target="_blank">Stack Overflow</a><a href="https://www.youtube.com/channel/UCxZcCampOHn-47kvtcK_oVQ" target="_blank">YouTube Channel</a></div><div><h5>More</h5><a href="https://github.com/gitbrent/sprestlib">GitHub Project</a><a href="https://www.flaticon.com/packs/creativity">Site Icons</a></div></section><section class="copyright">Copyright © 2018 Brent Ely</section></footer></div><script>
+              (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+              (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+              m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+              })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+              ga('create', 'UA-75147115-3', 'auto');
+              ga('send', 'pageview');
+            </script></body></html>

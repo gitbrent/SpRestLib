@@ -1,0 +1,78 @@
+<html lang="en"><head><meta charset="utf-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><title>REST API Methods · SpRestLib</title><meta name="viewport" content="width=device-width"/><meta name="generator" content="Docusaurus"/><meta property="og:title" content="REST API Methods · SpRestLib"/><meta property="og:type" content="website"/><meta property="og:url" content="https://gitbrent.github.io/SpRestLib/index.html"/><meta property="og:description" content="**************************************************************************************************"/><link rel="shortcut icon" href="/SpRestLib/img/favicon.png"/><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/hybrid.min.css"/><script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script><link rel="stylesheet" href="/SpRestLib/css/main.css"/></head><body class="sideNavVisible"><div class="fixedHeaderContainer"><div class="headerWrapper wrapper"><header><a href="/SpRestLib/"><img class="logo" src="/SpRestLib/img/sprestlib.svg"/><h2 class="headerTitle">SpRestLib</h2></a><div class="navigationWrapper navigationSlider"><nav class="slidingNav"><ul class="nav-site nav-site-internal"><li><a href="https://github.com/gitbrent/SpRestLib/releases" target="_self">Download</a></li><li><a href="/SpRestLib/docs/installation.html" target="_self">Get Started</a></li><li><a href="/SpRestLib/docs/api-rest.html" target="_self">API Documentation</a></li><li><a href="https://github.com/gitbrent/SpRestLib/" target="_self">GitHub</a></li></ul></nav></div></header></div></div><div class="navPusher"><div class="docMainWrapper wrapper"><div class="container docsNavContainer" id="docsNav"><nav class="toc"><div class="toggleNav"><section class="navWrapper wrapper"><div class="navBreadcrumb wrapper"><div class="navToggle" id="navToggler"><i></i></div><h2><i>›</i><span>API Reference</span></h2></div><div class="navGroups"><div class="navGroup navGroupActive"><h3>Get Started</h3><ul><li class="navListItem"><a class="navItem" href="/SpRestLib/docs/installation.html">Installation</a></li><li class="navListItem"><a class="navItem" href="/SpRestLib/docs/promises.html">Promise You Will Love It</a></li></ul></div><div class="navGroup navGroupActive"><h3>Features</h3><ul><li class="navListItem"><a class="navItem" href="/SpRestLib/docs/feat-integration.html">Library Integration</a></li><li class="navListItem"><a class="navItem" href="/SpRestLib/docs/feat-promises.html">Promise-based Operations</a></li><li class="navListItem"><a class="navItem" href="/SpRestLib/docs/feat-node.html">SharePoint via Node.js</a></li><li class="navListItem"><a class="navItem" href="/SpRestLib/docs/feat-utilities.html">Utility Methods</a></li></ul></div><div class="navGroup navGroupActive"><h3>API Reference</h3><ul><li class="navListItem navListItemActive"><a class="navItem navItemActive" href="/SpRestLib/docs/api-rest.html">REST API Methods</a></li><li class="navListItem"><a class="navItem" href="/SpRestLib/docs/api-list.html">List/Library (SPList) Methods</a></li><li class="navListItem"><a class="navItem" href="/SpRestLib/docs/api-site.html">Site (SPSite) Methods</a></li><li class="navListItem"><a class="navItem" href="/SpRestLib/docs/api-user.html">User Methods</a></li></ul></div><div class="navGroup navGroupActive"><h3>SpRestLib UI</h3><ul><li class="navListItem"><a class="navItem" href="/SpRestLib/docs/ui-form-binding.html">Form Binding</a></li></ul></div></div></section></div><script>
+          var toggler = document.getElementById('navToggler');
+          var nav = document.getElementById('docsNav');
+          toggler.onclick = function() {
+            nav.classList.toggle('docsSliderActive');
+          };
+        </script></nav></div><div class="container mainContainer"><div class="wrapper"><div class="post"><header class="postHeader"><h1>REST API Methods</h1></header><article><div><span><hr>
+<p>Table of Contents</p>
+<ul>
+<li><a href="#options">Options</a></li>
+<li><a href="#examples">Examples</a></li>
+</ul>
+<hr>
+<p>Returns the results of a given REST call to any <a href="https://msdn.microsoft.com/en-us/library/office/dn268594.aspx">SharePoint REST API</a></p>
+<p>Use the <code>sprLib.rest()</code> interface to GET or POST to any of the dozens of available SP REST API Endpoints.</p>
+<p>The available REST service endpoints can add Users to Groups, create columns in a List/Library, enumerate site properties
+and other super useful functions.</p>
+<p>Syntax:<br>
+<code>sprLib.rest(options)</code></p>
+<p>Returns: Array of objects containing name/value pairs</p>
+<h2><a class="anchor" aria-hidden="true" name="options"></a><a href="#options" aria-hidden="true" class="hash-link" ><svg aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Options</h2>
+<table>
+<thead>
+<tr><th style="text-align:left">Option</th><th style="text-align:left">Type</th><th style="text-align:left">Default</th><th style="text-align:left">Description</th><th style="text-align:left">Possible Values / Returns</th></tr>
+</thead>
+<tbody>
+<tr><td style="text-align:left"><code>url</code></td><td style="text-align:left">string</td><td style="text-align:left">current url</td><td style="text-align:left">REST API endpoint</td><td style="text-align:left">full or relative url. See: <a href="https://msdn.microsoft.com/en-us/library/office/dn268594.aspx">SharePoint REST API</a></td></tr>
+<tr><td style="text-align:left"><code>type</code></td><td style="text-align:left">string</td><td style="text-align:left"><code>GET</code></td><td style="text-align:left">rest operation type</td><td style="text-align:left"><code>GET</code> or <code>POST</code>. Ex:<code>type: 'POST'</code></td></tr>
+<tr><td style="text-align:left"><code>data</code></td><td style="text-align:left">string</td><td style="text-align:left"></td><td style="text-align:left">data to be sent</td><td style="text-align:left">Ex:<code>data: {'type': 'SP.FieldDateTime'}</code></td></tr>
+<tr><td style="text-align:left"><code>cache</code></td><td style="text-align:left">boolean</td><td style="text-align:left"><code>false</code></td><td style="text-align:left">cache settings</td><td style="text-align:left">Ex:<code>cache: true</code></td></tr>
+<tr><td style="text-align:left"><code>contentType</code></td><td style="text-align:left">string</td><td style="text-align:left"><code>application/json</code></td><td style="text-align:left">request header content-type</td><td style="text-align:left">Only used with <code>type:'POST'</code></td></tr>
+<tr><td style="text-align:left"><code>metadata</code></td><td style="text-align:left">boolean</td><td style="text-align:left"><code>false</code></td><td style="text-align:left">whether to return <code>__metadata</code></td><td style="text-align:left">Ex:<code>metadata: true</code></td></tr>
+<tr><td style="text-align:left"><code>queryCols</code></td><td style="text-align:left">string</td><td style="text-align:left"></td><td style="text-align:left">fields/columns to get</td><td style="text-align:left">any available field from the SP REST API</td></tr>
+<tr><td style="text-align:left"><code>queryFilter</code></td><td style="text-align:left">string</td><td style="text-align:left"></td><td style="text-align:left">query filter</td><td style="text-align:left">utilizes OData style <a href="https://msdn.microsoft.com/en-us/library/office/fp142385.aspx#Anchor_7">Query Operators</a> Ex:<code>queryFilter: 'Salary lt 99000'</code></td></tr>
+<tr><td style="text-align:left"><code>queryLimit</code></td><td style="text-align:left">string</td><td style="text-align:left"><code>1000</code></td><td style="text-align:left">max items to return</td><td style="text-align:left">1-5000. Ex:<code>queryLimit: 5000</code></td></tr>
+<tr><td style="text-align:left"><code>queryOrderby</code></td><td style="text-align:left">string</td><td style="text-align:left"></td><td style="text-align:left">column(s) to order by</td><td style="text-align:left">Ex:<code>queryOrderby: Name</code></td></tr>
+<tr><td style="text-align:left"><code>requestDigest</code></td><td style="text-align:left">string</td><td style="text-align:left"><code>$('#__REQUESTDIGEST</code>).val()</td><td style="text-align:left">Form Digest Value</td><td style="text-align:left">The <code>X-RequestDigest</code> header value (SP Auth)</td></tr>
+</tbody>
+</table>
+<h2><a class="anchor" aria-hidden="true" name="examples"></a><a href="#examples" aria-hidden="true" class="hash-link" ><svg aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Examples</h2>
+<pre><code class="hljs css javascript"><span class="hljs-comment">// EX: Get site collection groups</span>
+sprLib.rest({
+    <span class="hljs-attr">url</span>:          <span class="hljs-string">'/sites/dev/_api/web/sitegroups'</span>,
+    <span class="hljs-attr">queryCols</span>:    [<span class="hljs-string">'Title'</span>,<span class="hljs-string">'LoginName'</span>,<span class="hljs-string">'AllowMembersEditMembership'</span>],
+    <span class="hljs-attr">queryFilter</span>:  <span class="hljs-string">'AllowMembersEditMembership eq false'</span>,
+    <span class="hljs-attr">queryOrderby</span>: <span class="hljs-string">'Title'</span>,
+    <span class="hljs-attr">queryLimit</span>:   <span class="hljs-number">10</span>
+})
+.then(<span class="hljs-function"><span class="hljs-params">arrItems</span> =&gt;</span> <span class="hljs-built_in">console</span>.table(arrItems))
+.catch(<span class="hljs-function"><span class="hljs-params">errMsg</span> =&gt;</span> <span class="hljs-built_in">console</span>.error(errMsg));
+<span class="hljs-comment">/*
+.------------------------------------------------------------------------------.
+|         Title          |       LoginName        | AllowMembersEditMembership |
+|------------------------|------------------------|----------------------------|
+| Dev Site Owners        | Dev Site Owners        | false                      |
+| Dev Site Visitors      | Dev Site Visitors      | false                      |
+| Excel Services Viewers | Excel Services Viewers | false                      |
+'------------------------------------------------------------------------------'
+*/</span>
+
+<span class="hljs-comment">// EX: Add a new column to a list/library using the REST API</span>
+sprLib.rest({
+    <span class="hljs-attr">url</span>:  <span class="hljs-string">"_api/web/lists/getbytitle('Employees')/fields"</span>,
+    <span class="hljs-attr">data</span>: <span class="hljs-string">"{'__metadata':{'type':'SP.FieldDateTime'}, 'FieldTypeKind':4, 'Title':'Bonus Date', 'DisplayFormat':1 }"</span>,
+    <span class="hljs-attr">type</span>: <span class="hljs-string">"POST"</span>
+})
+.then(<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params"></span>)</span>{ <span class="hljs-built_in">console</span>.log(<span class="hljs-string">"New column created!"</span>); })
+.catch(<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">errMsg</span>)</span>{ <span class="hljs-built_in">console</span>.error(errMsg) });
+</code></pre>
+</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="feat-utilities.html">← Utility Methods</a><a class="docs-next button" href="api-list.html">List/Library (SPList) Methods →</a></div></div></div></div><footer class="nav-footer" id="footer"><section class="sitemap"><a href="/SpRestLib/" class="nav-home"><img src="/SpRestLib/img/sprestlib.svg" alt="SpRestLib" width="66" height="58"/></a><div><h5>Docs</h5><a href="/SpRestLib/docs/en/installation.html">Getting Started</a><a href="/SpRestLib/docs/en/api-rest.html">SharePoint API Reference</a><a href="/SpRestLib/docs/en/feat-promises.html">About JavaScript Promises</a></div><div><h5>Community</h5><a href="https://github.com/gitbrent/sprestlib/issues" target="_blank">GitHub Issues</a><a href="http://stackoverflow.com/questions/tagged/sprestlib" target="_blank">Stack Overflow</a><a href="https://www.youtube.com/channel/UCxZcCampOHn-47kvtcK_oVQ" target="_blank">YouTube Channel</a></div><div><h5>More</h5><a href="https://github.com/gitbrent/sprestlib">GitHub Project</a><a href="https://www.flaticon.com/packs/creativity">Site Icons</a></div></section><section class="copyright">Copyright © 2018 Brent Ely</section></footer></div><script>
+              (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+              (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+              m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+              })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+              ga('create', 'UA-75147115-3', 'auto');
+              ga('send', 'pageview');
+            </script></body></html>

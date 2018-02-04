@@ -1,0 +1,41 @@
+/* your custom css */
+
+@media only screen and (min-device-width: 360px) and (max-device-width: 736px) {
+	#FeatureCallCode .gridBlock {
+		flex-wrap: nowrap;
+	}
+}
+
+@media only screen and (min-width: 1024px) {
+}
+
+@media only screen and (max-width: 1023px) {
+}
+
+@media only screen and (min-width: 1400px) {
+}
+
+@media only screen and (min-width: 1500px) {
+}
+
+/* ===== Greatly improve look of `code` keywords in p/ul ===== */
+p code, li code {
+	display: inline-block;
+	padding: 2px 4px;
+	font-size: 80%;
+	line-height: 1.45;
+	word-break: break-all;
+	word-wrap: break-word;
+	background-color: #f5f5f5;
+	border: 1px solid #ccc;
+}
+
+#FeatureCallout .wrapper div {
+	padding: 10px 0;
+}
+#FeatureCallout .wrapper img {
+	margin: 0px 10px;
+	vertical-align: middle;
+	width: 32px;
+	height: 32px;
+}
