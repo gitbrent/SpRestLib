@@ -53,11 +53,11 @@ using the JavaScript SharePoint App Model.
 * `sprLib.user(options).groups()` - Returns an object with `SP.Group` group properties (Id, Owner, Title, etc.)
 * `sprLib.user(options).info()`   - Returns an object with `SP.User` user properties (Id, Email, Login, Title, etc.)
 
-## Form Population
-* `data-sprlib{options}` - Populates the parent tag using the options provided
-
 ## Utility
 * `sprLib.renewSecurityToken()` - Refreshes the SharePoint page security digest token
+
+## SpRestLib-UI -- Form Population
+* `data-sprlib{options}` - Populates the parent tag using the options provided
 
 
 
