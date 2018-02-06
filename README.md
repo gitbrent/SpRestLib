@@ -28,17 +28,17 @@ using the JavaScript SharePoint App Model.
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 
-
+- [Documentation](#documentation)
+- [Library Test Drive](#library-test-drive)
+  - [SpRestLib via Console](#sprestlib-via-console)
+- [Promise You Will Love It](#promise-you-will-love-it)
+  - [JavaScript Promises Have Arrived](#javascript-promises-have-arrived)
 - [Installation](#installation)
   - [Client-Side](#client-side)
     - [Include Local Scripts](#include-local-scripts)
     - [Include Bundle Script](#include-bundle-script)
     - [Install With Bower](#install-with-bower)
   - [Node.js](#nodejs)
-- [Library Test Drive](#library-test-drive)
-  - [SpRestLib via Console](#sprestlib-via-console)
-- [Promise You Will Love It](#promise-you-will-love-it)
-  - [JavaScript Promises Have Arrived](#javascript-promises-have-arrived)
 - [Method Overview](#method-overview)
   - [REST API](#rest-api)
   - [List/Library](#listlibrary)
@@ -126,40 +126,10 @@ using the JavaScript SharePoint App Model.
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
 **************************************************************************************************
-# Installation
+# Documentation
 
-## Client-Side
-
-### Include Local Scripts
-```javascript
-<script lang="javascript" src="https://yourhost.com/subsite/SiteAssets/js/jquery.min.js"></script>
-<script lang="javascript" src="https://yourhost.com/subsite/SiteAssets/js/sprestlib.js"></script>
-```
-* *IE11 support requires a Promises polyfill as well (included in the `libs` folder)*
-
-### Include Bundle Script
-```javascript
-<script lang="javascript" src="https://yourhost.com/subsite/SiteAssets/js/sprestlib.bundle.js"></script>
-```
-* *`sprestlib.bundle.js` includes all required libraries (SpRestLib + jQuery and Promises)*
-```javascript
-<script lang="javascript" src="https://yourhost.com/subsite/SiteAssets/js/sprestlib-ui.bundle.js"></script>
-```
-* *`sprestlib-ui.bundle.js` includes all required libraries plus UI (SpRestLib and SpRestLib-UI + jQuery and Promises)*
-
-### Install With Bower
-```javascript
-bower install sprestlib
-```
-
-## Node.js
-```javascript
-npm install sprestlib
-
-var sprLib = require("sprestlib");
-```
-* Desktop: Compatible with Electron applications.
-
+There's more than just the README!  Visit the SpRestLib homepage for complete documentation.
+* View the online [API Reference](https://gitbrent.github.io/SpRestLib/docs/installation.html)
 
 **************************************************************************************************
 # Library Test Drive
@@ -210,6 +180,43 @@ sprLib.user().info()
 })
 .catch(errMsg => console.error(errMsg));
 ```
+
+
+
+**************************************************************************************************
+# Installation
+
+## Client-Side
+
+### Include Local Scripts
+```javascript
+<script lang="javascript" src="https://yourhost.com/subsite/SiteAssets/js/jquery.min.js"></script>
+<script lang="javascript" src="https://yourhost.com/subsite/SiteAssets/js/sprestlib.js"></script>
+```
+* *IE11 support requires a Promises polyfill as well (included in the `libs` folder)*
+
+### Include Bundle Script
+```javascript
+<script lang="javascript" src="https://yourhost.com/subsite/SiteAssets/js/sprestlib.bundle.js"></script>
+```
+* *`sprestlib.bundle.js` includes all required libraries (SpRestLib + jQuery and Promises)*
+```javascript
+<script lang="javascript" src="https://yourhost.com/subsite/SiteAssets/js/sprestlib-ui.bundle.js"></script>
+```
+* *`sprestlib-ui.bundle.js` includes all required libraries plus UI (SpRestLib and SpRestLib-UI + jQuery and Promises)*
+
+### Install With Bower
+```javascript
+bower install sprestlib
+```
+
+## Node.js
+```javascript
+npm install sprestlib
+
+var sprLib = require("sprestlib");
+```
+* Desktop: Compatible with Electron applications.
 
 
 
