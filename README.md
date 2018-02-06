@@ -56,7 +56,7 @@ using the JavaScript SharePoint App Model.
 ## Utility
 * `sprLib.renewSecurityToken()` - Refreshes the SharePoint page security digest token
 
-## SpRestLib-UI -- Form Population
+## SpRestLib-UI :: Form Population
 * `data-sprlib{options}` - Populates the parent tag using the options provided
 
 
