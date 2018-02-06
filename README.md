@@ -126,9 +126,45 @@ using the JavaScript SharePoint App Model.
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
 **************************************************************************************************
+# Method Overview
+
+## REST API
+* `sprLib.rest(options)` - Returns the results of a given REST call to any [SharePoint REST API](https://msdn.microsoft.com/en-us/library/office/dn268594.aspx)
+
+## List/Library
+* `sprLib.list(listName).getItems(options)` - Returns an array of item objects using a variety of possible options
+* `sprLib.list(listName).create(item)` - Create a new list item using JSON data
+* `sprLib.list(listName).update(item)` - Update an existing item using JSON data
+* `sprLib.list(listName).delete(id)`   - Delete an existing item by ID (permanently delete)
+* `sprLib.list(listName).recycle(id)`  - Recycle an existing item by ID (move to Recycle Bin)
+* `sprLib.list(listName).cols()` - Returns an array of column objects with useful info (name, datatype, etc.)
+* `sprLib.list(listName).info()` - Returns information about the List/Library (GUID, numberOfItems, etc.)
+
+## Site Collection/Subsite
+* `sprLib.site(siteUrl).groups()`   - Returns an array of the site's Groups and Members
+* `sprLib.site(siteUrl).info()`     - Returns over a dozen site properties (ID, Owner, Language, Logo, etc.)
+* `sprLib.site(siteUrl).lists()`    - Returns an array of the site's Lists/Libraries
+* `sprLib.site(siteUrl).perms()`    - Returns an array of the site's Member/Roles objects
+* `sprLib.site(siteUrl).roles()`    - Returns an array of the site's Roles
+* `sprLib.site(siteUrl).subsites()` - Returns an array of the site's Subsites
+* `sprLib.site(siteUrl).users()`    - Returns an array of the site's Users and their base permissions
+
+## User Information
+* `sprLib.user(options).groups()` - Returns an object with `SP.Group` group properties (Id, Owner, Title, etc.)
+* `sprLib.user(options).info()`   - Returns an object with `SP.User` user properties (Id, Email, Login, Title, etc.)
+
+## Form Population
+* `data-sprlib{options}` - Populates the parent tag using the options provided
+
+## Utility
+* `sprLib.renewSecurityToken()` - Refreshes the SharePoint page security digest token
+
+
+
+**************************************************************************************************
 # Documentation
 
-There's more than just the README!  Visit the SpRestLib homepage for complete documentation.
+There's more than just the README!  
 * View the online [API Reference](https://gitbrent.github.io/SpRestLib/docs/installation.html)
 
 **************************************************************************************************
@@ -219,40 +255,6 @@ var sprLib = require("sprestlib");
 * Desktop: Compatible with Electron applications.
 
 
-
-**************************************************************************************************
-# Method Overview
-
-## REST API
-* `sprLib.rest(options)` - Returns the results of a given REST call to any [SharePoint REST API](https://msdn.microsoft.com/en-us/library/office/dn268594.aspx)
-
-## List/Library
-* `sprLib.list(listName).getItems(options)` - Returns an array of item objects using a variety of possible options
-* `sprLib.list(listName).create(item)` - Create a new list item using JSON data
-* `sprLib.list(listName).update(item)` - Update an existing item using JSON data
-* `sprLib.list(listName).delete(id)`   - Delete an existing item by ID (permanently delete)
-* `sprLib.list(listName).recycle(id)`  - Recycle an existing item by ID (move to Recycle Bin)
-* `sprLib.list(listName).cols()` - Returns an array of column objects with useful info (name, datatype, etc.)
-* `sprLib.list(listName).info()` - Returns information about the List/Library (GUID, numberOfItems, etc.)
-
-## Site Collection/Subsite
-* `sprLib.site(siteUrl).groups()`   - Returns an array of the site's Groups and Members
-* `sprLib.site(siteUrl).info()`     - Returns over a dozen site properties (ID, Owner, Language, Logo, etc.)
-* `sprLib.site(siteUrl).lists()`    - Returns an array of the site's Lists/Libraries
-* `sprLib.site(siteUrl).perms()`    - Returns an array of the site's Member/Roles objects
-* `sprLib.site(siteUrl).roles()`    - Returns an array of the site's Roles
-* `sprLib.site(siteUrl).subsites()` - Returns an array of the site's Subsites
-* `sprLib.site(siteUrl).users()`    - Returns an array of the site's Users and their base permissions
-
-## User Information
-* `sprLib.user(options).groups()` - Returns an object with `SP.Group` group properties (Id, Owner, Title, etc.)
-* `sprLib.user(options).info()`   - Returns an object with `SP.User` user properties (Id, Email, Login, Title, etc.)
-
-## Form Population
-* `data-sprlib{options}` - Populates the parent tag using the options provided
-
-## Utility
-* `sprLib.renewSecurityToken()` - Refreshes the SharePoint page security digest token
 
 **************************************************************************************************
 # Method Reference
