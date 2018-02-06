@@ -4,7 +4,6 @@ npm-debug.log
 bower_components/
 .icloud
 *.icloud
-package-lock.json
 *.lock
 
 lib/core/metadata.js
