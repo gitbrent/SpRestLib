@@ -1,6 +1,6 @@
 /*
  * DESC: Combine/Minify CSS and take existing min JavaScript - replace head tags with content
- * WHY.: Google PageSpeed Insights scores of 94/99 thats why!!
+ * WHY.: Google PageSpeed Insights scores of 99(mobile)/94(desktop) thats why!!
  */
 var fs       = require('fs'),
     gulp     = require('gulp'),
@@ -8,7 +8,6 @@ var fs       = require('fs'),
     replace  = require('gulp-string-replace'),
 	cleanCSS = require('gulp-clean-css');
 
-//var cssSrch1 = /\<link rel=\"stylesheet\" href=\"\/SpRestLib\/css\/main\.css\"\/\>/;
 var cssSrch1 = '<link rel="stylesheet" href="/SpRestLib/css/main.css"/>';
 var cssSrch2 = '<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/hybrid.min.css"/>';
 var jvsSrch1 = /\<script type="text\/javascript" src="https:\/\/cdnjs.cloudflare.com\/ajax\/libs\/highlight.*.min.js"\>\<\/script\>/;
