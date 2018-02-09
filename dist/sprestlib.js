@@ -33,7 +33,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 (function(){
 	// APP VERSION/BUILD
 	var APP_VER = "1.5.0-beta";
-	var APP_BLD = "20180111";
+	var APP_BLD = "20180208";
 	var DEBUG = false; // (verbose mode/lots of logging)
 	// ENUMERATIONS
 	var ENUM_PRINCIPALTYPES = {
@@ -586,7 +586,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 										else colVal = result[arrCol[0]];
 
 										// D: Fix result if needed: Empty person fields will be `{__proto__:{}}` at this point
-										if ( typeof colVal === 'object' && !Array.isArray(colVal) && Object.keys(colVal).length == 0 ) colVal = null;
+										if ( colVal && typeof colVal === 'object' && !Array.isArray(colVal) && Object.keys(colVal).length == 0 ) colVal = null;
 									}
 									else if ( col.dataName ) {
 										colVal = result[col.dataName];
