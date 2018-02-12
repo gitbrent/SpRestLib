@@ -2,7 +2,7 @@
  * NAME: qunit-test.js
  * DESC: tests for qunit-test.html (coded to my O365 Dev Site - YMMV)
  * AUTH: https://github.com/gitbrent/
- * DATE: Dec 31, 2017
+ * DATE: Feb 11, 2018
  *
  * HOWTO: Generate text tables for README etc.:
  * sprLib.list('Employees').getItems(['Id', 'Name', 'Badge_x0020_Number']).then(function(arrData){ console.log(getAsciiTableStr(arrData)) });
@@ -65,7 +65,6 @@ QUnit.module( "Library OPTIONS" );
 // ================================================================================================
 {
 	QUnit.test(`sprLib.baseUrl('${RESTROOT}')`, function(assert){
-		var done = assert.async();
 		// TEST:
 		// A: Set
 		sprLib.baseUrl(RESTROOT);
@@ -74,7 +73,6 @@ QUnit.module( "Library OPTIONS" );
 		// C: Test
 		assert.ok( strBaseUrl == RESTROOT, "Pass: `strBaseUrl == RESTROOT` Str: " + strBaseUrl );
 		//
-		done();
 	});
 }
 
@@ -1051,6 +1049,24 @@ QUnit.module( "LIST > ITEM GET Methods" );
 			done();
 		});
 	});
+
+	QUnit.test("sprLib.getItems() 20: `listCols` with duplicate column", function(assert){
+		var done = assert.async();
+		// TEST: This caused empty results until fixed in 1.5.0!
+		sprLib.list('Departments')
+		.getItems({ listCols:['Id','Id'] })
+		.then(function(arrayResults){
+			assert.ok( Object.keys(arrayResults[0]).length == 1, "arrayResults[0] has length == 1: "+ Object.keys(arrayResults[0]).length );
+			assert.ok( (arrayResults[0].Id)           , "arrayResults[0].Id exists: "+ JSON.stringify(arrayResults[0].Id) );
+			assert.ok( getAsciiTableStr(arrayResults) , `RESULTS:\n${getAsciiTableStr(arrayResults)}`);
+			done();
+		})
+		.catch(function(errorMessage){
+			assert.ok( (false), errorMessage );
+			done();
+		});
+	});
+
 
 	QUnit.test("sprLib.getItems() 50: `queryNext` with return values", function(assert){
 		var done = assert.async();
