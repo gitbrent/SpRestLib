@@ -33,7 +33,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 (function(){
 	// APP VERSION/BUILD
 	var APP_VER = "1.5.0-beta";
-	var APP_BLD = "20180208";
+	var APP_BLD = "20180211";
 	var DEBUG = false; // (verbose mode/lots of logging)
 	// ENUMERATIONS
 	var ENUM_PRINCIPALTYPES = {
@@ -406,7 +406,8 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 						var objNew = {};
 						Object.keys(inObj).forEach(function(key,idx){ objNew[key] = inObj[key]; });
 						var objListCols = {};
-						inObj.listCols.forEach(function(colStr,i){
+						// Filter returns unique values (otherwise, dupes will cause issues below. e.g.:['Id','Id'] will return nulls)
+						inObj.listCols.filter(function(value,index,self){ return self.indexOf(value) === index }).forEach(function(colStr,i){
 							var strTmp = ( colStr.indexOf('/') > -1 ? colStr.substring(0,colStr.indexOf('/')) : colStr );
 							// Handle cases where there are 2 expands from same column. Ex: 'Manager/Id' and 'Manager/Title'
 							if ( colStr ) objListCols[strTmp] = ( objListCols[strTmp] ? { dataName:objListCols[strTmp].dataName+','+colStr } : { dataName:colStr } );
