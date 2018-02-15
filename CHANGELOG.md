@@ -7,7 +7,8 @@
 - Form binding/population spun off into separate `sprestlib-ui.js` library
 - Added new dist file - minified library: `sprestlib.min.js`
 
-
+**Fixed Bugs:**
+- Selecting the same field name twice results in undefined [\#15](https://github.com/gitbrent/sprestlib/issues/15) ([gitbrent](https://github.com/gitbrent))
 
 
 
