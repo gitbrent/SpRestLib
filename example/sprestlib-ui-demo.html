@@ -6,7 +6,7 @@
 	<meta name="website"     content="https://github.com/gitbrent/SpRestLib/">
 	<meta name="keywords"    content="SpRestLib, JavaScript, js-sharepoint, OData, REST, SharePoint 2013, SP2013, SharePoint 2016, SP2016, SharePoint Online">
 	<meta name="description" content="Content Editor WebPart to showcase SpRestLib-UI features and capabilities">
-	<meta name="revised"     content="20180118">
+	<meta name="revised"     content="20180216">
 
 	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300">
 	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:700">
@@ -49,7 +49,7 @@
 
 	<script type="text/javascript">
 		$.ajaxSetup({ cache:false });
-		var APP_BLD = 20180118;
+		var APP_BLD = 20180216;
 		var HTML_SPINNER = '<div class="sprlib-spinner"><div class="sprlib-bounce1"></div><div class="sprlib-bounce2"></div><div class="sprlib-bounce3"></div></div>';
 
 		// ==================================================================================================================
@@ -226,7 +226,7 @@
 			<div id="tabUITable" data-tab="Data Binding: Table">
 				<!-- EXAMPLE 1 -->
 				<div class="subTitle" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
-					<div class="arrow active"></div>Example 1: (via `&lt;table&gt;`): All <code>Departments</code> items
+					<div class="arrow active"></div>Example 1: table: using array of column names
 				</div>
 				<div>
 					<div id="htmlEleTab1Code"><pre><code class="language-html"></code></pre></div>
@@ -235,7 +235,7 @@
 
 				<!-- EXAMPLE 2 -->
 				<div class="subTitle" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
-					<div class="arrow"></div>Example 2: (via `&lt;tbody&gt;`): All <code>Departments</code> items - complex column object + using `class` &amp; `format`
+					<div class="arrow"></div>Example 2: thead: complex column object + using `class` &amp; `format`
 				</div>
 				<div style="display:none">
 					<div id="htmlEleTab2Code"><pre><code class="language-html"></code></pre></div>
@@ -244,36 +244,58 @@
 
 				<!-- EXAMPLE 3 -->
 				<div class="subTitle" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
-					<div class="arrow"></div>Example 3: (via `&lt;table&gt;`): Last 10 Modified Employees - `"format":"INTLTIME"`
+					<div class="arrow"></div>Example 3: table: column object: using lookup + using date-format:intltime
 				</div>
 				<div style="display:none">
 					<div id="htmlEleTab3Code"><pre><code class="language-html"></code></pre></div>
 					<div id="htmlEleTab3Html"></div>
 				</div>
 
+				<!-- EXAMPLE 99 -->
+				<div class="subTitle" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
+					<div class="arrow"></div>Example 99: <span style="color:red">**Negative Test**</span> (testing UI when errors occur)
+				</div>
+				<div style="display:none">
+					<div id="htmlEleTab99Code"><pre><code class="language-html"></code></pre></div>
+					<div id="htmlEleTab99Html"></div>
+				</div>
+
 				<!-- Populate HTML elements before doc.ready is fired -->
 				<script type="text/javascript">
-					var htmlEleTab1 = '<table class="tabModern" data-sprlib=\'{ "list":"Departments", "cols":["Id","Title"], "limit":100, "showBusy":true }\'></table>';
+					var htmlEleTab1 = '<table class="tabModern" data-sprlib=\'{ "list":"Documents", "cols":["Id","FileLeafRef","Title"], "limit":30, "showBusy":true }\'></table>';
 					$('#htmlEleTab1Code pre code').text( htmlEleTab1 );
 					$('#htmlEleTab1Html').html( htmlEleTab1 );
 
 					var htmlEleTab2 = '<table class="tabModern" border="0" cellpadding="0" cellspacing="0">\n'
-						+ '  <thead>\n    <tr><th>Department Title</th><th>Last Modified By</th><th>Last Modified</th></tr>\n  </thead>\n'
-						+ '  <tbody data-sprlib=\'{ "list":"Departments", "cols":["Title","Editor/Title",{"name":"Modified","format":"INTLTIME","class":"nowctr","style":"width:5%"}] }\'></tbody>\n'
+						+ '  <thead>\n    <tr><th>Document Title</th><th>Last Modified By</th><th>Last Modified</th></tr>\n  </thead>\n'
+						+ '  <tbody data-sprlib=\'{\n'
+						+ '      "list":"Documents",\n'
+						+ '      "cols":["FileLeafRef","Editor/Title",{"name":"Modified","format":"INTLTIME","class":"nowctr","style":"width:5%"}],\n'
+						+ '      "limit":20'
+						+ '    }\'>\n'
+						+ '  </tbody>\n'
 						+ '</table>';
 					$('#htmlEleTab2Code pre code').text( htmlEleTab2 );
 					$('#htmlEleTab2Html').html( htmlEleTab2 );
 
 					var htmlEleTab3 = '<table \n  class="tabModern" \n'
 						+ '  data-sprlib=\'{\n'
-						+ '    "list": "Employees",\n'
-						+ '    "cols": [ "Title", {"name":"Manager/Title", "label":"Manager"}, {"name":"Modified", "format":"INTLTIME", "style":"width:5%; white-space:nowrap;"} ],\n'
+						+ '    "list": "Site Pages",\n'
+						+ '    "cols": [\n'
+						+ '       { "name":"FileLeafRef", "label":"File Name" }, \n'
+						+ '       { "name":"Editor/Title", "label":"Modified By" }, \n'
+						+ '       { "name":"Modified", "format":"INTLTIME", "style":"width:5%; white-space:nowrap;" } \n'
+						+ '   ],\n'
 						+ '   "order": "Modified desc",\n'
 						+ '   "limit": 10\n'
 						+ '  }\'>\n'
 						+ '</table>';
 					$('#htmlEleTab3Code pre code').text( htmlEleTab3 );
 					$('#htmlEleTab3Html').html( htmlEleTab3 );
+
+					var htmlEleTab99 = '<table class="tabModern" data-sprlib=\'{ "list":"Documents", "cols":["JunkColName"], "limit":99 }\'></table>';
+					$('#htmlEleTab99Code pre code').text( htmlEleTab99 );
+					$('#htmlEleTab99Html').html( htmlEleTab99 );
 				</script>
 			</div>
 
@@ -284,20 +306,24 @@
 				<div id="tabSelectElements" class="divTableRows testGroup">
 					<div>
 						<div><div id="htmlEleSel1Code"><pre><code class="language-html"></code></pre></div></div>
-						<div><div id="htmlEleSel1Html"></div></div>
+					</div>
+					<div>
+						<div>20 most recent Site Assets items: <span id="htmlEleSel1Html"></span></div>
 					</div>
 					<div>
 						<div><div id="htmlEleSel2Code"><pre><code class="language-html"></code></pre></div></div>
-						<div><div id="htmlEleSel2Html"></div></div>
+					</div>
+					<div>
+						<div>Document IDs: <span id="htmlEleSel2Html"></span></div>
 					</div>
 				</div>
 				<!-- Populate HTML elements before doc.ready is fired -->
 				<script type="text/javascript">
-				var htmlEleSel1 = '<select data-sprlib=\'{ "list":"Employees", "value":"Id", "text":"Name", "order":"ID desc", "limit":20 }\'></select>';
+				var htmlEleSel1 = '<select data-sprlib=\'{ "list":"Site Assets", "value":"Id", "text":"FileLeafRef", "order":"ID desc", "limit":20 }\'></select>';
 				$('#htmlEleSel1Code pre code').text( htmlEleSel1 );
 				$('#htmlEleSel1Html').html( htmlEleSel1 );
 
-				var htmlEleSel2 = '<select data-sprlib=\'{ "list":"Employees", "value":"Name", "text":"Id", "limit":30 }\'></select>';
+				var htmlEleSel2 = '<select data-sprlib=\'{ "list":"Documents", "value":"FileLeafRef", "text":"Id", "limit":20 }\'></select>';
 				$('#htmlEleSel2Code pre code').text( htmlEleSel2 );
 				$('#htmlEleSel2Html').html( htmlEleSel2 );
 				</script>
