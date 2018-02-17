@@ -174,7 +174,7 @@
 			// TAB: Setup
 			{
 				// SP: User
-				sprLib.user().info().then(function(objUser){ $('#spUserPerm').text(objUser.Title) });
+				sprLib.user().info().then(function(objUser){ $('#spUserPerm').text(objUser.Title) }).catch(function(strErr){ console.error(strErr) });
 
 				// SP: Datetime Stamp
 				$('#spDateTime').text( new Date().toLocaleString() );
