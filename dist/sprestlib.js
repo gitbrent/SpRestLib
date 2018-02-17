@@ -175,7 +175,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 	sprLib.list = function list(inOpt) {
 		var _newList = {};
 		var _urlBase = "_api/lists";
-		var _requestDigest = $("#__REQUESTDIGEST").val();
+		var _requestDigest = document.getElementById('__REQUESTDIGEST').value;
 		inOpt = inOpt || {};
 		// Allow `guid` as a synonym for `name` per user request
 		if ( inOpt.guid ) inOpt.name = inOpt.guid;
@@ -1001,7 +1001,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 				url    : inOpt.url,
 				type   : inOpt.type,
 				cache  : inOpt.cache,
-				headers: inOpt.headers || { "Accept":"application/json;odata=verbose", "X-RequestDigest":inOpt.requestDigest || $("#__REQUESTDIGEST").val() }
+				headers: inOpt.headers || { "Accept":"application/json;odata=verbose", "X-RequestDigest":inOpt.requestDigest || document.getElementById('__REQUESTDIGEST').value }
 			};
 			// Add `data` if included
 			if ( inOpt.data ) objAjaxQuery.data = inOpt.data;
@@ -1324,7 +1324,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 					.then(function(){
 						if (DEBUG) console.log('err-403: token renewed');
 						// Some operations (ex: CRUD) will include the token value in header. It must be refreshed as well (or the new tolem is pointless!)
-						if ( inOpt.headers && inOpt.headers['X-RequestDigest'] ) inOpt.headers['X-RequestDigest'] = inOpt.requestDigest || $("#__REQUESTDIGEST").val();
+						if ( inOpt.headers && inOpt.headers['X-RequestDigest'] ) inOpt.headers['X-RequestDigest'] = (inOpt.requestDigest || document.getElementById('__REQUESTDIGEST').value);
 						gRetryCounter++;
 						sprLib.rest(inOpt);
 					});
