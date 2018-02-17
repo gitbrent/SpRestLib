@@ -10,10 +10,7 @@
 	"license": "MIT",
 	"dependencies": {
 		"https": ">=1.0.0",
-		"is-electron": "^2.1.0",
-		"jquery": "^3.2.1",
-		"jquery-node": "^0.3.0",
-		"promise": ">=6.1.0"
+		"is-electron": "^2.1.0"
 	},
 	"main": "dist/sprestlib.js",
 	"directories": {
@@ -27,6 +24,9 @@
 	"keywords": [
 		"javascript-odata-library",
 		"javascript-rest-library",
+		"javascript-sharepoint-rest",
+		"javascript-sharepoint-services",
+		"javascript-sharepoint-web-services",
 		"javascript-sp-web-services",
 		"sharepoint-javascript",
 		"sharepoint-javascript-app",
@@ -47,9 +47,7 @@
 		"sharepoint-user-library",
 		"sharepoint-users",
 		"sharepoint-web-services",
-		"sharepoint-web-services-library",
-		"sp2013",
-		"sp2016"
+		"sharepoint-web-services-library"
 	],
 	"bugs": {
 		"url": "https://github.com/gitbrent/sprestlib/issues"
