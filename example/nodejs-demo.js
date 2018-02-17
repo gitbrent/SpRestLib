@@ -14,9 +14,10 @@
 
 // Required Args
 // =============
-if (process.argv.length < 4) {
-	console.log("Usage..: node nodejs-demo.js [spUsername] [spPassword] [spHostUrl]");
-	console.log("Example: node nodejs-demo.js admin@billg.onmicrosoft.com c@ashm0ney https://billg.sharepoint.com");
+if (process.argv.length < 5) {
+	console.log("*ERROR*: Not enough arguments provided\n");
+	console.log("Usage....: node nodejs-demo.js [spUsername] [spPassword] [spHostUrl]");
+	console.log("Example..: node nodejs-demo.js admin@billg.onmicrosoft.com c@ashm0ney https://billg.sharepoint.com");
 	process.exit(-1);
 }
 
@@ -40,7 +41,7 @@ console.log(`> SpRestLib version: ${sprLib.version}\n`); // Loaded okay?
 // Office365/On-Prem/Hosted Vars
 var SP_USER = process.argv[2];
 var SP_PASS = process.argv[3];
-var SP_URL  = process.argv[4];
+var SP_URL  = process.argv[4].replace(/\/$/gi,'');
 var SP_HOST = SP_URL.toLowerCase().replace('https://','').replace('http://','');
 var gBinarySecurityToken = "";
 var gAuthCookie1 = "";
