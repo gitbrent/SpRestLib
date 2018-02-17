@@ -1,14 +1,17 @@
 # Change Log
 
-## [v1.5.0](https://github.com/gitbrent/sprestlib/tree/v1.5.0) (2018-02-??)
+## [v1.5.0](https://github.com/gitbrent/sprestlib/tree/v1.5.0) (2018-02-16)
 [Full Changelog](https://github.com/gitbrent/sprestlib/compare/v1.4.0...v1.5.0)
 
 **Implemented Enhancements:**
 - Form binding/population spun off into separate `sprestlib-ui.js` library
-- Added new dist file - minified library: `sprestlib.min.js`
+- Created a separate demo page for `sprestlib-ui.js` library
+- Added new dist file (minified library): `sprestlib.min.js`
 
 **Fixed Bugs:**
 - Selecting the same field name twice results in undefined [\#15](https://github.com/gitbrent/sprestlib/issues/15) ([gitbrent](https://github.com/gitbrent))
+- Fixed a null-check defect in REST result parsing
+
 
 
 
@@ -25,6 +28,7 @@
 
 
 
+
 ## [v1.3.0](https://github.com/gitbrent/sprestlib/tree/v1.3.0) (2017-11-27)
 [Full Changelog](https://github.com/gitbrent/sprestlib/compare/v1.2.1...v1.3.0)
 
@@ -37,12 +41,14 @@
 
 
 
+
 ## [v1.2.1](https://github.com/gitbrent/sprestlib/tree/v1.2.1) (2017-10-12)
 [Full Changelog](https://github.com/gitbrent/sprestlib/compare/v1.2.0...v1.2.1)
 
 **Fixed Bugs:**
 - Url param passing .rest() with 'http'/'https' is not being parsed correctly [\#2](https://github.com/gitbrent/sprestlib/issues/2) ([gitbrent](https://github.com/gitbrent))
 - Query options passed to .rest() are only parsed when 'queryCols' exists [\#3](https://github.com/gitbrent/sprestlib/issues/3) ([gitbrent](https://github.com/gitbrent))
+
 
 
 
@@ -58,6 +64,7 @@
 
 
 
+
 ## [v1.1.0](https://github.com/gitbrent/sprestlib/tree/v1.1.0) (2017-09-07)
 [Full Changelog](https://github.com/gitbrent/sprestlib/compare/v1.0.0...v1.1.0)
 
@@ -65,6 +72,7 @@
 - Fixed bug in error messages introduced in last release
 - Fixed error handling in Node.js
 - Fixed return of empty array for null Person/lookup fields
+
 
 
 
@@ -76,11 +84,17 @@
 - Node connectivity to SharePoint (Office 365) works now
 - Last bit of cleanup work to arrive at v1.0.0
 
+
+
+
 ## [v0.12.0](https://github.com/gitbrent/sprestlib/tree/v0.12.0) (2017-07-05)
 [Full Changelog](https://github.com/gitbrent/sprestlib/compare/v0.11.0...v0.12.0)
 
 **Fixed Bugs:**
 - Lots of code cleanup and bug fixes
+
+
+
 
 ## [v0.11.0](https://github.com/gitbrent/sprestlib/tree/v0.11.0) (2017-06-25)
 [Full Changelog](https://github.com/gitbrent/sprestlib/compare/v0.10.0...v0.11.0)
@@ -96,10 +110,16 @@
 - Added sprestlib.bundle.js file (using gulp)
 - Added bower support
 
+
+
+
 ## [v0.10.0](https://github.com/gitbrent/sprestlib/tree/v1.0.0) (2017-05-11)
 
 **Code Cleanup**
 **New Features**
+
+
+
 
 ## [v0.9.0](https://github.com/gitbrent/sprestlib/tree/v1.0.0) (2017-01-31)
 

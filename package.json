@@ -1,6 +1,6 @@
 {
 	"name": "sprestlib",
-	"version": "1.5.0-beta",
+	"version": "1.5.0",
 	"author": {
 		"name": "Brent Ely",
 		"url": "https://github.com/gitbrent/"
@@ -25,12 +25,11 @@
 		"url": "git+https://github.com/gitbrent/sprestlib.git"
 	},
 	"keywords": [
-		"sharepoint-group-library",
-		"javascript-odata",
 		"javascript-odata-library",
 		"javascript-rest-library",
 		"javascript-sp-web-services",
 		"sharepoint-javascript",
+		"sharepoint-javascript-app",
 		"sharepoint-javascript-framework",
 		"sharepoint-javascript-library",
 		"sharepoint-javascript-rest",
@@ -44,7 +43,9 @@
 		"sharepoint-rest",
 		"sharepoint-rest-api",
 		"sharepoint-rest-library",
+		"sharepoint-site",
 		"sharepoint-user-library",
+		"sharepoint-users",
 		"sharepoint-web-services",
 		"sharepoint-web-services-library",
 		"sp2013",

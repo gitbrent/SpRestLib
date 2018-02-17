@@ -29,8 +29,8 @@
 
 (function(){
 	// APP VERSION/BUILD
-	var APP_VER = "1.0.0-beta";
-	var APP_BLD = "20180114";
+	var APP_VER = "1.0.0";
+	var APP_BLD = "20180216";
 	var SPRLIB_REQ = "1.4.0+";
 	var DEBUG = false; // (verbose mode/lots of logging)
 	// APP MESSAGE STRINGS (Internationalization)
@@ -163,9 +163,8 @@
 	==================================================================================================
 	*/
 
-	// TODO: Unimplemented/undocumented/undemoed
+	// TODO: Unimplemented/undocumented/undemoed... need to: Validate/Update/Document
 	function doParseFormIntoJson(inModel, inEleId) {
-		// TODO: Validate/Update/Document for post-1.0.0
 		var objReturn = {
 			jsonSpData: {},
 			jsonFormat: {}
@@ -195,49 +194,49 @@
 			var dataName = ( inModel.listCols[strCol] ? inModel.listCols[strCol].dataName : strCol );
 
 			// C: Handle various element types
-			// TODO: add new HTML5 tags
-
-			// CASE: <checkbox>
-			if ( $(this).is(':checkbox') ) {
-				objReturn.jsonSpData[dataName] = $(this).prop('checked');
-				objReturn.jsonFormat[strCol] = APP_STRINGS[APP_OPTS.language][$(this).prop('checked').toString()];
-			}
-			// CASE: <jquery-ui datepicker>
-			else if ( $(this).val() && $(this).hasClass('hasDatepicker') ) {
-				objReturn.jsonSpData[dataName] = $(this).datepicker('getDate').toISOString();
-				objReturn.jsonFormat[strCol] = ( inModel.listCols[strCol].dateFormat ? bdeLib.localDateStrFromSP(null,$(this).datepicker('getDate'),inModel.listCols[strCol].dateFormat) : $(this).datepicker('getDate').toISOString() );
-			}
-			// CASE: <select:single>
-			else if ( $(this).val() && $(this).prop('type') == 'select-one' ) {
-				objReturn.jsonSpData[dataName] = ($(this).data('type') && ($(this).data('type') == 'num' || $(this).data('type') == 'pct')) ? Number($(this).val()) : $(this).val().toString();
-				objReturn.jsonFormat[strCol] = objReturn.jsonSpData[dataName];
-			}
-			// CASE: <select:multiple>
-			else if ( $(this).val() && $(this).prop('type') == 'select-multiple' ) {
-				// TODO: This is for multi-lookup!  Multi-choice w/b different - add code!
-				// EX: (SP2013/16): { "SkillsId": { "__metadata":{"type":"Collection(Edm.Int32)"}, "results":[1,2,3] } }
-				var arrIds = [];
-				$.each($(this).val(), function(i,val){ arrIds.push( Number(val) ); });
-				objReturn.jsonSpData[dataName] = { "__metadata":{"type":"Collection(Edm.Int32)"}, "results":arrIds };
-				objReturn.jsonFormat[strCol] = arrIds.toString();
-			}
-			// CASE: <radiobutton>
-			else if ( $(this).val() && $(this).is(':radio') ) {
-				// TODO: FUTURE: Add radiobutton, get value by name or whatever
-			}
-			// CASE: <textarea>
-			else if ( $(this).text() && $(this).prop('tagName').toUpperCase() == 'TEXTAREA' ) {
-				objReturn.jsonSpData[dataName] = $(this).text();
-				objReturn.jsonFormat[strCol] = $(this).text();
-			}
-			// CASE: (everything else - excluding buttons)
-			else if ( $(this).val() && $(this).prop('type') != 'submit' && $(this).prop('type') != 'reset' && $(this).prop('type') != 'button' ) {
-				objReturn.jsonSpData[dataName] = $(this).val();
-				objReturn.jsonFormat[strCol] = $(this).val();
-			}
-			// CASE: No value
-			else {
-				objReturn.jsonFormat[strCol] = '';
+			{
+				// CASE: <checkbox>
+				if ( $(this).is(':checkbox') ) {
+					objReturn.jsonSpData[dataName] = $(this).prop('checked');
+					objReturn.jsonFormat[strCol] = APP_STRINGS[APP_OPTS.language][$(this).prop('checked').toString()];
+				}
+				// CASE: <jquery-ui datepicker>
+				else if ( $(this).val() && $(this).hasClass('hasDatepicker') ) {
+					objReturn.jsonSpData[dataName] = $(this).datepicker('getDate').toISOString();
+					objReturn.jsonFormat[strCol] = ( inModel.listCols[strCol].dateFormat ? bdeLib.localDateStrFromSP(null,$(this).datepicker('getDate'),inModel.listCols[strCol].dateFormat) : $(this).datepicker('getDate').toISOString() );
+				}
+				// CASE: <select:single>
+				else if ( $(this).val() && $(this).prop('type') == 'select-one' ) {
+					objReturn.jsonSpData[dataName] = ($(this).data('type') && ($(this).data('type') == 'num' || $(this).data('type') == 'pct')) ? Number($(this).val()) : $(this).val().toString();
+					objReturn.jsonFormat[strCol] = objReturn.jsonSpData[dataName];
+				}
+				// CASE: <select:multiple>
+				else if ( $(this).val() && $(this).prop('type') == 'select-multiple' ) {
+					// TODO: This is for multi-lookup!  Multi-choice w/b different - add code!
+					// EX: (SP2013/16): { "SkillsId": { "__metadata":{"type":"Collection(Edm.Int32)"}, "results":[1,2,3] } }
+					var arrIds = [];
+					$.each($(this).val(), function(i,val){ arrIds.push( Number(val) ); });
+					objReturn.jsonSpData[dataName] = { "__metadata":{"type":"Collection(Edm.Int32)"}, "results":arrIds };
+					objReturn.jsonFormat[strCol] = arrIds.toString();
+				}
+				// CASE: <radiobutton>
+				else if ( $(this).val() && $(this).is(':radio') ) {
+					// TODO: FUTURE: Add radiobutton, get value by name or whatever
+				}
+				// CASE: <textarea>
+				else if ( $(this).text() && $(this).prop('tagName').toUpperCase() == 'TEXTAREA' ) {
+					objReturn.jsonSpData[dataName] = $(this).text();
+					objReturn.jsonFormat[strCol] = $(this).text();
+				}
+				// CASE: (everything else - excluding buttons)
+				else if ( $(this).val() && $(this).prop('type') != 'submit' && $(this).prop('type') != 'reset' && $(this).prop('type') != 'button' ) {
+					objReturn.jsonSpData[dataName] = $(this).val();
+					objReturn.jsonFormat[strCol] = $(this).val();
+				}
+				// CASE: No value
+				else {
+					objReturn.jsonFormat[strCol] = '';
+				}
 			}
 
 			// D: Special Cases:
@@ -327,11 +326,10 @@
 						}
 					});
 				}
-
-				// 2: If a column is in a [select] text/value, then add it to cols!
-				if ( objTagData.text  && objTagData.cols.indexOf(objTagData.text)  == -1 ) arrColNames.push(objTagData.text);
-				if ( objTagData.value && objTagData.cols.indexOf(objTagData.value) == -1 ) arrColNames.push(objTagData.value);
 			}
+			// If a column is in a [select] text/value, then those 2 are the query cols
+			if ( objTagData.text  ) arrColNames.push(objTagData.text);
+			if ( objTagData.value ) arrColNames.push(objTagData.value);
 
 			if ( objTagData.filter ) {
 				// A: Param Check (NOTE: Dont use "!$(tag).filter.val" as actual value may be [false] or ""!)
@@ -369,6 +367,7 @@
 						}
 
 						$.each(objTagData.data, function(i,data){
+							console.log(data);
 							$(tag).append('<option value="'+ data[objTagData.value] +'">'+ data[objTagData.text] +'</option>');
 						});
 					}
@@ -493,7 +492,7 @@
 						+ strErr +'</td></tr>'
 					);
 				}
-				// TODO: show error in tag
+				// TODO: show error in tags other than table
 				console.error(strErr);
 			});
 		});

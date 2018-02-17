@@ -173,11 +173,13 @@ to load the SpRestLib bundle script dynamically:
 ```javascript
 // 1: Load SpRestLib via CDN
 var script = document.createElement('script');
-script.src = "https://cdn.rawgit.com/gitbrent/SpRestLib/v1.4.0/dist/sprestlib.bundle.js";
+script.src = "https://cdn.rawgit.com/gitbrent/SpRestLib/v1.5.0/dist/sprestlib.bundle.js";
 document.getElementsByTagName('head')[0].appendChild(script);
 
-// 2: Try some library methods
+// 2: Test drive some library methods
+// Show current user info
 sprLib.user().info().then( objUser => (console.table ? console.table([objUser]) : console.log(objUser)) );
+// Show all Lists/Libraries on the current Site
 sprLib.site().lists().then( arrLists => (console.table ? console.table(arrLists) : console.log(arrLists)) );
 ```
 
