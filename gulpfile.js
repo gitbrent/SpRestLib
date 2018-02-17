@@ -5,7 +5,7 @@ var gulp       = require('gulp'),
     uglify     = require('gulp-uglify');
 
 gulp.task('default', function(){
-    gulp.src(['lib/jquery.min.js', 'lib/promise.min.js', 'dist/sprestlib.js'])
+    gulp.src(['lib/promise.min.js', 'dist/sprestlib.js'])
         .pipe(concat('sprestlib.bundle.js'))
         .pipe(sourcemaps.init())
         .pipe(ignore.exclude(["**/*.map"]))
