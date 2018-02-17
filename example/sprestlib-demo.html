@@ -39,7 +39,7 @@
 	<!-- ^^^ DEBUG ^^^ -->
 	<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.8.3/themes/prism-coy.css">
 
-	<script type="text/javascript" src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+	<script type="text/javascript" src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
 	<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.29.0/js/jquery.tablesorter.min.js"></script>
 	<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.8.3/prism.min.js"></script>
 	<script type="text/javascript" src="https://cdn.rawgit.com/sorensen/ascii-table/v0.0.9/ascii-table.min.js"></script>
@@ -421,8 +421,10 @@
 			// TAB: Sandbox
 			{
 				$('#sandboxCode').text(
-					"sprLib.list('Employees')\n"
-					+ ".getItems({ listCols:['Id','Name','Manager/Id','Manager/Title'] })\n"
+					"sprLib.list('Site Assets')\n"
+					+ ".getItems({\n"
+					+ "  listCols: ['Id','FileLeafRef','Created','Modified']\n"
+					+ "})\n"
 					+ ".then(function(data){ return data; });"
 				);
 			}
@@ -641,12 +643,12 @@
 			<div id="tabList" data-tab="List Methods">
 				<div class="subTitle">List/Library Methods</div>
 				<p>
-					Here are all the Lists/Libraries found on this site:<br>
-					Select one and try some CRUD ops!
+					Select one of the Lists/Libraries found on this site to view its properties.<br>
+					Note: Only non-hidden Lists/Libraries are shown
 				</p>
 
 				<div id="contListSelect" class="divTable" style="width:auto; margin-bottom:20px;">
-					<div class="th">
+					<div class="th" style="padding:0; font-size:120%; vertical-align:middle;">
 						Site Lists/Libraries
 					</div>
 					<div>
@@ -654,7 +656,6 @@
 						<select id="selSiteLists" onchange="handleListChange()">
 							<option value="">Select...</option>
 						</select>
-						<span>(only non-hidden Lists/Libraries are shown)</span>
 					</div>
 				</div>
 
