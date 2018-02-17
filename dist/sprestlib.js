@@ -1150,7 +1150,12 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 				// NOTE: Depending upon which REST endpoint used, SP can return results in various forms (!)
 				// EX..: data.d.results is an [] of {}: [ {Title:'Brent Ely', Email:'Brent.Ely@microsoft.com'}, {}, {} ]
 				// NOTE: Ensure results are an object because SP will return an entire HTML page as a result in some error cases!
-				if ( arrObjResult.length > 0 || (data && data.d && data.d.results && typeof data.d.results === 'object') ) {
+
+				if ( objAjaxQuery.url.toLowerCase().indexOf('owssvr.dll') > -1 && objAjaxQuery.url.toLowerCase().indexOf('includeversions=true') > -1 ) {
+					// IE11: When using jQuery AJAX for AppendText/Versions/getVersions, the `data` result must be parsed directly (no conversion) using `$(data).find("z:row")`
+					inOpt.spArrData.push( data );
+				}
+				else if ( arrObjResult.length > 0 || (data && data.d && data.d.results && typeof data.d.results === 'object') ) {
 					(arrObjResult.length > 0 ? arrObjResult : data.d.results).forEach(function(result){
 						var objRow = {};
 
@@ -1299,12 +1304,6 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 
 					if ( objRow.__metadata && !inOpt.metadata ) delete objRow.__metadata;
 					inOpt.spArrData.push( objRow );
-				}
-				else {
-					// IE11: When using jQuery AJAX for AppendText/Versions/getVersions, the `data` result must be parsed directly (no conversion) using `$(data).find("z:row")`
-					if ( objAjaxQuery.url.toLowerCase().indexOf('owssvr.dll') > -1 && objAjaxQuery.url.toLowerCase().indexOf('includeversions=true') > -1 ) {
-						inOpt.spArrData.push( data );
-					}
 				}
 
 				// D:
