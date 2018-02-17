@@ -4,6 +4,8 @@
 [Full Changelog](https://github.com/gitbrent/sprestlib/compare/v1.5.0...v1.6.0)
 
 **Implemented Enhancements:**
+- Removed jQuery methods from sprestlib.js, reducing dependencies to zero!
+
 **Fixed Bugs:**
 
 
