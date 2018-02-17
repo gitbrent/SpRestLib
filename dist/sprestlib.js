@@ -659,20 +659,21 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 						.then(function(result){
 							if ( result && result[0] && result[0].documentElement ) {
 								// Query is order by oldest->newest, so always capture the result and the last one captured will always be the most recent
-								$(result[0].documentElement).find("z\\:row, row").each(function(i,row){
+// TODO: remove jQuery
+								result[0].documentElement.querySelectorAll('row').forEach(function(row){
 									arrAppendCols.forEach(function(objCol,idx){
-										var intID = $(row).attr("ows_ID");
+										var intID = row.getAttribute("ows_ID");
 										var prvComm = "";
 
 										// NOTE: LOGIC: Versions doesnt filter like getItems, so we may get many more items than our dataset has
-										if ( inObj.spObjData[intID] && $(row).attr("ows_"+objCol.dataName) ) {
-											var rowNote = ($(row).attr('ows_'+objCol.dataName) || '');
+										if ( inObj.spObjData[intID] && row.getAttribute('ows_'+objCol.dataName) ) {
+											var rowNote = row.getAttribute('ows_'+objCol.dataName) || '';
 											if ( rowNote ) {
 												if ( rowNote != prvComm ) {
 													// IE11: Convert date to ISO-8601 format or IE will fail using date like '2017-01-02 12:34:55'
 													inObj.spObjData[intID][objCol.keyName].push({
-														verDate: new Date($(row).attr('ows_Modified').replace(' ','T')).toISOString(),
-														verName: $(row).attr('ows_Editor').substring($(row).attr('ows_Editor').indexOf("#")+1),
+														verDate: new Date(row.getAttribute('ows_Modified').replace(' ','T')).toISOString(),
+														verName: row.getAttribute('ows_Editor').substring(row.getAttribute('ows_Editor').indexOf("#")+1),
 														verText: rowNote
 													});
 													prvComm = rowNote;
@@ -682,8 +683,8 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 													// (so author and date are correct - older ones are ModifiedBy folks who Modified *OTHER* fields! - oldest is true author!)
 													inObj.spObjData[intID][objCol.keyName].pop();
 													inObj.spObjData[intID][objCol.keyName].push({
-														verDate: new Date($(row).attr('ows_Modified').replace(' ','T')).toISOString(),
-														verName: $(row).attr('ows_Editor').substring($(row).attr('ows_Editor').indexOf("#")+1),
+														verDate: new Date(row.getAttribute('ows_Modified').replace(' ','T')).toISOString(),
+														verName: row.getAttribute('ows_Editor').substring(row.getAttribute('ows_Editor').indexOf("#")+1),
 														verText: rowNote
 													});
 												}
@@ -1152,7 +1153,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 				// NOTE: Ensure results are an object because SP will return an entire HTML page as a result in some error cases!
 
 				if ( objAjaxQuery.url.toLowerCase().indexOf('owssvr.dll') > -1 && objAjaxQuery.url.toLowerCase().indexOf('includeversions=true') > -1 ) {
-					// IE11: When using jQuery AJAX for AppendText/Versions/getVersions, the `data` result must be parsed directly (no conversion) using `$(data).find("z:row")`
+					// IE11: When using jQuery AJAX for AppendText/Versions/getVersions, the `data` result must be parsed directly (no conversion) using `(data).find("z:row")`
 					inOpt.spArrData.push( data );
 				}
 				else if ( arrObjResult.length > 0 || (data && data.d && data.d.results && typeof data.d.results === 'object') ) {
