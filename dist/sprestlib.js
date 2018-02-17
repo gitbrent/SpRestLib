@@ -33,7 +33,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 (function(){
 	// APP VERSION/BUILD
 	var APP_VER = "1.6.0-beta";
-	var APP_BLD = "20180216";
+	var APP_BLD = "20180217";
 	var DEBUG = false; // (verbose mode/lots of logging)
 	// ENUMERATIONS
 	var ENUM_PRINCIPALTYPES = {
@@ -86,14 +86,12 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 	==================================================================================================
 	*/
 
-	function parseErrorMessage(jqXHR, textStatus, errorThrown) {
+	function parseErrorMessage(jqXHR) {
 		// STEP 1:
-		jqXHR       = jqXHR       || {};
-		textStatus  = textStatus  || "";
-		errorThrown = errorThrown || "";
+		jqXHR = jqXHR || {};
 
 		// STEP 2:
-		var strErrText = "("+ jqXHR.status +") "+ textStatus +": "+ errorThrown;
+		var strErrText = "("+ jqXHR.status +") "+ jqXHR.responseText;
 		var strSpeCode = "";
 
 		// STPE 3: Parse out SharePoint/IIS error code and message
@@ -173,14 +171,14 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 	* @example - string - sprLib.list({ name:'Documents', baseUrl:'/sites/dev/sandbox', requestDigest:'8675309,05 Dec 2017 01:23:45 -0000' });
 	*/
 	sprLib.list = function list(inOpt) {
+		// A: Options setup
+		inOpt = inOpt || {};
 		var _newList = {};
 		var _urlBase = "_api/lists";
-		var _requestDigest = document.getElementById('__REQUESTDIGEST').value;
-		inOpt = inOpt || {};
-		// Allow `guid` as a synonym for `name` per user request
-		if ( inOpt.guid ) inOpt.name = inOpt.guid;
+		var _requestDigest = (inOpt.requestDigest || (document && document.getElementById('__REQUESTDIGEST') ? document.getElementById('__REQUESTDIGEST').value : null));
+		if ( inOpt.guid ) inOpt.name = inOpt.guid; // Allow `guid` as a synonym for `name` per user request
 
-		// A: Param check
+		// B: Param check
 		if ( inOpt && typeof inOpt === 'string' ) {
 			// DESIGN: Accept either [ListName] or [ListGUID]
 			_urlBase += ( gRegexGUID.test(inOpt) ? "(guid'"+ inOpt +"')" : "/getbytitle('"+ inOpt.replace(/\s/gi,'%20') +"')" );
@@ -188,7 +186,6 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 		else if ( inOpt && typeof inOpt === 'object' && Object.keys(inOpt).length > 0 && inOpt.name ) {
 			_urlBase = (inOpt.baseUrl ? inOpt.baseUrl.replace(/\/+$/,'')+'/_api/lists' : _urlBase);
 			_urlBase += ( gRegexGUID.test(inOpt.name) ? "(guid'"+ inOpt.name +"')" : "/getbytitle('"+ inOpt.name.replace(/\s/gi,'%20') +"')" );
-			if ( inOpt.requestDigest ) _requestDigest = inOpt.requestDigest;
 		}
 		else {
 			console.error("ERROR: A 'listName' or 'listGUID' is required! EX: `sprLib.list('Employees')` or `sprLib.list({ name:'Employees' })`");
@@ -659,7 +656,6 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 						.then(function(result){
 							if ( result && result[0] && result[0].documentElement ) {
 								// Query is order by oldest->newest, so always capture the result and the last one captured will always be the most recent
-// TODO: remove jQuery
 								result[0].documentElement.querySelectorAll('row').forEach(function(row){
 									arrAppendCols.forEach(function(objCol,idx){
 										var intID = row.getAttribute("ows_ID");
@@ -992,6 +988,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 			inOpt = inOpt || {};
 			inOpt.spArrData = [];
 			inOpt.cache    = inOpt.cache    || APP_OPTS.cache;
+			inOpt.digest   = (inOpt.requestDigest || (document && document.getElementById('__REQUESTDIGEST') ? document.getElementById('__REQUESTDIGEST').value : null));
 			inOpt.metadata = inOpt.metadata || APP_OPTS.metadata;
 			inOpt.type     = inOpt.restType || inOpt.type || "GET";
 			inOpt.url      = (inOpt.restUrl || inOpt.url || APP_OPTS.baseUrl).replace(/\"/g, "'");
@@ -1002,7 +999,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 				url    : inOpt.url,
 				type   : inOpt.type,
 				cache  : inOpt.cache,
-				headers: inOpt.headers || { "Accept":"application/json;odata=verbose", "X-RequestDigest":inOpt.requestDigest || document.getElementById('__REQUESTDIGEST').value }
+				headers: inOpt.headers || { "Accept":"application/json;odata=verbose", "X-RequestDigest":inOpt.digest }
 			};
 			// Add `data` if included
 			if ( inOpt.data ) objAjaxQuery.data = inOpt.data;
@@ -1128,15 +1125,33 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 						request.end();
 					}
 					else {
-						// TODO: Remove jQuery: Convert to vanilla JS (http://youmightnotneedjquery.com/#post)
-						$.ajax(objAjaxQuery)
-						.done(function(data,textStatus){
-							resolve(data);
+						// A:
+						var request = new XMLHttpRequest();
+						request.open(objAjaxQuery.type, objAjaxQuery.url, true);
+
+						// B:
+						Object.keys(objAjaxQuery.headers || {}).forEach(function(key){
+							request.setRequestHeader(key, objAjaxQuery.headers[key]);
 						})
-						.fail(function(jqXHR,textStatus,errorThrown){
-							// TODO: 20170628: renewSecurityToken when detected
-							reject( parseErrorMessage(jqXHR, textStatus, errorThrown) + "\n\nURL used: " + objAjaxQuery.url );
-						});
+
+						// C:
+						request.onload = function() {
+							if ( request.status >= 200 && request.status < 400 ) {
+								// Try XML first as `owssvr` (versions) query returns a true XML document
+								resolve(request.responseXML || request.responseText);
+							}
+							else {
+								reject( parseErrorMessage(request) + "\n\nURL used: " + objAjaxQuery.url );
+							}
+						};
+
+						// D:
+						request.onerror = function() {
+							reject( parseErrorMessage(request) + "\n\nURL used: " + objAjaxQuery.url );
+						};
+
+						// D:
+						request.send( objAjaxQuery.data ? objAjaxQuery.data : null );
 					}
 				});
 			})
@@ -1322,9 +1337,10 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 						return sprLib.renewSecurityToken();
 					})
 					.then(function(){
+						var digest = (document && document.getElementById('__REQUESTDIGEST') ? document.getElementById('__REQUESTDIGEST').value : null);
 						if (DEBUG) console.log('err-403: token renewed');
 						// Some operations (ex: CRUD) will include the token value in header. It must be refreshed as well (or the new tolem is pointless!)
-						if ( inOpt.headers && inOpt.headers['X-RequestDigest'] ) inOpt.headers['X-RequestDigest'] = (inOpt.requestDigest || document.getElementById('__REQUESTDIGEST').value);
+						if ( inOpt.headers && inOpt.headers['X-RequestDigest'] ) inOpt.headers['X-RequestDigest'] = digest;
 						gRetryCounter++;
 						sprLib.rest(inOpt);
 					});
