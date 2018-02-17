@@ -1009,7 +1009,6 @@ QUnit.module( "LIST > ITEM GET Methods" );
 					listCols: {
 						appendText: { dataName:'Versioned_x0020_Comments', getVersions:true }
 					},
-					fetchAppend: true,
 					queryLimit: 10,
 					queryOrderby: "Modified desc"
 				}),
@@ -1024,21 +1023,24 @@ QUnit.module( "LIST > ITEM GET Methods" );
 			.then(function(arrayResults){
 				var result = arrayResults[0];
 				assert.ok( true, "Negative Test: getVersions=false\n------------------" );
-				assert.ok( Object.keys(result[0]).filter(key=>{return key.indexOf('_')!=0}).length == 3, "result[0] (no '__meta/__next') has length == 3: "+ Object.keys(result[0]).length );
+				assert.ok( Object.keys(result[0]).filter(key=>{return key.indexOf('_')!=0}).length == 3, "result[0] (no '__meta/__next') has length == 3: "+ Object.keys(result[0]).filter(key=>{return key.indexOf('_')!=0}).length );
 				assert.ok( (true), "result[0].Versioned_x0020_Comments: "+ result[0].Versioned_x0020_Comments );
 				assert.ok( getAsciiTableStr(result), `RESULTS:\n${getAsciiTableStr(result)}` );
 
 				var result = arrayResults[1];
 				assert.ok( true, "TEST: getVersions with keyname-1\n------------------" );
-				assert.ok( Object.keys(result[0]).filter(key=>{return key.indexOf('_')!=0}).length == 1, "result[0] (no '__meta/__next') has length == 1: "+ Object.keys(result[0]).length );
-				assert.ok( (true), "result[0].appendText: "+ result[0].appendText );
+				assert.ok( Object.keys(result[0]).filter(key=>{return key.indexOf('_')!=0}).length == 1, "result[0] (no '__meta/__next') has length == 1: "+ Object.keys(result[0]).filter(key=>{return key.indexOf('_')!=0}).length );
+				assert.ok( result[0].appendText, "result[0].appendText: "+ result[0].appendText );
+				assert.ok( Array.isArray(result[0].appendText), "Array.isArray(result[0].appendText): "+ Array.isArray(result[0].appendText) );
+				assert.ok( result[0].appendText.length > 0, "result[0].appendText.length > 0: "+ result[0].appendText.length );
 				assert.ok( getAsciiTableStr(result), `RESULTS:\n${getAsciiTableStr(result)}` );
 
 				var result = arrayResults[2];
 				assert.ok( true, "TEST: getVersions with keyname-2\n------------------" );
-				assert.ok( Object.keys(result[0]).filter(key=>{return key.indexOf('_')!=0}).length == 1, "result[0] (no '__meta/__next') has length == 1: "+ Object.keys(result[0]).length );
-				assert.ok( (true), "result[0].Versioned_x0020_Comments: "+ result[0].Versioned_x0020_Comments );
-				assert.ok( (true), "result[0].VC is Array(): "+ Array.isArray(result[0].Versioned_x0020_Comments) );
+				assert.ok( Object.keys(result[0]).filter(key=>{return key.indexOf('_')!=0}).length == 1, "result[0] (no '__meta/__next') has length == 1: "+ Object.keys(result[0]).filter(key=>{return key.indexOf('_')!=0}).length );
+				assert.ok( result[0].Versioned_x0020_Comments, "result[0].Versioned_x0020_Comments: "+ result[0].Versioned_x0020_Comments );
+				assert.ok( Array.isArray(result[0].Versioned_x0020_Comments), "result[0].VC is Array(): "+ Array.isArray(result[0].Versioned_x0020_Comments) );
+				assert.ok( result[0].Versioned_x0020_Comments.length > 0, "result[0].Versioned_x0020_Comments.length > 0: "+ result[0].Versioned_x0020_Comments.length );
 				assert.ok( getAsciiTableStr(result), `RESULTS:\n${getAsciiTableStr(result)}` );
 
 				done();
