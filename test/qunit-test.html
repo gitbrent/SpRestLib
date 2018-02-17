@@ -9,14 +9,21 @@
 		.test-message { font-family:monospace; font-size:14px; white-space:pre; }
 	</style>
 	<script type="text/javascript" src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
-	<script type="text/javascript" src="https://cdn.rawgit.com/sorensen/ascii-table/v0.0.9/ascii-table.min.js"></script>
 	<script type="text/javascript" src="https://code.jquery.com/qunit/qunit-2.5.0.js"></script>
+	<script type="text/javascript" src="https://cdn.rawgit.com/sorensen/ascii-table/v0.0.9/ascii-table.min.js"></script>
 	<script type="text/javascript">
 		const APP_BLD = 20180211;
 		$.ajaxSetup({ cache:false });
 		$.getScript("/sites/dev/SiteAssets/js/sprestlib.js", function(){
-			console.log( 'sprLib.version = '+sprLib.version );
-			$.getScript("/sites/dev/SiteAssets/qunit-tests.js");
+			console.log('sprLib.version = '+sprLib.version);
+			$.getScript("/sites/dev/SiteAssets/qunit-tests.js", function(){
+				function showVer(){
+					if ( $('#qunit-header span').length == 0 )
+						$('#qunit-header').append('<span style="float:right">sprLib.version: '+ sprLib.version+'&nbsp;</span>');
+				}
+				setTimeout(showVer,5000);
+				setTimeout(showVer,15000);
+			});
 		});
 	</script>
 </head>
