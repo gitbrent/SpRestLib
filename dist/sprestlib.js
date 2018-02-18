@@ -1881,9 +1881,10 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 		}
 
 		/**
-		* Get User Profile props
+		* Get User Profile properties (SP.UserProfiles.PersonProperties)
 		*
 		* @example sprLib.user().profile()
+		* @example sprLib.user({ id:9 }).profile()
 		* @example sprLib.user().profile('AccountName')
 		* @example sprLib.user().profile(['AccountName','DisplayName'])
 		*
@@ -1905,11 +1906,20 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 		_newUser.profile = function(arrProfileKeys) {
 			return new Promise(function(resolve, reject) {
 				var arrQueryKeys = (Array.isArray(arrProfileKeys) ? arrProfileKeys : (typeof arrProfileKeys === 'string' ? [arrProfileKeys] : null));
-				var userAcctName = (inOpt ? encodeURIComponent(inOpt) : null);
+				var userAcctName = (inOpt && inOpt.login ? encodeURIComponent(inOpt.login) : null);
 
 				// STEP 1: Fetch current/specified User Profile Props
 				Promise.resolve()
 				.then(function(){
+					// Per MSDN, the only way to select props is using `AccountName`, so fetch it if it was not passed in
+					// Get Login/AccountName when somehting was passed (as opposed to null/'current user'), but not the AccountName
+					if ( inOpt && !inOpt.login ) return sprLib.user(inOpt).info();
+				})
+				.then(function(objUser){
+					// A: Use LoginName if it was just queried
+					if ( objUser ) userAcctName = encodeURIComponent(objUser.LoginName);
+
+					// B: Fetch props
 					// NOTE: Just fetch all props (no filter below) as `GetMyProperties?select=SID` returns nothing, but it's present when querying all props
 					// NOTE: Both of these queries returns an object of [PersonProperties](https://msdn.microsoft.com/en-us/library/office/dn790354.aspx#bk_PersonProperties)
 					if ( !userAcctName ) {
