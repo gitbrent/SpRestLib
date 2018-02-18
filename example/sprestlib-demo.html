@@ -6,7 +6,7 @@
 	<meta name="website"     content="https://github.com/gitbrent/SpRestLib/">
 	<meta name="keywords"    content="SpRestLib, JavaScript, js-sharepoint, OData, REST, SharePoint 2013, SP2013, SharePoint 2016, SP2016, SharePoint Online">
 	<meta name="description" content="Content Editor WebPart to showcase SpRestLib features and capabilities">
-	<meta name="revised"     content="20180109">
+	<meta name="revised"     content="20180218">
 
 	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300">
 	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:700">
@@ -34,7 +34,6 @@
 	<script type="text/javascript" src="https://cdn.rawgit.com/gitbrent/SpRestLib/v1.5.0/example/css/sprestlib-demo.css"></script>
 	DEBUG Below
 	-->
-	<link rel="stylesheet" type="text/css" href="../SiteAssets/sprestlib/css/sprestlib.css">
 	<link rel="stylesheet" type="text/css" href="../SiteAssets/sprestlib/css/sprestlib-demo.css">
 	<!-- ^^^ DEBUG ^^^ -->
 	<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.8.3/themes/prism-coy.css">
@@ -50,7 +49,7 @@
 
 	<script type="text/javascript">
 		$.ajaxSetup({ cache:false });
-		var APP_BLD = 20180109;
+		var APP_BLD = 20180218;
 		var HTML_SPINNER = '<div class="sprlib-spinner"><div class="sprlib-bounce1"></div><div class="sprlib-bounce2"></div><div class="sprlib-bounce3"></div></div>';
 
 		// ==================================================================================================================
@@ -404,6 +403,15 @@
 					+ '});';
 				$('#user2Code pre code').text( user2Code );
 				eval(user2Code);
+
+				var user3Code = "sprLib.user().profile()\n"
+					+ ".then(function(objUser){\n"
+					+ "    $.each(objUser,function(key,val){\n"
+					+ "        if (typeof val !== 'object') $('#user3Html table tbody').append('<tr><th>'+ key +'</th><td>'+ val +'</td></tr>');\n"
+					+ "    });\n"
+					+ '});';
+				$('#user3Code pre code').text( user3Code );
+				eval(user3Code);
 			}
 
 			// TAB: REST API
@@ -696,6 +704,22 @@
 								<tr>
 									<th style="width:10%">Group ID</th>
 									<th style="width:90%">Group Title</th>
+								</tr>
+							</thead>
+							<tbody></tbody>
+						</table>
+					</div>
+				</div>
+
+				<div class="subTitle">User Profile</div>
+				<div>
+					<div id="user3Code"><pre><code class="language-javascript"></code></pre></div>
+					<div id="user3Html" style="margin-bottom:20px">
+						<table class="tabModern">
+							<thead>
+								<tr>
+									<th style="width:10%">Prop Name</th>
+									<th style="width:90%">Prop Value</th>
 								</tr>
 							</thead>
 							<tbody></tbody>
