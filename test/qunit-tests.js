@@ -2,7 +2,7 @@
  * NAME: qunit-test.js
  * DESC: tests for qunit-test.html (coded to my O365 Dev Site - YMMV)
  * AUTH: https://github.com/gitbrent/
- * DATE: Feb 11, 2018
+ * DATE: Feb 18, 2018
  *
  * HOWTO: Generate text tables for README etc.:
  * sprLib.list('Employees').getItems(['Id', 'Name', 'Badge_x0020_Number']).then(function(arrData){ console.log(getAsciiTableStr(arrData)) });
@@ -1795,6 +1795,25 @@ QUnit.module( "USER Methods" );
 					done();
 				});
 			});
+
+			QUnit.test('sprLib.user('+ JSON.stringify(param) +').profile()', function(assert){
+				var done = assert.async();
+				// TEST:
+				Promise.all([
+					sprLib.user(param).profile(),
+					sprLib.user(param).profile('Email')
+				])
+				.then(function(arrArrays){
+					var prof1 = arrArrays[0];
+					var prof2 = arrArrays[1];
+					assert.ok( prof1.hasOwnProperty('Email'), "Pass: prof1.hasOwnProperty('Email'): " + prof1.hasOwnProperty('Email') );
+					assert.ok( Object.keys(prof1).length > 0, "Pass: Object.keys(prof1).length > 0: "+ Object.keys(prof1).length );
+					assert.ok( prof2.Email == gObjCurrUser.Email, "prof2.Email == gObjCurrUser.Email ? "+ `${prof2.Email} == ${gObjCurrUser.Email}` );
+					assert.ok( getAsciiTableStr(prof1), `RESULTS:\n${getAsciiTableStr(prof1)}` );
+					assert.ok( getAsciiTableStr(prof2), `RESULTS:\n${getAsciiTableStr(prof2)}` );
+					done();
+				});
+			});
 		});
 
 		// TODO: separate test for `[ '', {} ]` as those will return current user
@@ -1819,6 +1838,24 @@ QUnit.module( "USER Methods" );
 				.then(function(arrGroups){
 					assert.ok( Array.isArray(arrGroups), "Pass: Array.isArray(arrGroups): " + Array.isArray(arrGroups) );
 					assert.ok( arrGroups.length == 0, "Pass: `arrGroups.length == 0` -> "+ arrGroups.length );
+					done();
+				});
+			});
+
+			QUnit.test('sprLib.user('+ JSON.stringify(param) +').profile()', function(assert){
+				var done = assert.async();
+				// TEST:
+				Promise.all([
+					sprLib.user(param).profile(),
+					sprLib.user(param).profile('Email')
+				])
+				.then(function(arrArrays){
+					var prof1 = arrArrays[0];
+					var prof2 = arrArrays[1];
+					assert.ok( prof1 && Object.keys(prof1).length == 0, "Object.keys(prof1).length == 0: " + Object.keys(prof1).length );
+					assert.ok( prof2 && Object.keys(prof2).length == 0, "Object.keys(prof2).length == 0: " + Object.keys(prof2).length );
+					assert.ok( !prof1.Email , "prof1.Email doesnt exist: "+ prof1.Email );
+					assert.ok( !prof2.Email , "prof2.Email doesnt exist: "+ prof2.Email );
 					done();
 				});
 			});
