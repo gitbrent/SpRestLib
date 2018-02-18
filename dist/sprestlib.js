@@ -175,7 +175,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 		inOpt = inOpt || {};
 		var _newList = {};
 		var _urlBase = "_api/lists";
-		var _requestDigest = (inOpt.requestDigest || (document && document.getElementById('__REQUESTDIGEST') ? document.getElementById('__REQUESTDIGEST').value : null));
+		var _requestDigest = (inOpt.requestDigest || (typeof document !== 'undefined' && document.getElementById('__REQUESTDIGEST') ? document.getElementById('__REQUESTDIGEST').value : null));
 		if ( inOpt.guid ) inOpt.name = inOpt.guid; // Allow `guid` as a synonym for `name` per user request
 
 		// B: Param check
@@ -988,7 +988,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 			inOpt = inOpt || {};
 			inOpt.spArrData = [];
 			inOpt.cache    = inOpt.cache    || APP_OPTS.cache;
-			inOpt.digest   = (inOpt.requestDigest || (document && document.getElementById('__REQUESTDIGEST') ? document.getElementById('__REQUESTDIGEST').value : null));
+			inOpt.digest   = (inOpt.requestDigest || (typeof document !== 'undefined' && document.getElementById('__REQUESTDIGEST') ? document.getElementById('__REQUESTDIGEST').value : null));
 			inOpt.metadata = (typeof inOpt.metadata !== 'undefined' && inOpt.metadata != null ? inOpt.metadata : APP_OPTS.metadata);
 			inOpt.type     = inOpt.restType || inOpt.type || "GET";
 			inOpt.url      = (inOpt.restUrl || inOpt.url || APP_OPTS.baseUrl).replace(/\"/g, "'");
@@ -1941,7 +1941,10 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 				.then(function(arrProfileProps){
 					var objProfile = {};
 
-					// A: Capture all cols or just the ones specified
+					// A: Cases where this fails (bad user, maybe no license?) REST returns {'GetPropertiesFor':null}
+					if ( arrProfileProps && arrProfileProps[0] && arrProfileProps[0].hasOwnProperty('GetPropertiesFor') ) resolve( {} );
+
+					// B: Capture all cols or just the ones specified
 					if ( arrProfileProps[0] && Array.isArray(arrQueryKeys) && arrQueryKeys.length > 0 ) {
 						arrQueryKeys.forEach(function(key){
 							objProfile[key] = arrProfileProps[0][key] || 'ERROR: No such property exists in SP.UserProfiles.PeopleManager';
@@ -1951,10 +1954,10 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 						objProfile = arrProfileProps[0];
 					}
 					else {
-						console.log('??? `arrProfileProps[0]` does not exist!');
+						if (DEBUG) console.log('??? `arrProfileProps[0]` does not exist!');
 					}
 
-					// B: Clean data
+					// C: Clean data
 					Object.keys(objProfile).forEach(function(key){
 						// B.A: Remove `__metadata` and `ValueType` from each property
 						if ( objProfile[key] && objProfile[key].__metadata ) delete objProfile[key].__metadata;
@@ -1967,7 +1970,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 						if ( objProfile[key] && objProfile[key].results ) { objProfile[key] = objProfile[key].results; }
 					});
 
-					// C: Reduce `UserProfileProperties` array of objects to prop name/value
+					// D: Reduce `UserProfileProperties` array of objects to prop name/value
 					// EX: [{"__metadata":{"type":"SP.KeyValue"},"Key":"UserProfile_GUID","Value":"712d9300-5d61-456b-95d1-123d29e5e0bc","ValueType":"Edm.String"},...]
 					if ( objProfile.UserProfileProperties ) {
 						var objProfileProps = {};
@@ -1975,8 +1978,8 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 						objProfile.UserProfileProperties = objProfileProps;
 					}
 
-					// D: Done
-					resolve( objProfile );
+					// E: Done
+					resolve( Object.keys(objProfile).length == 0 ? {} : objProfile );
 				})
 				.catch(function(strErr){
 					reject(strErr);
@@ -2004,13 +2007,10 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 
 // [Node.js] support
 if ( NODEJS ) {
-	// A: Set vars
+	// A: Set require vars
+	var https = require("https");
 	var isElectron = require("is-electron");
 
-	// B: Load depdendencies
-	var $ = require("jquery-node");
-	var https = require("https");
-
-	// C: Export module
+	// B: Export module
 	module.exports = sprLib;
 }
