@@ -1977,9 +1977,9 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 
 					// D: Done
 					resolve( objProfile );
-/*				})
+				})
 				.catch(function(strErr){
-					reject(strErr);*/
+					reject(strErr);
 				});
 			});
 		}
