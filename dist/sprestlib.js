@@ -989,7 +989,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 			inOpt.spArrData = [];
 			inOpt.cache    = inOpt.cache    || APP_OPTS.cache;
 			inOpt.digest   = (inOpt.requestDigest || (document && document.getElementById('__REQUESTDIGEST') ? document.getElementById('__REQUESTDIGEST').value : null));
-			inOpt.metadata = inOpt.metadata || APP_OPTS.metadata;
+			inOpt.metadata = (typeof inOpt.metadata !== 'undefined' && inOpt.metadata != null ? inOpt.metadata : APP_OPTS.metadata);
 			inOpt.type     = inOpt.restType || inOpt.type || "GET";
 			inOpt.url      = (inOpt.restUrl || inOpt.url || APP_OPTS.baseUrl).replace(/\"/g, "'");
 
@@ -1882,36 +1882,95 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 
 		// TODO: Add _newUser.profile - works when users have Enterpise license/access to User-Profile-Service
 		// FUTURE: add ability to fetch individual properties (`Manager` etc)
-		// http://sharepoint.stackexchange.com/questions/207422/getting-user-profile-property-with-dash-in-name-with-rest-api
-		// User Profile service - https://msdn.microsoft.com/en-us/library/office/dn790354.aspx
-		//
+		// REFS: http://sharepoint.stackexchange.com/questions/207422/getting-user-profile-property-with-dash-in-name-with-rest-api
+		// REFS: [User Profile service](https://msdn.microsoft.com/en-us/library/office/dn790354.aspx)
 		/* WORKS:
 			/sites/dev/_api/sp.userprofiles.profileloader.getprofileloader/getuserprofile - (The user profile of the current user)
 			/sites/dev/_api/sp.userprofiles.profileloader.getprofileloader/getuserprofile/AccountName
 			/sites/dev/_api/sp.userprofiles.profileloader.getowneruserprofile
 		*/
-		/* 20170611:
-			sprLib.rest({
-				url: "/sites/dev/_api/sp.userprofiles.profileloader.getowneruserprofile",
-				type: 'POST'
-			})
-			// WORKS in SP Online
-			PictureUrl, SipAddress, etc.
-		*/
-		/* 20170611:
-		// NOTE: Encode "#" to "%23" or query fails!
-		// NOTE: Per MSDN we can only query with `accountName`
-			sprLib.rest({
-				url: "/sites/dev/_api/SP.UserProfiles.PeopleManager/GetPropertiesFor(accountName=@v)?@v='i:0%23.f|membership|admin@siteurl.onmicrosoft.com'",
-				type: 'POST'
-			})
-		*/
+		// TODO: CURR:
+		_newUser.profile = function(arrProfileKeys) {
+			return new Promise(function(resolve, reject) {
+				var arrQueryKeys = arrProfileKeys || null;
+				var userAcctName = (inOpt ? encodeURIComponent(inOpt) : null);
+
+				// STEP 1: Fetch current/specified User Profile Props
+				Promise.resolve()
+				.then(function(){
+					// NOTE: Just fetch all props (no filter below) as `GetMyProperties?select=SID` returns nothing, but it's present when querying all props
+					// NOTE: Both of these queries returns an object of [PersonProperties](https://msdn.microsoft.com/en-us/library/office/dn790354.aspx#bk_PersonProperties)
+					if ( !userAcctName ) {
+						return sprLib.rest({
+							url: "_api/SP.UserProfiles.PeopleManager/GetMyProperties",
+							metadata: false
+						});
+					}
+					else {
+						// NOTE: Encode "#" to "%23" or query fails!
+						// NOTE: Per MSDN we can only query with `accountName`
+						return sprLib.rest({
+							url: "_api/SP.UserProfiles.PeopleManager/GetPropertiesFor(accountName=@v)?@v='"+userAcctName+"'",
+							type: 'POST',
+							metadata: false
+						});
+					}
+				})
+				.then(function(arrProfileProps){
+					var objProfile = {};
+
+					// A: Capture all cols or just the ones specified
+					if ( arrProfileProps[0] && arrQueryKeys && arrQueryKeys.length > 0 ) {
+						arrQueryKeys.forEach(function(key){
+							objProfile[key] = arrProfileProps[0][key] || { Key:key, Value:'ERROR: No such property exists in SP.UserProfiles.PeopleManager' };
+						});
+					}
+					else if ( arrProfileProps[0] ) {
+						objProfile = arrProfileProps[0];
+					}
+					else {
+						console.log('??? `arrProfileProps[0]` does not exist!');
+					}
+
+					// B: Clean data
+					Object.keys(objProfile).forEach(function(key){
+						//var propVal = objProfile[key];
+
+						// B.A: Remove `__metadata` and `ValueType` from each property
+						if ( objProfile[key] && objProfile[key].__metadata ) delete objProfile[key].__metadata;
+						if ( objProfile[key] && objProfile[key].ValueType  ) delete objProfile[key].ValueType;
+
+						// B.B: Cleanup lookup-type prop values with their own `results` array
+						if ( key == 'UserProfileProperties' ) {
+							objProfile[key] = objProfile[key].results;
+							console.log(objProfile[key]);
+						}
+						// B.B: Elevate `results` to the prop value. EX: `Peers:{__metadata:{...}, results:[]}`` -> `Peers:[]`
+						else if ( objProfile[key] && objProfile[key].results ) {
+							objProfile[key] = objProfile[key].results;
+							console.log(objProfile[key]);
+						}
+					});
+
+					// C:
+					resolve( objProfile );
+/*				})
+				.catch(function(strErr){
+					reject(strErr);*/
+				});
+			});
+		}
+
 		/* More Ex:
 		http://siteurl/_api/SP.UserProfiles.PeopleManager/GetUserProfilePropertyFor(accountName=@v,propertyName='LastName')?@v='i:0%23.f|membership|brent@siteurl.onmicrosoft.com'
 		http://siteurl/_api/SP.UserProfiles.PeopleManager/GetMyProperties?$select=PictureUrl,AccountName
+		sprLib.rest({
+		    url:  '_api/SP.UserProfiles.PeopleManager/GetMyProperties',
+		    queryCols: ['PictureUrl','AccountName']
+		})
 		*/
 
-		// LAST: Return this List to enable chaining
+		// LAST: Return this User to enable chaining
 		return _newUser;
 	}
 
