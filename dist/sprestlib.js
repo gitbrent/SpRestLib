@@ -33,7 +33,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 (function(){
 	// APP VERSION/BUILD
 	var APP_VER = "1.6.0-beta";
-	var APP_BLD = "20180217";
+	var APP_BLD = "20180218";
 	var DEBUG = false; // (verbose mode/lots of logging)
 	// ENUMERATIONS
 	var ENUM_PRINCIPALTYPES = {
@@ -1880,19 +1880,31 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 			});
 		}
 
-		// TODO: Add _newUser.profile - works when users have Enterpise license/access to User-Profile-Service
-		// FUTURE: add ability to fetch individual properties (`Manager` etc)
-		// REFS: http://sharepoint.stackexchange.com/questions/207422/getting-user-profile-property-with-dash-in-name-with-rest-api
-		// REFS: [User Profile service](https://msdn.microsoft.com/en-us/library/office/dn790354.aspx)
-		/* WORKS:
-			/sites/dev/_api/sp.userprofiles.profileloader.getprofileloader/getuserprofile - (The user profile of the current user)
-			/sites/dev/_api/sp.userprofiles.profileloader.getprofileloader/getuserprofile/AccountName
-			/sites/dev/_api/sp.userprofiles.profileloader.getowneruserprofile
+		/**
+		* Get User Profile props
+		*
+		* @example sprLib.user().profile()
+		* @example sprLib.user().profile('AccountName')
+		* @example sprLib.user().profile(['AccountName','DisplayName'])
+		*
+		* @return {Promise} - Return `Promise` containing User Profile info
+		*
+		* @see: http://sharepoint.stackexchange.com/questions/207422/getting-user-profile-property-with-dash-in-name-with-rest-api
+		* @see: [User Profile service](https://msdn.microsoft.com/en-us/library/office/dn790354.aspx)
+		* also:
+		* /sites/dev/_api/sp.userprofiles.profileloader.getprofileloader/getuserprofile - (The user profile of the current user)
+		* /sites/dev/_api/sp.userprofiles.profileloader.getprofileloader/getuserprofile/AccountName
+		* /sites/dev/_api/sp.userprofiles.profileloader.getowneruserprofile
+		* http://siteurl/_api/SP.UserProfiles.PeopleManager/GetUserProfilePropertyFor(accountName=@v,propertyName='LastName')?@v='i:0%23.f|membership|brent@siteurl.onmicrosoft.com'
+		* http://siteurl/_api/SP.UserProfiles.PeopleManager/GetMyProperties?$select=PictureUrl,AccountName
+		* sprLib.rest({
+		*     url:  '_api/SP.UserProfiles.PeopleManager/GetMyProperties',
+		*     queryCols: ['PictureUrl','AccountName']
+		* })
 		*/
-		// TODO: CURR:
 		_newUser.profile = function(arrProfileKeys) {
 			return new Promise(function(resolve, reject) {
-				var arrQueryKeys = arrProfileKeys || null;
+				var arrQueryKeys = (Array.isArray(arrProfileKeys) ? arrProfileKeys : (typeof arrProfileKeys === 'string' ? [arrProfileKeys] : null));
 				var userAcctName = (inOpt ? encodeURIComponent(inOpt) : null);
 
 				// STEP 1: Fetch current/specified User Profile Props
@@ -1920,9 +1932,9 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 					var objProfile = {};
 
 					// A: Capture all cols or just the ones specified
-					if ( arrProfileProps[0] && arrQueryKeys && arrQueryKeys.length > 0 ) {
+					if ( arrProfileProps[0] && Array.isArray(arrQueryKeys) && arrQueryKeys.length > 0 ) {
 						arrQueryKeys.forEach(function(key){
-							objProfile[key] = arrProfileProps[0][key] || { Key:key, Value:'ERROR: No such property exists in SP.UserProfiles.PeopleManager' };
+							objProfile[key] = arrProfileProps[0][key] || 'ERROR: No such property exists in SP.UserProfiles.PeopleManager';
 						});
 					}
 					else if ( arrProfileProps[0] ) {
@@ -1934,25 +1946,26 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 
 					// B: Clean data
 					Object.keys(objProfile).forEach(function(key){
-						//var propVal = objProfile[key];
-
 						// B.A: Remove `__metadata` and `ValueType` from each property
 						if ( objProfile[key] && objProfile[key].__metadata ) delete objProfile[key].__metadata;
 						if ( objProfile[key] && objProfile[key].ValueType  ) delete objProfile[key].ValueType;
 
 						// B.B: Cleanup lookup-type prop values with their own `results` array
-						if ( key == 'UserProfileProperties' ) {
-							objProfile[key] = objProfile[key].results;
-							console.log(objProfile[key]);
-						}
-						// B.B: Elevate `results` to the prop value. EX: `Peers:{__metadata:{...}, results:[]}`` -> `Peers:[]`
-						else if ( objProfile[key] && objProfile[key].results ) {
-							objProfile[key] = objProfile[key].results;
-							console.log(objProfile[key]);
-						}
+						if ( key == 'UserProfileProperties' ) { objProfile[key] = objProfile[key].results; }
+
+						// B.C: Elevate `results` to the prop value. EX: `Peers:{__metadata:{...}, results:[]}`` -> `Peers:[]`
+						if ( objProfile[key] && objProfile[key].results ) { objProfile[key] = objProfile[key].results; }
 					});
 
-					// C:
+					// C: Reduce `UserProfileProperties` array of objects to prop name/value
+					// EX: [{"__metadata":{"type":"SP.KeyValue"},"Key":"UserProfile_GUID","Value":"712d9300-5d61-456b-95d1-123d29e5e0bc","ValueType":"Edm.String"},...]
+					if ( objProfile.UserProfileProperties ) {
+						var objProfileProps = {};
+						objProfile.UserProfileProperties.forEach(function(obj){ objProfileProps[obj.Key] = obj.Value; });
+						objProfile.UserProfileProperties = objProfileProps;
+					}
+
+					// D: Done
 					resolve( objProfile );
 /*				})
 				.catch(function(strErr){
@@ -1960,15 +1973,6 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 				});
 			});
 		}
-
-		/* More Ex:
-		http://siteurl/_api/SP.UserProfiles.PeopleManager/GetUserProfilePropertyFor(accountName=@v,propertyName='LastName')?@v='i:0%23.f|membership|brent@siteurl.onmicrosoft.com'
-		http://siteurl/_api/SP.UserProfiles.PeopleManager/GetMyProperties?$select=PictureUrl,AccountName
-		sprLib.rest({
-		    url:  '_api/SP.UserProfiles.PeopleManager/GetMyProperties',
-		    queryCols: ['PictureUrl','AccountName']
-		})
-		*/
 
 		// LAST: Return this User to enable chaining
 		return _newUser;
