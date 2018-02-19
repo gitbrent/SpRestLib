@@ -11,16 +11,17 @@
  // QUnit.test("QUnit Base Test", function(assert){ assert.ok( true === true, "Passed!" ); });
  */
 
-const BASEURL = _spPageContextInfo.siteServerRelativeUrl;
-const RESTROOT = '/sites/dev';
+const BASEURL   = _spPageContextInfo.siteServerRelativeUrl;
+const RESTROOT  = '/sites/dev';
 const RESTDEMO1 = '/sites/dev/sandbox';
 const RESTDEMO2 = '/sites/dev/sandbox/';
-const SITEURL1 = '/sites/dev/sandbox/child1';
-const SITEURL2 = 'sandbox/child1';
-const SITEURL3 = '/sites/dev/sandbox/';
+const SITEURL1  = '/sites/dev/sandbox/child1';
+const SITEURL2  = 'sandbox/child1';
+const SITEURL3  = '/sites/dev/sandbox/';
 //
 const ARR_NAMES_FIRST = ['Jack','Mark','CutiePie','Steve','Barry','Clark','Diana','Star','Luke','Captain'];
 const ARR_NAMES_LAST  = ['Septiceye','Iplier','Martzia','Rodgers','Allen','Kent','Prince','Lord','Skywalker','Marvel'];
+//
 const LIST_GUID2 = '23846527-218a-43a2-b5c1-7b55b6feb1a3';
 //
 var gTestUserId = 9;
@@ -1865,33 +1866,15 @@ QUnit.module( "USER Methods" );
 
 // TODO: Add Utility methods
 
-
-// NEGATIVE TEST:
 /*
-sprLib.rest({ restUrl:'../_api/web/GetByTitle' });
-*/
-
-
-// ================================================================================================
-//QUnit.module( "Binding / Forms" );
-// ================================================================================================
-// sprLib.model('Employees').syncItem()
-
-
-/*
-some API calls require an arguamnet (group/pr0file rest endpoints ets), require an auth toekn an POST!
-ajaxType: "POST
-*/
-
-
-/*
-howto test form/htmls
-test(name, function() {
-	var links = document.getElementById("qunit-fixture").getElementsByTagName("a");
-	equal(links[0].innerHTML, "January 28th, 2008");
-	equal(links[2].innerHTML, "January 27th, 2008");
-	prettyDate.update(now);
-	equal(links[0].innerHTML, first);
-	equal(links[2].innerHTML, second);
-});
+	TODO: 20180218: create `qunit-ui-tests.js` start with below
+	howto test form/htmls
+	test(name, function() {
+		var links = document.getElementById("qunit-fixture").getElementsByTagName("a");
+		equal(links[0].innerHTML, "January 28th, 2008");
+		equal(links[2].innerHTML, "January 27th, 2008");
+		prettyDate.update(now);
+		equal(links[0].innerHTML, first);
+		equal(links[2].innerHTML, second);
+	});
 */
