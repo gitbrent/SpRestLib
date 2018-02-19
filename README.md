@@ -49,12 +49,12 @@ using the JavaScript SharePoint App Model.
 * `sprLib.site(siteUrl).subsites()` - Returns an array of the site's Subsites
 * `sprLib.site(siteUrl).users()`    - Returns an array of the site's Users and their base permissions
 
-## User Information
+## User Groups/Info/Profile
 * `sprLib.user(options).groups()`  - Returns an object with `SP.Group` group properties (Id, Owner, Title, etc.)
 * `sprLib.user(options).info()`    - Returns an object with `SP.User` user properties (Id, Email, Login, Title, etc.)
-* `sprLib.user(options).profile()` - Returns an object with `SP.UserProfile.PersonProperties` (DirectReports, PictureUrl, etc.)
+* `sprLib.user(options).profile()` - Returns `SP.UserProfile.PersonProperties` (DirectReports, PictureUrl, etc.)
 
-## Utility
+## Utility Methods
 * `sprLib.renewSecurityToken()` - Refreshes the SharePoint page security digest token
 
 ## SpRestLib-UI :: Form Population
