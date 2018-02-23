@@ -218,7 +218,16 @@ sprLib.user().info()
 .catch(errMsg => console.error(errMsg));
 ```
 
+You can also use the async/await syntax (available in recent browsers and Node.JS 8.6+, or via transpiling with BabelJS):
 
+```javascript
+const infoGetter = async () => {
+  // EX: Get the current user's ID, then get their Tasks
+  const objUser = await sprLib.user().info();
+  const arrItems = await sprLib.list('Tasks').getItems({ queryFilter:'Owner/Id eq ' + objUser.Id });
+  console.log("Current user's Tasks = " + arrItems.length);
+}
+```
 
 **************************************************************************************************
 # Installation
