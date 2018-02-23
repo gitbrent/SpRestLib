@@ -6,6 +6,7 @@
 **Implemented Enhancements:**
 - Removed jQuery methods from sprestlib.js, reducing dependencies to zero!
 - Add support for SP User Profile API [\#14](https://github.com/gitbrent/sprestlib/issues/14) ([ra6hi9](https://github.com/ra6hi9))
+- Add async/await example [\#16](https://github.com/gitbrent/sprestlib/pull/16) ([wmertens](https://github.com/wmertens))
 
 **Fixed Bugs:**
 
