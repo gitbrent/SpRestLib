@@ -13,7 +13,7 @@ gulp.task('default', function(){
         .pipe(sourcemaps.write('./'))
         .pipe(gulp.dest('dist/'));
 
-    gulp.src(['lib/jquery.min.js', 'lib/promise.min.js', 'dist/sprestlib.js', 'dist/sprestlib-ui.js'])
+    gulp.src(['lib/promise.min.js', 'dist/sprestlib.js', 'lib/jquery.min.js', 'dist/sprestlib-ui.js'])
         .pipe(concat('sprestlib-ui.bundle.js'))
         .pipe(sourcemaps.init())
         .pipe(ignore.exclude(["**/*.map"]))
