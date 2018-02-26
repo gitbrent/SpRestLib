@@ -1,4 +1,6 @@
 /*
+* NAME: sprestlib-demo.css
+* DATE: 20180225
 */
 
 /* Responsive */
@@ -209,6 +211,10 @@ input:checked + .slider:before { -webkit-transform:translateX(12px); -ms-transfo
 .subTitle { font-size:1.8rem; color:#0088cc; margin:20px 0 10px 0; cursor: pointer; }
 .subTitle.plain { display:inline-block; cursor:default; }
 .subTitle.first { margin-top:0 !important; }
+.subTitle.secTitle {
+	cursor: auto;
+	border-bottom: 2px solid #b5d5f5;
+}
 
 .arrow {
 	display: inline-block;
