@@ -6,7 +6,7 @@
 	<meta name="website"     content="https://github.com/gitbrent/SpRestLib/">
 	<meta name="keywords"    content="SpRestLib, JavaScript, js-sharepoint, OData, REST, SharePoint 2013, SP2013, SharePoint 2016, SP2016, SharePoint Online">
 	<meta name="description" content="Content Editor WebPart to showcase SpRestLib features and capabilities">
-	<meta name="revised"     content="20180218">
+	<meta name="revised"     content="20180225">
 
 	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300">
 	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:700">
@@ -29,27 +29,21 @@
 		!!!==>> Check the img folder for screencaps of the SharePoint setup! <<==!!!
 	-->
 
-	<!--
-	<script type="text/javascript" src="https://cdn.rawgit.com/gitbrent/SpRestLib/v1.5.0/example/css/sprestlib.css"></script>
-	<script type="text/javascript" src="https://cdn.rawgit.com/gitbrent/SpRestLib/v1.5.0/example/css/sprestlib-demo.css"></script>
-	DEBUG Below
-	-->
-	<link rel="stylesheet" type="text/css" href="../SiteAssets/sprestlib/css/sprestlib-demo.css">
-	<!-- ^^^ DEBUG ^^^ -->
 	<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.8.3/themes/prism-coy.css">
+	<link rel="stylesheet" type="text/css" href="https://cdn.rawgit.com/gitbrent/SpRestLib/master/example/css/sprestlib-demo.css">
+	<!-- DEBUG
+	<link rel="stylesheet" type="text/css" href="../SiteAssets/sprestlib/css/sprestlib-demo.css">
+	-->
 
 	<script type="text/javascript" src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+	<script type="text/javascript" src="https://cdn.rawgit.com/gitbrent/SpRestLib/master/dist/sprestlib.bundle.js"></script>
 	<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.29.0/js/jquery.tablesorter.min.js"></script>
 	<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.8.3/prism.min.js"></script>
 	<script type="text/javascript" src="https://cdn.rawgit.com/sorensen/ascii-table/v0.0.9/ascii-table.min.js"></script>
-	<!-- DEBUG:
-	<script type="text/javascript" src="https://cdn.rawgit.com/gitbrent/SpRestLib/v1.4.0/dist/sprestlib.bundle.js"></script>
-	<script type="text/javascript" src="https://cdn.rawgit.com/gitbrent/SpRestLib/master/dist/sprestlib.js"></script>
-	-->
 
 	<script type="text/javascript">
 		$.ajaxSetup({ cache:false });
-		var APP_BLD = 20180218;
+		var APP_BLD = 20180225;
 		var HTML_SPINNER = '<div class="sprlib-spinner"><div class="sprlib-bounce1"></div><div class="sprlib-bounce2"></div><div class="sprlib-bounce3"></div></div>';
 
 		// ==================================================================================================================
@@ -91,6 +85,7 @@
 			sprLib.list($('#selSiteLists').val()).info()
 			.then(function(objInfo){
 				var $table = $('<table class="tabModern"><tbody></tbody></table>');
+				$table.append('<thead><tr><th>Prop Name</th><th>Prop Value</th></tr></thead>');
 				Object.keys(objInfo).forEach(function(key,idx){
 					$table.find('tbody').append('<tr><th>'+ key +'</th>'+'<td class="code">'+ objInfo[key] +'</td></tr>');
 				});
@@ -329,17 +324,16 @@
 				// F: Site Subsites
 				sprLib.site().subsites()
 				.then(function(arrSites){
-					// TODO: call each site(UrlRel) to Get [base] perms!
-
 					arrSites.forEach(function(site,idx){
 						let $row = $('<tr/>');
-						$row.append('<th><a href="'+ site.UrlRel +'" target="_blank">'+ site.Name +'</a></th>');
+						$row.append('<th><a href="'+ site.UrlRel +'" target="_blank" title="Site GUID: '+ site.Id +'">'+ site.Name +'</a></th>');
 						$row.append('<td class="showGrpDesc">'+ site.Created +'</td>');
 						$row.append('<td class="showGrpDesc">'+ site.Modified +'</td>');
+						$row.append('<td>'+ site.UrlRel +'</td>');
+						$row.append('<td>'+ site.SiteLogoUrl +'</td>');
 						$('#tabSiteSubsites tbody').append( $row );
 					});
 					if ( $.tablesorter ) $('#tabSiteSubsites').tablesorter({ sortList:[[0,0]] });
-
 				});
 
 				// G: Site Users
@@ -349,7 +343,6 @@
 					arrUsers.forEach(function(user,idx){
 						let $row = $('<tr/>');
 						$row.append('<td>'+ user.Title +'</td>');
-						$row.append('<td>'+ user.PrincipalType +'</td>');
 						$row.append('<td>'+ user.LoginName +'</td>');
 						$row.append('<td>'+ user.Email +'</td>');
 						$row.append('<td class="nowctr">'+ (user.IsSiteAdmin ? 'Yes' : 'No') +'</td>');
@@ -388,10 +381,11 @@
 			{
 				var user1Code = "sprLib.user().info()\n"
 					+ ".then(function(objUser){\n"
-					+ "    $.each(objUser,function(key,val){\n"
-					+ "        if (typeof val !== 'object') $('#user1Html table tbody').append('<tr><th>'+ key +'</th><td>'+ val +'</td></tr>');\n"
+					+ "    Object.keys(objUser).forEach(function(key){\n"
+					+ "        var val = objUser[key];\n"
+					+ "        $('#user1Html table tbody').append('<tr><th>'+ key +'</th><td class=\"code\">'+ (typeof val === 'object' ? JSON.stringify(val,null,4) : val) +'</td></tr>');\n"
 					+ "    });\n"
-					+ '});';
+					+ "});";
 				$('#user1Code pre code').text( user1Code );
 				eval(user1Code);
 
@@ -406,10 +400,12 @@
 
 				var user3Code = "sprLib.user().profile()\n"
 					+ ".then(function(objUser){\n"
-					+ "    $.each(objUser,function(key,val){\n"
-					+ "        if (typeof val !== 'object') $('#user3Html table tbody').append('<tr><th>'+ key +'</th><td>'+ val +'</td></tr>');\n"
+					+ "    Object.keys(objUser).forEach(function(key){\n"
+					+ "        var val = objUser[key];\n"
+					//+ "        if (typeof val !== 'object') $('#user3Html table tbody').append('<tr><th>'+ key +'</th><td>'+ val +'</td></tr>');\n"
+					+ "        $('#user3Html table tbody').append('<tr><th>'+ key +'</th><td class=\"code\">'+ (typeof val === 'object' ? JSON.stringify(val,null,4) : val) +'</td></tr>');\n"
 					+ "    });\n"
-					+ '});';
+					+ "});";
 				$('#user3Code pre code').text( user3Code );
 				eval(user3Code);
 			}
@@ -417,8 +413,8 @@
 			// TAB: REST API
 			{
 				var rest1Code = "sprLib.rest({\n"
-				 	+ "    url:  '_api/web/lists/',\n"
-					+ "    queryCols: ['BaseType','ItemCount','Title']\n"
+				 	+ "    url: '_api/web/lists/',\n"
+					+ "    queryCols: ['BaseType', 'ItemCount', 'Title']\n"
 				 	+ "})\n"
 					+ ".then(function(arrayListObjs){\n"
 					+ "    $('#rest1Html').append( getAsciiTableStr(arrayListObjs) );\n"
@@ -441,9 +437,23 @@
 
 		// ==================================================================================================================
 		$(document).ready(function(){
-			// **DEBUG**
-			// Dynamically load library as SP Online is *BAD* about caching
-			$.getScript("../SiteAssets/sprestlib/js/sprestlib.js", function(){ doPageLoad(); });
+			// If you're me: Load newest/local copy for dev/test work :-)
+			if ( window.location.href.toLowerCase().indexOf('gitbrent') > -1 ) {
+				// Dynamically load library as SharePoint Online is *BAD* about caching
+				$.getScript("../SiteAssets/sprestlib/js/sprestlib.js", function(){
+					console.log('FYI: Local copy of `sprestlib.js` loaded successfully...');
+					console.log( sprLib.version );
+					doPageLoad();
+				});
+			}
+			else if ( typeof sprLib === 'undefined' ) {
+				alert("Oops!\n\n`sprLib` is undefined - maybe a bad link to the 'sprestlib.js' file or something...?\n");
+				return;
+			}
+			else {
+				doPageLoad();
+			}
+
 		});
 	</script>
 </head>
@@ -515,7 +525,7 @@
 			</div>
 
 			<div id="tabSite" data-tab="Site Methods">
-				<div class="subTitle" style="border-bottom:2px solid #b5d5f5">Local Website</div>
+				<div class="subTitle secTitle">Local Website</div>
 
 				<div class="subTitle" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
 					<div class="arrow active"></div>Site Info
@@ -526,8 +536,8 @@
 					<table id="tabSiteInfo" class="tabModern">
 						<thead>
 							<tr>
-								<th>Key</th>
-								<th>Value</th>
+								<th>Prop Name</th>
+								<th>Prop Value</th>
 							</tr>
 						</thead>
 						<tbody></tbody>
@@ -579,15 +589,17 @@
 						<thead>
 							<tr>
 								<th>Name</th>
-								<th>Perms</th>
-								<th>TODO</th>
+								<th>Created</th>
+								<th>Modified</th>
+								<th>Relative URL</th>
+								<th>Site Logo URL</th>
 							</tr>
 						</thead>
 						<tbody></tbody>
 					</table>
 				</div>
 
-				<div class="subTitle" style="border-bottom:2px solid #b5d5f5">Site-Collection</div>
+				<div class="subTitle secTitle">Site-Collection</div>
 
 				<div class="subTitle" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
 					<div class="arrow"></div>Permission Groups
@@ -636,7 +648,6 @@
 						<thead>
 							<tr>
 								<th>Title</th>
-								<th>PrincipalType</th>
 								<th>LoginName</th>
 								<th>Email</th>
 								<th>IsSiteAdmin</th>
@@ -651,7 +662,7 @@
 
 			<div id="tabList" data-tab="List Methods">
 				<div class="subTitle">List/Library Methods</div>
-				<p>
+				<p class="desc">
 					Select one of the Lists/Libraries found on this site to view its properties.<br>
 					Note: Only non-hidden Lists/Libraries are shown
 				</p>
@@ -680,23 +691,33 @@
 			</div>
 
 			<div id="tabUser" data-tab="Users">
-				<div class="subTitle">User Methods</div>
-				<p>
+				<div class="subTitle secTitle">User Methods</div>
+				<p class="desc">
 					Get User Information (Title, Email, etc.) and User Groups (which SP Groups they belong to).
 				</p>
 
-				<div class="subTitle">User Information</div>
+				<div class="subTitle" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
+					<div class="arrow active"></div>User Information
+				</div>
 				<div>
 					<div id="user1Code"><pre><code class="language-javascript"></code></pre></div>
 					<div id="user1Html" style="margin-bottom:20px">
 						<table class="tabModern">
+							<thead>
+								<tr>
+									<th style="width:10%">Prop Name</th>
+									<th style="width:90%">Prop Value</th>
+								</tr>
+							</thead>
 							<tbody></tbody>
 						</table>
 					</div>
 				</div>
 
-				<div class="subTitle">User Groups</div>
-				<div>
+				<div class="subTitle" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
+					<div class="arrow"></div>User Groups
+				</div>
+				<div style="display:none">
 					<div id="user2Code"><pre><code class="language-javascript"></code></pre></div>
 					<div id="user2Html" style="margin-bottom:20px">
 						<table class="tabModern">
@@ -711,8 +732,16 @@
 					</div>
 				</div>
 
-				<div class="subTitle">User Profile</div>
-				<div>
+				<div class="subTitle secTitle">User Profile Methods</div>
+				<p class="desc">
+					NOTE: The <span class="code">user().profile()</span> method utliizes the
+					<a href="https://technet.microsoft.com/en-us/library/ee662538.aspx" target="_blank">UserProfile Service API</a>,
+					which requires either an enterprise license for on-prem installations, or a SharePoint Online subscription.
+				</p>
+				<div class="subTitle" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
+					<div class="arrow"></div>User Properties
+				</div>
+				<div style="display:none">
 					<div id="user3Code"><pre><code class="language-javascript"></code></pre></div>
 					<div id="user3Html" style="margin-bottom:20px">
 						<table class="tabModern">
@@ -728,7 +757,7 @@
 				</div>
 			</div>
 
-			<div id="tabRest" data-tab="RESR API">
+			<div id="tabRest" data-tab="REST API">
 				<div class="subTitle" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
 					<div class="arrow active"></div>REST API Calls
 				</div>
