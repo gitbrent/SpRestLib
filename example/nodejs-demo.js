@@ -48,7 +48,7 @@ var gAuthCookie1 = "";
 var gAuthCookie2 = "";
 
 Promise.resolve()
-.then(function(){
+.then(() => {
 	// STEP 1: Login to MS with user/pass and get SecurityToken
 	console.log(' * STEP 1/2: Auth into login.microsoftonline.com ...');
 
@@ -112,7 +112,7 @@ Promise.resolve()
 		request.end();
 	});
 })
-.then(function(){
+.then(() => {
 	// STEP 2: Provide SecurityToken to SP site and get 2 Auth Cookies
 	console.log(' * STEP 2/2: Auth into SharePoint ...');
 
@@ -144,7 +144,7 @@ Promise.resolve()
 		request.end();
 	});
 })
-.then(function(data){
+.then((data) => {
 	// STEP 3: Send requests including authentication cookies
 	console.log(' * SUCCESS!! Authenticated into "'+ SP_HOST +'"');
 	//console.log(`...gAuthCookie1:\n${gAuthCookie1}\n`);
@@ -160,7 +160,7 @@ Promise.resolve()
 	// C: Now run all the sprLib API calls you want
 	return sprLib.user().info();
 })
-.then(function(objUser){
+.then((objUser) => {
 	console.log('\nTEST 1: sprLib.user().info()');
 	console.log('----------------------------');
 	//console.log(objUser);
@@ -171,20 +171,39 @@ Promise.resolve()
 
 	return sprLib.list('Site Assets').info();
 })
-.then(function(objInfo){
+.then((objInfo) => {
 	console.log("\nTEST 2: sprLib.list('Site Assets').info()");
 	console.log('-----------------------------------------');
 	console.log('Created....: '+ objInfo.Created);
 	console.log('ItemCount..: '+ objInfo.ItemCount);
 
+	// CRUD Test:
+	//sprLib.list('Departments').create({ Title:'node test' });
+	// THIS WILL FAIL - "The security validation for this page is invalid and might be corrupted. Please use your web browser's Back button to try your operation again."
+	// a `requestDigest` must be generated and included
+	return sprLib.rest({ url:'_api/contextinfo', type:'POST' });
+})
+.then(arr => {
+	let strReqDig = arr[0].GetContextWebInformation.FormDigestValue;
+
+	console.log("\nTEST 3: sprLib.list('Announcements').create()");
+	console.log('---------------------------------------------');
+	console.log('strReqDig..:'+ strReqDig);
+
+	return sprLib.list({ name:'Announcements', requestDigest:strReqDig }).create({ "Title":"created with Node demo" });
+})
+.then((objCrud) => {
+	console.log('..\n..create done!');
+	console.log('New item ID...: '+ objCrud.ID);
+
 	// NEGATIVE-TEST: (check for error msg response)
 	//return sprLib.list('Site Assets').getItems({ listCols:['ColDoesntExist'] });
 })
-.then(function(){
+.then(() => {
 	console.log('\n================================================================================');
 	console.log('...demo complete.\n');
 })
-.catch(function(strErr){
+.catch((strErr) => {
 	console.error('\n!!! ERROR !!!');
 	console.error(strErr);
 	return;
