@@ -33,7 +33,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 (function(){
 	// APP VERSION/BUILD
 	var APP_VER = "1.6.0-beta";
-	var APP_BLD = "20180218";
+	var APP_BLD = "20180228";
 	var DEBUG = false; // (verbose mode/lots of logging)
 	// ENUMERATIONS
 	var ENUM_PRINCIPALTYPES = {
@@ -107,6 +107,10 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 		return strErrText;
 	}
 
+	/*
+	* HOWTO: generate a `requestDigest`
+	* sprLib.rest({ url:'_api/contextinfo', type:'POST' }).then(arr => console.log(arr[0].GetContextWebInformation.FormDigestValue) );
+	*/
 	function doRenewDigestToken() {
 		return new Promise(function(resolve,reject) {
 			// Use SP.js UpdateFormDigest function if available
@@ -726,7 +730,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 		_newList.create = function(jsonData) {
 			return new Promise(function(resolve, reject) {
 				// FIRST: Param checks
-				if ( !jsonData || Array.isArray(jsonData) || typeof jsonData !== 'object' || Object.keys(jsonData).length == 0 ) reject("JSON data expected! Ex: `{Name:'Brent'}`");
+				if ( !jsonData || Array.isArray(jsonData) || typeof jsonData !== 'object' || Object.keys(jsonData).length == 0 ) reject("Object type expected! Ex: `{Title:'New Emp'}`");
 				try { var test = JSON.stringify(jsonData) } catch(ex) { reject("`JSON.stringify(jsonData)` failed! Send valid JSON Please. Ex: `{'Name':'Brent'}`") }
 
 				// STEP 1: Param Setup
@@ -760,7 +764,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 
 							// B: Populate metadata
 							jsonData.__metadata = jsonData.__metadata || arrData[0].__metadata || {};
-							jsonData.__metadata.etag = jsonData.__metadata.etag || arrData[0].__metadata.etag;
+							jsonData.__metadata.etag = jsonData.__metadata.etag || (arrData[0].__metadata ? arrData[0].__metadata.etag : null);
 						}
 						else {
 							jsonData = null;
@@ -797,9 +801,9 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 		_newList.update = function(jsonData) {
 			return new Promise(function(resolve, reject) {
 				// FIRST: Param checks
-				if ( !jsonData || Array.isArray(jsonData) || typeof jsonData !== 'object' || Object.keys(jsonData).length == 0 ) reject("JSON data expected! Ex: `{Name:'Brent'}`");
-				if ( !jsonData['ID'] && !jsonData['Id'] && !jsonData['iD'] && !jsonData['id'] ) reject("JSON data must have an `ID` value! Ex: `{Id:99}`");
-				try { var test = JSON.stringify(jsonData) } catch(ex) { reject("`JSON.stringify(jsonData)` failed! Send valid JSON Please. Ex: `{'Name':'Brent'}`") }
+				if ( !jsonData || Array.isArray(jsonData) || typeof jsonData !== 'object' || Object.keys(jsonData).length == 0 ) reject("Object type expected! Ex: `{Title:'Brent'}`");
+				if ( !jsonData['ID'] && !jsonData['Id'] && !jsonData['iD'] && !jsonData['id'] ) reject("Object must have an `Id` property! Ex: `{Id:99}`");
+				try { var test = JSON.stringify(jsonData) } catch(ex) { reject("`JSON.stringify(jsonData)` failed! Send valid object. Ex: `{'Title':'Brent'}`") }
 
 				// STEP 1: Param Setup
 				// A: Set our `Id` value (users may send an of 4 different cases), then remove as ID is not updateable in SP
@@ -869,9 +873,9 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 		_newList.delete = function(jsonData) {
 			return new Promise(function(resolve,reject) {
 				// FIRST: Param checks
-				if ( !jsonData || Array.isArray(jsonData) || typeof jsonData !== 'object' || Object.keys(jsonData).length == 0 ) reject("JSON data expected! Ex: `{Name:'Brent'}`");
-				if ( !jsonData['ID'] && !jsonData['Id'] && !jsonData['iD'] && !jsonData['id'] ) reject("JSON data must have an `ID` value! Ex: `{Id:99}`");
-				try { var test = JSON.stringify(jsonData) } catch(ex) { reject("`JSON.stringify(jsonData)` failed! Send valid JSON Please. Ex: `{'Name':'Brent'}`") }
+				if ( !jsonData || Array.isArray(jsonData) || typeof jsonData !== 'object' || Object.keys(jsonData).length == 0 ) reject("Object type expected! Ex: `{Title:'Brent'}`");
+				if ( !jsonData['ID'] && !jsonData['Id'] && !jsonData['iD'] && !jsonData['id'] ) reject("Object data must have an `Id` property! Ex: `{Id:99}`");
+				try { var test = JSON.stringify(jsonData) } catch(ex) { reject("`JSON.stringify(jsonData)` failed! Send a valid object. Ex: `{'Title':'Brent'}`") }
 
 				// STEP 1: Param Setup
 				// A: Set our `Id` value (users may send an of 4 different cases), then remove as ID is not updateable in SP
@@ -1086,7 +1090,6 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 				return new Promise(function(resolve, reject) {
 					if ( NODEJS && APP_OPTS.nodeEnabled ) {
 						objAjaxQuery.headers["Cookie"] = APP_OPTS.nodeCookie;
-						delete objAjaxQuery.headers["X-RequestDigest"];
 						var options = {
 							hostname: APP_OPTS.nodeServer,
 							path:     objAjaxQuery.url,
@@ -1110,8 +1113,9 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 									*/
 									reject();
 								}
-								else if ( rawData.indexOf('Microsoft.SharePoint.SPException') > -1 ) {
+								else if ( rawData.indexOf('{"error"') > -1 && rawData.indexOf('{"code"') > -1 ) {
 									// EX: {"error":{"code":"-1, Microsoft.SharePoint.SPException","message":{"lang":"en-US","value":"The field or property 'ColDoesntExist' does not exist."}}}
+									// EX: {"error":{"code":"-1, Microsoft.SharePoint.Client.InvalidClientQueryException","message":{"lang":"en-US","value":"A node of type 'EndOfInput' was read from the JSON reader when trying to read the start of an entry. A 'StartObject' node was expected."}}}
 									reject( JSON.parse(rawData).error.message.value + "\n\nURL used: " + objAjaxQuery.url );
 								}
 								else {
