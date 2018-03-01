@@ -1089,6 +1089,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 			.then(function(){
 				return new Promise(function(resolve, reject) {
 					if ( NODEJS && APP_OPTS.nodeEnabled ) {
+						// AUTH: Cookie is required for GET and POST
 						objAjaxQuery.headers["Cookie"] = APP_OPTS.nodeCookie;
 						var options = {
 							hostname: APP_OPTS.nodeServer,
@@ -1126,6 +1127,8 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 								reject( JSON.parse(rawData).error.message.value + "\n\nURL used: " + objAjaxQuery.url );
 							});
 						});
+						// POST: Data is sent to SP via `write`
+						if ( objAjaxQuery.data ) request.write(objAjaxQuery.data);
 						request.end();
 					}
 					else {
@@ -1136,7 +1139,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 						// B:
 						Object.keys(objAjaxQuery.headers || {}).forEach(function(key){
 							request.setRequestHeader(key, objAjaxQuery.headers[key]);
-						})
+						});
 
 						// C:
 						request.onload = function() {
@@ -1154,7 +1157,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 							reject( parseErrorMessage(request) + "\n\nURL used: " + objAjaxQuery.url );
 						};
 
-						// D:
+						// E:
 						request.send( objAjaxQuery.data ? objAjaxQuery.data : null );
 					}
 				});
