@@ -36,6 +36,15 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 	var APP_BLD = "20180228";
 	var DEBUG = false; // (verbose mode/lots of logging)
 	// ENUMERATIONS
+	// REF: [`SP.BaseType`](https://msdn.microsoft.com/en-us/library/office/jj246925.aspx)
+	var ENUM_BASETYPES = {
+		"0": "List",
+		"1": "Library",
+		"3": "Discussion Board",
+		"4": "Survey",
+		"5": "Issue"
+	};
+	// REF: [`SP.Utilities.PrincipalType`](https://msdn.microsoft.com/en-us/library/ee553710(v=office.14).aspx)
 	var ENUM_PRINCIPALTYPES = {
 		"0" : "None",
 		"1" : "User",
