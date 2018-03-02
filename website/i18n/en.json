@@ -15,6 +15,7 @@
     "installation": "Installation",
     "Installation": "Installation",
     "promises": "Promise You Will Love It",
+    "sp-auth-notes": "SharePoint Authentication",
     "ui-form-binding": "Form Binding",
     "Download": "Download",
     "Get Started": "Get Started",
@@ -22,6 +23,7 @@
     "GitHub": "GitHub",
     "Features": "Features",
     "API Reference": "API Reference",
+    "Help / Support": "Help / Support",
     "SpRestLib UI": "SpRestLib UI"
   },
   "pages-strings": {

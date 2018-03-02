@@ -3,6 +3,7 @@
 		"Get Started": ["installation","promises"],
 		"Features": ["feat-integration", "feat-promises", "feat-node", "feat-utilities"],
 		"API Reference": ["api-rest","api-list","api-site","api-user"],
+		"Help / Support": ["sp-auth-notes"],
 		"SpRestLib UI": ["ui-form-binding"]
 	}
 }
