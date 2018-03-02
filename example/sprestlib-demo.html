@@ -40,7 +40,7 @@
 
 	<script type="text/javascript">
 		$.ajaxSetup({ cache:false });
-		var APP_BLD = 20180225;
+		var APP_BLD = 20180302;
 		var HTML_SPINNER = '<div class="sprlib-spinner"><div class="sprlib-bounce1"></div><div class="sprlib-bounce2"></div><div class="sprlib-bounce3"></div></div>';
 
 		// ==================================================================================================================
@@ -235,11 +235,11 @@
 						if ( !list.Hidden ) {
 							var $row = $('<tr/>');
 							$row.append('<th><img class="imgIcon" src="'+ list.ImageUrl +'">'
-								+ '<a href="'+ list.RootFolder.ServerRelativeUrl +'" target="_blank">'+ list.Title +'</a>'
+								+ '<a href="'+ list.ServerRelativeUrl +'" target="_blank">'+ list.Title +'</a>'
 								+ (list.Description ? '<div class="showDesc"><span style="display:none">: </span>'+ list.Description +'</div>' : '')
 								+ '</th>'
 							);
-							$row.append('<td>'+ (list.BaseType == 0 ? 'List' : list.BaseType == 1 ? 'Library' : '?') +'</td>');
+							$row.append('<td>'+ list.BaseType +'</td>');
 							$row.append('<td class="right">'+ list.ItemCount +'</td>');
 							$('#tabSiteLists tbody').append( $row );
 						}
