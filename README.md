@@ -1229,13 +1229,13 @@ is built, the generation and handling of tokens will vary.
 ## Authentication Requirements Overview
 
 ### GET Operations
-GET operations are methods that return data from SharePoint (REST queries, get list items, site/user info).
+GET operations are methods that read data from SharePoint (REST queries, get list items, site/user info).
 
 GET Authentication Requirements:
 * Cookie (containing both `rtFA` and `FedAuth` values)
 
 ### POST Operations
-POST operations are methods that write data from SharePoint (Create, Update, Delete, Recycle).
+POST operations are methods that write data to SharePoint (Create, Update, Delete, Recycle).
 
 POST Authentication Requirements:
 * Cookie (containing both `rtFA` and `FedAuth` values)
@@ -1249,7 +1249,7 @@ security items and send them along with any GET/POST requests.
 Once you get away from embedded WebPart code, you will need to be provide the necessary security items.
 
 For example, the Node demo (`sprestlib/examples/nodejs-demo.js`) runs completely outside of SharePoint, but can
-connect as it authenticates into a Microsoft portal to received the cookie values and queries the SharePoint context
+connect as it authenticates into a Microsoft portal to query the two required cookie values, and also queries the SharePoint context
 when a RequestDigest value is required.  Use the code provided in the demo to fetch cookie or RequestDigest values as needed.
 
 Most applications that run in a webpage should have the necessary cookie values, so try fetching and passing
@@ -1263,7 +1263,7 @@ indicates your POST operation is not receiving a valid `requestDigest` value.
 sprLib.rest({ url:'_api/contextinfo', type:'POST' })
 .then(arr => {
     let strReqDig = arr[0].GetContextWebInformation.FormDigestValue;
-    return sprLib.list({ name:'Announcements', requestDigest:strReqDig }).create({ "Title":"created with Node demo" });
+    return sprLib.list({ name:'Announcements', requestDigest:strReqDig }).create({ "Title":"New Item" });
 })
 .then(obj => {
     console.log('Item created!');
