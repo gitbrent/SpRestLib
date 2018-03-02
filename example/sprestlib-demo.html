@@ -6,7 +6,7 @@
 	<meta name="website"     content="https://github.com/gitbrent/SpRestLib/">
 	<meta name="keywords"    content="SpRestLib, JavaScript, js-sharepoint, OData, REST, SharePoint 2013, SP2013, SharePoint 2016, SP2016, SharePoint Online">
 	<meta name="description" content="Content Editor WebPart to showcase SpRestLib features and capabilities">
-	<meta name="revised"     content="20180225">
+	<meta name="revised"     content="20180302">
 
 	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300">
 	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:700">
@@ -16,17 +16,14 @@
 
 	<!-- HOWTO / FAQ / SETUP -->
 	<!--
-		FAQ:
-		*** This pages JavaScript requires a browser that supports ES6/JS2015 (IE11 wont work, sorry. sprLib does support it though!) ***
-
 		SETUP:
-		1) Create new folder under ./SiteAssets: "sprestlib"
-		2) Drag the contents of the `/example` folder from the SpRestLib download archive into the ./SiteAssets/sprestlib folder (1 html file, 1 css folder and 1 js folder)
-		3) Create a new Page: DEMO_SpRestLib.aspx
-		4) Add a Content Editor Web Part to the page and point it to ./SiteAssets/sprestlib/sprestlib-demo.html
-		5) The DEMO_SpRestLib.aspx page is ready to go!
+		1) Create new folder in your SharePoint `SiteAssets` Library named "sprestlib"
+		2) Drag the contents of the `sprestlib/example` folder into the `SiteAssets/sprestlib` folder (2 html files, 1 css folder and 1 js folder)
+		3) Create a new SharePoint Page named "sprestlib-demo.aspx"
+		4) Add a Content Editor Web Part to the page and set its source to "../SiteAssets/sprestlib/sprestlib-demo.html"
+		5) The SpRestLibDemo.aspx page on your SharePoint site is ready to go!
 
-		!!!==>> Check the img folder for screencaps of the SharePoint setup! <<==!!!
+		!!!~~> Check the img folder for screencaps of the SharePoint setup! <~~!!!
 	-->
 
 	<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.8.3/themes/prism-coy.css">
@@ -56,10 +53,10 @@
 				else arrColHeadings.push(key);
 			});
 
-			let table = new AsciiTable().setHeading( arrColHeadings );
+			var table = new AsciiTable().setHeading( arrColHeadings );
 
-			arrayResults.forEach((obj,idx) => {
-				let vals = [];
+			arrayResults.forEach(function(obj,idx){
+				var vals = [];
 				$.each(obj, function(key,val){
 					if ( typeof val === 'object' && JSON.stringify(val).indexOf("__deferred") > 0 ) val = "[[__deferred]]";
 					if ( typeof val === 'object' && JSON.stringify(val).indexOf("__metadata") > 0 ) val = "[[__metadata]]";
@@ -104,7 +101,7 @@
 				if ( arrColObjs.length ) $.each(arrColObjs[0],function(key,val){ $table.find('thead tr').append('<th>'+key+'</th>') });
 
 				arrColObjs.forEach(function(obj,idx){
-					let $row = $('<tr/>');
+					var $row = $('<tr/>');
 					$.each(obj,function(key,val){ $row.append('<td>'+val+'</td>') });
 					$table.find('tbody').append( $row );
 				});
@@ -236,7 +233,7 @@
 				.then(function(arrLists){
 					arrLists.forEach(function(list,idx){
 						if ( !list.Hidden ) {
-							let $row = $('<tr/>');
+							var $row = $('<tr/>');
 							$row.append('<th><img class="imgIcon" src="'+ list.ImageUrl +'">'
 								+ '<a href="'+ list.RootFolder.ServerRelativeUrl +'" target="_blank">'+ list.Title +'</a>'
 								+ (list.Description ? '<div class="showDesc"><span style="display:none">: </span>'+ list.Description +'</div>' : '')
@@ -255,7 +252,7 @@
 				.then(function(arrPerms){
 					arrPerms.forEach(function(perm,idx){
 						// A-1: Create row
-						let $row = $('<tr/>');
+						var $row = $('<tr/>');
 						$row.append('<th>'
 						// TODO: diff icon for each `PrincipalType`
 							+ '<img class="imgIcon" src="/_layouts/15/images/ribbon_userprofile_16.png">'
@@ -279,7 +276,7 @@
 						// Ex: 'Title':"SharingLinks.44086f6e-e6e7-409f-9a2f-6ff12121bc85.OrganizationEdit.79c8003a-1234-4ca7-a942-172a81817a6a"
 						if ( group.OwnerTitle != 'System Account' ) {
 							// A-1: Create row
-							let $row = $('<tr/>');
+							var $row = $('<tr/>');
 							$row.append('<th>'
 								+ '<img class="imgIcon" src="/_layouts/15/images/ribbon_userprofile_16.png">'
 								+ '<a href="../_layouts/15/people.aspx?MembershipGroupId='+ group.Id +'" target="_blank">'+ group.Title +'</a>'
@@ -295,11 +292,11 @@
 								url: '_api/web/SiteGroups('+ group.Id +')/Users',
 								queryCols: ['Id','Email','LoginName','PrincipleType','Title']
 							})
-							.then(arrUsers => {
-								arrUsers.forEach((user,idx) => $('#groupUsers'+group.Id).append('<div class="itemBox">'+ user.Title +'<span style="display:none">; </span></div>') );
+							.then(function(arrUsers){
+								arrUsers.forEach(function(user,idx){ $('#groupUsers'+group.Id).append('<div class="itemBox">'+ user.Title +'<span style="display:none">; </span></div>') });
 								$('#groupCount'+group.Id).text( $('#groupUsers'+group.Id+' .itemBox').length );
 							})
-							.catch(strErr => $('#groupUsers'+group.Id).text(strErr||'?'));
+							.catch(function(strErr){ $('#groupUsers'+group.Id).text(strErr||'?') });
 						}
 					});
 					// FIXME: This will fire before all the AJAX above, then count sorting wont work, etc.
@@ -312,7 +309,7 @@
 					arrRoles.forEach(function(role,idx){
 						// Filter: Hidden roles
 						if ( !role.Hidden ) {
-							let $row = $('<tr/>');
+							var $row = $('<tr/>');
 							$row.append('<th><a href="../_layouts/15/EditRole.aspx?role='+ role.Name +'" target="_blank">'+ role.Name +'</a></th>');
 							$row.append('<td class="showGrpDesc">'+ role.Description +'</td>');
 							$('#tabSiteRoles tbody').append( $row );
@@ -325,7 +322,7 @@
 				sprLib.site().subsites()
 				.then(function(arrSites){
 					arrSites.forEach(function(site,idx){
-						let $row = $('<tr/>');
+						var $row = $('<tr/>');
 						$row.append('<th><a href="'+ site.UrlRel +'" target="_blank" title="Site GUID: '+ site.Id +'">'+ site.Name +'</a></th>');
 						$row.append('<td class="showGrpDesc">'+ site.Created +'</td>');
 						$row.append('<td class="showGrpDesc">'+ site.Modified +'</td>');
@@ -341,7 +338,7 @@
 				.then(function(arrUsers){
 					// G-1: Populate Users
 					arrUsers.forEach(function(user,idx){
-						let $row = $('<tr/>');
+						var $row = $('<tr/>');
 						$row.append('<td>'+ user.Title +'</td>');
 						$row.append('<td>'+ user.LoginName +'</td>');
 						$row.append('<td>'+ user.Email +'</td>');
@@ -477,7 +474,7 @@
 			<div id="tabSetup" data-tab="Setup" class="active">
 				<div class="subTitle">Welcome!</div>
 				<p>
-					Let's check your setup and show you how SpRestLib is configured.
+					Check your setup below to ensure SpRestLib is configured correctly.
 					<ul>
 						<li>If everything below looks okay, then all the functionality in the demo tabs are ready to explore.</li>
 						<li>Please check the <a href="https://github.com/gitbrent/SpRestLib">GitHub Project Site</a> for setup
