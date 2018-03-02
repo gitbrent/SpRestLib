@@ -1,0 +1,71 @@
+<html lang="en"><head><meta charset="utf-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><title>SharePoint Authentication · SpRestLib</title><meta name="viewport" content="width=device-width"/><meta name="generator" content="Docusaurus"/><meta property="og:title" content="SharePoint Authentication · SpRestLib"/><meta property="og:type" content="website"/><meta property="og:url" content="https://gitbrent.github.io/SpRestLib/index.html"/><meta property="og:description" content="**************************************************************************************************"/><link rel="shortcut icon" href="/SpRestLib/img/favicon.png"/><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/hybrid.min.css"/><script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script><link rel="stylesheet" href="/SpRestLib/css/main.css"/></head><body class="sideNavVisible"><div class="fixedHeaderContainer"><div class="headerWrapper wrapper"><header><a href="/SpRestLib/"><img class="logo" src="/SpRestLib/img/sprestlib.svg"/><h2 class="headerTitle">SpRestLib</h2></a><div class="navigationWrapper navigationSlider"><nav class="slidingNav"><ul class="nav-site nav-site-internal"><li><a href="https://github.com/gitbrent/SpRestLib/releases" target="_self">Download</a></li><li><a href="/SpRestLib/docs/installation.html" target="_self">Get Started</a></li><li><a href="/SpRestLib/docs/api-rest.html" target="_self">API Documentation</a></li><li><a href="https://github.com/gitbrent/SpRestLib/" target="_self">GitHub</a></li></ul></nav></div></header></div></div><div class="navPusher"><div class="docMainWrapper wrapper"><div class="container docsNavContainer" id="docsNav"><nav class="toc"><div class="toggleNav"><section class="navWrapper wrapper"><div class="navBreadcrumb wrapper"><div class="navToggle" id="navToggler"><i></i></div><h2><i>›</i><span>Help / Support</span></h2></div><div class="navGroups"><div class="navGroup navGroupActive"><h3>Get Started</h3><ul><li class="navListItem"><a class="navItem" href="/SpRestLib/docs/installation.html">Installation</a></li><li class="navListItem"><a class="navItem" href="/SpRestLib/docs/promises.html">Promise You Will Love It</a></li></ul></div><div class="navGroup navGroupActive"><h3>Features</h3><ul><li class="navListItem"><a class="navItem" href="/SpRestLib/docs/feat-integration.html">Library Integration</a></li><li class="navListItem"><a class="navItem" href="/SpRestLib/docs/feat-promises.html">Promise-based Operations</a></li><li class="navListItem"><a class="navItem" href="/SpRestLib/docs/feat-node.html">SharePoint via Node.js</a></li><li class="navListItem"><a class="navItem" href="/SpRestLib/docs/feat-utilities.html">Utility Methods</a></li></ul></div><div class="navGroup navGroupActive"><h3>API Reference</h3><ul><li class="navListItem"><a class="navItem" href="/SpRestLib/docs/api-rest.html">REST API Methods</a></li><li class="navListItem"><a class="navItem" href="/SpRestLib/docs/api-list.html">List/Library (SPList) Methods</a></li><li class="navListItem"><a class="navItem" href="/SpRestLib/docs/api-site.html">Site (SPSite) Methods</a></li><li class="navListItem"><a class="navItem" href="/SpRestLib/docs/api-user.html">User Methods</a></li></ul></div><div class="navGroup navGroupActive"><h3>Help / Support</h3><ul><li class="navListItem navListItemActive"><a class="navItem navItemActive" href="/SpRestLib/docs/sp-auth-notes.html">SharePoint Authentication</a></li></ul></div><div class="navGroup navGroupActive"><h3>SpRestLib UI</h3><ul><li class="navListItem"><a class="navItem" href="/SpRestLib/docs/ui-form-binding.html">Form Binding</a></li></ul></div></div></section></div><script>
+          var toggler = document.getElementById('navToggler');
+          var nav = document.getElementById('docsNav');
+          toggler.onclick = function() {
+            nav.classList.toggle('docsSliderActive');
+          };
+        </script></nav></div><div class="container mainContainer"><div class="wrapper"><div class="post"><header class="postHeader"><h1>SharePoint Authentication</h1></header><article><div><span><hr>
+<p>Table of Contents</p>
+<ul>
+<li><a href="#sharepoint-authentication-overview">SharePoint Authentication Overview</a></li>
+<li><a href="#sharepoint-authentication-requirements">SharePoint Authentication Requirements</a>
+<ul>
+<li><a href="#get-operations">GET Operations</a></li>
+<li><a href="#post-operations">POST Operations</a></li>
+</ul></li>
+<li><a href="#sharepoint-authentication-keys">SharePoint Authentication Keys</a>
+<ul>
+<li><a href="#example-retrieve-a-formdigestvalue-value">Example: Retrieve a FormDigestValue value</a></li>
+</ul></li>
+</ul>
+<hr>
+<h2><a class="anchor" aria-hidden="true" name="sharepoint-authentication-overview"></a><a href="#sharepoint-authentication-overview" aria-hidden="true" class="hash-link" ><svg aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>SharePoint Authentication Overview</h2>
+<p>SharePoint requires authentication tokens to interact with its API.  Depending upon how your application
+is built, the generation and handling of tokens will vary.</p>
+<h2><a class="anchor" aria-hidden="true" name="authentication-requirements"></a><a href="#authentication-requirements" aria-hidden="true" class="hash-link" ><svg aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Authentication Requirements</h2>
+<h3><a class="anchor" aria-hidden="true" name="get-operations"></a><a href="#get-operations" aria-hidden="true" class="hash-link" ><svg aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>GET Operations</h3>
+<p>GET operations are methods that read data from SharePoint (REST queries, get list items, site/user info).</p>
+<p>GET Authentication Requirements:</p>
+<ul>
+<li>Cookie (containing both <code>rtFA</code> and <code>FedAuth</code> values)</li>
+</ul>
+<h3><a class="anchor" aria-hidden="true" name="post-operations"></a><a href="#post-operations" aria-hidden="true" class="hash-link" ><svg aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>POST Operations</h3>
+<p>POST operations are methods that write data to SharePoint (Create, Update, Delete, Recycle).</p>
+<p>POST Authentication Requirements:</p>
+<ul>
+<li>Cookie (containing both <code>rtFA</code> and <code>FedAuth</code> values)</li>
+<li>Security Token (an <code>X-RequestDigest</code> request header containing the FormDigestValue value)</li>
+</ul>
+<h2><a class="anchor" aria-hidden="true" name="sharepoint-authentication-keys"></a><a href="#sharepoint-authentication-keys" aria-hidden="true" class="hash-link" ><svg aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>SharePoint Authentication Keys</h2>
+<p>If your app is running in a WebPart, then both the cookie values and the FormDigestValue exist in the page already,
+and you can simply call <code>sprLib.list('Some List').update()</code> etc. and it will work as the library will detect these
+security items and send them along with any GET/POST requests.</p>
+<p>Once you get away from embedded WebPart code, you will need to be provide the necessary security items.</p>
+<p>For example, the Node demo (<code>sprestlib/examples/nodejs-demo.js</code>) runs completely outside of SharePoint, but can
+connect as it authenticates into a Microsoft portal to query the two required cookie values, and also queries the SharePoint context
+when a RequestDigest value is required.  Use the code provided in the demo to fetch cookie or RequestDigest values as needed.</p>
+<p>Most applications that run in a webpage should have the necessary cookie values, so try fetching and passing
+the FormDigestValue for CRUD/POST operations with <code>requestDigest</code> as shown below if you encounter authentication errors.</p>
+<h3><a class="anchor" aria-hidden="true" name="example-retrieve-a-formdigestvalue-value"></a><a href="#example-retrieve-a-formdigestvalue-value" aria-hidden="true" class="hash-link" ><svg aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Example: Retrieve a FormDigestValue value</h3>
+<pre><code class="hljs css javascript">sprLib.rest({ <span class="hljs-attr">url</span>:<span class="hljs-string">'_api/contextinfo'</span>, <span class="hljs-attr">type</span>:<span class="hljs-string">'POST'</span> })
+.then(<span class="hljs-function"><span class="hljs-params">arr</span> =&gt;</span> {
+    <span class="hljs-keyword">let</span> strReqDig = arr[<span class="hljs-number">0</span>].GetContextWebInformation.FormDigestValue;
+    <span class="hljs-keyword">return</span> sprLib.list({ <span class="hljs-attr">name</span>:<span class="hljs-string">'Announcements'</span>, <span class="hljs-attr">requestDigest</span>:strReqDig }).create({ <span class="hljs-string">"Title"</span>:<span class="hljs-string">"New Item"</span> });
+})
+.then(<span class="hljs-function"><span class="hljs-params">obj</span> =&gt;</span> {
+    <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'Item created!'</span>);
+});
+</code></pre>
+<p>If you encounter an error that states &quot;The security validation for this page is invalid and might be corrupted. [...]&quot;, that
+indicates your POST operation is not receiving a valid <code>requestDigest</code> value.</p>
+<p>An invalid FormDigestValue error:
+<img src="/SpRestLib/docs/assets/auth-error-security-validation-invalid.png" alt="SharePoint POST auth error"></p>
+</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="api-user.html">← User Methods</a><a class="docs-next button" href="ui-form-binding.html">Form Binding →</a></div></div></div></div><footer class="nav-footer" id="footer"><section class="sitemap"><a href="/SpRestLib/" class="nav-home"><img src="/SpRestLib/img/sprestlib.svg" alt="SpRestLib" width="66" height="58"/></a><div><h5>Docs</h5><a href="/SpRestLib/docs/en/installation.html">Getting Started</a><a href="/SpRestLib/docs/en/api-rest.html">SharePoint API Reference</a><a href="/SpRestLib/docs/en/feat-promises.html">About JavaScript Promises</a></div><div><h5>Community</h5><a href="https://github.com/gitbrent/sprestlib/issues" target="_blank">GitHub Issues</a><a href="http://stackoverflow.com/questions/tagged/sprestlib" target="_blank">Stack Overflow</a><a href="https://www.youtube.com/channel/UCxZcCampOHn-47kvtcK_oVQ" target="_blank">YouTube Channel</a></div><div><h5>More</h5><a href="https://github.com/gitbrent/sprestlib">GitHub Project</a><a href="https://www.flaticon.com/packs/creativity">Site Icons</a></div></section><section class="copyright">Copyright © 2018 Brent Ely</section></footer></div><script>
+              (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+              (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+              m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+              })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+              ga('create', 'UA-75147115-3', 'auto');
+              ga('send', 'pageview');
+            </script></body></html>
