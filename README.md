@@ -140,6 +140,12 @@ using the JavaScript SharePoint App Model.
       - [HTML Tag Properties: Cols Options](#html-tag-properties-cols-options)
     - [Examples](#examples-1)
   - [Utility Methods](#utility-methods)
+- [SharePoint Authentication Notes](#sharepoint-authentication-notes)
+  - [Authentication Requirements Overview](#authentication-requirements-overview)
+    - [GET Operations](#get-operations)
+    - [POST Operations](#post-operations)
+  - [Using Authentication Keys](#using-authentication-keys)
+    - [Example: Retrieve a FormDigestValue value](#example-retrieve-a-formdigestvalue-value)
 - [Node.js and SharePoint Online](#nodejs-and-sharepoint-online)
   - [Connect To Office 365/SharePoint Online With Node.js](#connect-to-office-365sharepoint-online-with-nodejs)
     - [Demo](#demo)
@@ -155,6 +161,8 @@ using the JavaScript SharePoint App Model.
 - [Integration with Other Libraries](#integration-with-other-libraries)
   - [Integration with Angular/Typescript/Webpack](#integration-with-angulartypescriptwebpack)
 - [Issues / Suggestions](#issues--suggestions)
+  - [Authentication](#authentication)
+  - [Bugs](#bugs)
 - [Special Thanks](#special-thanks)
 - [License](#license)
 
@@ -1213,6 +1221,56 @@ NOTE: SpRestLib will refresh the token automatically as needed during CRUD opera
 
 
 **************************************************************************************************
+# SharePoint Authentication Notes
+
+SharePoint requires authentication tokens to interact with its API.  Depending upon how your application
+is built, the generation and handling of tokens will vary.
+
+## Authentication Requirements Overview
+
+### GET Operations
+GET operations are methods that return data from SharePoint (REST queries, get list items, site/user info).
+
+GET Authentication Requirements:
+* Cookie (containing both `rtFA` and `FedAuth` values)
+
+### POST Operations
+POST operations are methods that write data from SharePoint (Create, Update, Delete, Recycle).
+
+POST Authentication Requirements:
+* Cookie (containing both `rtFA` and `FedAuth` values)
+* Security Token (an `X-RequestDigest` request header containing the FormDigestValue value)
+
+## Using Authentication Keys
+If your app is running in a WebPart, then both the cookie values and the FormDigestValue exist in the page already,
+and you can simply call `sprLib.list('Some List').update()` etc. and it will work as the library will detect these
+security items and send them along with any GET/POST requests.
+
+Once you get away from embedded WebPart code, you will need to be provide the necessary security items.
+
+For example, the Node demo (`sprestlib/examples/nodejs-demo.js`) runs completely outside of SharePoint, but can
+connect as it authenticates into a Microsoft portal to received the cookie values and queries the SharePoint context
+when a RequestDigest value is required.  Use the code provided in the demo to fetch cookie or RequestDigest values as needed.
+
+Most applications that run in a webpage should have the necessary cookie values, so try fetching and passing
+the FormDigestValue for CRUD/POST operations with `requestDigest` as shown below if you encounter authentication errors.
+
+### Example: Retrieve a FormDigestValue value
+```javascript
+sprLib.rest({ url:'_api/contextinfo', type:'POST' })
+.then(arr => {
+    let strReqDig = arr[0].GetContextWebInformation.FormDigestValue;
+    return sprLib.list({ name:'Announcements', requestDigest:strReqDig }).create({ "Title":"created with Node demo" });
+})
+.then(obj => {
+    console.log('Item created!');
+});
+```
+
+
+
+
+**************************************************************************************************
 # Node.js and SharePoint Online
 
 ## Connect To Office 365/SharePoint Online With Node.js
@@ -1302,6 +1360,10 @@ Issue/Discussion: [Issue #9](https://github.com/gitbrent/SpRestLib/issues/9)
 **************************************************************************************************
 # Issues / Suggestions
 
+## Authentication
+See [SharePoint Authentication Notes](#sharepoint-authentication-notes) for issues with authentication.
+
+## Bugs
 Please file issues or suggestions on the [issues page on GitHub](https://github.com/gitbrent/SpRestLib/issues/new), or even better, [submit a pull request](https://github.com/gitbrent/SpRestLib/pulls). Feedback is always welcome!
 
 When reporting issues, please include a code snippet or a link demonstrating the problem.
