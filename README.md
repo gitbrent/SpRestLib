@@ -1255,6 +1255,9 @@ when a RequestDigest value is required.  Use the code provided in the demo to fe
 Most applications that run in a webpage should have the necessary cookie values, so try fetching and passing
 the FormDigestValue for CRUD/POST operations with `requestDigest` as shown below if you encounter authentication errors.
 
+If you encounter an error that states "The security validation for this page is invalid and might be corrupted. [...]", that
+indicates your POST operation is not receiving a valid `requestDigest` value.
+
 ### Example: Retrieve a FormDigestValue value
 ```javascript
 sprLib.rest({ url:'_api/contextinfo', type:'POST' })
