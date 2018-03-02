@@ -33,7 +33,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 (function(){
 	// APP VERSION/BUILD
 	var APP_VER = "1.6.0-beta";
-	var APP_BLD = "20180228";
+	var APP_BLD = "20180302";
 	var DEBUG = false; // (verbose mode/lots of logging)
 	// ENUMERATIONS
 	// REF: [`SP.BaseType`](https://msdn.microsoft.com/en-us/library/office/jj246925.aspx)
@@ -1443,11 +1443,20 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 			return new Promise(function(resolve, reject) {
 				sprLib.rest({
 					url: strBaseUrl+'_api/web/lists',
-					queryCols: ['Id','Title','Description','ParentWebUrl','ItemCount','Hidden','ImageUrl','BaseType','BaseTemplate','RootFolder/ServerRelativeUrl']
+					queryCols: [
+						'Id','Title','Description','ItemCount','BaseType','BaseTemplate','Hidden','ImageUrl','ParentWebUrl','RootFolder/ServerRelativeUrl'
+					]
 				})
 				.then(function(arrData){
-					// A: Flatten value
-					arrData.forEach(function(item,idx){ item.RootFolder = item.RootFolder.ServerRelativeUrl });
+					// A: Modify some values
+					arrData.forEach(function(item,idx){
+						// A: Flatten/Elevate `ServerRelativeUrl` value
+						item.ServerRelativeUrl = (item.RootFolder && item.RootFolder.ServerRelativeUrl ? item.RootFolder.ServerRelativeUrl : null);
+						if ( item.RootFolder ) delete item.RootFolder;
+
+						// B: Decode type
+						item.BaseType = ENUM_BASETYPES[item.BaseType] || item.BaseType;
+					});
 
 					// B: Resolve results (NOTE: empty array is the correct default result)
 					resolve( arrData || [] );
