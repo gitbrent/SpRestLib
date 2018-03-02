@@ -2,7 +2,7 @@
  * NAME: qunit-test.js
  * DESC: tests for qunit-test.html (coded to my O365 Dev Site - YMMV)
  * AUTH: https://github.com/gitbrent/
- * DATE: Feb 18, 2018
+ * DATE: Mar 02, 2018
  *
  * HOWTO: Generate text tables for README etc.:
  * sprLib.list('Employees').getItems(['Id', 'Name', 'Badge_x0020_Number']).then(function(arrData){ console.log(getAsciiTableStr(arrData)) });
@@ -24,6 +24,7 @@ const ARR_NAMES_LAST  = ['Septiceye','Iplier','Martzia','Rodgers','Allen','Kent'
 //
 const LIST_GUID2 = '23846527-218a-43a2-b5c1-7b55b6feb1a3';
 //
+const gRegexGUID = /^[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}$/i;
 var gTestUserId = 9;
 
 function getAsciiTableStr(inResult) {
@@ -1583,8 +1584,13 @@ QUnit.module( "SITE Methods" );
 				var objItem = arrResults[0];
 				//
 				assert.ok( Object.keys(objItem).length == 10, "Object.keys(objItem).length == 10: "+ Object.keys(objItem).length );
-				assert.ok( (objItem.Id),    "objItem.Id    exists: '"+ objItem.Id    +"'");
-				assert.ok( (objItem.Title), "objItem.Title exists: '"+ objItem.Title +"'");
+				assert.ok( (objItem.Title != null),     "objItem.Title exists..........: '"+ objItem.Title +"'");
+				assert.ok( (objItem.Id    != null),     "objItem.Id    exists..........: '"+ objItem.Id    +"'");
+				assert.ok( gRegexGUID.test(objItem.Id), "gRegexGUID.test(objItem.Id)...: '"+ objItem.Id    +"'");
+				assert.ok( !isNaN(objItem.ItemCount),   "objItem.ItemCount is a Number.: "+ objItem.ItemCount +"");
+				assert.ok( (objItem.ImageUrl          && objItem.ImageUrl.indexOf('/') == 0),          "objItem.ImageUrl          starts with '/': '"+ objItem.ImageUrl +"'");
+				assert.ok( (objItem.ParentWebUrl      && objItem.ParentWebUrl.indexOf('/') == 0),      "objItem.ParentWebUrl      starts with '/': '"+ objItem.ParentWebUrl +"'");
+				assert.ok( (objItem.ServerRelativeUrl && objItem.ServerRelativeUrl.indexOf('/') == 0), "objItem.ServerRelativeUrl starts with '/': '"+ objItem.ServerRelativeUrl +"'");
 				assert.ok( getAsciiTableStr(objItem), `RESULTS:\n${getAsciiTableStr(objItem)}` );
 				assert.ok( getAsciiTableStr(arrResults), `RESULTS:\n${getAsciiTableStr(arrResults)}` );
 				//
