@@ -4,13 +4,15 @@
 [Full Changelog](https://github.com/gitbrent/sprestlib/compare/v1.5.0...v1.6.0)
 
 **Implemented Enhancements:**
-- Removed jQuery methods from sprestlib.js - there are now ZERO library dependencies!
 - Add support for SP User Profile API [\#14](https://github.com/gitbrent/sprestlib/issues/14) ([ra6hi9](https://github.com/ra6hi9))
+- Removed jQuery methods from sprestlib.js - there are now ZERO library dependencies!
 - Add async/await example [\#16](https://github.com/gitbrent/sprestlib/pull/16) ([wmertens](https://github.com/wmertens))
 - Removed all ES6 code from `sprestlib-demo.html` (it is IE11 compatible now!), plus moved deps to CDN from local files.
+- Improved error messages/feedback
 
 **Fixed Bugs:**
 - Fixed two issues with CRUD operations via Node.js
+- Fixed a few minor issues with parsing no results in certain scenarios, etc.
 
 
 
