@@ -5,7 +5,7 @@
  * REQS: Node 4.x + `npm install sprestlib`
  * EXEC: `node nodejs-demo.js (sp-username) (sp-password) {sp-hostUrl}`
  * VER.: 1.5.0
- * REL.: 20180301
+ * REL.: 20180305
  * REFS: HOWTO: Authenticate to SharePoint Online (*.sharepoint.com)
  * - https://allthatjs.com/2012/03/28/remote-authentication-in-sharepoint-online/
  * - http://paulryan.com.au/2014/spo-remote-authentication-rest/
@@ -188,7 +188,7 @@ Promise.resolve()
 
 	console.log("\nTEST 3: sprLib.list('Announcements').create()");
 	console.log('---------------------------------------------');
-	console.log('strReqDig..:'+ strReqDig);
+	console.log('strReqDig..: '+ strReqDig);
 
 	return sprLib.list({ name:'Announcements', requestDigest:strReqDig }).create({ "Title":"created with Node demo" });
 })
