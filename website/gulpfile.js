@@ -13,7 +13,7 @@ var cssSrch2 = '<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/hi
 var jvsSrch1 = /\<script type="text\/javascript" src="https:\/\/cdnjs.cloudflare.com\/ajax\/libs\/highlight.*.min.js"\>\<\/script\>/;
 
 /* ========== */
-var arrDeployTasks = ['deploy-html','deploy-index','deploy-img','deploy-help','deploy-sitemap'];
+var arrDeployTasks = ['deploy-html','deploy-index','deploy-css','deploy-img','deploy-help','deploy-sitemap'];
 
 gulp.task('deploy-html', ()=>{
 	return gulp.src('./build/SpRestLib/docs/*.html').pipe(gulp.dest('../docs/'));
@@ -21,6 +21,10 @@ gulp.task('deploy-html', ()=>{
 
 gulp.task('deploy-index', ()=>{
 	return gulp.src('../index.perf.html', {base:'./'}).pipe(gulp.dest('../index.html'));
+});
+
+gulp.task('deploy-css', ()=>{
+	return gulp.src('./build/SpRestLib/css/*.*').pipe(gulp.dest('../css/'));
 });
 
 gulp.task('deploy-img', ()=>{
