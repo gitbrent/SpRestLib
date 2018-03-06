@@ -1,6 +1,6 @@
 # Change Log
 
-## [v1.6.0](https://github.com/gitbrent/sprestlib/tree/v1.6.0) (2018-03-??)
+## [v1.6.0](https://github.com/gitbrent/sprestlib/tree/v1.6.0) (2018-03-05)
 [Full Changelog](https://github.com/gitbrent/sprestlib/compare/v1.5.0...v1.6.0)
 
 **Implemented Enhancements:**
