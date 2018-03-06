@@ -17,5 +17,6 @@
 <url> <loc>https://gitbrent.github.io/docs/feat-utilities.html</loc> <changefreq>hourly</changefreq> <priority>1.0</priority> <xhtml:link rel="alternate" hreflang="en" href="https://gitbrent.github.io/docs/feat-utilities.html" /> </url>
 <url> <loc>https://gitbrent.github.io/docs/installation.html</loc> <changefreq>hourly</changefreq> <priority>1.0</priority> <xhtml:link rel="alternate" hreflang="en" href="https://gitbrent.github.io/docs/installation.html" /> </url>
 <url> <loc>https://gitbrent.github.io/docs/promises.html</loc> <changefreq>hourly</changefreq> <priority>1.0</priority> <xhtml:link rel="alternate" hreflang="en" href="https://gitbrent.github.io/docs/promises.html" /> </url>
+<url> <loc>https://gitbrent.github.io/docs/sp-auth-notes.html</loc> <changefreq>hourly</changefreq> <priority>1.0</priority> <xhtml:link rel="alternate" hreflang="en" href="https://gitbrent.github.io/docs/sp-auth-notes.html" /> </url>
 <url> <loc>https://gitbrent.github.io/docs/ui-form-binding.html</loc> <changefreq>hourly</changefreq> <priority>1.0</priority> <xhtml:link rel="alternate" hreflang="en" href="https://gitbrent.github.io/docs/ui-form-binding.html" /> </url>
 </urlset>

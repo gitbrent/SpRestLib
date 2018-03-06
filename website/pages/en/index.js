@@ -21,7 +21,7 @@ function MakeLeftBulletText(strText) {
 // NOTE: Code is only recognized if lines have leading tabs (?)
 const tryCodeBlock = `// 1: Load SpRestLib via CDN
 var script = document.createElement('script');
-script.src = "https://cdn.rawgit.com/gitbrent/SpRestLib/v1.4.0/dist/sprestlib.bundle.js";
+script.src = "https://cdn.rawgit.com/gitbrent/SpRestLib/v1.6.0/dist/sprestlib.bundle.js";
 document.getElementsByTagName('head')[0].appendChild(script);
 //
 // 2: Try some library methods
@@ -120,7 +120,7 @@ Promise.resolve()
     return sprLib.list('Employees').delete(item);
 })
 .then(function(item){
-    console.log('Ran entire CRUD chain!');
+    console.log('We just ran the entire CRUD chain!');
 });
 `;
 const res4 = `//
@@ -132,7 +132,7 @@ const res4 = `//
 //
 // Deleted item!
 //
-// Ran entire CRUD chain!
+// We just ran the entire CRUD chain!
 //
 `;
 
@@ -230,28 +230,28 @@ const FeatureBullets = props => (
 	<Block background="light" layout="fourColumn">
 		{[
 			{
-				content: 'Most REST/Web Service interaction can be done in a couple of lines of code',
-				image: imgUrl('circle-magic.svg'),
-				imageAlign: 'top',
-				title: 'Easy To Use',
-			},
-			{
-				content: 'Utilizes new ES6 Promise architecture for asynchronous operation chaining/grouping',
-				image: imgUrl('circle-handshake.svg'),
-				imageAlign: 'top',
-				title: 'Chains Async Ops',
-			},
-			{
 				content: 'Provides list, user, site and REST methods for SharePoint 2013 API/SharePoint Online',
 				image: imgUrl('circle-checklist.svg'),
 				imageAlign: 'top',
 				title: 'Full Featured',
 			},
 			{
-				content: 'Pure JavaScript solution - a jQuery library with no other dependencies',
+				content: 'Most REST/Web Service interaction can be done in a couple of lines of code',
+				image: imgUrl('circle-magic.svg'),
+				imageAlign: 'top',
+				title: 'Easy To Use',
+			},
+			{
+				content: 'Lightweight, pure JavaScript library with no other framework dependencies',
 				image: imgUrl('circle-blueprint.svg'),
 				imageAlign: 'top',
 				title: 'Modern',
+			},
+			{
+				content: 'Utilizes new ES6 Promise architecture for asynchronous operation chaining/grouping',
+				image: imgUrl('circle-handshake.svg'),
+				imageAlign: 'top',
+				title: 'Chains Async Ops',
 			},
 		]}
 	</Block>
@@ -311,13 +311,13 @@ const TryOutLiveDemo = props => (
 		{[
 			{
 				title: 'Try It Out: Library Test Drive',
-				content: '<p>You can try SpRestLib on your site right now!</p>'
-					+ '<p>Go to any page on your SharePoint site and press <code>F12</code> to open the developer window '
-					+ 'in your browser, then run the following snippet to load the SpRestLib bundle script dynamically:</p>',
+				content: '<p>You should try using SpRestLib!</p>'
+					+ "<p>Just open your browser's Developer Tools window anywhere on your SharePoint site, "
+					+ "then run the following code snippet which will load the SpRestLib bundle script dynamically:</p>",
 			},
 			{
 				title: '',
-				content: '<pre><code>'+tryCodeBlock+'</code></pre><img src="/SpRestLib/img/tryitout.png" />',
+				content: '<pre><code>'+tryCodeBlock+'</code></pre><img src="/SpRestLib/img/tryitout.png" class="imgShadow" />',
 			},
 		]}
 	</Block>

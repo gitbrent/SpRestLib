@@ -39,3 +39,5 @@ p code, li code {
 	width: 32px;
 	height: 32px;
 }
+
+.imgShadow { box-shadow: 0px 1px 3px 0px #666; }
