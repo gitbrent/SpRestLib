@@ -9,20 +9,19 @@ using the JavaScript SharePoint App Model.
 
 ### Library Features:
 * Simple  - Most REST/Web Service interaction can be done in a few lines of code
-* Modern  - Lightweight, pure JavaScript solution
+* Modern  - Lightweight, pure JavaScript solution with no dependencies
 * Elegant - Utilizes the new [ES6 Promise](http://www.datchley.name/es6-promises/) architecture for asynchronous operations
 * Robust  - Built for [SharePoint 2013 API](https://msdn.microsoft.com/en-us/library/office/jj860569.aspx) and [OData v3](http://www.odata.org/documentation/odata-version-3-0/)
 
 ### SharePoint Interfaces:
 * List Methods - Create, read, update, and delete (CRUD) List/Library items with a single line of code
-* REST Methods - Run ad-hoc REST calls to any [SharePoint REST API](https://msdn.microsoft.com/en-us/library/office/dn268594.aspx) endpoint
-* User Methods - Get User information (ID, Email, LoginName, Groups, etc.)
+* User Methods - Get User information: Basic (ID, Email, LoginName, etc.) and UserProfile (Manager, 100+ Properties)
 * Site Methods - Get Site information (Lists, Groups, Users, Roles, Subsites and Permissions)
+* REST Methods - Call any available [SharePoint REST API](https://msdn.microsoft.com/en-us/library/office/dn268594.aspx) endpoint
 * Form Population - Populate form elements using data-bind declarative binding system like Knockout or AngluarJS
 
 ### Supported Environments:
 * SharePoint 2013 (SP2013), SharePoint 2016 (SP2016), SharePoint Online (O365)
-* *Enterprise license not required*
 
 
 **************************************************************************************************
@@ -178,9 +177,9 @@ There's more than just the README!
 # Library Test Drive
 
 ## SpRestLib via Console
-Want to try SpRestLib on your site?  
-Just open an F12 developer window on any page under your SharePoint site and run the following snippet
-to load the SpRestLib bundle script dynamically:
+You should test drive SpRestLib!  It's super easy:  
+Just open your browser's Developer Tools window anywhere on your SharePoint site,
+then run the following code snippet which will load the SpRestLib bundle script dynamically:
 
 ```javascript
 // 1: Load SpRestLib via CDN
@@ -1362,7 +1361,7 @@ Issue/Discussion: [Issue #9](https://github.com/gitbrent/SpRestLib/issues/9)
 # Issues / Suggestions
 
 ## Authentication
-See [SharePoint Authentication Notes](#sharepoint-authentication-notes) for issues with authentication.
+See [SharePoint Authentication Notes](https://gitbrent.github.io/SpRestLib/docs/sp-auth-notes.html) for issues with authentication.
 
 ## Bugs
 Please file issues or suggestions on the [issues page on GitHub](https://github.com/gitbrent/SpRestLib/issues/new), or even better, [submit a pull request](https://github.com/gitbrent/SpRestLib/pulls). Feedback is always welcome!
