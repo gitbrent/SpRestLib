@@ -20,17 +20,17 @@ is built, the generation and handling of tokens will vary.
 ## Authentication Requirements
 
 ### GET Operations
-GET operations are methods that read data from SharePoint (REST queries, get list items, site/user info).
+* Operations that read data from SharePoint (REST queries, get list items, site/user info).
 
 GET Authentication Requirements:
 * Cookie (containing both `rtFA` and `FedAuth` values)
 
 ### POST Operations
-POST operations are methods that write data to SharePoint (Create, Update, Delete, Recycle).
+* Operations that write data to SharePoint (Create, Update, Delete, Recycle).
 
 POST Authentication Requirements:
 * Cookie (containing both `rtFA` and `FedAuth` values)
-* Security Token (an `X-RequestDigest` request header containing the FormDigestValue value)
+* Security Token (an `X-RequestDigest` authorization header containing the FormDigestValue value)
 
 ## SharePoint Authentication Keys
 If your app is running in a WebPart, then both the cookie values and the FormDigestValue exist in the page already,
@@ -45,6 +45,8 @@ when a RequestDigest value is required.  Use the code provided in the demo to fe
 
 Most applications that run in a webpage should have the necessary cookie values, so try fetching and passing
 the FormDigestValue for CRUD/POST operations with `requestDigest` as shown below if you encounter authentication errors.
+
+See Microsoft's documentation for more: [Add-ins that use OAuth must pass access tokens in requests](https://docs.microsoft.com/en-us/sharepoint/dev/sp-add-ins/complete-basic-operations-using-sharepoint-rest-endpoints#add-ins-that-use-oauth-must-pass-access-tokens-in-requests)
 
 ### Example: Retrieve a FormDigestValue value
 ```javascript
