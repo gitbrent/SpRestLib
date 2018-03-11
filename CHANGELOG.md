@@ -1,5 +1,16 @@
 # Change Log
 
+## [v1.7.0](https://github.com/gitbrent/sprestlib/tree/v1.7.0) (2018-04-??)
+[Full Changelog](https://github.com/gitbrent/sprestlib/compare/v1.6.0...v1.7.0)
+
+**Implemented Enhancements:**
+- Renamed `getItems()` list method to `items()`
+
+**Fixed Bugs:**
+
+
+
+
 ## [v1.6.0](https://github.com/gitbrent/sprestlib/tree/v1.6.0) (2018-03-05)
 [Full Changelog](https://github.com/gitbrent/sprestlib/compare/v1.5.0...v1.6.0)
 

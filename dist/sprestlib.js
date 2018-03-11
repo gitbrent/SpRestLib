@@ -32,8 +32,8 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 
 (function(){
 	// APP VERSION/BUILD
-	var APP_VER = "1.6.0";
-	var APP_BLD = "20180305";
+	var APP_VER = "1.7.0-beta";
+	var APP_BLD = "20180309";
 	var DEBUG = false; // (verbose mode/lots of logging)
 	// ENUMERATIONS
 	// REF: [`SP.BaseType`](https://msdn.microsoft.com/en-us/library/office/jj246925.aspx)
@@ -368,7 +368,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 		* @see: Field Ref.: https://msdn.microsoft.com/en-us/library/office/dn600182.aspx
 		* @see: FieldTypes: https://msdn.microsoft.com/en-us/library/office/microsoft.sharepoint.client.fieldtype.aspx
 		*/
-		_newList.getItems = function(inObj) {
+		_newList.items = function(inObj) {
 			var listGUID = '';
 			return new Promise(function(resolve, reject) {
 				// STEP 1: Create/Init Params
@@ -719,6 +719,9 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 				});
 			});
 		}
+
+		// DEPRECATED: Remove in 2.0.0
+		_newList.getItems = _newList.items;
 
 		// CRUD ---------------------------------------------------------------------
 

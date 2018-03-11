@@ -2,10 +2,10 @@
  * NAME: qunit-test.js
  * DESC: tests for qunit-test.html (coded to my O365 Dev Site - YMMV)
  * AUTH: https://github.com/gitbrent/
- * DATE: Mar 02, 2018
+ * DATE: Mar 09, 2018
  *
  * HOWTO: Generate text tables for README etc.:
- * sprLib.list('Employees').getItems(['Id', 'Name', 'Badge_x0020_Number']).then(function(arrData){ console.log(getAsciiTableStr(arrData)) });
+ * sprLib.list('Employees').items(['Id', 'Name', 'Badge_x0020_Number']).then(function(arrData){ console.log(getAsciiTableStr(arrData)) });
  *
  // REALITY-CHECK:
  // QUnit.test("QUnit Base Test", function(assert){ assert.ok( true === true, "Passed!" ); });
@@ -263,7 +263,7 @@ QUnit.module( "LIST > ITEM CRUD Methods" );
 		var done = assert.async();
 
 		// PREP:
-		sprLib.list('Employees').getItems({ listCols:'Id', queryOrderby:'Modified', queryLimit:1, metadata:true })
+		sprLib.list('Employees').items({ listCols:'Id', queryOrderby:'Modified', queryLimit:1, metadata:true })
 		.then(function(data){
 			// TEST:
 			sprLib.list('Employees')
@@ -285,7 +285,7 @@ QUnit.module( "LIST > ITEM CRUD Methods" );
 	QUnit.test("sprLib.list().update() 2: with etag [null]    ", function(assert){
 		var done = assert.async();
 		// PREP:
-		sprLib.list('Employees').getItems({ listCols:'Id', queryOrderby:'Modified', queryLimit:1 })
+		sprLib.list('Employees').items({ listCols:'Id', queryOrderby:'Modified', queryLimit:1 })
 		.then(function(data){
 			// TEST:
 			sprLib.list('Employees')
@@ -308,7 +308,7 @@ QUnit.module( "LIST > ITEM CRUD Methods" );
 		var done = assert.async();
 
 		// PREP:
-		sprLib.list('Employees').getItems({ listCols:'Id', queryOrderby:'Modified', queryLimit:1 })
+		sprLib.list('Employees').items({ listCols:'Id', queryOrderby:'Modified', queryLimit:1 })
 		.then(function(data){
 			// TEST:
 			sprLib.list('Employees')
@@ -332,7 +332,7 @@ QUnit.module( "LIST > ITEM CRUD Methods" );
 		var done = assert.async();
 		// PREP:
 		var gUpdateItem = {};
-		sprLib.list('Employees').getItems({ listCols:'Id', queryOrderby:'Modified', queryLimit:1, metadata:true })
+		sprLib.list('Employees').items({ listCols:'Id', queryOrderby:'Modified', queryLimit:1, metadata:true })
 		.then(function(data){ gUpdateItem = data[0]; })
 		.then(function(){
 			// TEST:
@@ -351,7 +351,7 @@ QUnit.module( "LIST > ITEM CRUD Methods" );
 		var done = assert.async();
 		// PREP:
 		var gUpdateItem = {};
-		sprLib.list('Employees').getItems({ listCols:'Id', queryOrderby:'Modified', queryLimit:1 })
+		sprLib.list('Employees').items({ listCols:'Id', queryOrderby:'Modified', queryLimit:1 })
 		.then(function(data){ gUpdateItem = data[0]; })
 		.then(function(){
 			// TEST:
@@ -370,7 +370,7 @@ QUnit.module( "LIST > ITEM CRUD Methods" );
 		var done = assert.async();
 		// PREP:
 		var numId = "'-1'";
-		sprLib.list('Employees').getItems({ listCols:'Id', queryOrderby:'Modified', queryLimit:1 })
+		sprLib.list('Employees').items({ listCols:'Id', queryOrderby:'Modified', queryLimit:1 })
 		.then(function(data){
 			numId = data[0].Id;
 			assert.ok( (true), "Found Id: "+numId );
@@ -394,7 +394,7 @@ QUnit.module( "LIST > ITEM CRUD Methods" );
 		var done = assert.async();
 		// PREP:
 		var numId = "'-1'";
-		sprLib.list('Employees').getItems({ listCols:'Id', queryOrderby:'Modified', queryLimit:1 })
+		sprLib.list('Employees').items({ listCols:'Id', queryOrderby:'Modified', queryLimit:1 })
 		.then(function(data){
 			numId = data[0].Id;
 			assert.ok( (true), "Found Id: "+numId );
@@ -463,7 +463,7 @@ QUnit.module( "LIST > ITEM CRUD Methods" );
 	QUnit.test("sprLib.list().update(): w/o `__metadata`", function(assert){
 		var done = assert.async();
 
-		sprLib.list('Employees').getItems({ listCols:'Id', queryOrderby:'Modified', queryLimit:1 })
+		sprLib.list('Employees').items({ listCols:'Id', queryOrderby:'Modified', queryLimit:1 })
 		.then(function(data){
 			sprLib.list('Employees')
 			.update({
@@ -485,7 +485,7 @@ QUnit.module( "LIST > ITEM CRUD Methods" );
 	QUnit.test("sprLib.list().create() JUNK TESTS", function(assert){
 		var done = assert.async();
 
-		sprLib.list('Employees').getItems({ listCols:'Id', queryOrderby:'Modified', queryLimit:1 })
+		sprLib.list('Employees').items({ listCols:'Id', queryOrderby:'Modified', queryLimit:1 })
 		.then(function(data){
 			[null, undefined, {}, [], ['ID'], {etag:null}, {type:null}, {ID:null}].forEach(function(json,idx){
 				var done = assert.async();
@@ -507,7 +507,7 @@ QUnit.module( "LIST > ITEM CRUD Methods" );
 	QUnit.test("sprLib.list().update() JUNK TESTS", function(assert){
 		var done = assert.async();
 
-		sprLib.list('Employees').getItems({ listCols:'Id', queryOrderby:'Modified', queryLimit:1 })
+		sprLib.list('Employees').items({ listCols:'Id', queryOrderby:'Modified', queryLimit:1 })
 		.then(function(data){
 			[null, undefined, {}, [], ['ID'], {etag:null}, {type:null}, {ID:0}].forEach(function(json,idx){
 				var done = assert.async();
@@ -532,11 +532,11 @@ QUnit.module( "LIST > ITEM CRUD Methods" );
 QUnit.module( "LIST > ITEM GET Methods" );
 // ================================================================================================
 {
-	QUnit.test("sprLib.getItems() 01: no opts", function(assert){
+	QUnit.test("sprLib.items() 01: no opts", function(assert){
 		var done = assert.async();
 		// TEST:
 		sprLib.list('Employees')
-		.getItems()
+		.items()
 		.then(function(arrayResults){
 			assert.ok( arrayResults.length > 0        , "arrayResults is an Array and length > 0: "+ arrayResults.length );
 			assert.ok( (!arrayResults[0].__metadata)  , "arrayResults[0].__metadata does not exist!" );
@@ -549,11 +549,11 @@ QUnit.module( "LIST > ITEM GET Methods" );
 		});
 	});
 
-	QUnit.test("sprLib.getItems() 02: simple col name STRING", function(assert){
+	QUnit.test("sprLib.items() 02: simple col name STRING", function(assert){
 		var done = assert.async();
 		// TEST:
 		sprLib.list('Employees')
-		.getItems('Name')
+		.items('Name')
 		.then(function(arrayResults){
 			assert.ok( arrayResults.length > 0                 , "arrayResults is an Array and length > 0: "+ arrayResults.length );
 			assert.ok( Object.keys(arrayResults[0]).length == 1, "arrayResults[0] has length == 1: "+ Object.keys(arrayResults[0]).length );
@@ -566,11 +566,11 @@ QUnit.module( "LIST > ITEM GET Methods" );
 		});
 	});
 
-	QUnit.test("sprLib.getItems() 03: simple col name ARRAY (w Person object)", function(assert){
+	QUnit.test("sprLib.items() 03: simple col name ARRAY (w Person object)", function(assert){
 		var done = assert.async();
 		// TEST:
 		sprLib.list('Employees')
-		.getItems(
+		.items(
 			['Id', 'Name', 'Manager/Title']
 		)
 		.then(function(arrayResults){
@@ -585,11 +585,11 @@ QUnit.module( "LIST > ITEM GET Methods" );
 		});
 	});
 
-	QUnit.test("sprLib.getItems() 04: `listCols` with simple string", function(assert){
+	QUnit.test("sprLib.items() 04: `listCols` with simple string", function(assert){
 		var done = assert.async();
 		// TEST:
 		sprLib.list('Employees')
-		.getItems({ listCols:'Manager/Title' })
+		.items({ listCols:'Manager/Title' })
 		.then(function(arrayResults){
 			assert.ok( Object.keys(arrayResults[0]).length == 1, "arrayResults[0] has length == 1: "+ Object.keys(arrayResults[0]).length );
 			assert.ok( (arrayResults[0].Manager.Title)         , "arrayResults[0].Manager.Title exists: "+ JSON.stringify(arrayResults[0].Manager.Title) );
@@ -602,11 +602,11 @@ QUnit.module( "LIST > ITEM GET Methods" );
 		});
 	});
 
-	QUnit.test("sprLib.getItems() 05: `listCols` with simple array of col names (Manager/Title)", function(assert){
+	QUnit.test("sprLib.items() 05: `listCols` with simple array of col names (Manager/Title)", function(assert){
 		var done = assert.async();
 		// TEST:
 		sprLib.list('Employees')
-		.getItems({
+		.items({
 			listCols:['Id', 'Name', 'Manager/Title']
 		})
 		.then(function(arrayResults){
@@ -621,11 +621,11 @@ QUnit.module( "LIST > ITEM GET Methods" );
 		});
 	});
 
-	QUnit.test("sprLib.getItems() 06: `listCols` with simple array of col names (Manager/Id and Manager/Title)", function(assert){
+	QUnit.test("sprLib.items() 06: `listCols` with simple array of col names (Manager/Id and Manager/Title)", function(assert){
 		var done = assert.async();
 		// TEST:
 		sprLib.list({ name:'Employees' })
-		.getItems({
+		.items({
 			listCols: ['Id', 'Name', 'Manager/Id', 'Manager/Title'],
 			metadata: true
 		})
@@ -643,11 +643,11 @@ QUnit.module( "LIST > ITEM GET Methods" );
 		});
 	});
 
-	QUnit.test("sprLib.getItems() 07: `listCols` with named columns", function(assert){
+	QUnit.test("sprLib.items() 07: `listCols` with named columns", function(assert){
 		var done = assert.async();
 		// TEST:
 		sprLib.list('Employees')
-		.getItems({
+		.items({
 			listCols: {
 				name:     { dataName:'Name'               },
 				badgeNum: { dataName:'Badge_x0020_Number' },
@@ -671,11 +671,11 @@ QUnit.module( "LIST > ITEM GET Methods" );
 		});
 	});
 
-	QUnit.test("sprLib.getItems() 08: `listCols` with named columns `dataFunc` tests", function(assert){
+	QUnit.test("sprLib.items() 08: `listCols` with named columns `dataFunc` tests", function(assert){
 		var done = assert.async();
 		// TEST:
 		sprLib.list('Employees')
-		.getItems({
+		.items({
 			listCols: {
 				name:     { dataName:'Name'               },
 				badgeNum: { dataName:'Badge_x0020_Number' },
@@ -699,11 +699,11 @@ QUnit.module( "LIST > ITEM GET Methods" );
 		});
 	});
 
-	QUnit.test("sprLib.getItems() 09: `listCols` with named columns: Multi-Lookup test `Id`", function(assert){
+	QUnit.test("sprLib.items() 09: `listCols` with named columns: Multi-Lookup test `Id`", function(assert){
 		var done = assert.async();
 		// TEST:
 		sprLib.list('Employees')
-		.getItems({
+		.items({
 			listCols: {
 				empName:  { dataName:'Name'          },
 				mgrTitle: { dataName:'Manager/Title' },
@@ -724,11 +724,11 @@ QUnit.module( "LIST > ITEM GET Methods" );
 		});
 	});
 
-	QUnit.test("sprLib.getItems() 10: `listCols` with column array: Multi-Lookup test `Id`", function(assert){
+	QUnit.test("sprLib.items() 10: `listCols` with column array: Multi-Lookup test `Id`", function(assert){
 		var done = assert.async();
 		// TEST:
 		sprLib.list('Employees')
-		.getItems({
+		.items({
 			listCols: ['Name', 'Manager/Title', 'Departments_x0020_Supported/Id'],
 			queryLimit: 1,
 			queryFilter: "Departments_x0020_Supported ne null"
@@ -749,18 +749,18 @@ QUnit.module( "LIST > ITEM GET Methods" );
 	});
 
 	// NOTE: Promise.all()
-	QUnit.test("sprLib.getItems() 11: `listCols` with column array: Multi-Lookup two fields (`Id`, `Title`)", function(assert){
+	QUnit.test("sprLib.items() 11: `listCols` with column array: Multi-Lookup two fields (`Id`, `Title`)", function(assert){
 		var done = assert.async();
 		// TEST:
 		Promise.all([
 			sprLib.list('Employees')
-			.getItems({
+			.items({
 				listCols: ['Name', 'Departments_x0020_Supported/Id', 'Departments_x0020_Supported/Title'],
 				queryLimit: 1,
 				queryFilter: "Departments_x0020_Supported ne null"
 			})
 			,sprLib.list('Employees')
-			.getItems({
+			.items({
 				listCols: ['Name', 'Departments_x0020_Supported/Id', 'Departments_x0020_Supported/Title'],
 				queryLimit: 1,
 				queryFilter: "Departments_x0020_Supported eq null"
@@ -797,16 +797,16 @@ QUnit.module( "LIST > ITEM GET Methods" );
 	});
 
 	// NOTE: Promise.all()
-	QUnit.test("sprLib.getItems() 12: `listCols` with column array: Multi-Person two fields (`ID`, `Title`)", function(assert){
+	QUnit.test("sprLib.items() 12: `listCols` with column array: Multi-Person two fields (`ID`, `Title`)", function(assert){
 		var done = assert.async();
 		// TEST:
 		Promise.all([
-			sprLib.list('Employees').getItems({
+			sprLib.list('Employees').items({
 				listCols: ['Name', 'Mentored_x0020_Team_x0020_Member/ID', 'Mentored_x0020_Team_x0020_Member/Title'],
 				queryLimit: 1,
 				queryFilter: "Mentored_x0020_Team_x0020_Member ne null"
 			}),
-			sprLib.list('Employees').getItems({
+			sprLib.list('Employees').items({
 				listCols: ['Name', 'Mentored_x0020_Team_x0020_Member/ID', 'Mentored_x0020_Team_x0020_Member/Title'],
 				queryLimit: 1,
 				queryFilter: "Mentored_x0020_Team_x0020_Member eq null"
@@ -833,17 +833,17 @@ QUnit.module( "LIST > ITEM GET Methods" );
 		});
 	});
 
-	QUnit.test("sprLib.getItems() 13: `queryFilter` using: `Id` + `eq`", function(assert){
+	QUnit.test("sprLib.items() 13: `queryFilter` using: `Id` + `eq`", function(assert){
 		var done = assert.async();
 		// TEST:
 		Promise.resolve()
 		.then(function(){
-			return sprLib.list('Employees').getItems({ listCols:'Id', queryLimit:1 });
+			return sprLib.list('Employees').items({ listCols:'Id', queryLimit:1 });
 		})
 		.then(function(arrayResults){
 			var intId = arrayResults[0].Id;
 			sprLib.list('Employees')
-			.getItems({
+			.items({
 				listCols: ['Id','Name'],
 				queryFilter: 'Id eq '+intId
 			})
@@ -861,17 +861,17 @@ QUnit.module( "LIST > ITEM GET Methods" );
 		});
 	});
 
-	QUnit.test("sprLib.getItems() 14: `queryFilter` using: `Name` + `eq` with single-quote", function(assert){
+	QUnit.test("sprLib.items() 14: `queryFilter` using: `Name` + `eq` with single-quote", function(assert){
 		var done = assert.async();
 		// TEST:
 		Promise.resolve()
 		.then(function(){
-			return sprLib.list('Employees').getItems({ listCols:'Name', queryLimit:1 });
+			return sprLib.list('Employees').items({ listCols:'Name', queryLimit:1 });
 		})
 		.then(function(arrayResults){
 			var strName = arrayResults[0].Name;
 			sprLib.list('Employees')
-			.getItems({
+			.items({
 				listCols: 'Name',
 				queryFilter: "Name eq '"+strName+"'",
 				queryLimit: 1
@@ -889,17 +889,17 @@ QUnit.module( "LIST > ITEM GET Methods" );
 		});
 	});
 
-	QUnit.test("sprLib.getItems() 15: `queryFilter` using: `Name` + `eq` with double-quote", function(assert){
+	QUnit.test("sprLib.items() 15: `queryFilter` using: `Name` + `eq` with double-quote", function(assert){
 		var done = assert.async();
 		// TEST:
 		Promise.resolve()
 		.then(function(){
-			return sprLib.list('Employees').getItems({ listCols:'Name', queryLimit:1 });
+			return sprLib.list('Employees').items({ listCols:'Name', queryLimit:1 });
 		})
 		.then(function(arrayResults){
 			var strName = arrayResults[0].Name;
 			sprLib.list('Employees')
-			.getItems({
+			.items({
 				listCols: 'Name',
 				queryFilter: 'Name eq "'+strName+'"',
 				queryLimit: 1
@@ -917,11 +917,11 @@ QUnit.module( "LIST > ITEM GET Methods" );
 		});
 	});
 
-	QUnit.test("sprLib.getItems() 16: `queryLimit` test", function(assert){
+	QUnit.test("sprLib.items() 16: `queryLimit` test", function(assert){
 		var done = assert.async();
 		// TEST:
 		sprLib.list('Employees')
-		.getItems({ listCols:'Name', queryLimit:3, metadata:true })
+		.items({ listCols:'Name', queryLimit:3, metadata:true })
 		.then(function(arrayResults){
 			assert.ok( arrayResults.length == 3       , "arrayResults length == 3: "+ arrayResults.length );
 			assert.ok( (arrayResults[0].__metadata.id), "arrayResults[0].__metadata.id exists: "+ JSON.stringify(arrayResults[0].__metadata.id) );
@@ -934,11 +934,11 @@ QUnit.module( "LIST > ITEM GET Methods" );
 		});
 	});
 
-	QUnit.test("sprLib.getItems() 17: `queryOrderby` (asc) test", function(assert){
+	QUnit.test("sprLib.items() 17: `queryOrderby` (asc) test", function(assert){
 		var done = assert.async();
 		// TEST:
 		sprLib.list('Employees')
-		.getItems({
+		.items({
 			listCols: 'Id',
 			queryLimit: 3,
 			queryOrderby: 'Id'
@@ -954,11 +954,11 @@ QUnit.module( "LIST > ITEM GET Methods" );
 		});
 	});
 
-	QUnit.test("sprLib.getItems() 18: `queryOrderby` (desc) test", function(assert){
+	QUnit.test("sprLib.items() 18: `queryOrderby` (desc) test", function(assert){
 		var done = assert.async();
 		// TEST:
 		sprLib.list('Employees')
-		.getItems({
+		.items({
 			listCols: 'Id',
 			queryLimit: 3,
 			queryOrderby: 'Id desc'
@@ -974,10 +974,10 @@ QUnit.module( "LIST > ITEM GET Methods" );
 		});
 	});
 
-	QUnit.test("sprLib.getItems() 19: Promise.all/Multi-Test: APPEND TEXT", function(assert){
+	QUnit.test("sprLib.items() 19: Promise.all/Multi-Test: APPEND TEXT", function(assert){
 		var done = assert.async();
 
-		sprLib.list('Employees').getItems({ listCols:'ID', queryOrderby:'Modified', queryLimit:1 })
+		sprLib.list('Employees').items({ listCols:'ID', queryOrderby:'Modified', queryLimit:1 })
 		.then(function(arrResults){
 			return sprLib.list('Employees')
 			.update({
@@ -1002,19 +1002,19 @@ QUnit.module( "LIST > ITEM GET Methods" );
 
 			// TEST:
 			Promise.all([
-				sprLib.list('Employees').getItems({
+				sprLib.list('Employees').items({
 					listCols: ['ID', 'Versioned_x0020_Comments', 'Mentored_x0020_Team_x0020_Member/Title'],
 					queryLimit: 10,
 					queryOrderby: "Modified desc"
 				}),
-				sprLib.list('Employees').getItems({
+				sprLib.list('Employees').items({
 					listCols: {
 						appendText: { dataName:'Versioned_x0020_Comments', getVersions:true }
 					},
 					queryLimit: 10,
 					queryOrderby: "Modified desc"
 				}),
-				sprLib.list('Employees').getItems({
+				sprLib.list('Employees').items({
 					listCols: {
 						Versioned_x0020_Comments: { dataName:'Versioned_x0020_Comments', getVersions:true }
 					},
@@ -1054,11 +1054,11 @@ QUnit.module( "LIST > ITEM GET Methods" );
 		});
 	});
 
-	QUnit.test("sprLib.getItems() 20: `listCols` with duplicate column", function(assert){
+	QUnit.test("sprLib.items() 20: `listCols` with duplicate column", function(assert){
 		var done = assert.async();
 		// TEST: This caused empty results until fixed in 1.5.0!
 		sprLib.list('Departments')
-		.getItems({ listCols:['Id','Id'] })
+		.items({ listCols:['Id','Id'] })
 		.then(function(arrayResults){
 			assert.ok( Object.keys(arrayResults[0]).length == 1, "arrayResults[0] has length == 1: "+ Object.keys(arrayResults[0]).length );
 			assert.ok( (arrayResults[0].Id)           , "arrayResults[0].Id exists: "+ JSON.stringify(arrayResults[0].Id) );
@@ -1071,19 +1071,18 @@ QUnit.module( "LIST > ITEM GET Methods" );
 		});
 	});
 
-
-	QUnit.test("sprLib.getItems() 50: `queryNext` with return values", function(assert){
+	QUnit.test("sprLib.items() 50: `queryNext` with return values", function(assert){
 		var done = assert.async();
 		var intLastID = 0;
 
-		sprLib.list('Departments').getItems({ listCols:['Id','Title'], queryOrderby:'ID', queryLimit:5 })
+		sprLib.list('Departments').items({ listCols:['Id','Title'], queryOrderby:'ID', queryLimit:5 })
 		.then(arrayResults => {
 			assert.ok( Object.keys(arrayResults[0]).length == 3, "Object.keys(arrayResults[0]) length == 3: "+ Object.keys(arrayResults[0]).length );
 			assert.ok( (arrayResults[0].__next ), "arrayResults[0].__next exists: "+ JSON.stringify(arrayResults[0].__next) );
 			assert.ok( getAsciiTableStr(arrayResults) , `RESULTS:\n${getAsciiTableStr(arrayResults)}`);
 			//
 			intLastID = arrayResults[arrayResults.length-1].Id;
-			return sprLib.list('Departments').getItems({ queryNext:arrayResults[0].__next, listCols:['Id','Title'], queryOrderby:'ID', queryLimit:5 })
+			return sprLib.list('Departments').items({ queryNext:arrayResults[0].__next, listCols:['Id','Title'], queryOrderby:'ID', queryLimit:5 })
 		})
 		.then(arrayResults => {
 			assert.ok( intLastID+1 == arrayResults[0].Id, "intLastID+1 == arrayResults[0].Id: "+ (intLastID+1) +" ?=? "+ arrayResults[0].Id );
@@ -1092,7 +1091,7 @@ QUnit.module( "LIST > ITEM GET Methods" );
 			assert.ok( getAsciiTableStr(arrayResults) , `RESULTS:\n${getAsciiTableStr(arrayResults)}`);
 			//
 			intLastID = arrayResults[arrayResults.length-1].Id;
-			return sprLib.list('Departments').getItems({ queryNext:arrayResults[0].__next, listCols:['Id','Title'], queryOrderby:'ID', queryLimit:5 })
+			return sprLib.list('Departments').items({ queryNext:arrayResults[0].__next, listCols:['Id','Title'], queryOrderby:'ID', queryLimit:5 })
 		})
 		.then(arrayResults => {
 			assert.ok( intLastID+1 == arrayResults[0].Id, "intLastID+1 == arrayResults[0].Id: "+ (intLastID+1) +" ?=? "+ arrayResults[0].Id );
@@ -1101,7 +1100,7 @@ QUnit.module( "LIST > ITEM GET Methods" );
 			assert.ok( getAsciiTableStr(arrayResults) , `RESULTS:\n${getAsciiTableStr(arrayResults)}`);
 			//
 			intLastID = arrayResults[arrayResults.length-1].Id;
-			return sprLib.list('Departments').getItems({ queryNext:arrayResults[0].__next, listCols:['Id','Title'], queryOrderby:'ID', queryLimit:5 })
+			return sprLib.list('Departments').items({ queryNext:arrayResults[0].__next, listCols:['Id','Title'], queryOrderby:'ID', queryLimit:5 })
 		})
 		.then(arrayResults => {
 			assert.ok( intLastID+1 == arrayResults[0].Id, "intLastID+1 == arrayResults[0].Id: "+ (intLastID+1) +" ?=? "+ arrayResults[0].Id );
@@ -1115,20 +1114,20 @@ QUnit.module( "LIST > ITEM GET Methods" );
 		});
 	});
 
-	QUnit.test("sprLib.getItems() 51: `queryNext` using options", function(assert){
+	QUnit.test("sprLib.items() 51: `queryNext` using options", function(assert){
 		var done = assert.async();
 		var intMax = 5;
 
 		// TEST:
 		Promise.resolve()
 		.then(function(){
-			return sprLib.list('Departments').getItems({ listCols:'Id', queryOrderby:'ID' });
+			return sprLib.list('Departments').items({ listCols:'Id', queryOrderby:'ID' });
 		})
 		.then(function(arrayResults){
 			var numPrevId = arrayResults[0].Id;
 
 			sprLib.list('Departments')
-			.getItems({
+			.items({
 				listCols    : 'Id',
 				queryOrderby: 'Id',
 				queryNext   : { prevId:numPrevId, maxItems:intMax }
@@ -1149,12 +1148,30 @@ QUnit.module( "LIST > ITEM GET Methods" );
 		});
 	});
 
+	// DEPRECATED: `getItems`
+	QUnit.test("sprLib.items() 90: DEPRECATED TEST: `getItems`", function(assert){
+		var done = assert.async();
+		// TEST: This caused empty results until fixed in 1.5.0!
+		sprLib.list('Departments')
+		.getItems({ listCols:['Id'] })
+		.then(function(arrayResults){
+			assert.ok( Object.keys(arrayResults[0]).length == 1, "arrayResults[0] has length == 1: "+ Object.keys(arrayResults[0]).length );
+			assert.ok( (arrayResults[0].Id)           , "arrayResults[0].Id exists: "+ JSON.stringify(arrayResults[0].Id) );
+			assert.ok( getAsciiTableStr(arrayResults) , `RESULTS:\n${getAsciiTableStr(arrayResults)}`);
+			done();
+		})
+		.catch(function(errorMessage){
+			assert.ok( (false), errorMessage );
+			done();
+		});
+	});
+
 	// JUNK TESTS:
-	QUnit.test("sprLib.getItems() 99: Junk/Empty .list() param test", function(assert){
+	QUnit.test("sprLib.items() 99: Junk/Empty .list() param test", function(assert){
 		['', [], [''], ['',''], {}].forEach(function(data,idx){
 			var done = assert.async();
 			// TEST:
-			sprLib.list('Employees').getItems({listCols:data, queryLimit:10})
+			sprLib.list('Employees').items({listCols:data, queryLimit:10})
 			.then(function(arrayResults){
 				assert.ok( arrayResults.length > 0        , "arrayResults is an Array and length > 0: "+ arrayResults.length );
 				assert.ok( getAsciiTableStr(arrayResults) , `RESULTS:\n${getAsciiTableStr(arrayResults)}`);
@@ -1520,7 +1537,7 @@ QUnit.module( "requestDigest Tests" );
 		// B: Test
 		Promise.all([
 			sprLib.rest({ url:'_api/contextinfo', type:'POST' }),
-			sprLib.list('Employees').getItems({ listCols:'Id', queryLimit:'1' })
+			sprLib.list('Employees').items({ listCols:'Id', queryLimit:'1' })
 		])
 		.then(function(arrAllArrays){
 			_digest = arrAllArrays[0][0].GetContextWebInformation.FormDigestValue;

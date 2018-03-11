@@ -31,13 +31,13 @@ using the JavaScript SharePoint App Model.
 * `sprLib.rest(options)` - Returns the results of a given REST call to any [SharePoint REST API](https://msdn.microsoft.com/en-us/library/office/dn268594.aspx)
 
 ## List/Library
-* `sprLib.list(listName).getItems(options)` - Returns an array of item objects using a variety of possible options
-* `sprLib.list(listName).create(item)` - Create a new list item using JSON data
-* `sprLib.list(listName).update(item)` - Update an existing item using JSON data
-* `sprLib.list(listName).delete(id)`   - Delete an existing item by ID (permanently delete)
-* `sprLib.list(listName).recycle(id)`  - Recycle an existing item by ID (move to Recycle Bin)
-* `sprLib.list(listName).cols()` - Returns an array of column objects with useful info (name, datatype, etc.)
-* `sprLib.list(listName).info()` - Returns information about the List/Library (GUID, numberOfItems, etc.)
+* `sprLib.list(listName).items(options)` - Returns an array of item objects using a variety of possible options
+* `sprLib.list(listName).create(item)`   - Create a new list item using JSON data
+* `sprLib.list(listName).update(item)`   - Update an existing item using JSON data
+* `sprLib.list(listName).delete(id)`     - Delete an existing item by ID (permanently delete)
+* `sprLib.list(listName).recycle(id)`    - Recycle an existing item by ID (move to Recycle Bin)
+* `sprLib.list(listName).cols()`         - Returns an array of column objects with useful info (name, datatype, etc.)
+* `sprLib.list(listName).info()`         - Returns information about the List/Library (GUID, numberOfItems, etc.)
 
 ## Site Collection/Subsite
 * `sprLib.site(siteUrl).groups()`   - Returns an array of the site's Groups and Members
@@ -217,7 +217,7 @@ See the [Async Operations via Promises](#async-operations-via-promises) section 
 // EX: Get the current user's ID, then get their Tasks
 sprLib.user().info()
 .then(function(objUser){
-    return sprLib.list('Tasks').getItems({ queryFilter:'Owner/Id eq ' + objUser.Id });
+    return sprLib.list('Tasks').items({ queryFilter:'Owner/Id eq ' + objUser.Id });
 })
 .then(function(arrItems){
     console.log("Current user's Tasks = " + arrItems.length);
@@ -232,7 +232,7 @@ as async/await is built on JavaScript Promises.
 const infoGetter = async() => {
     // EX: Get the current user's ID, then get their Tasks
     const objUser = await sprLib.user().info();
-    const arrItems = await sprLib.list('Tasks').getItems({ queryFilter:'Owner/Id eq ' + objUser.Id });
+    const arrItems = await sprLib.list('Tasks').items({ queryFilter:'Owner/Id eq ' + objUser.Id });
     console.log("Current user's Tasks = " + arrItems.length);
 }
 ```
@@ -378,7 +378,7 @@ sprLib.rest({ url:'_api/contextinfo', type:'POST' })
 
 ### Get Items
 Syntax:  
-`sprLib.list(listName|listGUID).getItems(options)`
+`sprLib.list(listName|listGUID).items(options)`
 
 Returns:
 * Array of objects containing name/value pairs
@@ -417,7 +417,7 @@ an "editLink" is created.
 #### Sample Code
 ```javascript
 // EX: Simple array of column names
-sprLib.list('Employees').getItems( ['Id','Name','Badge_x0020_Number'] )
+sprLib.list('Employees').items( ['Id','Name','Badge_x0020_Number'] )
 .then(arrData => console.table(arrData))
 .catch(errMsg => console.error(errMsg));
 
@@ -433,7 +433,7 @@ sprLib.list('Employees').getItems( ['Id','Name','Badge_x0020_Number'] )
 
 ```javascript
 // EX: Using 'listCols' option with array of column names
-sprLib.list('Employees').getItems({
+sprLib.list('Employees').items({
     listCols: ['Name', 'Badge_x0020_Number', 'Hire_x0020_Date']
 })
 .then(arrData => console.table(arrData))
@@ -445,7 +445,7 @@ sprLib.list('Employees').getItems({
 // EX: Using 'getVersions' to gather all "Append Text"/Versioned Text into an array
 // EX: Using 'dataFunc' option to return a dynamic, generated value (an html link)
 // EX: Using query options: filter, order, limit
-sprLib.list('Employees').getItems({
+sprLib.list('Employees').items({
     listCols: {
         empId:      { dataName:'ID' },
         badgeNum:   { dataName:'Badge_x0020_Number' },
@@ -475,7 +475,7 @@ sprLib.list('Employees').getItems({
 // EX: Using paging/next/skip
 
 // Anytime there are more results than what was returned, an `__next` object will be included. Keep passing these in subsequent queries to get all results.
-sprLib.list('Departments').getItems({ listCols:['Id','Created'], queryLimit:5 });
+sprLib.list('Departments').items({ listCols:['Id','Created'], queryLimit:5 });
 // RESULT:
 /*
 .-----------------------------------------------------------.
@@ -489,7 +489,7 @@ sprLib.list('Departments').getItems({ listCols:['Id','Created'], queryLimit:5 })
 '-----------------------------------------------------------'
 */
 
-sprLib.list('Departments').getItems({
+sprLib.list('Departments').items({
     listCols:  ['Id','Created'],
     queryNext: {'prevId':5, 'maxItems':5}
 });
