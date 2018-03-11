@@ -61,7 +61,7 @@ sprLib.rest({ url:'_api/contextinfo', type:'POST' })
 
 ## Get Items
 Syntax:  
-`sprLib.list(listName|listGUID).getItems(options)`
+`sprLib.list(listName|listGUID).items(options)`
 
 Returns:
 * Array of objects containing name/value pairs
@@ -100,7 +100,7 @@ an "editLink" is created.
 ### Sample Code
 ```javascript
 // EX: Simple array of column names
-sprLib.list('Employees').getItems( ['Id','Name','Badge_x0020_Number'] )
+sprLib.list('Employees').items( ['Id','Name','Badge_x0020_Number'] )
 .then(arrData => console.table(arrData))
 .catch(errMsg => console.error(errMsg));
 
@@ -116,7 +116,7 @@ sprLib.list('Employees').getItems( ['Id','Name','Badge_x0020_Number'] )
 
 ```javascript
 // EX: Using 'listCols' option with array of column names
-sprLib.list('Employees').getItems({
+sprLib.list('Employees').items({
     listCols: ['Name', 'Badge_x0020_Number', 'Hire_x0020_Date']
 })
 .then(arrData => console.table(arrData))
@@ -128,7 +128,7 @@ sprLib.list('Employees').getItems({
 // EX: Using 'getVersions' to gather all "Append Text"/Versioned Text into an array
 // EX: Using 'dataFunc' option to return a dynamic, generated value (an html link)
 // EX: Using query options: filter, order, limit
-sprLib.list('Employees').getItems({
+sprLib.list('Employees').items({
     listCols: {
         empId:      { dataName:'ID' },
         badgeNum:   { dataName:'Badge_x0020_Number' },
@@ -158,7 +158,7 @@ sprLib.list('Employees').getItems({
 // EX: Using paging/next/skip
 
 // Anytime there are more results than what was returned, an `__next` object will be included. Keep passing these in subsequent queries to get all results.
-sprLib.list('Departments').getItems({ listCols:['Id','Created'], queryLimit:5 });
+sprLib.list('Departments').items({ listCols:['Id','Created'], queryLimit:5 });
 // RESULT:
 /*
 .-----------------------------------------------------------.
@@ -172,7 +172,7 @@ sprLib.list('Departments').getItems({ listCols:['Id','Created'], queryLimit:5 })
 '-----------------------------------------------------------'
 */
 
-sprLib.list('Departments').getItems({
+sprLib.list('Departments').items({
     listCols:  ['Id','Created'],
     queryNext: {'prevId':5, 'maxItems':5}
 });

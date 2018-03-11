@@ -32,7 +32,7 @@ const exCodeCSOM = `function queryListItems() {
     var context = new SP.ClientContext();
     var list = context.get_web().get_lists().getByTitle('Announcements');
     var caml = new SP.CamlQuery();
-    returnedItems = list.getItems(caml);
+    returnedItems = list.items(caml);
     context.load(returnedItems);
     context.executeQueryAsync(onSucceededCallback, onFailedCallback);
  }
@@ -50,13 +50,13 @@ const exCodeJquery = `$.ajax({
     }
 });
 `;
-const exCodeSimple = `sprLib.list('Announcements').getItems(['Id','Title'])
+const exCodeSimple = `sprLib.list('Announcements').items(['Id','Title'])
 .then(function(arrResults){ console.table(arrResults) })
 .catch(function(strErrMsg){ console.error(strErrMsg)  });
 `;
 const exCodeChain = `sprLib.user().info()
 .then(function(objUser){
-    return sprLib.list('Projects').getItems({
+    return sprLib.list('Projects').items({
         listCols: ['Id','Title'],
         queryFilter: 'Owner/Id eq ' + objUser.Id
     });
@@ -67,7 +67,7 @@ const exCodeChain = `sprLib.user().info()
 .catch(function(strErr){ console.error(strErr); });
 `;
 const txt1 = `sprLib.list('Employees')
-.getItems(
+.items(
     ['Id', 'Name', 'Manager/Id', 'Manager/Title']
 )
 .then(function(arrData){ console.table(arrData) })

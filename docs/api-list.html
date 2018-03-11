@@ -70,7 +70,7 @@ a SharePoint .aspx page, you will need to obtain the digest value and pass it wh
 </code></pre>
 <h2><a class="anchor" aria-hidden="true" name="get-items"></a><a href="#get-items" aria-hidden="true" class="hash-link" ><svg aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Get Items</h2>
 <p>Syntax:<br>
-<code>sprLib.list(listName|listGUID).getItems(options)</code></p>
+<code>sprLib.list(listName|listGUID).items(options)</code></p>
 <p>Returns:</p>
 <ul>
 <li>Array of objects containing name/value pairs</li>
@@ -113,7 +113,7 @@ form so users can edit the item directly.</p>
 an &quot;editLink&quot; is created.</p>
 <h3><a class="anchor" aria-hidden="true" name="sample-code"></a><a href="#sample-code" aria-hidden="true" class="hash-link" ><svg aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Sample Code</h3>
 <pre><code class="hljs css javascript"><span class="hljs-comment">// EX: Simple array of column names</span>
-sprLib.list(<span class="hljs-string">'Employees'</span>).getItems( [<span class="hljs-string">'Id'</span>,<span class="hljs-string">'Name'</span>,<span class="hljs-string">'Badge_x0020_Number'</span>] )
+sprLib.list(<span class="hljs-string">'Employees'</span>).items( [<span class="hljs-string">'Id'</span>,<span class="hljs-string">'Name'</span>,<span class="hljs-string">'Badge_x0020_Number'</span>] )
 .then(<span class="hljs-function"><span class="hljs-params">arrData</span> =&gt;</span> <span class="hljs-built_in">console</span>.table(arrData))
 .catch(<span class="hljs-function"><span class="hljs-params">errMsg</span> =&gt;</span> <span class="hljs-built_in">console</span>.error(errMsg));
 
@@ -127,7 +127,7 @@ sprLib.list(<span class="hljs-string">'Employees'</span>).getItems( [<span class
 */</span>
 </code></pre>
 <pre><code class="hljs css javascript"><span class="hljs-comment">// EX: Using 'listCols' option with array of column names</span>
-sprLib.list(<span class="hljs-string">'Employees'</span>).getItems({
+sprLib.list(<span class="hljs-string">'Employees'</span>).items({
     <span class="hljs-attr">listCols</span>: [<span class="hljs-string">'Name'</span>, <span class="hljs-string">'Badge_x0020_Number'</span>, <span class="hljs-string">'Hire_x0020_Date'</span>]
 })
 .then(<span class="hljs-function"><span class="hljs-params">arrData</span> =&gt;</span> <span class="hljs-built_in">console</span>.table(arrData))
@@ -137,7 +137,7 @@ sprLib.list(<span class="hljs-string">'Employees'</span>).getItems({
 <span class="hljs-comment">// EX: Using 'getVersions' to gather all "Append Text"/Versioned Text into an array</span>
 <span class="hljs-comment">// EX: Using 'dataFunc' option to return a dynamic, generated value (an html link)</span>
 <span class="hljs-comment">// EX: Using query options: filter, order, limit</span>
-sprLib.list(<span class="hljs-string">'Employees'</span>).getItems({
+sprLib.list(<span class="hljs-string">'Employees'</span>).items({
     <span class="hljs-attr">listCols</span>: {
         <span class="hljs-attr">empId</span>:      { <span class="hljs-attr">dataName</span>:<span class="hljs-string">'ID'</span> },
         <span class="hljs-attr">badgeNum</span>:   { <span class="hljs-attr">dataName</span>:<span class="hljs-string">'Badge_x0020_Number'</span> },
@@ -165,7 +165,7 @@ sprLib.list(<span class="hljs-string">'Employees'</span>).getItems({
 <pre><code class="hljs css javascript"><span class="hljs-comment">// EX: Using paging/next/skip</span>
 
 <span class="hljs-comment">// Anytime there are more results than what was returned, an `__next` object will be included. Keep passing these in subsequent queries to get all results.</span>
-sprLib.list(<span class="hljs-string">'Departments'</span>).getItems({ <span class="hljs-attr">listCols</span>:[<span class="hljs-string">'Id'</span>,<span class="hljs-string">'Created'</span>], <span class="hljs-attr">queryLimit</span>:<span class="hljs-number">5</span> });
+sprLib.list(<span class="hljs-string">'Departments'</span>).items({ <span class="hljs-attr">listCols</span>:[<span class="hljs-string">'Id'</span>,<span class="hljs-string">'Created'</span>], <span class="hljs-attr">queryLimit</span>:<span class="hljs-number">5</span> });
 <span class="hljs-comment">// RESULT:</span>
 <span class="hljs-comment">/*
 .-----------------------------------------------------------.
@@ -179,7 +179,7 @@ sprLib.list(<span class="hljs-string">'Departments'</span>).getItems({ <span cla
 '-----------------------------------------------------------'
 */</span>
 
-sprLib.list(<span class="hljs-string">'Departments'</span>).getItems({
+sprLib.list(<span class="hljs-string">'Departments'</span>).items({
     <span class="hljs-attr">listCols</span>:  [<span class="hljs-string">'Id'</span>,<span class="hljs-string">'Created'</span>],
     <span class="hljs-attr">queryNext</span>: {<span class="hljs-string">'prevId'</span>:<span class="hljs-number">5</span>, <span class="hljs-string">'maxItems'</span>:<span class="hljs-number">5</span>}
 });

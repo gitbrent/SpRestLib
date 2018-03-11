@@ -32,7 +32,7 @@ See the [Async Operations via Promises](#async-operations-via-promises) section 
 // EX: Get the current user's ID, then get their Tasks
 sprLib.user().info()
 .then(function(objUser){
-    return sprLib.list('Tasks').getItems({ queryFilter:'Owner/Id eq ' + objUser.Id });
+    return sprLib.list('Tasks').items({ queryFilter:'Owner/Id eq ' + objUser.Id });
 })
 .then(function(arrItems){
     console.log("Current user's Tasks = " + arrItems.length);
@@ -52,7 +52,7 @@ Meaning you can write code that runs in a "normal", linear fashion as shown belo
 const infoGetter = async() => {
     // EX: Get the current user's ID, then get their Tasks
     const objUser = await sprLib.user().info();
-    const arrItems = await sprLib.list('Tasks').getItems({ queryFilter:'Owner/Id eq ' + objUser.Id });
+    const arrItems = await sprLib.list('Tasks').items({ queryFilter:'Owner/Id eq ' + objUser.Id });
     console.log("Current user's Tasks = " + arrItems.length);
 }
 ```
