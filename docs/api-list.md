@@ -32,7 +32,6 @@ Lists can be accessed by either their name or their GUID:
 `sprLib.list(listGUID)`  
 `sprLib.list({ name:name })`  
 `sprLib.list({ guid:GUID })`  
-`sprLib.list({ name:name, baseUrl:path })`  
 `sprLib.list({ name:name, baseUrl:path, requestDigest:formDigestValue })`  
 
 ## Options
@@ -64,8 +63,10 @@ Syntax:
 `sprLib.list(listName|listGUID).items(options)`
 
 Returns:
-* Array of objects containing name/value pairs
-* `__metadata` is always included in the results array (to enable further operations, use of Etag, etc.)
+* Array of objects containing column name/value pairs
+
+Notes:  
+* Omitting the `listCols` option will result in all List columns being returned (mimic SharePoint default behavior)
 
 ### Options
 | Option        | Type     | Default   | Description                         | Possible Values / Returns                  |
@@ -73,13 +74,11 @@ Returns:
 | `listCols`    | array    |           | array of column names (OData style) | `listCols: ['Name', 'Badge_x0020_Number']` |
 | `listCols`    | object   |           | object with column properties       | `listCols: { badge: { dataName:'Badge_x0020_Number' } }` |
 | `cache`       | boolean  | `false`   | cache settings                      | Ex:`cache: true` |
-| `metadata`    | boolean  | `false`   | whether to return `__metadata`      | Ex:`metadata: true` |
 | `queryFilter` | string   |           | query filter                        | utilizes OData style [Query Operators](https://msdn.microsoft.com/en-us/library/office/fp142385.aspx#Anchor_7) |
 | `queryLimit`  | string   |           | max items to return                    | 1-*N* |
 | `queryNext`   | object   |           | object with Next/Skip options (paging) | `prevId` (1-N), `maxItems` (1-5000) Ex:`{ prevId:5000, maxItems:1000 }` |
 | `queryOrderby`| string   |           | column(s) to order by                  | Ex:`queryOrderby:Name` |
-
-NOTE: Omitting `listCols` will result in all List columns being returned (mimic SharePoint default behavior)
+| `metadata`    | boolean  | `false`   | whether to return `__metadata`      | The `__metadata` property can be included in the results array (to enable further operations, use of Etag, etc.) by using `metadata:true` |
 
 ### listCols Object
 | Option        | Type     | Default   | Description           | Possible Values / Return Values     |
@@ -196,7 +195,7 @@ Syntax: `sprLib.list(listName|listGUID).create(itemObject)`
 
 Options: An object with internal name/value pairs to be inserted
 
-Returns: Object with key/value pairs
+Returns: Object with column name/value pairs
 
 Example:
 ```javascript
