@@ -301,19 +301,32 @@ Returns: Array of columns with name value pairs of property values
 
 ### Sample Code
 ```javascript
-sprLib.list('Employees').cols()
+sprLib.list('Announcements').cols()
 .then(function(arrayResults){ console.table(arrayResults) });
 
 // Result:
 /*
-.--------------------------------------------------------------------------------------------------------------------------------------.
-|   dispName   |      dataName      |  dataType  | isAppend | isNumPct | isReadOnly | isRequired | isUnique | defaultValue | maxLength |
-|--------------|--------------------|------------|----------|----------|------------|------------|----------|--------------|-----------|
-| ID           | ID                 | Counter    | false    | false    | true       | false      | false    |              |           |
-| Name         | Name               | Text       | false    | false    | false      | false      | false    |              |       255 |
-| Badge Number | Badge_x0020_Number | Number     | false    | false    | false      | true       | true     |              |           |
-| Hire Date    | Hire_x0020_Date    | DateTime   | false    | false    | false      | false      | false    |              |           |
-'--------------------------------------------------------------------------------------------------------------------------------------'
+.---------------------------------------------------------------------------------------------------------------------------------------------.
+|      dispName       |     dataName      |  dataType   | isAppend | isNumPct | isReadOnly | isRequired | isUnique | defaultValue | maxLength |
+|---------------------|-------------------|-------------|----------|----------|------------|------------|----------|--------------|-----------|
+| ID                  | ID                | Counter     | false    | false    | true       | false      | false    | null         | null      |
+| Content Type        | ContentType       | Computed    | false    | false    | false      | false      | false    | null         | null      |
+| Title               | Title             | Text        | false    | false    | false      | true       | false    | null         |       255 |
+| Modified            | Modified          | DateTime    | false    | false    | true       | false      | false    | null         | null      |
+| Created             | Created           | DateTime    | false    | false    | true       | false      | false    | null         | null      |
+| Created By          | Author            | User        | false    | false    | true       | false      | false    | null         | null      |
+| Modified By         | Editor            | User        | false    | false    | true       | false      | false    | null         | null      |
+| Attachments         | Attachments       | Attachments | false    | false    | false      | false      | false    | null         | null      |
+| Title               | LinkTitleNoMenu   | Computed    | false    | false    | true       | false      | false    | null         | null      |
+| Title               | LinkTitle         | Computed    | false    | false    | true       | false      | false    | null         | null      |
+| Item Child Count    | ItemChildCount    | Lookup      | false    | false    | true       | false      | false    | null         | null      |
+| Folder Child Count  | FolderChildCount  | Lookup      | false    | false    | true       | false      | false    | null         | null      |
+| App Created By      | AppAuthor         | Lookup      | false    | false    | true       | false      | false    | null         | null      |
+| App Modified By     | AppEditor         | Lookup      | false    | false    | true       | false      | false    | null         | null      |
+| Compliance Asset Id | ComplianceAssetId | Text        | false    | false    | true       | false      | false    | null         |       255 |
+| Body                | Body              | Note        | false    | false    | false      | false      | false    | null         | null      |
+| Expires             | Expires           | DateTime    | false    | false    | false      | false      | false    | null         | null      |
+'---------------------------------------------------------------------------------------------------------------------------------------------'
 */
 ```
 
