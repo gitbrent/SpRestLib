@@ -15,7 +15,7 @@ const siteConfig = {
 	headerLinks: [
 		{href: 'https://github.com/gitbrent/SpRestLib/releases', label: 'Download'},
 		{doc: 'installation', label: 'Get Started'},
-		{doc: 'api-rest', label: 'API Documentation'},
+		{doc: 'api-list', label: 'API Documentation'},
 		{href: 'https://github.com/gitbrent/SpRestLib/', label: 'GitHub'},
 	],
 	headerIcon: 'img/sprestlib.svg',

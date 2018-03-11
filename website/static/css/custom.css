@@ -1,20 +1,14 @@
 /* your custom css */
 
 @media only screen and (min-device-width: 360px) and (max-device-width: 736px) {
-	#FeatureCallCode .gridBlock {
-		flex-wrap: nowrap;
-	}
+	#FeatureCallCode .gridBlock { flex-wrap: nowrap; }
 }
-
 @media only screen and (min-width: 1024px) {
 }
-
 @media only screen and (max-width: 1023px) {
 }
-
 @media only screen and (min-width: 1400px) {
 }
-
 @media only screen and (min-width: 1500px) {
 }
 
@@ -40,4 +34,4 @@ p code, li code {
 	height: 32px;
 }
 
-.imgShadow { box-shadow: 0px 1px 3px 0px #666; }
+.imgShadow, #try img { box-shadow: 0px 1px 3px 0px #666; }

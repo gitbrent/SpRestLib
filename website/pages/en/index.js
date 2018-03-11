@@ -25,8 +25,8 @@ script.src = "https://cdn.rawgit.com/gitbrent/SpRestLib/v1.6.0/dist/sprestlib.bu
 document.getElementsByTagName('head')[0].appendChild(script);
 //
 // 2: Try some library methods
-sprLib.user().info().then(  objUser  => (console.table ? console.table([objUser]) : console.log(objUser))  );
-sprLib.site().lists().then( arrLists => (console.table ? console.table(arrLists)  : console.log(arrLists)) );
+sprLib.user().info().then( objUser => console.log(objUser) );
+sprLib.site().lists().then( arrLists => console.log(arrLists) );
 `;
 const exCodeCSOM = `function queryListItems() {
     var context = new SP.ClientContext();
@@ -294,33 +294,46 @@ const FeatureCallCode = props => (
 			as adding another SpRestLib query to a <code>then()</code>.  Additionally, exceptions are just as easy to deal with -
 			simply add a <code>catch()</code> statement.
 		</p>
-		<div style={{display:'table',width:'100%'}}>
-			<div style={{display:'table-cell',width:'20%',paddingRight:'10px'}}><h2>Simple Query</h2></div>
-			<div style={{display:'table-cell',width:'80%'}}><pre><code>{exCodeSimple}</code></pre></div>
-		</div>
-		<div style={{display:'table',width:'100%'}}>
-			<div style={{display:'table-cell',width:'20%',paddingRight:'10px'}}><h2>Chained Queries</h2></div>
-			<div style={{display:'table-cell',width:'80%'}}><pre><code>{exCodeChain}</code></pre></div>
-		</div>
+
+		<GridBlock
+			align="left"
+			layout="twoColumn"
+			contents={[
+				{ title:'Simple Query', content:'<pre><code>'+ exCodeSimple +'</code></pre>' }
+			]}
+		/>
+		<GridBlock
+			align="left"
+			layout="twoColumn"
+			contents={[
+				{ title:'Chained Queries', content:'<pre><code>'+ exCodeChain +'</code></pre>' }
+			]}
+		/>
 	</Container>
 );
 
 // 5:
 const TryOutLiveDemo = props => (
-	<Block id="try" align="left" background="white" layout="twoColumn">
-		{[
-			{
-				title: 'Try It Out: Library Test Drive',
-				content: '<p>You should try using SpRestLib!</p>'
-					+ "<p>Just open your browser's Developer Tools window anywhere on your SharePoint site, "
-					+ "then run the following code snippet which will load the SpRestLib bundle script dynamically:</p>",
-			},
-			{
-				title: '',
-				content: '<pre><code>'+tryCodeBlock+'</code></pre><img src="/SpRestLib/img/tryitout.png" class="imgShadow" />',
-			},
-		]}
-	</Block>
+	<Container id='Try' padding={['bottom', 'top']} background='white'>
+		<div>
+			<h2>Try It Out: Library Test Drive</h2>
+			<h4>You should try using SpRestLib!</h4>
+			<p>
+				Just open your browser "Developer Tools" window on your SharePoint site somewhere,
+				then run the following code snippet which will load the SpRestLib bundle script dynamically:
+			</p>
+
+			<GridBlock
+				align="left"
+				layout="twoColumn"
+				contents={[
+					{ title:'', content:'<pre><code>'+ tryCodeBlock +'</code></pre>' }
+				]}
+			/>
+
+			<img src="/SpRestLib/img/tryitout.png" />
+		</div>
+	</Container>
 );
 
 // 6:
