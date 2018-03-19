@@ -764,16 +764,16 @@ Returns: Array of site lists
 #### List Properties
 | Property Name       | Type     | Description                                                |
 | :------------------ | :------- | :--------------------------------------------------------- |
-| `BaseTemplate`      | number   | `SP.List.baseTemplate` property value - ex: 100            |
-| `BaseType`          | string   | `SP.BaseType` property value - ex: `Library`, `List`, etc. |
-| `Description`       | string   | Site Description                                           |
+| `BaseTemplate`      | number   | `SP.List.baseTemplate` property value - ex: `100`          |
+| `BaseType`          | string   | `SP.BaseType` property value - ex: `"List"`                |
+| `Description`       | string   | List Description                                           |
 | `Hidden`            | boolean  | Is list hidden?                                            |
-| `Id`                | GUID     | The SP GUID of the Site                                    |
-| `ImageUrl`          | string   | Relative URL to the list's SharePoint logo image           |
+| `Id`                | GUID     | The SP GUID of the List                                    |
+| `ImageUrl`          | string   | Relative URL to the list's logo image                      |
 | `ItemCount`         | number   | Total items in the List/Library                            |
 | `ParentWebUrl`      | string   | Relative URL of parent web site                            |
-| `ServerRelativeUrl` | string   | RootFolder.ServerRelativeUrl                               |
-| `Title`             | string   | Title of the Site/Subsite                                  |
+| `ServerRelativeUrl` | string   | Relative URL of the list itself - ex: `"/HR/Lists/Employees"` |
+| `Title`             | string   | Title of the List                                          |
 
 #### Sample Code
 ```javascript
@@ -782,7 +782,7 @@ sprLib.site().lists()
 
 /*
 .------------------------------------------------------------.
-|    Prop Name      |              Prop Value                |
+|     Prop Name     |               Prop Value               |
 |-------------------|----------------------------------------|
 | Id                | "8fda2798-daba-497d-9840-df87b08e09c1" |
 | Title             | "Employees"                            |
