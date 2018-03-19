@@ -33,7 +33,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 (function(){
 	// APP VERSION/BUILD
 	var APP_VER = "1.7.0-beta";
-	var APP_BLD = "20180309";
+	var APP_BLD = "20180318";
 	var DEBUG = false; // (verbose mode/lots of logging)
 	// ENUMERATIONS
 	// REF: [`SP.BaseType`](https://msdn.microsoft.com/en-us/library/office/jj246925.aspx)
@@ -1401,7 +1401,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 					sprLib.rest({
 						url: strBaseUrl+'_api/web',
 						queryCols: ['Id','Title','Description','Language','Created',
-							'LastItemModifiedDate','RequestAccessEmail','SiteLogoUrl','Url','WebTemplate',
+							'LastItemModifiedDate','LastItemUserModifiedDate','RequestAccessEmail','SiteLogoUrl','Url','WebTemplate',
 							'AssociatedOwnerGroup/Id',        'AssociatedMemberGroup/Id',        'AssociatedVisitorGroup/Id',
 							'AssociatedOwnerGroup/OwnerTitle','AssociatedMemberGroup/OwnerTitle','AssociatedVisitorGroup/OwnerTitle',
 							'AssociatedOwnerGroup/Title',     'AssociatedMemberGroup/Title',     'AssociatedVisitorGroup/Title'

@@ -2,7 +2,7 @@
  * NAME: qunit-test.js
  * DESC: tests for qunit-test.html (coded to my O365 Dev Site - YMMV)
  * AUTH: https://github.com/gitbrent/
- * DATE: Mar 09, 2018
+ * DATE: Mar 18, 2018
  *
  * HOWTO: Generate text tables for README etc.:
  * sprLib.list('Employees').items(['Id', 'Name', 'Badge_x0020_Number']).then(function(arrData){ console.log(getAsciiTableStr(arrData)) });
@@ -1573,7 +1573,7 @@ QUnit.module( "SITE Methods" );
 			// TEST:
 			sprLib.site(ARG_SITE).info()
 			.then(function(objSite){
-				assert.ok( Object.keys(objSite).length == 14, "Object.keys(objSite).length == 14: "+ Object.keys(objSite).length );
+				assert.ok( Object.keys(objSite).length == 15, "Object.keys(objSite).length == 15: "+ Object.keys(objSite).length );
 				assert.ok( (objSite.Id),    "objSite.Id    exists: '"+ objSite.Id    +"'");
 				assert.ok( (objSite.Title), "objSite.Title exists: '"+ objSite.Title +"'");
 				assert.ok( objSite.AssociatedOwnerGroup.Id && objSite.AssociatedOwnerGroup.Title && objSite.AssociatedOwnerGroup.OwnerTitle, "objSite.AssociatedOwnerGroup has 3 props: "+ JSON.stringify(objSite.AssociatedOwnerGroup) );
