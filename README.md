@@ -785,7 +785,7 @@ sprLib.site().lists()
 |    Prop Name      |              Prop Value                |
 |-------------------|----------------------------------------|
 | Id                | "8fda2798-daba-497d-9840-df87b08e09c1" |
-| Title             | "Employees                             |
+| Title             | "Employees"                            |
 | Description       | "All company personnel"                |
 | ItemCount         | 238                                    |
 | BaseType          | "List"                                 |
