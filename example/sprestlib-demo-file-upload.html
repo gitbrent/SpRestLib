@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en-us">
+<head>
+	<title>SpRestLib File Upload Demo</title>
+	<meta name="author" content="https://github.com/gitbrent">
+	<link rel="stylesheet" type="text/css" href="https://cdn.rawgit.com/gitbrent/SpRestLib/master/example/css/sprestlib-demo.css">
+
+	<style type="text/css">
+		#contentRow {
+			padding-top: 0;
+		}
+		body {
+			font-family: "Segoe UI", "Helvetica Neue", Verdana, Arial, sans-serif;
+			font-size: 11px;
+		}
+		body > div {
+			margin-bottom: 20px;
+		}
+
+		h1 {
+			font-weight: normal;
+			color: #0088cc;
+			font-size: 28px;
+			margin-bottom: 10px;
+		}
+		h2 {
+			font-weight: normal;
+			font-size: 12px;
+			color: #999;
+			margin-bottom: 20px;
+		}
+		textarea {
+			height: 100px;
+			margin: 5px 0;
+		}
+		tt {
+			color: blue;
+		}
+
+		.subTitle {
+			display: block;
+		}
+
+		/* ========== ========== */
+		#tabResults thead th {
+			font-size: 12px;
+		}
+		#tabResults tbody td:last-child {
+			background: white;
+		}
+		.groupItem {
+			display: inline-block;
+			background: #CDE7F1;
+			color: #666;
+			border: 1px #ccc solid;
+			margin: 0 6px 3px 0;
+			padding: 2px 6px;
+			border-radius: 3px;
+		}
+
+		/* ========== ========== */
+		#console {
+			font-face: courier new, monospace;
+			font-size: 12px;
+			padding: 5px;
+			background: #eee;
+			border: 1px #ccc solid;
+		}
+
+		#console span {
+			color: red;
+			background: yellow;
+			font-weight: bold;
+			font-size: large;
+		}
+	</style>
+
+	<script type="text/javascript" src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+	<script type="text/javascript" src="https://cdn.rawgit.com/gitbrent/SpRestLib/master/dist/sprestlib.bundle.js"></script>
+	<script type="text/javascript">
+		// APP
+		var APP_BLD = 20180318;
+		// CONST
+		var HTML_SPINNER = '<div class="sprlib-spinner"><div class="sprlib-bounce1"></div><div class="sprlib-bounce2"></div><div class="sprlib-bounce3"></div></div>';
+
+		/*
+			REFS:
+			https://blogs.msdn.microsoft.com/uksharepoint/2013/04/20/uploading-files-using-the-rest-api-and-client-side-techniques/
+			https://msdn.microsoft.com/en-us/library/office/dn769086.aspx
+			http://sharepoint.stackexchange.com/questions/74969/properties-when-uploading-files-using-rest-in-sp-2013
+		*/
+
+		// ==================================================================================================================
+
+		function doUploadFile() {
+			// STEP 1: Reality Check
+			if ( !$('#selDestLib').val() ) {
+				alert("Please select a Destination Library!");
+				return;
+			}
+			else if ( !$('#getFile') || !$('#getFile')[0] || !$('#getFile')[0].value ) {
+				alert("Please select a file with the File Picker!");
+				return;
+			}
+
+			// STEP 2: Status update
+			$('#console').append('Starting file upload... <br>');
+
+			// STEP 3: Get the local file as an array buffer
+			var getFile = getFileBuffer();
+			getFile.done(function(arrayBuffer){
+				addFileToFolder(arrayBuffer);
+			});
+			getFile.fail(function(error){
+				alert(error.responseText);
+				console.error(error);
+			});
+		}
+
+		function getFileBuffer() {
+			var deferred = $.Deferred();
+			var reader = new FileReader();
+			reader.onloadend = function(e){ deferred.resolve(e.target.result); }
+			reader.onerror = function(e){ deferred.reject(e.target.error); }
+			reader.readAsArrayBuffer( $('#getFile')[0].files[0] );
+			return deferred.promise();
+		}
+
+		function addFileToFolder(arrayBuffer){
+			var parts = $('#getFile')[0].value.split('\\');
+			var fileName = parts[parts.length - 1];
+			var strAjaxUrl = _spPageContextInfo.siteAbsoluteUrl
+				+ "/_api/web/lists/getByTitle('"+ $('#selDestLib').val() +"')"
+				+ "/RootFolder/files/add(overwrite=true,url='"+ fileName +"')";
+
+		 	sprLib.rest({
+				url: strAjaxUrl,
+				type: "POST",
+				data: arrayBuffer
+			})
+			.then(function(arr){
+				$('#console').append('SUCCESS: "'+ arr[0].Name +'" uploaded to: '+ arr[0].ServerRelativeUrl +'<br>');
+			})
+			.catch(function(strErr){ console.error(strErr); });;
+		}
+
+		// ==================================================================================================================
+
+		function appStart() {
+			// STEP 1: Check for FileReader API (HTML5) support.
+			if ( !window.FileReader ) {
+				alert('Sorry, but your browser does not support the FileReader API.');
+				return;
+			}
+
+			// STEP 2:
+			sprLib.site().lists()
+			.then(function(arrLists){
+				arrLists.forEach(function(list){
+					if ( list.BaseType == 'Library' && !list.Hidden ) {
+						$('#selDestLib').append('<option value="'+ list.Title +'">'+ list.Title +'</option>');
+					}
+				});
+
+				$('#contOptions .sprlib-spinner, #selDestLib').toggle();
+			})
+			.catch(function(strErr){
+				alert(strErr);
+			});
+		}
+
+		// ==================================================================================================================
+		window.onload = function(){ appStart(); SetFullScreenMode(true); }
+	</script>
+</head>
+<body>
+	<h1 style="margin-top:0">SpRestLib File Upload Demo</h1>
+
+	<div class="subTitle" style="cursor:pointer" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
+		<div class="arrow active"></div>File Upload
+	</div>
+	<div id="contOptions">
+		<table class="tabModern">
+			<tbody>
+				<tr>
+					<th style="width:10%; white-space:nowrap;">Destination Library</th>
+					<td style="width:90%">
+						<select id="selDestLib" style="display:none"><option value="">Select...</option></select>
+						<div class="sprlib-spinner"><div class="sprlib-bounce1"></div><div class="sprlib-bounce2"></div><div class="sprlib-bounce3"></div></div>
+					</td>
+				</tr>
+				<tr>
+					<th>File Picker</th>
+					<td style="width:90%">
+						<input id="getFile" type="file" style="width:30%">
+					</td>
+				</tr>
+				<tr>
+					<th></th>
+					<td>
+						<button type="button" class="flatBtn flatBtn-blue" style="width:30%" onclick="doUploadFile()">Upload File</button>
+					</td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
+
+	<div class="subTitle" style="cursor:pointer" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
+		<div class="arrow active"></div>Output
+	</div>
+	<div id="contConsole">
+		<tt><div id="console"></div></tt>
+	</div>
+</body>
+</html>
