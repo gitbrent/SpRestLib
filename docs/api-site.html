@@ -80,20 +80,20 @@
 .-------------------------------------------------------------------------------------------------------------------------------------.
 |        Prop Name         |                                                Prop Value                                                |
 |--------------------------|----------------------------------------------------------------------------------------------------------|
+| Id                       | "123b4f37-6a13-4bc8-869a-08b5e4b7c058"                                                                   |
+| Title                    | "SpRestLib Dev Site"                                                                                     |
+| Description              | "Main O365 Dev Site for SpRestLib."                                                                      |
+| Language                 | 1033                                                                                                     |
+| Created                  | "2016-08-16T14:53:31.327"                                                                                |
+| LastItemModifiedDate     | "2017-10-28T23:06:13Z"                                                                                   |
+| LastItemUserModifiedDate | "2017-10-28T23:06:13Z"                                                                                   |
+| RequestAccessEmail       | "someone@example.com"                                                                                    |
+| SiteLogoUrl              | "/sites/dev/SiteAssets/images/sample_company_logo.png"                                                   |
+| Url                      | "https://brent.sharepoint.com/sites/dev"                                                                 |
+| WebTemplate              | "STS"                                                                                                    |
 | AssociatedMemberGroup    | {"Id":8,"Title":"Dev Site Members","OwnerTitle":"Dev Site Owners"}                                       |
 | AssociatedOwnerGroup     | {"Id":6,"Title":"Dev Site Owners","OwnerTitle":"Dev Site Owners"}                                        |
 | AssociatedVisitorGroup   | {"Id":7,"Title":"Dev Site Visitors","OwnerTitle":"Dev Site Owners"}                                      |
-| Created                  | 2016-08-16T14:53:31.327                                                                                  |
-| Description              | Main O365 Dev Site for SpRestLib.                                                                        |
-| Id                       | 123b4f37-6a13-4bc8-869a-08b5e4b7c058                                                                     |
-| Language                 | 1033                                                                                                     |
-| LastItemModifiedDate     | 2017-10-28T23:06:13Z                                                                                     |
-| LastItemUserModifiedDate | 2017-10-28T23:06:13Z                                                                                     |
-| RequestAccessEmail       | someone@example.com                                                                                      |
-| SiteLogoUrl              | /sites/dev/SiteAssets/images/sample_company_logo.png                                                     |
-| Title                    | SpRestLib Dev Site                                                                                       |
-| Url                      | https://brent.sharepoint.com/sites/dev                                                                   |
-| WebTemplate              | STS                                                                                                      |
 | Owner                    | {"LoginName":"brent@microsoft.com","Title":"Brent Ely","Email":"brent@microsoft.com","IsSiteAdmin":true} |
 '-------------------------------------------------------------------------------------------------------------------------------------'
 */</span>
@@ -109,16 +109,16 @@
 <tr><th style="text-align:left">Property Name</th><th style="text-align:left">Type</th><th style="text-align:left">Description</th></tr>
 </thead>
 <tbody>
-<tr><td style="text-align:left"><code>BaseTemplate</code></td><td style="text-align:left">number</td><td style="text-align:left"><code>SP.List.baseTemplate</code> property value</td></tr>
-<tr><td style="text-align:left"><code>BaseType</code></td><td style="text-align:left">number</td><td style="text-align:left"><code>SP.BaseType</code> property value</td></tr>
-<tr><td style="text-align:left"><code>Description</code></td><td style="text-align:left">string</td><td style="text-align:left">Site Description</td></tr>
+<tr><td style="text-align:left"><code>BaseTemplate</code></td><td style="text-align:left">number</td><td style="text-align:left"><code>SP.List.baseTemplate</code> property value - ex: <code>100</code></td></tr>
+<tr><td style="text-align:left"><code>BaseType</code></td><td style="text-align:left">string</td><td style="text-align:left"><code>SP.BaseType</code> property value - ex: <code>&quot;List&quot;</code></td></tr>
+<tr><td style="text-align:left"><code>Description</code></td><td style="text-align:left">string</td><td style="text-align:left">List Description</td></tr>
 <tr><td style="text-align:left"><code>Hidden</code></td><td style="text-align:left">boolean</td><td style="text-align:left">Is list hidden?</td></tr>
-<tr><td style="text-align:left"><code>Id</code></td><td style="text-align:left">GUID</td><td style="text-align:left">The SP GUID of the Site</td></tr>
-<tr><td style="text-align:left"><code>ImageUrl</code></td><td style="text-align:left">string</td><td style="text-align:left">Relative URL to the site's SharePoint logo image</td></tr>
+<tr><td style="text-align:left"><code>Id</code></td><td style="text-align:left">GUID</td><td style="text-align:left">The SP GUID of the List</td></tr>
+<tr><td style="text-align:left"><code>ImageUrl</code></td><td style="text-align:left">string</td><td style="text-align:left">Relative URL to the list's logo image</td></tr>
 <tr><td style="text-align:left"><code>ItemCount</code></td><td style="text-align:left">number</td><td style="text-align:left">Total items in the List/Library</td></tr>
 <tr><td style="text-align:left"><code>ParentWebUrl</code></td><td style="text-align:left">string</td><td style="text-align:left">Relative URL of parent web site</td></tr>
-<tr><td style="text-align:left"><code>RootFolder</code></td><td style="text-align:left">string</td><td style="text-align:left">RootFolder.ServerRelativeUrl</td></tr>
-<tr><td style="text-align:left"><code>Title</code></td><td style="text-align:left">string</td><td style="text-align:left">Title of the Site/Subsite</td></tr>
+<tr><td style="text-align:left"><code>ServerRelativeUrl</code></td><td style="text-align:left">string</td><td style="text-align:left">Relative URL of the list itself - ex: <code>&quot;/HR/Lists/Employees&quot;</code></td></tr>
+<tr><td style="text-align:left"><code>Title</code></td><td style="text-align:left">string</td><td style="text-align:left">Title of the List</td></tr>
 </tbody>
 </table>
 <h3><a class="anchor" aria-hidden="true" name="sample-code"></a><a href="#sample-code" aria-hidden="true" class="hash-link" ><svg aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Sample Code</h3>
@@ -126,20 +126,20 @@
 .then(<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">arr</span>)</span>{ <span class="hljs-built_in">console</span>.table([arr[<span class="hljs-number">0</span>]]) });
 
 <span class="hljs-comment">/*
-.-----------------------------------------------------.
-|  Prop Name   |              Prop Value              |
-|--------------|--------------------------------------|
-| Id           | 8fda2798-daba-497d-9840-df87b08e09c1 |
-| Title        | Employees                            |
-| Description  |                                      |
-| ParentWebUrl | /sites/dev                           |
-| ItemCount    | 238                                  |
-| Hidden       | false                                |
-| ImageUrl     | /_layouts/15/images/itgen.png?rev=44 |
-| BaseType     | 0                                    |
-| BaseTemplate | 100                                  |
-| RootFolder   | /sites/dev/Lists/Employees           |
-'-----------------------------------------------------'
+.------------------------------------------------------------.
+|     Prop Name     |               Prop Value               |
+|-------------------|----------------------------------------|
+| Id                | "8fda2798-daba-497d-9840-df87b08e09c1" |
+| Title             | "Employees"                            |
+| Description       | "All company personnel"                |
+| ItemCount         | 238                                    |
+| BaseType          | "List"                                 |
+| BaseTemplate      | 100                                    |
+| Hidden            | false                                  |
+| ImageUrl          | "/_layouts/15/images/itgen.png?rev=44" |
+| ParentWebUrl      | "/sites/dev"                           |
+| ServerRelativeUrl | "/sites/dev/Lists/Employees"           |
+'------------------------------------------------------------'
 */</span>
 </code></pre>
 <h2><a class="anchor" aria-hidden="true" name="get-site-permissions"></a><a href="#get-site-permissions" aria-hidden="true" class="hash-link" ><svg aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Get Site Permissions</h2>

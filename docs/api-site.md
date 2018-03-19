@@ -62,20 +62,20 @@ sprLib.site().info()
 .-------------------------------------------------------------------------------------------------------------------------------------.
 |        Prop Name         |                                                Prop Value                                                |
 |--------------------------|----------------------------------------------------------------------------------------------------------|
+| Id                       | "123b4f37-6a13-4bc8-869a-08b5e4b7c058"                                                                   |
+| Title                    | "SpRestLib Dev Site"                                                                                     |
+| Description              | "Main O365 Dev Site for SpRestLib."                                                                      |
+| Language                 | 1033                                                                                                     |
+| Created                  | "2016-08-16T14:53:31.327"                                                                                |
+| LastItemModifiedDate     | "2017-10-28T23:06:13Z"                                                                                   |
+| LastItemUserModifiedDate | "2017-10-28T23:06:13Z"                                                                                   |
+| RequestAccessEmail       | "someone@example.com"                                                                                    |
+| SiteLogoUrl              | "/sites/dev/SiteAssets/images/sample_company_logo.png"                                                   |
+| Url                      | "https://brent.sharepoint.com/sites/dev"                                                                 |
+| WebTemplate              | "STS"                                                                                                    |
 | AssociatedMemberGroup    | {"Id":8,"Title":"Dev Site Members","OwnerTitle":"Dev Site Owners"}                                       |
 | AssociatedOwnerGroup     | {"Id":6,"Title":"Dev Site Owners","OwnerTitle":"Dev Site Owners"}                                        |
 | AssociatedVisitorGroup   | {"Id":7,"Title":"Dev Site Visitors","OwnerTitle":"Dev Site Owners"}                                      |
-| Created                  | 2016-08-16T14:53:31.327                                                                                  |
-| Description              | Main O365 Dev Site for SpRestLib.                                                                        |
-| Id                       | 123b4f37-6a13-4bc8-869a-08b5e4b7c058                                                                     |
-| Language                 | 1033                                                                                                     |
-| LastItemModifiedDate     | 2017-10-28T23:06:13Z                                                                                     |
-| LastItemUserModifiedDate | 2017-10-28T23:06:13Z                                                                                     |
-| RequestAccessEmail       | someone@example.com                                                                                      |
-| SiteLogoUrl              | /sites/dev/SiteAssets/images/sample_company_logo.png                                                     |
-| Title                    | SpRestLib Dev Site                                                                                       |
-| Url                      | https://brent.sharepoint.com/sites/dev                                                                   |
-| WebTemplate              | STS                                                                                                      |
 | Owner                    | {"LoginName":"brent@microsoft.com","Title":"Brent Ely","Email":"brent@microsoft.com","IsSiteAdmin":true} |
 '-------------------------------------------------------------------------------------------------------------------------------------'
 */
@@ -89,18 +89,18 @@ Syntax:
 Returns: Array of site lists
 
 ### List Properties
-| Property Name    | Type     | Description                                      |
-| :--------------- | :------- | :----------------------------------------------- |
-| `BaseTemplate`   | number   | `SP.List.baseTemplate` property value            |
-| `BaseType`       | number   | `SP.BaseType` property value                     |
-| `Description`    | string   | Site Description                                 |
-| `Hidden`         | boolean  | Is list hidden?                                  |
-| `Id`             | GUID     | The SP GUID of the Site                          |
-| `ImageUrl`       | string   | Relative URL to the site's SharePoint logo image |
-| `ItemCount`      | number   | Total items in the List/Library                  |
-| `ParentWebUrl`   | string   | Relative URL of parent web site                  |
-| `RootFolder`     | string   | RootFolder.ServerRelativeUrl                     |
-| `Title`          | string   | Title of the Site/Subsite                        |
+| Property Name       | Type     | Description                                                |
+| :------------------ | :------- | :--------------------------------------------------------- |
+| `BaseTemplate`      | number   | `SP.List.baseTemplate` property value - ex: `100`          |
+| `BaseType`          | string   | `SP.BaseType` property value - ex: `"List"`                |
+| `Description`       | string   | List Description                                           |
+| `Hidden`            | boolean  | Is list hidden?                                            |
+| `Id`                | GUID     | The SP GUID of the List                                    |
+| `ImageUrl`          | string   | Relative URL to the list's logo image                      |
+| `ItemCount`         | number   | Total items in the List/Library                            |
+| `ParentWebUrl`      | string   | Relative URL of parent web site                            |
+| `ServerRelativeUrl` | string   | Relative URL of the list itself - ex: `"/HR/Lists/Employees"` |
+| `Title`             | string   | Title of the List                                          |
 
 ### Sample Code
 ```javascript
@@ -108,20 +108,20 @@ sprLib.site().lists()
 .then(function(arr){ console.table([arr[0]]) });
 
 /*
-.-----------------------------------------------------.
-|  Prop Name   |              Prop Value              |
-|--------------|--------------------------------------|
-| Id           | 8fda2798-daba-497d-9840-df87b08e09c1 |
-| Title        | Employees                            |
-| Description  |                                      |
-| ParentWebUrl | /sites/dev                           |
-| ItemCount    | 238                                  |
-| Hidden       | false                                |
-| ImageUrl     | /_layouts/15/images/itgen.png?rev=44 |
-| BaseType     | 0                                    |
-| BaseTemplate | 100                                  |
-| RootFolder   | /sites/dev/Lists/Employees           |
-'-----------------------------------------------------'
+.------------------------------------------------------------.
+|     Prop Name     |               Prop Value               |
+|-------------------|----------------------------------------|
+| Id                | "8fda2798-daba-497d-9840-df87b08e09c1" |
+| Title             | "Employees"                            |
+| Description       | "All company personnel"                |
+| ItemCount         | 238                                    |
+| BaseType          | "List"                                 |
+| BaseTemplate      | 100                                    |
+| Hidden            | false                                  |
+| ImageUrl          | "/_layouts/15/images/itgen.png?rev=44" |
+| ParentWebUrl      | "/sites/dev"                           |
+| ServerRelativeUrl | "/sites/dev/Lists/Employees"           |
+'------------------------------------------------------------'
 */
 ```
 
