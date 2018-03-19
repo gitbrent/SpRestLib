@@ -735,20 +735,20 @@ sprLib.site().info()
 .-------------------------------------------------------------------------------------------------------------------------------------.
 |        Prop Name         |                                                Prop Value                                                |
 |--------------------------|----------------------------------------------------------------------------------------------------------|
+| Id                       | "123b4f37-6a13-4bc8-869a-08b5e4b7c058"                                                                   |
+| Title                    | "SpRestLib Dev Site"                                                                                     |
+| Description              | "Main O365 Dev Site for SpRestLib."                                                                      |
+| Language                 | 1033                                                                                                     |
+| Created                  | "2016-08-16T14:53:31.327"                                                                                |
+| LastItemModifiedDate     | "2017-10-28T23:06:13Z"                                                                                   |
+| LastItemUserModifiedDate | "2017-10-28T23:06:13Z"                                                                                   |
+| RequestAccessEmail       | "someone@example.com"                                                                                    |
+| SiteLogoUrl              | "/sites/dev/SiteAssets/images/sample_company_logo.png"                                                   |
+| Url                      | "https://brent.sharepoint.com/sites/dev"                                                                 |
+| WebTemplate              | "STS"                                                                                                    |
 | AssociatedMemberGroup    | {"Id":8,"Title":"Dev Site Members","OwnerTitle":"Dev Site Owners"}                                       |
 | AssociatedOwnerGroup     | {"Id":6,"Title":"Dev Site Owners","OwnerTitle":"Dev Site Owners"}                                        |
 | AssociatedVisitorGroup   | {"Id":7,"Title":"Dev Site Visitors","OwnerTitle":"Dev Site Owners"}                                      |
-| Created                  | 2016-08-16T14:53:31.327                                                                                  |
-| Description              | Main O365 Dev Site for SpRestLib.                                                                        |
-| Id                       | 123b4f37-6a13-4bc8-869a-08b5e4b7c058                                                                     |
-| Language                 | 1033                                                                                                     |
-| LastItemModifiedDate     | 2017-10-28T23:06:13Z                                                                                     |
-| LastItemUserModifiedDate | 2017-10-28T23:06:13Z                                                                                     |
-| RequestAccessEmail       | someone@example.com                                                                                      |
-| SiteLogoUrl              | /sites/dev/SiteAssets/images/sample_company_logo.png                                                     |
-| Title                    | SpRestLib Dev Site                                                                                       |
-| Url                      | https://brent.sharepoint.com/sites/dev                                                                   |
-| WebTemplate              | STS                                                                                                      |
 | Owner                    | {"LoginName":"brent@microsoft.com","Title":"Brent Ely","Email":"brent@microsoft.com","IsSiteAdmin":true} |
 '-------------------------------------------------------------------------------------------------------------------------------------'
 */
