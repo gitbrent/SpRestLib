@@ -644,7 +644,7 @@ Returns: Array of list properties
 | :-------------------------- | :------- | :---------------------------------------------------------- |
 | `AllowContentTypes`         | boolean  | Whether `Allow management of content types?` is enabled     |
 | `BaseTemplate`              | integer  | `SPListTemplateType` SP Base Template ID number - ex: `100` |
-| `BaseType`                  | integer  | SP Base Type ID number - ex: `0`                            |
+| `BaseType`                  | string   | `SP.BaseType` property value - ex: `Library`, `List`, etc.  |
 | `Created`                   | string   | Date the List/Library was created (ISO format)              |
 | `Description`               | string   | List/Library `Description`                                  |
 | `DraftVersionVisibility`    | number   | whether draft versions can be seen                          |
@@ -762,18 +762,18 @@ Syntax:
 Returns: Array of site lists
 
 #### List Properties
-| Property Name    | Type     | Description                                      |
-| :--------------- | :------- | :----------------------------------------------- |
-| `BaseTemplate`   | number   | `SP.List.baseTemplate` property value            |
-| `BaseType`       | number   | `SP.BaseType` property value                     |
-| `Description`    | string   | Site Description                                 |
-| `Hidden`         | boolean  | Is list hidden?                                  |
-| `Id`             | GUID     | The SP GUID of the Site                          |
-| `ImageUrl`       | string   | Relative URL to the site's SharePoint logo image |
-| `ItemCount`      | number   | Total items in the List/Library                  |
-| `ParentWebUrl`   | string   | Relative URL of parent web site                  |
-| `RootFolder`     | string   | RootFolder.ServerRelativeUrl                     |
-| `Title`          | string   | Title of the Site/Subsite                        |
+| Property Name       | Type     | Description                                                |
+| :------------------ | :------- | :--------------------------------------------------------- |
+| `BaseTemplate`      | number   | `SP.List.baseTemplate` property value - ex: 100            |
+| `BaseType`          | string   | `SP.BaseType` property value - ex: `Library`, `List`, etc. |
+| `Description`       | string   | Site Description                                           |
+| `Hidden`            | boolean  | Is list hidden?                                            |
+| `Id`                | GUID     | The SP GUID of the Site                                    |
+| `ImageUrl`          | string   | Relative URL to the list's SharePoint logo image           |
+| `ItemCount`         | number   | Total items in the List/Library                            |
+| `ParentWebUrl`      | string   | Relative URL of parent web site                            |
+| `ServerRelativeUrl` | string   | RootFolder.ServerRelativeUrl                               |
+| `Title`             | string   | Title of the Site/Subsite                                  |
 
 #### Sample Code
 ```javascript
@@ -781,20 +781,20 @@ sprLib.site().lists()
 .then(function(arr){ console.table([arr[0]]) });
 
 /*
-.-----------------------------------------------------.
-|  Prop Name   |              Prop Value              |
-|--------------|--------------------------------------|
-| Id           | 8fda2798-daba-497d-9840-df87b08e09c1 |
-| Title        | Employees                            |
-| Description  |                                      |
-| ParentWebUrl | /sites/dev                           |
-| ItemCount    | 238                                  |
-| Hidden       | false                                |
-| ImageUrl     | /_layouts/15/images/itgen.png?rev=44 |
-| BaseType     | 0                                    |
-| BaseTemplate | 100                                  |
-| RootFolder   | /sites/dev/Lists/Employees           |
-'-----------------------------------------------------'
+.------------------------------------------------------------.
+|    Prop Name      |              Prop Value                |
+|-------------------|----------------------------------------|
+| Id                | "8fda2798-daba-497d-9840-df87b08e09c1" |
+| Title             | "Employees                             |
+| Description       | "All company personnel"                |
+| ItemCount         | 238                                    |
+| BaseType          | "List"                                 |
+| BaseTemplate      | 100                                    |
+| Hidden            | false                                  |
+| ImageUrl          | "/_layouts/15/images/itgen.png?rev=44" |
+| ParentWebUrl      | "/sites/dev"                           |
+| ServerRelativeUrl | "/sites/dev/Lists/Employees"           |
+'------------------------------------------------------------'
 */
 ```
 
