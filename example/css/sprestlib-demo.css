@@ -1,6 +1,6 @@
 /*
 * NAME: sprestlib-demo.css
-* DATE: 20180225
+* DATE: 20180318
 */
 
 /* Responsive */
@@ -11,6 +11,24 @@ h1   { font-size: 2.4rem; } /* =24px */
 .github-fork-ribbon:before {
     background-color: #0088cc;
 }
+
+.sprlib-spinner {
+	display: block;
+	height: 16px;
+	text-align: center;
+	white-space: nowrap;
+}
+.sprlib-spinner > div {
+	display: inline-block;
+	width:16px; height:16px;
+	background-color: #40b0df;
+	border: 3px solid #f2f9fc;
+	border-radius: 100%;
+	animation: sprlib-sk-bouncedelay 1.4s infinite ease-in-out both;
+}
+.sprlib-spinner .sprlib-bounce1 { animation-delay: -0.32s; }
+.sprlib-spinner .sprlib-bounce2 { animation-delay: -0.16s; }
+@keyframes sprlib-sk-bouncedelay { 0%, 80%, 100% {  transform: scale(0); } 40% { transform: scale(1.0); } }
 
 .sprlib-spinner { min-height:32px; }
 .sprlib-spinner > div { width:32px; height:32px; }
