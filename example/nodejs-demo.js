@@ -46,7 +46,9 @@ var SP_HOST = SP_URL.toLowerCase().replace('https://','').replace('http://','');
 var gBinarySecurityToken = "";
 var gAuthCookie1 = "";
 var gAuthCookie2 = "";
+let gStrReqDig = "";
 
+// Examples:
 Promise.resolve()
 .then(() => {
 	// STEP 1: Login to MS with user/pass and get SecurityToken
@@ -184,17 +186,66 @@ Promise.resolve()
 	return sprLib.rest({ url:'_api/contextinfo', type:'POST' });
 })
 .then(arr => {
-	let strReqDig = arr[0].GetContextWebInformation.FormDigestValue;
+	gStrReqDig = arr[0].GetContextWebInformation.FormDigestValue;
 
 	console.log("\nTEST 3: sprLib.list('Announcements').create()");
 	console.log('---------------------------------------------');
-	console.log('strReqDig..: '+ strReqDig);
+	console.log('gStrReqDig..: '+ gStrReqDig);
 
-	return sprLib.list({ name:'Announcements', requestDigest:strReqDig }).create({ "Title":"created with Node demo" });
+	return sprLib.list({ name:'Announcements', requestDigest:gStrReqDig }).create({ "Title":"created with Node demo" });
 })
 .then((objCrud) => {
 	console.log('..\n..create done!');
 	console.log('New item ID...: '+ objCrud.ID);
+
+	console.log("\nTEST 4: sprLib.list('Site Assets').upload()");
+	console.log('---------------------------------------------');
+
+	var strFileName = "upload.txt";
+	//var strFileName = "sprestlib.png";
+//	var strUrl = SP_HOST + "/_api/web/lists/getByTitle('Site Assets')" + "/RootFolder/files/add(overwrite=true,url='"+ strFileName +"')";
+//	var strUrl = "_api/web/lists/getByTitle('Site Assets')" + "/RootFolder/files/add(overwrite=true,url='"+ strFileName +"')";
+
+	var strUrl = "_api/web/lists/getByTitle('Site%20Assets')/RootFolder/files/add(overwrite=true,url='TEST')";
+
+// this works too?
+// http://www.somewhere.com/testsite/_api/web/GetFolderByServerRelativeUrl('/testsite/Shared Documents')/Files/add(url='filename.png',overwrite=true)
+	var strUrl = "_api/web/GetFolderByServerRelativeUrl('/sites/dev/Shared%20Documents')/Files/add(url='filename.png',overwrite=true)";
+
+	var bitmap = fs.readFileSync(strFileName);
+	var postData = new Buffer(bitmap).toString('utf8');
+//	var postData = new Buffer(bitmap);
+//	var postData = fs.readFileSync(strFileName, 'utf8');
+//	var postData = fs.readFileSync(strFileName, 'binary');
+
+//var b = fs.readFileSync(strFileName);
+var b = new Buffer(bitmap);//.toString('utf8');
+var ab = b.buffer.slice(b.byteOffset, b.byteOffset + b.byteLength);
+var arrayBuffer = new Uint8Array(postData).buffer;
+//console.log(arrayBuffer);
+//console.log(postData.substring(0,111));
+
+// TODO:
+//	return sprLib.list('Site Assets').upload('/some/file/demo.txt')
+
+postData = { "title":"test record" };
+
+//	fs.readFile(strFileName, 'binary', (err, postData) => {
+		return sprLib.rest({
+			url: strUrl,
+			type: "POST",
+//			headers: { "Accept":"application/json;odata=verbose", "X-RequestDigest":gStrReqDig, "Content-Type":"application/octet-stream" },
+//			headers: { "Accept":"application/json;odata=verbose", "X-RequestDigest":gStrReqDig },
+			requestDigest: gStrReqDig,
+			data: JSON.stringify(postData) // ab//.toString('utf8')
+		});
+//	});
+
+})
+.then((arrResults) => {
+	console.log('done with UPLOAD');
+	console.log(arrResults);
+//	console.log('SUCCESS: "'+ arrResults[0].Name +'" uploaded to: '+ arrResults[0].ServerRelativeUrl );
 
 	// NEGATIVE-TEST: (check for error msg response)
 	//return sprLib.list('Site Assets').getItems({ listCols:['ColDoesntExist'] });

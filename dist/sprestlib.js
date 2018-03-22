@@ -1020,7 +1020,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 			// Add `data` if included
 			if ( inOpt.data ) objAjaxQuery.data = inOpt.data;
 			// Add default `context-type` for POST if none was specified
-			if ( objAjaxQuery.type == 'POST' && !objAjaxQuery.headers.contentType ) objAjaxQuery.headers['content-type'] = 'application/json;odata=verbose';
+			if ( objAjaxQuery.type == 'POST' && !objAjaxQuery.headers['Content-Type'] ) objAjaxQuery.headers['content-type'] = 'application/json;odata=verbose';
 
 			// STEP 3: Construct Base URL: `url` can be presented in many different forms...
 			objAjaxQuery.url = (inOpt.url.toLowerCase().indexOf('http') == 0 || inOpt.url.indexOf('/') == 0 ? '' : APP_OPTS.baseUrl);
@@ -1129,14 +1129,20 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 								else if ( rawData.indexOf('{"error"') > -1 && rawData.indexOf('{"code"') > -1 ) {
 									// EX: {"error":{"code":"-1, Microsoft.SharePoint.SPException","message":{"lang":"en-US","value":"The field or property 'ColDoesntExist' does not exist."}}}
 									// EX: {"error":{"code":"-1, Microsoft.SharePoint.Client.InvalidClientQueryException","message":{"lang":"en-US","value":"A node of type 'EndOfInput' was read from the JSON reader when trying to read the start of an entry. A 'StartObject' node was expected."}}}
-									reject( JSON.parse(rawData).error.message.value + "\n\nURL used: " + objAjaxQuery.url );
+									reject(
+										'ERROR..: ('+ JSON.parse(rawData).error.code +') '+ JSON.parse(rawData).error.message.value +'\n'
+										+ 'URL....: '+ objAjaxQuery.url
+									);
 								}
 								else {
 									resolve(rawData);
 								}
 							});
 							res.on('error', function(e){
-								reject( JSON.parse(rawData).error.message.value + "\n\nURL used: " + objAjaxQuery.url );
+								reject(
+									'ERROR: ('+ JSON.parse(rawData).error.code +') '+ JSON.parse(rawData).error.message.value +'\n'
+									+ 'URL..: ' + objAjaxQuery.url
+								);
 							});
 						});
 						// POST: Data is sent to SP via `write`
@@ -1175,6 +1181,8 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 				});
 			})
 			.then(function(data){
+console.log('DATA:');
+console.log(data);
 				// A: Parse string to JSON if needed
 				data = ( typeof data === 'string' && data.indexOf('{') == 0 ? JSON.parse(data) : data );
 
