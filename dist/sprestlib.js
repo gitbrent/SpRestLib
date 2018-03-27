@@ -302,6 +302,10 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 			});
 		}
 
+		// TODO: 1.7.0: perms!
+		_newList.perms = function() {
+		}
+
 		// GET-ITEMS ----------------------------------------------------------------
 
 		/**
@@ -1380,8 +1384,8 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 	*/
 	sprLib.site = function site(inUrl) {
 		// Variables
-		var newSite = {};
-		var strBaseUrl = (inUrl ? (inUrl+'/').replace(/\/+$/g,'/') : ''); // Guarantee that baseUrl will end with a forward slash
+		var _newSite = {};
+		var _urlBase = (inUrl ? (inUrl+'/').replace(/\/+$/g,'/') : ''); // Guarantee that baseUrl will end with a forward slash
 
 		/**
 		* Get Site information:
@@ -1395,11 +1399,11 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 		*
 		* @return {Promise} - return `Promise` containing Site info object
 		*/
-		newSite.info = function() {
+		_newSite.info = function() {
 			return new Promise(function(resolve, reject) {
 				Promise.all([
 					sprLib.rest({
-						url: strBaseUrl+'_api/web',
+						url: _urlBase+'_api/web',
 						queryCols: ['Id','Title','Description','Language','Created',
 							'LastItemModifiedDate','LastItemUserModifiedDate','RequestAccessEmail','SiteLogoUrl','Url','WebTemplate',
 							'AssociatedOwnerGroup/Id',        'AssociatedMemberGroup/Id',        'AssociatedVisitorGroup/Id',
@@ -1409,7 +1413,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 						cache: false
 					}),
 					sprLib.rest({
-						url: strBaseUrl+'_api/site',
+						url: _urlBase+'_api/site',
 						queryCols: ['Owner/Email','Owner/LoginName','Owner/Title','Owner/IsSiteAdmin'],
 						cache: false
 					})
@@ -1446,10 +1450,10 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 		*
 		* @return {Promise} - Return `Promise` containing Site Lists/Libraries
 		*/
-		newSite.lists = function() {
+		_newSite.lists = function() {
 			return new Promise(function(resolve, reject) {
 				sprLib.rest({
-					url: strBaseUrl+'_api/web/lists',
+					url: _urlBase+'_api/web/lists',
 					queryCols: [
 						'Id','Title','Description','ItemCount','BaseType','BaseTemplate','Hidden','ImageUrl','ParentWebUrl','RootFolder/ServerRelativeUrl'
 					]
@@ -1479,10 +1483,10 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 		*
 		* @return {Promise} - return `Promise` containing Subsites
 		*/
-		newSite.subsites = function() {
+		_newSite.subsites = function() {
 			return new Promise(function(resolve, reject) {
 				sprLib.rest({
-					url: strBaseUrl+'_api/web/webs',
+					url: _urlBase+'_api/web/webs',
 					queryCols: {
 						Id:				{ dataName:'Id'						,dispName:'Id'					},
 						Name:			{ dataName:'Title'					,dispName:'Subsite Name'		},
@@ -1520,10 +1524,10 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 		*
 		* @return {Promise} - return `Promise` containing Site Permission object { Member:{}, Roles:[] }
 		*/
-		newSite.perms = function() {
+		_newSite.perms = function() {
 			return new Promise(function(resolve, reject) {
 				sprLib.rest({
-					url: strBaseUrl+'_api/web/roleAssignments',
+					url: _urlBase+'_api/web/roleAssignments',
 					queryCols: ['PrincipalId','Member/PrincipalType','Member/Title','RoleDefinitionBindings/Name','RoleDefinitionBindings/Hidden']
 				})
 				.then(function(arrData){
@@ -1560,10 +1564,10 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 		*
 		* @return {Promise} - return `Promise` containing Roles
 		*/
-		newSite.roles = function() {
+		_newSite.roles = function() {
 			return new Promise(function(resolve, reject) {
 				sprLib.rest({
-					url: strBaseUrl+'_api/web/roleDefinitions',
+					url: _urlBase+'_api/web/roleDefinitions',
 					queryCols: ['Id','Name','Description','RoleTypeKind','Hidden']
 				})
 				.then(function(arrData){
@@ -1590,7 +1594,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 		*
 		* @return {Promise} - return `Promise` containing Groups
 		*/
-		newSite.groups = function() {
+		_newSite.groups = function() {
 			return new Promise(function(resolve, reject) {
 				var arrData = [];
 				var arrQuery = [];
@@ -1601,7 +1605,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 
 					// STEP 1: Get Groups
 					sprLib.rest({
-						url: strBaseUrl+'_api/web/RoleAssignments',
+						url: _urlBase+'_api/web/RoleAssignments',
 						queryCols: ['Member/Id','Member/Title','Member/Description','Member/OwnerTitle','Member/PrincipalType','Member/AllowMembersEditMembership'],
 						queryFilter: 'Member/PrincipalType eq 8',
 						queryLimit: 5000
@@ -1623,7 +1627,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 							// B: Create Users promise
 							arrPromises.push(
 								sprLib.rest({
-									url: strBaseUrl+'_api/web/SiteGroups/GetById('+ grp.Member.Id +')/Users',
+									url: _urlBase+'_api/web/SiteGroups/GetById('+ grp.Member.Id +')/Users',
 									queryCols: ['Id','LoginName','Title'],
 									queryLimit: 5000
 								})
@@ -1647,7 +1651,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 				}
 				else {
 					sprLib.rest({
-						url: strBaseUrl+'_api/web/siteGroups',
+						url: _urlBase+'_api/web/siteGroups',
 						queryCols:
 							['Id','Title','PrincipalType','Description','OwnerTitle','AllowMembersEditMembership',
 							'Users/Id','Users/Title','Users/LoginName'],
@@ -1684,7 +1688,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 		*
 		* @return {Promise} - return `Promise` containing Users
 		*/
-		newSite.users = function() {
+		_newSite.users = function() {
 			return new Promise(function(resolve, reject) {
 				// LOGIC: If `inUrl` exists, then just get the Groups from that site, otherwise, return SiteCollection Groups
 				if ( inUrl ) {
@@ -1694,13 +1698,13 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 					// FIXME: LIMIT: Library only supports up to 5000 results!
 					Promise.all([
 						sprLib.rest({
-							url: strBaseUrl+'_api/web/RoleAssignments',
+							url: _urlBase+'_api/web/RoleAssignments',
 							queryCols: ['Member/Id','Member/Email','Member/LoginName','Member/Title','Member/IsSiteAdmin'],
 							queryFilter: 'Member/PrincipalType eq 1',
 							queryLimit: 5000
 						}),
 						sprLib.rest({
-							url: strBaseUrl+'_api/web/RoleAssignments',
+							url: _urlBase+'_api/web/RoleAssignments',
 							queryCols: ['Member/Id','Member/Title','Member/Users/Id','Member/Users/Email','Member/Users/LoginName','Member/Users/Title','Member/Users/IsSiteAdmin'],
 							queryFilter: 'Member/PrincipalType eq 8',
 							queryLimit: 5000
@@ -1754,7 +1758,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 				else {
 					// SiteCollection [All] Users
 					sprLib.rest({
-						url: strBaseUrl+'_api/web/SiteUsers',
+						url: _urlBase+'_api/web/SiteUsers',
 						queryCols: ['Id','Email','LoginName','Title','IsSiteAdmin','Groups/Id','Groups/Title'],
 						queryFilter: 'PrincipalType eq 1',
 						queryLimit: 5000
@@ -1777,10 +1781,10 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 
 		// TODO: FUTURE: contentTypes & Features
 		/*
-			newSite.contentTypes = function() {
+			_newSite.contentTypes = function() {
 				// ContentTypes: https://contoso.sharepoint.com/sites/dev/_api/web/ContentTypes
 			}
-			newSite.features = function() {
+			_newSite.features = function() {
 				// Features: https://contoso.sharepoint.com/sites/dev/_api/site/Features
 			}
 		*/
@@ -1807,7 +1811,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 		*/
 
 		// LAST: Return this List to enable chaining
-		return newSite;
+		return _newSite;
 	}
 
 	// API: USER (Current or Query User by Props)
@@ -2024,12 +2028,12 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 	}
 
 	// API: UTILITY: Token
-	sprLib.renewSecurityToken = function renewSecurityToken(){
+	sprLib.renewSecurityToken = function renewSecurityToken() {
 		return doRenewDigestToken();
 	}
 
 	// API: NODEJS: Setup
-	sprLib.nodeConfig = function nodeConfig(inOpt){
+	sprLib.nodeConfig = function nodeConfig(inOpt) {
 		inOpt = (inOpt && typeof inOpt === 'object' ? inOpt : {});
 		APP_OPTS.nodeCookie  = inOpt.cookie || '';
 		APP_OPTS.nodeEnabled = (typeof inOpt.nodeEnabled !== 'undefined' ? inOpt.nodeEnabled : true);
