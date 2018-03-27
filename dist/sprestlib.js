@@ -228,10 +228,6 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 
 		// STEP 1: Add public methods
 
-		// TODO: list().perms()
-		// returns exactly what SP Perms page has (user/group, type, perm roles/levels)
-		// Eg: _layouts/15/user.aspx?obj=[listGUID]
-
 		/**
 		* Return array of column objects with info about each (title, REST/internal name, type, etc.)
 		*
@@ -286,7 +282,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 		_newList.info = function() {
 			return new Promise(function(resolve, reject) {
 				var strFields = 'Id,AllowContentTypes,BaseTemplate,BaseType,Created,Description,DraftVersionVisibility,'
-					+ 'EnableAttachments,EnableFolderCreation,EnableVersioning,ForceCheckout,Hidden,ItemCount,'
+					+ 'EnableAttachments,EnableFolderCreation,EnableVersioning,ForceCheckout,Hidden,ItemCount,HasUniqueRoleAssignments,'
 					+ 'LastItemDeletedDate,LastItemModifiedDate,LastItemUserModifiedDate,ListItemEntityTypeFullName,Title';
 
 				sprLib.rest({
@@ -302,8 +298,40 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 			});
 		}
 
-		// TODO: 1.7.0: perms!
+		// TODO: list().perms(): 1.7.0: perms!
+		// returns exactly what SP Perms page has (user/group, type, perm roles/levels)
+		//
+		// Eg: _layouts/15/user.aspx?obj=[listGUID]
+		// NAME, TYPE, PERMISSIONS LEVEL(S)
+		// "Dev Owners", "SharePoint Group", ["Full Control"]
 		_newList.perms = function() {
+			return new Promise(function(resolve, reject) {
+				sprLib.rest({
+					url: _urlBase+'/RoleAssignments?$select=',
+					queryCols: ['PrincipalId','Member/PrincipalType','Member/Title','RoleDefinitionBindings/Name','RoleDefinitionBindings/Hidden']
+				})
+				.then(function(arrData){
+					// STEP 1: Transform: Results s/b 2 keys with props inside each
+					arrData.forEach(function(objItem,idx){
+						// A: "Rename" the `RoleDefinitionBindings` key to be user-friendly
+						Object.defineProperty(objItem, 'Roles', Object.getOwnPropertyDescriptor(objItem, 'RoleDefinitionBindings'));
+						delete objItem.RoleDefinitionBindings;
+
+						// B: Move `PrincipalId` inside {Member}
+						objItem.Member.PrincipalId = objItem.PrincipalId;
+						delete objItem.PrincipalId;
+
+						// C: Decode PrincipalType into text
+						objItem.Member.PrincipalType = ENUM_PRINCIPALTYPES[objItem.Member.PrincipalType] || objItem.Member.PrincipalType;
+					});
+
+					// STEP 2: Resolve results (NOTE: empty array is the correct default result)
+					resolve( arrData || [] );
+				})
+				.catch(function(strErr){
+					reject( strErr );
+				});
+			});
 		}
 
 		// GET-ITEMS ----------------------------------------------------------------
@@ -1531,7 +1559,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 					queryCols: ['PrincipalId','Member/PrincipalType','Member/Title','RoleDefinitionBindings/Name','RoleDefinitionBindings/Hidden']
 				})
 				.then(function(arrData){
-					// Transform: Results s/b 2 keys with props inside each
+					// STEP 1: Transform: Results s/b 2 keys with props inside each
 					arrData.forEach(function(objItem,idx){
 						// A: "Rename" the `RoleDefinitionBindings` key to be user-friendly
 						Object.defineProperty(objItem, 'Roles', Object.getOwnPropertyDescriptor(objItem, 'RoleDefinitionBindings'));
@@ -1546,11 +1574,11 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 					});
 
 					// TODO: OPTION: "Show Group Members", then do lookups below, otherwise, just show users/group names
-					// TODO: use PrincipalType to find groups and query for thier users, then full pictureisodne!!!
+					// TODO: use PrincipalType to find groups and query for thier users, then the full picture is done!
 					//.then(arrOwnerId => { return sprLib.rest({ url:site.UrlAbs+'/_api/web/SiteGroups/GetById('+ arrOwnerId[0].Id +')/Users', queryCols:['Title','Email'] }) })
 					//.then(arrUsers   => arrUsers.forEach((user,idx) => site.OwnersGroupUsers += ('<div class="itemBox">'+ user.Title +'<span style="display:none">; </span></div>') ))
 
-					// A: Resolve results (NOTE: empty array is the correct default result)
+					// STEP 2: Resolve results (NOTE: empty array is the correct default result)
 					resolve( arrData || [] );
 				})
 				.catch(function(strErr){

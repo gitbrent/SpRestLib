@@ -652,6 +652,7 @@ Returns: Array of list properties
 | `EnableFolderCreation`      | boolean  | whether users can create folders in this list/library       |
 | `EnableVersioning`          | boolean  | whether versioning is enabled for the items in this list    |
 | `ForceCheckout`             | boolean  | Whether Force checkout is enabled                           |
+| `HasUniqueRoleAssignments`  | boolean  | Whether list has unique (non-inherited) permissions         |
 | `Hidden`                    | boolean  | Whether List is hidden                                      |
 | `Id`                        | GUID     | The SP GUID of the List                                     |
 | `ItemCount`                 | number   | The number of Items in the List                             |
@@ -668,28 +669,29 @@ sprLib.list('Employees').info()
 
 // RESULT:
 /*
-.-------------------------------------------------------------------.
-|         Prop Name          |              Prop Value              |
-|----------------------------|--------------------------------------|
-| AllowContentTypes          | true                                 |
-| BaseTemplate               | 100                                  |
-| BaseType                   | 0                                    |
-| Created                    | 2016-08-21T20:48:43Z                 |
-| Description                |                                      |
-| DraftVersionVisibility     | 0                                    |
-| EnableAttachments          | true                                 |
-| EnableFolderCreation       | false                                |
-| EnableVersioning           | true                                 |
-| ForceCheckout              | false                                |
-| Hidden                     | false                                |
-| Id                         | 8fda2799-dbbc-a420-9869-df87b08b09c1 |
-| ItemCount                  | 238                                  |
-| LastItemDeletedDate        | 2017-10-27T04:42:39Z                 |
-| LastItemModifiedDate       | 2017-10-27T04:42:55Z                 |
-| LastItemUserModifiedDate   | 2017-10-27T04:42:55Z                 |
-| ListItemEntityTypeFullName | SP.Data.EmployeesListItem            |
-| Title                      | Employees                            |
-'-------------------------------------------------------------------'
+.---------------------------------------------------------------------.
+|         Prop Name          |               Prop Value               |
+|----------------------------|----------------------------------------|
+| AllowContentTypes          | true                                   |
+| BaseTemplate               | 100                                    |
+| BaseType                   | 0                                      |
+| Created                    | "2017-08-21T20:48:43Z"                 |
+| Description                |                                        |
+| DraftVersionVisibility     | 0                                      |
+| EnableAttachments          | true                                   |
+| EnableFolderCreation       | false                                  |
+| EnableVersioning           | true                                   |
+| ForceCheckout              | false                                  |
+| HasUniqueRoleAssignments   | false                                  |
+| Hidden                     | false                                  |
+| Id                         | "8fda2799-dbbc-a420-9869-df87b08b09c1" |
+| ItemCount                  | 238                                    |
+| LastItemDeletedDate        | "2017-10-27T04:42:39Z"                 |
+| LastItemModifiedDate       | "2017-10-27T04:42:55Z"                 |
+| LastItemUserModifiedDate   | "2017-10-27T04:42:55Z"                 |
+| ListItemEntityTypeFullName | "SP.Data.EmployeesListItem"            |
+| Title                      | "Employees"                            |
+'---------------------------------------------------------------------'
 */
 ```
 
