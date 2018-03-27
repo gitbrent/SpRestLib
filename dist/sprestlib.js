@@ -33,7 +33,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 (function(){
 	// APP VERSION/BUILD
 	var APP_VER = "1.7.0-beta";
-	var APP_BLD = "20180318";
+	var APP_BLD = "20180326";
 	var DEBUG = false; // (verbose mode/lots of logging)
 	// ENUMERATIONS
 	// REF: [`SP.BaseType`](https://msdn.microsoft.com/en-us/library/office/jj246925.aspx)
@@ -1425,7 +1425,11 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 					delete objSite.AssociatedOwnerGroup.__metadata;
 					delete objSite.AssociatedVisitorGroup.__metadata;
 
-					// C: Resolve results (NOTE: if site was not found, an empty object is the correct result)
+					// C: Remove columns that may not be present
+					// `LastItemUserModifiedDate` exists in SP2016/SharePoint-Online, but not in SP2013 on-prem
+					if ( objSite.hasOwnProperty('LastItemUserModifiedDate') && !objSite.LastItemUserModifiedDate ) delete objSite.LastItemUserModifiedDate;
+
+					// D: Resolve results (NOTE: if site was not found, an empty object is the correct result)
 					resolve( objSite );
 				})
 				.catch(function(strErr){
