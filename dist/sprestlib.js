@@ -277,7 +277,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 		/**
 		* Return an object containing information about the current List/Library
 		*
-		* @example: sprLib.list('Employees').info().then(function(objInfo){ console.table(objInfo) });
+		* @example: sprLib.list('Employees').info().then( objInfo => console.table(objInfo) );
 		*/
 		_newList.info = function() {
 			return new Promise(function(resolve, reject) {
@@ -298,13 +298,23 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 			});
 		}
 
-		// TODO: list().perms(): 1.7.0: perms!
-		// returns exactly what SP Perms page has (user/group, type, perm roles/levels)
-		//
-		// Eg: _layouts/15/user.aspx?obj=[listGUID]
-		// NAME, TYPE, PERMISSIONS LEVEL(S)
-		// "Dev Owners", "SharePoint Group", ["Full Control"]
-		_newList.perms = function() {
+		/**
+		* Get List permissions
+		* Returns array of objects with `Member` and `Roles` properties
+		*
+		* @example - sprLib.list('Employees').perms().then( arr => console.log(arr) );
+		* //.--------------------------------------------------------------------------------------------------------------------------------------------------------------------------.
+		* //|                                        Member                                         |                                      Roles                                       |
+		* //|---------------------------------------------------------------------------------------|----------------------------------------------------------------------------------|
+		* //| {"Title":"Excel Services Viewers","PrincipalType":"SharePoint Group","PrincipalId":5} | [{"Hidden":false,"Name":"View Only"}]                                            |
+		* //| {"Title":"Dev Site Owners","PrincipalType":"SharePoint Group","PrincipalId":6}        | [{"Hidden":false,"Name":"Full Control"},{"Hidden":true,"Name":"Limited Access"}] |
+		* //| {"Title":"Dev Site Visitors","PrincipalType":"SharePoint Group","PrincipalId":7}      | [{"Hidden":false,"Name":"Read"}]                                                 |
+		* //| {"Title":"Dev Site Members","PrincipalType":"SharePoint Group","PrincipalId":8}       | [{"Hidden":false,"Name":"Design"},{"Hidden":false,"Name":"Edit"}]                |
+		* //'--------------------------------------------------------------------------------------------------------------------------------------------------------------------------'
+		*
+		* @example - sprLib.list('Employees').perms({ "view":"web" }).then( arr => console.log(arr) );
+		*/
+		_newList.perms = function(inOpt) {
 			return new Promise(function(resolve, reject) {
 				sprLib.rest({
 					url: _urlBase+'/RoleAssignments?$select=',
@@ -324,6 +334,14 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 						// C: Decode PrincipalType into text
 						objItem.Member.PrincipalType = ENUM_PRINCIPALTYPES[objItem.Member.PrincipalType] || objItem.Member.PrincipalType;
 					});
+
+					// STEP 2:
+					if ( inOpt && inOpt.view && inOpt.view == "web" ) {
+						// TODO: return simple view that matches web
+						// Eg: _layouts/15/user.aspx?obj=[listGUID]
+						// NAME, TYPE, PERMISSIONS LEVEL(S)
+						// "Dev Owners", "SharePoint Group", ["Full Control"]
+					}
 
 					// STEP 2: Resolve results (NOTE: empty array is the correct default result)
 					resolve( arrData || [] );
@@ -1538,7 +1556,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 
 		/**
 		* Get Site base permissions
-		* Returns array of obejcts with 2 keys: `Member` and `Roles`
+		* Returns array of objects with `Member` and `Roles` properties
 		*
 		* @example - sprLib.site().perms().then( arr => console.table(arr) );
 		* //.--------------------------------------------------------------------------------------------------------------------------------------------------.
