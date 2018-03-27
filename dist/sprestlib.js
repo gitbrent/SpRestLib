@@ -282,7 +282,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 		_newList.info = function() {
 			return new Promise(function(resolve, reject) {
 				var strFields = 'Id,AllowContentTypes,BaseTemplate,BaseType,Created,Description,DraftVersionVisibility,'
-					+ 'EnableAttachments,EnableFolderCreation,EnableVersioning,ForceCheckout,Hidden,ItemCount,HasUniqueRoleAssignments,'
+					+ 'EnableAttachments,EnableFolderCreation,EnableVersioning,ForceCheckout,HasUniqueRoleAssignments,Hidden,ItemCount,'
 					+ 'LastItemDeletedDate,LastItemModifiedDate,LastItemUserModifiedDate,ListItemEntityTypeFullName,Title';
 
 				sprLib.rest({

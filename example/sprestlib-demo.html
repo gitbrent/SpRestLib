@@ -6,7 +6,7 @@
 	<meta name="website"     content="https://github.com/gitbrent/SpRestLib/">
 	<meta name="keywords"    content="SpRestLib, JavaScript, js-sharepoint, OData, REST, SharePoint 2013, SP2013, SharePoint 2016, SP2016, SharePoint Online">
 	<meta name="description" content="Content Editor WebPart to showcase SpRestLib features and capabilities">
-	<meta name="revised"     content="20180302">
+	<meta name="revised"     content="20180326">
 
 	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300">
 	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:700">
@@ -73,6 +73,7 @@
 			// A: Clear results
 			$('#tab1-ListInfo table').remove();
 			$('#tab1-ListCols table').remove();
+			$('#tab1-ListPerms table').remove();
 			// B: Return if nothing selected
 			if ( !$('#selSiteLists').val() ) return;
 
@@ -82,7 +83,7 @@
 			.then(function(objInfo){
 				var $table = $('<table class="tabModern"><tbody></tbody></table>');
 				$table.append('<thead><tr><th>Prop Name</th><th>Prop Value</th></tr></thead>');
-				Object.keys(objInfo).forEach(function(key,idx){
+				Object.keys(objInfo).sort().forEach(function(key,idx){
 					$table.find('tbody').append('<tr><th>'+ key +'</th>'+'<td class="code">'+ objInfo[key] +'</td></tr>');
 				});
 				$('#tab1-ListInfo').append( $table );
@@ -109,6 +110,26 @@
 			})
 			.catch(function(errMsg){
 				$('$tab1-ListCols .tableRows').after( '<table><tbody><tr><td>'+errMsg+'</td></tr></tbody></table>' );
+			});
+
+			// LIST PERMS:
+			$('#tab1-ListPerms pre code').text( 'sprLib.list(\''+ $('#selSiteLists').val() +'\').perms()' );
+			sprLib.list($('#selSiteLists').val()).perms()
+			.then(function(arrColObjs){
+				var $table = $('<table class="tabModern"><thead><tr></tr></thead><tbody></tbody></table>');
+
+				if ( arrColObjs.length ) $.each(arrColObjs[0],function(key,val){ $table.find('thead tr').append('<th>'+key+'</th>') });
+
+				arrColObjs.forEach(function(obj,idx){
+					var $row = $('<tr/>');
+					$.each(obj,function(key,val){ $row.append('<td class="code">'+ (typeof val === 'object' ? JSON.stringify(val,null,4) : val) +'</td>') });
+					$table.find('tbody').append( $row );
+				});
+
+				$('#tab1-ListPerms').append( $table );
+			})
+			.catch(function(errMsg){
+				$('$tab1-ListPerms .tableRows').after( '<table><tbody><tr><td>'+errMsg+'</td></tr></tbody></table>' );
 			});
 		}
 
@@ -437,6 +458,7 @@
 			if ( window.location.href.toLowerCase().indexOf('gitbrent') > -1 ) {
 				// Dynamically load library as SharePoint Online is *BAD* about caching
 				$.getScript("../SiteAssets/sprestlib/js/sprestlib.js", function(){
+					$('#libChkSprLib > div:last-child').text( sprLib.version );
 					console.log('FYI: Local copy of `sprestlib.js` loaded successfully...');
 					console.log( sprLib.version );
 					doPageLoad();
@@ -449,7 +471,6 @@
 			else {
 				doPageLoad();
 			}
-
 		});
 	</script>
 </head>
@@ -675,14 +696,25 @@
 					</div>
 				</div>
 
-				<div id="tab1-ListInfo" style="margin-bottom:20px;">
-					<div class="subTitle">List Information</div>
-					<div><pre><code class="language-javascript">sprLib.list('listName').info()</code></pre></div>
+				<div class="subTitle" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
+					<div class="arrow active"></div>List Information
+				</div>
+				<div id="tab1-ListInfo">
+					<pre><code class="language-javascript">sprLib.list('listName').info()</code></pre>
 				</div>
 
-				<div id="tab1-ListCols" style="margin-bottom:20px;">
-					<div class="subTitle">List Columns</div>
-					<div><pre><code class="language-javascript">sprLib.list('listName').cols()</code></pre></div>
+				<div class="subTitle" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
+					<div class="arrow"></div>List Columns
+				</div>
+				<div id="tab1-ListCols" style="display:none">
+					<pre><code class="language-javascript">sprLib.list('listName').cols()</code></pre>
+				</div>
+
+				<div class="subTitle" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
+					<div class="arrow"></div>List Permissions
+				</div>
+				<div id="tab1-ListPerms" style="display:none">
+					<pre><code class="language-javascript">sprLib.list('listName').perms()</code></pre>
 				</div>
 			</div>
 
