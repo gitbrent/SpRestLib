@@ -6,7 +6,7 @@
 	<meta name="website"     content="https://github.com/gitbrent/SpRestLib/">
 	<meta name="keywords"    content="SpRestLib, JavaScript, js-sharepoint, OData, REST, SharePoint 2013, SP2013, SharePoint 2016, SP2016, SharePoint Online">
 	<meta name="description" content="Content Editor WebPart to showcase SpRestLib features and capabilities">
-	<meta name="revised"     content="20180326">
+	<meta name="revised"     content="20180327">
 
 	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300">
 	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:700">
@@ -39,8 +39,9 @@
 
 	<script type="text/javascript">
 		$.ajaxSetup({ cache:false });
-		var APP_BLD = 20180302;
+		var APP_BLD = 20180327;
 		var HTML_SPINNER = '<div class="sprlib-spinner"><div class="sprlib-bounce1"></div><div class="sprlib-bounce2"></div><div class="sprlib-bounce3"></div></div>';
+		var LAYOUTS_URL = _spPageContextInfo.layoutsUrl || '_layouts/15';
 
 		// ==================================================================================================================
 
@@ -73,7 +74,8 @@
 			// A: Clear results
 			$('#tab1-ListInfo table').remove();
 			$('#tab1-ListCols table').remove();
-			$('#tab1-ListPerms table').remove();
+			$('#tabListPerms').trigger("destroy");
+			$('#tabListPerms tbody').empty();
 			// B: Return if nothing selected
 			if ( !$('#selSiteLists').val() ) return;
 
@@ -115,18 +117,19 @@
 			// LIST PERMS:
 			$('#tab1-ListPerms pre code').text( 'sprLib.list(\''+ $('#selSiteLists').val() +'\').perms()' );
 			sprLib.list($('#selSiteLists').val()).perms()
-			.then(function(arrColObjs){
-				var $table = $('<table class="tabModern"><thead><tr></tr></thead><tbody></tbody></table>');
-
-				if ( arrColObjs.length ) $.each(arrColObjs[0],function(key,val){ $table.find('thead tr').append('<th>'+key+'</th>') });
-
-				arrColObjs.forEach(function(obj,idx){
+			.then(function(arrPerms){
+				arrPerms.forEach(function(perm){
+					// A-1: Create row
 					var $row = $('<tr/>');
-					$.each(obj,function(key,val){ $row.append('<td class="code">'+ (typeof val === 'object' ? JSON.stringify(val,null,4) : val) +'</td>') });
-					$table.find('tbody').append( $row );
+					$row.append('<th><a href="../'+LAYOUTS_URL+'/people.aspx?MembershipGroupId='+ perm.Member.PrincipalId +'" target="_blank">'+ perm.Member.Title +'</a></th>');
+					$row.append('<td>'+ perm.Member.PrincipalType +'</td>');
+					$row.append('<td/>');
+					perm.Roles.forEach(function(role){
+						if ( !role.Hidden ) $row.find('td:last-child').append('<div class="itemBox">'+ role.Name +'<span style="display:none">; </span></div>');
+					});
+					$('#tabListPerms tbody').append( $row );
 				});
-
-				$('#tab1-ListPerms').append( $table );
+				if ( $.tablesorter ) $('#tabListPerms').tablesorter({ sortList:[[0,0]] });
 			})
 			.catch(function(errMsg){
 				$('$tab1-ListPerms .tableRows').after( '<table><tbody><tr><td>'+errMsg+'</td></tr></tbody></table>' );
@@ -273,11 +276,7 @@
 					arrPerms.forEach(function(perm,idx){
 						// A-1: Create row
 						var $row = $('<tr/>');
-						$row.append('<th>'
-						// TODO: diff icon for each `PrincipalType`
-							+ '<img class="imgIcon" src="/_layouts/15/images/ribbon_userprofile_16.png">'
-							+ '<a href="../_layouts/15/user.aspx" target="_blank">'+ perm.Member.Title +'</a>'
-							+ '</th>');
+						$row.append('<th><a href="../'+LAYOUTS_URL+'/people.aspx?MembershipGroupId='+ perm.Member.PrincipalId +'" target="_blank">'+ perm.Member.Title +'</a></th>');
 						$row.append('<td/>');
 						perm.Roles.forEach(function(role,idx){
 							if ( !role.Hidden ) $row.find('td:last-child').append('<div class="itemBox">'+ role.Name +'<span style="display:none">; </span></div>');
@@ -298,8 +297,8 @@
 							// A-1: Create row
 							var $row = $('<tr/>');
 							$row.append('<th>'
-								+ '<img class="imgIcon" src="/_layouts/15/images/ribbon_userprofile_16.png">'
-								+ '<a href="../_layouts/15/people.aspx?MembershipGroupId='+ group.Id +'" target="_blank">'+ group.Title +'</a>'
+								+ '<img class="imgIcon" src="/'+LAYOUTS_URL+'/images/ribbon_userprofile_16.png">'
+								+ '<a href="../'+LAYOUTS_URL+'/people.aspx?MembershipGroupId='+ group.Id +'" target="_blank">'+ group.Title +'</a>'
 								+ '</th>');
 							$row.append('<td>'+ group.OwnerTitle +'</td>');
 							$row.append('<td id="groupCount'+ group.Id +'" class="nowctr"></td>');
@@ -310,7 +309,7 @@
 							// A-2: Populate Group members
 							sprLib.rest({
 								url: '_api/web/SiteGroups('+ group.Id +')/Users',
-								queryCols: ['Id','Email','LoginName','PrincipleType','Title']
+								queryCols: ['Id','Email','LoginName','PrincipalType','Title']
 							})
 							.then(function(arrUsers){
 								arrUsers.forEach(function(user,idx){ $('#groupUsers'+group.Id).append('<div class="itemBox">'+ user.Title +'<span style="display:none">; </span></div>') });
@@ -330,7 +329,7 @@
 						// Filter: Hidden roles
 						if ( !role.Hidden ) {
 							var $row = $('<tr/>');
-							$row.append('<th><a href="../_layouts/15/EditRole.aspx?role='+ role.Name +'" target="_blank">'+ role.Name +'</a></th>');
+							$row.append('<th><a href="../'+LAYOUTS_URL+'/EditRole.aspx?role='+ role.Name +'" target="_blank">'+ role.Name +'</a></th>');
 							$row.append('<td class="showGrpDesc">'+ role.Description +'</td>');
 							$('#tabSiteRoles tbody').append( $row );
 						}
@@ -368,7 +367,7 @@
 						user.Groups.forEach(function(group,idx){
 							$row.find('td:last-child').append(
 								'<div class="itemBox">'
-								+ '<a href="../_layouts/15/people.aspx?MembershipGroupId='+ group.Id +'" target="_blank">'+ group.Title +'</a>'
+								+ '<a href="../'+LAYOUTS_URL+'/people.aspx?MembershipGroupId='+ group.Id +'" target="_blank">'+ group.Title +'</a>'
 								+ '</div>'
 							);
 						});
@@ -444,7 +443,7 @@
 			{
 				$('#sandboxCode').text(
 					"sprLib.list('Site Assets')\n"
-					+ ".getItems({\n"
+					+ ".items({\n"
 					+ "  listCols: ['Id','FileLeafRef','Created','Modified']\n"
 					+ "})\n"
 					+ ".then(function(data){ return data; });"
@@ -678,7 +677,7 @@
 			</div>
 
 			<div id="tabList" data-tab="List Methods">
-				<div class="subTitle">List/Library Methods</div>
+				<div class="subTitle secTitle">List/Library Methods</div>
 				<p class="desc">
 					Select one of the Lists/Libraries found on this site to view its properties.<br>
 					Note: Only non-hidden Lists/Libraries are shown
@@ -715,6 +714,17 @@
 				</div>
 				<div id="tab1-ListPerms" style="display:none">
 					<pre><code class="language-javascript">sprLib.list('listName').perms()</code></pre>
+
+					<table id="tabListPerms" class="tabModern">
+						<thead>
+							<tr>
+								<th>Name</th>
+								<th>Type</th>
+								<th class="sorter-false showGrpDesc">Permissions</th>
+							</tr>
+						</thead>
+						<tbody></tbody>
+					</table>
 				</div>
 			</div>
 
