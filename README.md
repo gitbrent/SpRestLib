@@ -38,7 +38,7 @@ using the JavaScript SharePoint App Model.
 * `sprLib.list(listName).recycle(id)`    - Recycle an existing item by ID (move to Recycle Bin)
 * `sprLib.list(listName).cols()`         - Returns an array of column objects with useful info (name, datatype, etc.)
 * `sprLib.list(listName).info()`         - Returns information about the List/Library (GUID, numberOfItems, etc.)
-* `sprLib.list(listName).perms()`        - Returns an array of the site's Member/Roles objects
+* `sprLib.list(listName).perms()`        - Returns an array of the list's Member/Roles objects
 
 ## Site Collection/Subsite
 * `sprLib.site(siteUrl).groups()`   - Returns an array of the site's Groups and Members
@@ -104,7 +104,7 @@ using the JavaScript SharePoint App Model.
     - [Get List Permissions](#get-list-permissions)
       - [Perm Properties](#perm-properties)
       - [Sample Code](#sample-code-3)
-      - [Sample Code: Easily Reproduce the "List Permissions" page ('/\_layouts/15/user.aspx')](#sample-code-easily-reproduce-the-list-permissions-page-%5C_layouts15useraspx)
+      - [Sample Code:](#sample-code)
   - [Site Methods (`SPSite`)](#site-methods-spsite)
     - [Get Site Info](#get-site-info)
       - [Site Properties](#site-properties)
@@ -728,7 +728,8 @@ sprLib.list('Employees').perms()
 */
 ```
 
-#### Sample Code: Easily Reproduce the "List Permissions" page ('/\_layouts/15/user.aspx')
+#### Sample Code:
+Easily Reproduce the "List Permissions" page ('/\_layouts/15/user.aspx')
 ```javascript
 sprLib.list('Employees').perms()
 .then(function(arrPerms){
