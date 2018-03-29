@@ -38,6 +38,7 @@ using the JavaScript SharePoint App Model.
 * `sprLib.list(listName).recycle(id)`    - Recycle an existing item by ID (move to Recycle Bin)
 * `sprLib.list(listName).cols()`         - Returns an array of column objects with useful info (name, datatype, etc.)
 * `sprLib.list(listName).info()`         - Returns information about the List/Library (GUID, numberOfItems, etc.)
+* `sprLib.list(listName).perms()`        - Returns an array of the site's Member/Roles objects
 
 ## Site Collection/Subsite
 * `sprLib.site(siteUrl).groups()`   - Returns an array of the site's Groups and Members
@@ -100,37 +101,41 @@ using the JavaScript SharePoint App Model.
     - [Get List Info](#get-list-info)
       - [List Properties](#list-properties)
       - [Sample Code](#sample-code-2)
+    - [Get List Permissions](#get-list-permissions)
+      - [Perm Properties](#perm-properties)
+      - [Sample Code](#sample-code-3)
+      - [Sample Code: Easily Reproduce the "List Permissions" page ('/\_layouts/15/user.aspx')](#sample-code-easily-reproduce-the-list-permissions-page-%5C_layouts15useraspx)
   - [Site Methods (`SPSite`)](#site-methods-spsite)
     - [Get Site Info](#get-site-info)
       - [Site Properties](#site-properties)
-      - [Sample Code](#sample-code-3)
+      - [Sample Code](#sample-code-4)
     - [Get Site Lists](#get-site-lists)
       - [List Properties](#list-properties-1)
-      - [Sample Code](#sample-code-4)
-    - [Get Site Permissions](#get-site-permissions)
-      - [Perm Properties](#perm-properties)
       - [Sample Code](#sample-code-5)
+    - [Get Site Permissions](#get-site-permissions)
+      - [Perm Properties](#perm-properties-1)
+      - [Sample Code](#sample-code-6)
     - [Get Site Groups](#get-site-groups)
       - [Group Properties](#group-properties)
-      - [Sample Code](#sample-code-6)
+      - [Sample Code](#sample-code-7)
     - [Get Site Roles](#get-site-roles)
       - [Role Properties](#role-properties)
-      - [Sample Code](#sample-code-7)
+      - [Sample Code](#sample-code-8)
     - [Get Site Subsites](#get-site-subsites)
       - [Subsite Properties](#subsite-properties)
-      - [Sample Code](#sample-code-8)
+      - [Sample Code](#sample-code-9)
     - [Get Site Users](#get-site-users)
       - [User Properties](#user-properties)
-      - [Sample Code](#sample-code-9)
+      - [Sample Code](#sample-code-10)
   - [User Methods](#user-methods)
     - [User Query Properties](#user-query-properties)
     - [Get User Information (`SPUser`)](#get-user-information-spuser)
-      - [Sample Code](#sample-code-10)
-    - [Get User Groups (`SPGroup`)](#get-user-groups-spgroup)
       - [Sample Code](#sample-code-11)
+    - [Get User Groups (`SPGroup`)](#get-user-groups-spgroup)
+      - [Sample Code](#sample-code-12)
     - [Get User Profile Properties (`SP.UserProfile.PersonProperties`)](#get-user-profile-properties-spuserprofilepersonproperties)
       - [Person Properties](#person-properties)
-      - [Sample Code](#sample-code-12)
+      - [Sample Code](#sample-code-13)
   - [Form Binding](#form-binding)
     - [Supported HTML Tags](#supported-html-tags)
     - [HTML Tag Properties](#html-tag-properties)
@@ -692,6 +697,60 @@ sprLib.list('Employees').info()
 | ListItemEntityTypeFullName | "SP.Data.EmployeesListItem"            |
 | Title                      | "Employees"                            |
 '---------------------------------------------------------------------'
+*/
+```
+
+### Get List Permissions
+Syntax: `sprLib.list(listName|listGUID).perms()`
+
+Returns: Array of list permissions
+
+#### Perm Properties
+| Property Name    | Type     | Description                                                           |
+| :--------------- | :------- | :-------------------------------------------------------------------- |
+| `Member`         | object   | object with Member properties (`Title`,`PrincipalId`,`PrincipalType`) |
+| `Roles`          | object   | array of Role objects with properties: (`Name`,`Hidden`)              |
+
+#### Sample Code
+```javascript
+sprLib.list('Employees').perms()
+.then(function(arrayResults){ console.table(arrayResults) });
+
+/*
+.-----------------------------------------------------------------------------------------------------------------------------------------------------------.
+|                                        Member                                         |                               Roles                               |
+|---------------------------------------------------------------------------------------|-------------------------------------------------------------------|
+| {"Title":"Dev Site Members","PrincipalType":"SharePoint Group","PrincipalId":8}       | [{"Hidden":false,"Name":"Design"},{"Hidden":false,"Name":"Edit"}] |
+| {"Title":"Dev Site Owners","PrincipalType":"SharePoint Group","PrincipalId":6}        | [{"Hidden":false,"Name":"Full Control"}]                          |
+| {"Title":"Dev Site Visitors","PrincipalType":"SharePoint Group","PrincipalId":7}      | [{"Hidden":false,"Name":"Read"}]                                  |
+| {"Title":"Excel Services Viewers","PrincipalType":"SharePoint Group","PrincipalId":5} | [{"Hidden":false,"Name":"View Only"}]                             |
+'-----------------------------------------------------------------------------------------------------------------------------------------------------------'
+*/
+```
+
+#### Sample Code: Easily Reproduce the "List Permissions" page ('/\_layouts/15/user.aspx')
+```javascript
+sprLib.list('Employees').perms()
+.then(function(arrPerms){
+    arrPerms.forEach(function(perm){
+        var $row = $('<tr/>');
+        $row.append('<td><a href="../_layouts/15/people.aspx?MembershipGroupId='+ perm.Member.PrincipalId +'">'+ perm.Member.Title +'</a></td>');
+        $row.append('<td>'+ perm.Member.PrincipalType +'</td>');
+        $row.append('<td/>');
+        perm.Roles.forEach(function(role){ if ( !role.Hidden ) $row.find('td:last-child').append(role.Name); });
+        $('#tabListPerms tbody').append( $row );
+    });
+});
+
+/*
+.----------------------------------------------------------.
+|          Name          |      Type        |    Roles     |
+|------------------------|------------------|--------------|
+| Dev Site Members       | SharePoint Group | Design, Edit |
+| Dev Site Owners        | SharePoint Group | Full Control |
+| Dev Site Visitors      | SharePoint Group | Read         |
+| Excel Services Viewers | SharePoint Group | View Only    |
+'----------------------------------------------------------'
 */
 ```
 
