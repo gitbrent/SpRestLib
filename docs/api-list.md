@@ -23,6 +23,10 @@ Table of Contents
 - [Get List Info](#get-list-info)
   - [List Properties](#list-properties)
   - [Sample Code](#sample-code-2)
+- [Get List Permissions](#get-list-permissions)
+  - [Perm Properties](#perm-properties)
+  - [Sample Code](#sample-code-3)
+  - [Sample Code](#sample-code-4)
 **************************************************************************************************
 
 ## Syntax
@@ -385,5 +389,62 @@ sprLib.list('Employees').info()
 | ListItemEntityTypeFullName | SP.Data.EmployeesListItem            |
 | Title                      | Employees                            |
 '-------------------------------------------------------------------'
+*/
+```
+
+
+
+### Get List Permissions
+Syntax: `sprLib.list(listName|listGUID).perms()`
+
+Returns: Array of list permissions
+
+#### Perm Properties
+| Property Name    | Type     | Description                                                           |
+| :--------------- | :------- | :-------------------------------------------------------------------- |
+| `Member`         | object   | object with Member properties (`Title`,`PrincipalId`,`PrincipalType`) |
+| `Roles`          | object   | array of Role objects with properties: (`Name`,`Hidden`)              |
+
+#### Sample Code
+```javascript
+sprLib.list('Employees').perms()
+.then(function(arrayResults){ console.table(arrayResults) });
+
+/*
+.-----------------------------------------------------------------------------------------------------------------------------------------------------------.
+|                                        Member                                         |                               Roles                               |
+|---------------------------------------------------------------------------------------|-------------------------------------------------------------------|
+| {"Title":"Dev Site Members","PrincipalType":"SharePoint Group","PrincipalId":8}       | [{"Hidden":false,"Name":"Design"},{"Hidden":false,"Name":"Edit"}] |
+| {"Title":"Dev Site Owners","PrincipalType":"SharePoint Group","PrincipalId":6}        | [{"Hidden":false,"Name":"Full Control"}]                          |
+| {"Title":"Dev Site Visitors","PrincipalType":"SharePoint Group","PrincipalId":7}      | [{"Hidden":false,"Name":"Read"}]                                  |
+| {"Title":"Excel Services Viewers","PrincipalType":"SharePoint Group","PrincipalId":5} | [{"Hidden":false,"Name":"View Only"}]                             |
+'-----------------------------------------------------------------------------------------------------------------------------------------------------------'
+*/
+```
+
+#### Sample Code
+Easily Reproduce the "List Permissions" page ('/\_layouts/15/user.aspx')
+```javascript
+sprLib.list('Employees').perms()
+.then(function(arrPerms){
+    arrPerms.forEach(function(perm){
+        var $row = $('<tr/>');
+        $row.append('<td><a href="../_layouts/15/people.aspx?MembershipGroupId='+ perm.Member.PrincipalId +'">'+ perm.Member.Title +'</a></td>');
+        $row.append('<td>'+ perm.Member.PrincipalType +'</td>');
+        $row.append('<td/>');
+        perm.Roles.forEach(function(role){ if ( !role.Hidden ) $row.find('td:last-child').append(role.Name); });
+        $('#tabListPerms tbody').append( $row );
+    });
+});
+
+/*
+.----------------------------------------------------------.
+|          Name          |      Type        |    Roles     |
+|------------------------|------------------|--------------|
+| Dev Site Members       | SharePoint Group | Design, Edit |
+| Dev Site Owners        | SharePoint Group | Full Control |
+| Dev Site Visitors      | SharePoint Group | Read         |
+| Excel Services Viewers | SharePoint Group | View Only    |
+'----------------------------------------------------------'
 */
 ```
