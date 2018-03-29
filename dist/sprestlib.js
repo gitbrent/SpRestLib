@@ -33,7 +33,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 (function(){
 	// APP VERSION/BUILD
 	var APP_VER = "1.7.0-beta";
-	var APP_BLD = "20180326";
+	var APP_BLD = "20180328";
 	var DEBUG = false; // (verbose mode/lots of logging)
 	// ENUMERATIONS
 	// REF: [`SP.BaseType`](https://msdn.microsoft.com/en-us/library/office/jj246925.aspx)
@@ -306,13 +306,11 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 		* //.--------------------------------------------------------------------------------------------------------------------------------------------------------------------------.
 		* //|                                        Member                                         |                                      Roles                                       |
 		* //|---------------------------------------------------------------------------------------|----------------------------------------------------------------------------------|
-		* //| {"Title":"Excel Services Viewers","PrincipalType":"SharePoint Group","PrincipalId":5} | [{"Hidden":false,"Name":"View Only"}]                                            |
+		* //| {"Title":"Dev Site Members","PrincipalType":"SharePoint Group","PrincipalId":8}       | [{"Hidden":false,"Name":"Design"},{"Hidden":false,"Name":"Edit"}]                |
 		* //| {"Title":"Dev Site Owners","PrincipalType":"SharePoint Group","PrincipalId":6}        | [{"Hidden":false,"Name":"Full Control"},{"Hidden":true,"Name":"Limited Access"}] |
 		* //| {"Title":"Dev Site Visitors","PrincipalType":"SharePoint Group","PrincipalId":7}      | [{"Hidden":false,"Name":"Read"}]                                                 |
-		* //| {"Title":"Dev Site Members","PrincipalType":"SharePoint Group","PrincipalId":8}       | [{"Hidden":false,"Name":"Design"},{"Hidden":false,"Name":"Edit"}]                |
+		* //| {"Title":"Excel Services Viewers","PrincipalType":"SharePoint Group","PrincipalId":5} | [{"Hidden":false,"Name":"View Only"}]                                            |
 		* //'--------------------------------------------------------------------------------------------------------------------------------------------------------------------------'
-		*
-		* @example - sprLib.list('Employees').perms({ "view":"web" }).then( arr => console.log(arr) );
 		*/
 		_newList.perms = function(inOpt) {
 			return new Promise(function(resolve, reject) {
@@ -334,14 +332,6 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 						// C: Decode PrincipalType into text
 						objItem.Member.PrincipalType = ENUM_PRINCIPALTYPES[objItem.Member.PrincipalType] || objItem.Member.PrincipalType;
 					});
-
-					// STEP 2:
-					if ( inOpt && inOpt.view && inOpt.view == "web" ) {
-						// TODO: return simple view that matches web
-						// Eg: _layouts/15/user.aspx?obj=[listGUID]
-						// NAME, TYPE, PERMISSIONS LEVEL(S)
-						// "Dev Owners", "SharePoint Group", ["Full Control"]
-					}
 
 					// STEP 2: Resolve results (NOTE: empty array is the correct default result)
 					resolve( arrData || [] );
