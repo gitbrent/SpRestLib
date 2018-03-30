@@ -5,6 +5,7 @@
 
 **Implemented Enhancements:**
 - Renamed `getItems()` list method to `items()`
+- Updated Node detection to be more accurate
 
 **Fixed Bugs:**
 

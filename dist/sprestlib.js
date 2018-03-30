@@ -27,13 +27,13 @@
 |*|  SOFTWARE.
 \*/
 
-// Detect Node.js
-var NODEJS = ( typeof module !== 'undefined' && module.exports );
+// Detect Node.js (NODEJS determines which network library to use, so using https-detection is perfect)
+var NODEJS = ( typeof module !== 'undefined' && module.exports && typeof require === 'function' && require('https') );
 
 (function(){
 	// APP VERSION/BUILD
 	var APP_VER = "1.7.0-beta";
-	var APP_BLD = "20180328";
+	var APP_BLD = "20180329";
 	var DEBUG = false; // (verbose mode/lots of logging)
 	// ENUMERATIONS
 	// REF: [`SP.BaseType`](https://msdn.microsoft.com/en-us/library/office/jj246925.aspx)
