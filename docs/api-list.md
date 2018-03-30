@@ -247,25 +247,25 @@ sprLib.list('Employees')
 
 ## Delete Item
 Syntax:
-`sprLib.list(listName|listGUID).delete(itemId)`
+`sprLib.list(listName|listGUID).delete(itemObject)`
 
 Returns:
 ID of the item just deleted
 
 Notes:
-Permanently deletes the item (bypasses Recycle Bin; Is not recoverable)
+Permanently deletes the item (bypasses Recycle Bin - not recoverable)
 
 Example:
 ```javascript
-sprLib.list('Employees').delete(99)
-.then(function(intId){ console.log('Deleted Item:'+intId); })
+sprLib.list('Employees').delete({ "ID":123 })
+.then(function(intId){ console.log('Deleted Item #'+intId); })
 .catch(function(strErr){ console.error(strErr); });
 ```
 
 
 ## Recycle Item
 Syntax:
-`sprLib.list(listName|listGUID).recycle(itemId)`
+`sprLib.list(listName|listGUID).recycle(itemObject)`
 
 Returns:
 ID of the item just recycled
@@ -275,8 +275,8 @@ Moves the item into the Site Recycle Bin
 
 Example:
 ```javascript
-sprLib.list('Employees').recycle(99)
-.then(function(intId){ console.log('Recycled Item:'+intId); })
+sprLib.list('Employees').recycle({ "ID":123 })
+.then(function(intId){ console.log('Recycled Item #'+intId); })
 .catch(function(strErr){ console.error(strErr); });
 ```
 
