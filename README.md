@@ -34,8 +34,8 @@ using the JavaScript SharePoint App Model.
 * `sprLib.list(listName).items(options)` - Returns an array of item objects using a variety of possible options
 * `sprLib.list(listName).create(item)`   - Create a new list item using JSON data
 * `sprLib.list(listName).update(item)`   - Update an existing item using JSON data
-* `sprLib.list(listName).delete(item)`   - Delete an existing item by ID (permanently delete)
-* `sprLib.list(listName).recycle(item)`  - Recycle an existing item by ID (move to Recycle Bin)
+* `sprLib.list(listName).delete(item)`   - Delete an existing item using JSON data (permanently delete)
+* `sprLib.list(listName).recycle(item)`  - Recycle an existing item using JSON data (move to Recycle Bin)
 * `sprLib.list(listName).cols()`         - Returns an array of column objects with useful info (name, datatype, etc.)
 * `sprLib.list(listName).info()`         - Returns information about the List/Library (GUID, numberOfItems, etc.)
 * `sprLib.list(listName).perms()`        - Returns an array of the list's Member/Roles objects
