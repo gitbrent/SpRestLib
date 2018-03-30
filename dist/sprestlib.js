@@ -171,7 +171,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports && typeof require
 		if (DEBUG) console.log('APP_OPTS.baseUrl = '+APP_OPTS.baseUrl);
 	}
 
-	// API: LIST (CRUD + getItems)
+	// API: LIST (CRUD, select, recycle)
 	/**
 	* @param `inOpt` (string) - required - ListName or ListGUID
 	* @example - string - sprLib.list('Documents');
@@ -342,7 +342,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports && typeof require
 			});
 		}
 
-		// GET-ITEMS ----------------------------------------------------------------
+		// SELECT -------------------------------------------------------------------
 
 		/**
 		* Get specified or all List/Library column values - optionally: filter, sort, limit
@@ -760,7 +760,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports && typeof require
 			});
 		}
 
-		// DEPRECATED: Remove in 2.0.0
+		// DEPRECATED: TODO: Remove in 2.0.0
 		_newList.getItems = _newList.items;
 
 		// CRUD ---------------------------------------------------------------------
@@ -908,26 +908,22 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports && typeof require
 
 		/**
 		* Delete an item from a SP List/Library
-		* This operation is permanent (item does not go into Recycle Bin)!
+		* This operation is permanent (item bypasses the Recycle Bin)!
 		*
-		* @example - with etag
-		* sprLib.list('Employees').delete({ __metadata: { etag:10 }, Id:1 })
-		* .then(function(){ console.log('Deleted!') })
-		* .catch(function(strErr){ console.error(strErr)  });
+		* @example - with `etag`
+		* sprLib.list('Employees').delete({ "__metadata":{"etag":10}, "Id":1 }).then(intID => console.log('Deleted #'+intID));
 		*
-		* @example - without etag (aka: force delete)
-		* sprLib.list('Employees').delete({ Id: 1 })
-		* .then(function(){ console.log('Deleted!') })
-		* .catch(function(strErr){ console.error(strErr)  });
+		* @example - without `etag` (force delete)
+		* sprLib.list('Employees').delete({ "ID":123 }).then(intID => console.log('Deleted #'+intID));
 		*
-		* @return {number} Return the `id` just deleted.
+		* @return {number} Return the `id` just deleted
 		*/
 		_newList.delete = function(jsonData) {
 			return new Promise(function(resolve,reject) {
 				// FIRST: Param checks
-				if ( !jsonData || Array.isArray(jsonData) || typeof jsonData !== 'object' || Object.keys(jsonData).length == 0 ) reject("Object type expected! Ex: `{Title:'Brent'}`");
-				if ( !jsonData['ID'] && !jsonData['Id'] && !jsonData['iD'] && !jsonData['id'] ) reject("Object data must have an `Id` property! Ex: `{Id:99}`");
-				try { var test = JSON.stringify(jsonData) } catch(ex) { reject("`JSON.stringify(jsonData)` failed! Send a valid object. Ex: `{'Title':'Brent'}`") }
+				if ( !jsonData || Array.isArray(jsonData) || typeof jsonData !== 'object' || Object.keys(jsonData).length == 0 ) reject("Object type expected! Ex: `{'ID':123}`");
+				if ( !jsonData['ID'] && !jsonData['Id'] && !jsonData['iD'] && !jsonData['id'] ) reject("Object data must have an `Id` property! Ex: `{'ID':123}`");
+				try { var test = JSON.stringify(jsonData) } catch(ex) { reject("`JSON.stringify(jsonData)` failed! Please pass a valid object. Ex: `{'ID':123}`") }
 
 				// STEP 1: Param Setup
 				// A: Set our `Id` value (users may send an of 4 different cases), then remove as ID is not updateable in SP
@@ -938,7 +934,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports && typeof require
 				if ( jsonData.__metadata.etag == "" || jsonData.__metadata.etag == null ) delete jsonData.__metadata.etag; // Ensure junk isnt passed, as etag on SP will error
 				delete jsonData.__next; // sprLib may return `next` which in turn may be passed here subsequently - its invalid, so remove it
 
-				// STEP 2: Update item
+				// STEP 2: Delete item
 				Promise.resolve()
 				.then(function(){
 					return ( jsonData.__metadata.type ? null : getListItemType() );
@@ -953,9 +949,9 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports && typeof require
 						url     : _urlBase +"/items("+ intID +")",
 						metadata: true,
 						headers : {
-							"X-HTTP-Method"  : "MERGE",
 							"Accept"         : "application/json;odata=verbose",
 							"X-RequestDigest": _requestDigest,
+							"X-HTTP-Method"  : "MERGE",
 							"IF-MATCH"       : ( jsonData.__metadata.etag ? jsonData.__metadata.etag : "*" )
 						}
 					})
@@ -971,31 +967,39 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports && typeof require
 		};
 
 		/**
-		* Remove an item from a SP List/Library
-		* This operation sends the item to Recycle Bin
+		* Recycle an item from a SP List/Library
+		* This operation sends the item to Recycle Bin (item is recoverable)
 		*
-		* @example - with etag
-		* sprLib.list('Employees').recycle({ __metadata:{ etag:10 }, Id:123 })
+		* @example
+		* sprLib.list('Employees').recycle({ "ID":123 })
 		*
-		* @example - without etag
-		* sprLib.list('Employees').recycle({ Id:123 })
-		*
-		* @example - simple ID (number or string)
-		* sprLib.list('Employees').recycle(123)
-		*
-		* @return {number} Return the `id` just recycled.
+		* @return {number} Return the `id` just recycled
 		*/
-		_newList.recycle = function(intID) {
+		_newList.recycle = function(jsonData) {
 			return new Promise(function(resolve,reject) {
 				// FIRST: Param checks
-				if ( !intID || typeof intID.toString() !== 'string' ) reject("ID expected! Ex: `recycle(99)`");
+				if ( !jsonData || Array.isArray(jsonData) || typeof jsonData !== 'object' || Object.keys(jsonData).length == 0 ) reject("Object type expected! Ex: `{'ID':123}`");
+				if ( !jsonData['ID'] && !jsonData['Id'] && !jsonData['iD'] && !jsonData['id'] ) reject("Object data must have an `Id` property! Ex: `{'ID':123}`");
+				try { var test = JSON.stringify(jsonData) } catch(ex) { reject("`JSON.stringify(jsonData)` failed! Please pass a valid object. Ex: `{'ID':123}`") }
 
-				// STEP 1: Recycle item
+				// STEP 1: Param Setup
+				// A: Set our `Id` value (users may send an of 4 different cases), then remove as ID is not updateable in SP
+				var intID = jsonData['ID'] || jsonData['Id'] || jsonData['iD'] || jsonData['id'];
+				delete jsonData.ID; delete jsonData.Id; delete jsonData.iD; delete jsonData.id;
+				// B: DESIGN/OPTION: If no etag is provided, consider it a force (a faux {OPTION})
+				jsonData.__metadata = jsonData.__metadata || {};
+				if ( jsonData.__metadata.etag == "" || jsonData.__metadata.etag == null ) delete jsonData.__metadata.etag; // Ensure junk isnt passed, as etag on SP will error
+				delete jsonData.__next; // sprLib may return `next` which in turn may be passed here subsequently - its invalid, so remove it
+
+				// STEP 2: Recycle item
 				sprLib.rest({
 					type    : "POST",
-					url     : _urlBase +"/items("+ intID.toString() +")/recycle()",
+					url     : _urlBase +"/items("+ intID +")/recycle()",
 					metadata: true,
-					headers : { "Accept":"application/json;odata=verbose", "X-RequestDigest":_requestDigest }
+					headers : {
+						"Accept"         : "application/json;odata=verbose",
+						"X-RequestDigest": _requestDigest
+					}
 				})
 				.then(function(){
 					// SP returns the item guid for Recycle operations

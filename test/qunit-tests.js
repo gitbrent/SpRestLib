@@ -341,8 +341,9 @@ QUnit.module( "LIST > ITEM CRUD Methods" );
 				__metadata: { etag:gUpdateItem.__metadata.etag },
 				id: gUpdateItem.Id
 			})
-			.then(function(){
-				assert.ok( (true), "Deleted! "+gUpdateItem.Id );
+			.then(function(retID){
+				assert.ok( typeof retID === 'number', "typeof retID === 'number': "+(typeof retID === 'number') );
+				assert.ok( retID == gUpdateItem.Id, "retID == gUpdateItem.Id: "+(retID == gUpdateItem.Id) );
 				done();
 			});
 		});
@@ -360,8 +361,9 @@ QUnit.module( "LIST > ITEM CRUD Methods" );
 				__metadata: { etag:null },
 				id: gUpdateItem.Id
 			})
-			.then(function(){
-				assert.ok( (true), "Deleted! "+gUpdateItem.Id );
+			.then(function(retID){
+				assert.ok( typeof retID === 'number', "typeof retID === 'number': "+(typeof retID === 'number') );
+				assert.ok( retID == gUpdateItem.Id, "retID == gUpdateItem.Id: "+(retID == gUpdateItem.Id) );
 				done();
 			});
 		});
@@ -379,8 +381,9 @@ QUnit.module( "LIST > ITEM CRUD Methods" );
 			// TEST:
 			sprLib.list('Employees')
 			.delete({ id:numId })
-			.then(function(retNum){
-				assert.ok( retNum, "Success! Returned Id: "+retNum );
+			.then(function(retID){
+				assert.ok( typeof retID === 'number', "typeof retID === 'number': "+(typeof retID === 'number') );
+				assert.ok( retID == numId, "retID == numId: "+(retID == numId) );
 				done();
 			});
 		})
@@ -397,14 +400,15 @@ QUnit.module( "LIST > ITEM CRUD Methods" );
 		sprLib.list('Employees').items({ listCols:'Id', queryOrderby:'Modified', queryLimit:1 })
 		.then(function(data){
 			numId = data[0].Id;
-			assert.ok( (true), "Found Id: "+numId );
+			assert.ok( (true), "FYI: selected ID: "+numId );
 		})
 		.then(function(){
 			// TEST:
 			sprLib.list('Employees')
-			.recycle( numId )
-			.then(function(retNum){
-				assert.ok( retNum, "Success! Returned Id: "+retNum );
+			.recycle({ "ID":numId })
+			.then(function(retID){
+				assert.ok( typeof retID === 'number', "typeof retID === 'number': "+(typeof retID === 'number') );
+				assert.ok( retID == numId, "retID == numId: "+(retID == numId) );
 				done();
 			});
 		})
