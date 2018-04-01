@@ -894,7 +894,16 @@ sprLib.site().perms()
 ### Get Site Groups
 Syntax:  
 `sprLib.site().groups()`  
-`sprLib.site(siteUrl).groups()`
+`sprLib.site().groups(options)`  
+`sprLib.site(siteUrl).groups()`  
+
+Usage: Filter Options allow you to return a single group instead of all the site groups.  
+
+### Group Filter Properties
+| Prop      | Type    | Description      | Possible Values                                   |
+| :-------- | :------ | :--------------- | :------------------------------------------------ |
+| `id`      | number  | group id         | group id to query. Ex: `{id:123}`                 |
+| `title`   | string  | group title      | group title to query. Ex: `{title:'Dev Owners'}`  |
 
 Returns: Array of site Groups
 
@@ -921,6 +930,17 @@ sprLib.site().groups()
 |  8 | Dev Site Members       | SharePoint Group | contribute permissions: Dev Site   | Dev Site Owners   | true                       | []                                                                |
 |  6 | Dev Site Owners        | SharePoint Group | full control permissions: Dev Site | SharePoint Group  | false                      | [{"Id":99,"LoginName":"brent@microsoft.com","Title":"Brent Ely"}] |
 |  7 | Dev Site Visitors      | SharePoint Group | read permissions: Dev Site         | SharePoint Group  | false                      | []                                                                |
+'----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------'
+*/
+
+sprLib.site().groups({ title:'Dev Site Members' })
+.then(function(arrayResults){ console.table(arrayResults) });
+
+/*
+.----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------.
+| Id |         Title          |  PrincipalType   |             Description            |    OwnerTitle     | AllowMembersEditMembership |                     Users                                         |
+|----|------------------------|------------------|------------------------------------|-------------------|----------------------------|-------------------------------------------------------------------|
+|  8 | Dev Site Members       | SharePoint Group | contribute permissions: Dev Site   | Dev Site Owners   | true                       | []                                                                |
 '----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------'
 */
 ```

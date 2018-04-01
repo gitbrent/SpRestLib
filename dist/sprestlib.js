@@ -33,7 +33,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports && typeof require
 (function(){
 	// APP VERSION/BUILD
 	var APP_VER = "1.7.0-beta";
-	var APP_BLD = "20180329";
+	var APP_BLD = "20180331";
 	var DEBUG = false; // (verbose mode/lots of logging)
 	// ENUMERATIONS
 	// REF: [`SP.BaseType`](https://msdn.microsoft.com/en-us/library/office/jj246925.aspx)
@@ -1585,8 +1585,8 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports && typeof require
 						objItem.Member.PrincipalType = ENUM_PRINCIPALTYPES[objItem.Member.PrincipalType] || objItem.Member.PrincipalType;
 					});
 
-					// TODO: OPTION: "Show Group Members", then do lookups below, otherwise, just show users/group names
-					// TODO: use PrincipalType to find groups and query for thier users, then the full picture is done!
+					// TODO?: OPTION: "Show Group Members", then do lookups below, otherwise, just show users/group names
+					// TODO?: use PrincipalType to find groups and query for thier users, then the full picture is done!
 					//.then(arrOwnerId => { return sprLib.rest({ url:site.UrlAbs+'/_api/web/SiteGroups/GetById('+ arrOwnerId[0].Id +')/Users', queryCols:['Title','Email'] }) })
 					//.then(arrUsers   => arrUsers.forEach((user,idx) => site.OwnersGroupUsers += ('<div class="itemBox">'+ user.Title +'<span style="display:none">; </span></div>') ))
 
@@ -1634,20 +1634,28 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports && typeof require
 		*
 		* @return {Promise} - return `Promise` containing Groups
 		*/
-		_newSite.groups = function() {
+		_newSite.groups = function(inOpt) {
 			return new Promise(function(resolve, reject) {
 				var arrData = [];
 				var arrQuery = [];
 
 				// LOGIC: If `inUrl` exists, then just get the Groups from that site, otherwise, return SiteCollection Groups
 				if ( inUrl ) {
+					// TODO: 1.7.0: Stop querying 1000 groups - use same query as REST
 					var arrPromises = [];
+
+					var strFilter = 'Member/PrincipalType eq 8'; // Default is all Groups
+					if ( inOpt && inOpt.id ) strFilter = "Member/Id eq "+inOpt.id;
+					else if ( inOpt && inOpt.title ) strFilter = "Member/Title eq '"+inOpt.title+"'";
 
 					// STEP 1: Get Groups
 					sprLib.rest({
 						url: _urlBase+'_api/web/RoleAssignments',
-						queryCols: ['Member/Id','Member/Title','Member/Description','Member/OwnerTitle','Member/PrincipalType','Member/AllowMembersEditMembership'],
-						queryFilter: 'Member/PrincipalType eq 8',
+						queryCols: [
+							'Member/Id','Member/Title','Member/Description','Member/OwnerTitle',
+							'Member/PrincipalType','Member/AllowMembersEditMembership'
+						],
+						queryFilter: strFilter,
 						queryLimit: 5000
 					})
 					.then(function(arrGroups){
@@ -1690,11 +1698,17 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports && typeof require
 					});
 				}
 				else {
+					var strFilter = ''; // Default is empty filter
+					if ( inOpt && inOpt.id ) strFilter = "Id eq "+inOpt.id;
+					else if ( inOpt && inOpt.title ) strFilter = "Title eq '"+inOpt.title+"'";
+
 					sprLib.rest({
-						url: _urlBase+'_api/web/siteGroups',
-						queryCols:
-							['Id','Title','PrincipalType','Description','OwnerTitle','AllowMembersEditMembership',
-							'Users/Id','Users/Title','Users/LoginName'],
+						url: _urlBase+'_api/web/SiteGroups',
+						queryCols: [
+							'Id','Title','PrincipalType','Description','OwnerTitle','AllowMembersEditMembership',
+							'Users/Id','Users/Title','Users/LoginName'
+						],
+						queryFilter: strFilter,
 						queryLimit: 5000
 					})
 					.then(function(arrData){

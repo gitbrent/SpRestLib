@@ -2,7 +2,7 @@
  * NAME: qunit-test.js
  * DESC: tests for qunit-test.html (coded to my O365 Dev Site - YMMV)
  * AUTH: https://github.com/gitbrent/
- * DATE: Mar 18, 2018
+ * DATE: Mar 31, 2018
  *
  * HOWTO: Generate text tables for README etc.:
  * sprLib.list('Employees').items(['Id', 'Name', 'Badge_x0020_Number']).then(function(arrData){ console.log(getAsciiTableStr(arrData)) });
@@ -1655,17 +1655,60 @@ QUnit.module( "SITE Methods" );
 	QUnit.test("sprLib.site().groups() - using both `()` and `(SITEURL1)`", function(assert){
 		arrTestUrls.forEach((ARG_SITE,idx)=>{
 			var done = assert.async();
-			// TEST:
+			var grpId = 0;
+			var grpTitle = "";
+
+			// TEST: No args
 			sprLib.site(ARG_SITE).groups()
 			.then(function(arrResults){
 				var objItem = arrResults[0];
+				grpId = objItem.Id;
+				grpTitle = objItem.Title;
 				//
 				assert.ok( Object.keys(objItem).length == 7, "Object.keys(objItem).length == 7: "+ Object.keys(objItem).length );
 				assert.ok( objItem.Users && Array.isArray(objItem.Users), "objItem.Users exists and is an array: "+ Array.isArray(objItem.Users) );
 				assert.ok( Object.keys(objItem.Users[0]).length == 3, "Object.keys(objItem.Users[0]).length == 3: "+ Object.keys(objItem.Users[0]).toString() );
 				assert.ok( getAsciiTableStr(arrResults), `RESULTS:\n${getAsciiTableStr(arrResults)}` );
 				//
-				assert.ok( true, `\n************************************************************\n`);
+				assert.ok( true, `\nEND TEST 1: ************************************************************\n`);
+			})
+			// TEST: Using filters
+			.then(function(){
+				return Promise.all([
+					sprLib.site(ARG_SITE).groups({ 'id':grpId }),
+					sprLib.site(ARG_SITE).groups({ 'title':grpTitle })
+				]);
+			})
+			.then(function(arrAllArrays){
+				var objItem1 = arrAllArrays[0][0];
+				var objItem2 = arrAllArrays[1][0];
+				//
+				assert.ok( arrAllArrays[0].length == 1, "arrAllArrays[0].length == 1: "+ arrAllArrays[0].length );
+				assert.ok( arrAllArrays[1].length == 1, "arrAllArrays[1].length == 1: "+ arrAllArrays[1].length );
+				//
+				assert.ok( objItem1.Id == grpId, "objItem1.Id == grpId: '"+ objItem1.Id +"' = '"+ grpId +"'" );
+				assert.ok( objItem2.Title == grpTitle, "objItem2.Title == grpTitle: '"+ objItem2.Title +"' = '"+ grpTitle +"'" );
+				assert.ok( Object.keys(objItem2).length == 7, "Object.keys(objItem2).length == 7: "+ Object.keys(objItem2).length );
+				assert.ok( objItem2.Users && Array.isArray(objItem2.Users), "objItem2.Users exists and is an array: "+ Array.isArray(objItem2.Users) );
+				assert.ok( Object.keys(objItem2.Users[0]).length == 3, "Object.keys(objItem2.Users[0]).length == 3: "+ Object.keys(objItem2.Users[0]).toString() );
+				assert.ok( getAsciiTableStr(arrAllArrays[0]), `RESULTS:\n${getAsciiTableStr(arrAllArrays[0])}` );
+				assert.ok( getAsciiTableStr(arrAllArrays[1]), `RESULTS:\n${getAsciiTableStr(arrAllArrays[1])}` );
+				//
+				assert.ok( true, `\nEND TEST 2: ************************************************************\n`);
+			})
+			// TEST: Using filters: NEGATIVE TEST
+			.then(function(){
+				return Promise.all([
+					sprLib.site(ARG_SITE).groups({ 'id':999111999 }),
+					sprLib.site(ARG_SITE).groups({ 'title':'JUNK' })
+				]);
+			})
+			.then(function(arrAllArrays){
+				//
+				assert.ok( arrAllArrays[0].length == 0, "arrAllArrays[0].length == 0: "+ arrAllArrays[0].length );
+				assert.ok( arrAllArrays[1].length == 0, "arrAllArrays[1].length == 0: "+ arrAllArrays[1].length );
+				//
+				assert.ok( true, `\nEND TEST 3: ************************************************************\n`);
 				done();
 			})
 			.catch(function(err){
