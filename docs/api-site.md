@@ -164,7 +164,7 @@ Syntax:
 
 Usage: Filter Options allow you to return a single group instead of all the site groups.  
 
-### Group Filter Properties
+### Group Filter Options
 | Prop      | Type    | Description      | Possible Values                                   |
 | :-------- | :------ | :--------------- | :------------------------------------------------ |
 | `id`      | number  | group id         | group id to query. Ex: `{id:123}`                 |
