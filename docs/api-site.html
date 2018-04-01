@@ -175,7 +175,19 @@
 <h2><a class="anchor" aria-hidden="true" name="get-site-groups"></a><a href="#get-site-groups" aria-hidden="true" class="hash-link" ><svg aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Get Site Groups</h2>
 <p>Syntax:<br>
 <code>sprLib.site().groups()</code>  <br>
+<code>sprLib.site().groups(options)</code>  <br>
 <code>sprLib.site(siteUrl).groups()</code></p>
+<p>Usage: Filter Options allow you to return a single group instead of all the site groups.</p>
+<h3><a class="anchor" aria-hidden="true" name="group-filter-properties"></a><a href="#group-filter-properties" aria-hidden="true" class="hash-link" ><svg aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Group Filter Properties</h3>
+<table>
+<thead>
+<tr><th style="text-align:left">Prop</th><th style="text-align:left">Type</th><th style="text-align:left">Description</th><th style="text-align:left">Possible Values</th></tr>
+</thead>
+<tbody>
+<tr><td style="text-align:left"><code>id</code></td><td style="text-align:left">number</td><td style="text-align:left">group id</td><td style="text-align:left">group id to query. Ex: <code>{id:123}</code></td></tr>
+<tr><td style="text-align:left"><code>title</code></td><td style="text-align:left">string</td><td style="text-align:left">group title</td><td style="text-align:left">group title to query. Ex: <code>{title:'Dev Owners'}</code></td></tr>
+</tbody>
+</table>
 <p>Returns: Array of site Groups</p>
 <h3><a class="anchor" aria-hidden="true" name="group-properties"></a><a href="#group-properties" aria-hidden="true" class="hash-link" ><svg aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Group Properties</h3>
 <table>
@@ -203,6 +215,17 @@
 |  8 | Dev Site Members       | SharePoint Group | contribute permissions: Dev Site   | Dev Site Owners   | true                       | []                                                                |
 |  6 | Dev Site Owners        | SharePoint Group | full control permissions: Dev Site | SharePoint Group  | false                      | [{"Id":99,"LoginName":"brent@microsoft.com","Title":"Brent Ely"}] |
 |  7 | Dev Site Visitors      | SharePoint Group | read permissions: Dev Site         | SharePoint Group  | false                      | []                                                                |
+'----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------'
+*/</span>
+
+sprLib.site().groups({ <span class="hljs-attr">title</span>:<span class="hljs-string">'Dev Site Members'</span> })
+.then(<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">arrayResults</span>)</span>{ <span class="hljs-built_in">console</span>.table(arrayResults) });
+
+<span class="hljs-comment">/*
+.----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------.
+| Id |         Title          |  PrincipalType   |             Description            |    OwnerTitle     | AllowMembersEditMembership |                     Users                                         |
+|----|------------------------|------------------|------------------------------------|-------------------|----------------------------|-------------------------------------------------------------------|
+|  8 | Dev Site Members       | SharePoint Group | contribute permissions: Dev Site   | Dev Site Owners   | true                       | []                                                                |
 '----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------'
 */</span>
 </code></pre>
