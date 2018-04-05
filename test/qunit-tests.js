@@ -2,7 +2,7 @@
  * NAME: qunit-test.js
  * DESC: tests for qunit-test.html (coded to my O365 Dev Site - YMMV)
  * AUTH: https://github.com/gitbrent/
- * DATE: Mar 31, 2018
+ * DATE: 20180402
  *
  * HOWTO: Generate text tables for README etc.:
  * sprLib.list('Employees').items(['Id', 'Name', 'Badge_x0020_Number']).then(function(arrData){ console.log(getAsciiTableStr(arrData)) });
@@ -1571,7 +1571,7 @@ QUnit.module( "SITE Methods" );
 	var arrTestUrls = [ null, SITEURL1, SITEURL2 ];
 
 	// DESC: info()
-	QUnit.test("sprLib.site().info() - using both `()` and `(SITEURL1)`", function(assert){
+	QUnit.test("sprLib.site().info() - using `arrTestUrls`", function(assert){
 		arrTestUrls.forEach((ARG_SITE,idx)=>{
 			var done = assert.async();
 			// TEST:
@@ -1770,17 +1770,65 @@ QUnit.module( "SITE Methods" );
 	QUnit.test("sprLib.site().users() - using both `()` and `(SITEURL1)`", function(assert){
 		arrTestUrls.forEach((ARG_SITE,idx)=>{
 			var done = assert.async();
+			var userId = 0;
+			var userTitle = "";
+
 			// TEST:
 			sprLib.site(ARG_SITE).users()
 			.then(function(arrResults){
 				var objItem = arrResults[0];
+				userId = objItem.Id;
+				userTitle = objItem.Title;
 				//
 				assert.ok( Object.keys(objItem).length == 6, "Object.keys(objItem).length == 6: "+ Object.keys(objItem).length );
 				assert.ok( objItem.Groups && Array.isArray(objItem.Groups), "objItem.Groups exists and is an array: "+ Array.isArray(objItem.Groups) );
 				assert.ok( Object.keys(objItem.Groups[0]).length == 2, "Object.keys(objItem.Groups[0]).length == 2: "+ Object.keys(objItem.Groups[0]).toString() );
 				assert.ok( getAsciiTableStr(arrResults), `RESULTS:\n${getAsciiTableStr(arrResults)}` );
 				//
-				assert.ok( true, `\n************************************************************\n`);
+				assert.ok( true, '\nSITE: '+ARG_SITE+'\nEND TEST 1: ************************************************************\n');
+			})
+			// TEST: Using filters
+			.then(function(){
+				return Promise.all([
+					sprLib.site(ARG_SITE).users({ 'id':userId }),
+					sprLib.site(ARG_SITE).users({ 'title':userTitle })
+				]);
+			})
+			.then(function(arrAllArrays){
+				var objItem1 = arrAllArrays[0][0];
+				var objItem2 = arrAllArrays[1][0];
+				//
+				assert.ok( true, '\nBEG TEST 2: ********************************************\nSITE: '+ARG_SITE+' / USER: '+userTitle+'\n');
+				//
+				assert.ok( arrAllArrays[0].length == 1, "arrAllArrays[0].length == 1: "+ arrAllArrays[0].length );
+				assert.ok( arrAllArrays[1].length == 1, "arrAllArrays[1].length == 1: "+ arrAllArrays[1].length );
+				//
+				assert.ok( objItem1.Id == userId, "objItem1.Id == userId: '"+ objItem1.Id +"' = '"+ userId +"'" );
+				assert.ok( objItem2.Title == userTitle, "objItem2.Title == userTitle: '"+ objItem2.Title +"' = '"+ userTitle +"'" );
+				assert.ok( Object.keys(objItem2).length == 6, "Object.keys(objItem2).length == 6: "+ Object.keys(objItem2).length );
+				assert.ok( objItem2.Groups && Array.isArray(objItem2.Groups), "objItem2.Groups exists and is an array: "+ Array.isArray(objItem2.Groups) );
+				assert.ok( objItem2.Groups.length > 0, "objItem2.Groups.length > 0: "+ objItem2.Groups.length );
+				assert.ok( objItem2.Groups[0], "objItem2.Groups[0] exists: "+ objItem2.Groups[0] );
+				assert.ok( Object.keys(objItem2.Groups[0]).length == 2, "Object.keys(objItem2.Groups[0]).length == 2: "+ Object.keys(objItem2.Groups[0]).toString() );
+				assert.ok( getAsciiTableStr(arrAllArrays[0]), `RESULTS:\n${getAsciiTableStr(arrAllArrays[0])}` );
+				assert.ok( getAsciiTableStr(arrAllArrays[1]), `RESULTS:\n${getAsciiTableStr(arrAllArrays[1])}` );
+				//
+				assert.ok( true, '\nSITE: '+ARG_SITE+'\nEND TEST 2: ************************************************************\n');
+			})
+			// TEST: Using filters: NEGATIVE TEST
+			.then(function(){
+				return Promise.all([
+					sprLib.site(ARG_SITE).users({ 'id':999111999 }),
+					sprLib.site(ARG_SITE).users({ 'title':'JUNK' })
+				]);
+			})
+			.then(function(arrAllArrays){
+				assert.ok( true, '\nBEG TEST 3: ********************************************\nSITE: '+ARG_SITE+'\n');
+				//
+				assert.ok( arrAllArrays[0].length == 0, "arrAllArrays[0].length == 0: "+ arrAllArrays[0].length );
+				assert.ok( arrAllArrays[1].length == 0, "arrAllArrays[1].length == 0: "+ arrAllArrays[1].length );
+				//
+				assert.ok( true, '\nSITE: '+ARG_SITE+'\nEND TEST 3: ************************************************************\n');
 				done();
 			})
 			.catch(function(err){

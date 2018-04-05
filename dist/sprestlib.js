@@ -27,13 +27,14 @@
 |*|  SOFTWARE.
 \*/
 
-// Detect Node.js (NODEJS determines which network library to use, so using https-detection is perfect)
+// Detect Node.js
+// NOTE: `NODEJS` determines which network library to use, so using https-detection is aprops.
 var NODEJS = ( typeof module !== 'undefined' && module.exports && typeof require === 'function' && require('https') );
 
 (function(){
 	// APP VERSION/BUILD
 	var APP_VER = "1.7.0-beta";
-	var APP_BLD = "20180331";
+	var APP_BLD = "20180404";
 	var DEBUG = false; // (verbose mode/lots of logging)
 	// ENUMERATIONS
 	// REF: [`SP.BaseType`](https://msdn.microsoft.com/en-us/library/office/jj246925.aspx)
@@ -1216,6 +1217,9 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports && typeof require
 						// E:
 						request.send( objAjaxQuery.data ? objAjaxQuery.data : null );
 					}
+				})
+				.catch(function(strErr){
+					reject(strErr);
 				});
 			})
 			.then(function(data){
@@ -1518,6 +1522,8 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports && typeof require
 			});
 		}
 
+		// TODO: v1.7.0: add `inOpt` to subsites
+
 		/**
 		* Get Subsites
 		*
@@ -1531,7 +1537,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports && typeof require
 						Id:				{ dataName:'Id'						,dispName:'Id'					},
 						Name:			{ dataName:'Title'					,dispName:'Subsite Name'		},
 						UrlAbs:			{ dataName:'Url'					,dispName:'Absolute URL'		},
-						UrlRel:			{ dataName:'ServerRelativeUrl'      ,dispNAme:'Relative URL'		},
+						UrlRel:			{ dataName:'ServerRelativeUrl'      ,dispName:'Relative URL'		},
 						Created:		{ dataName:'Created'				,dispName:'Date Created'		},
 						Modified:		{ dataName:'LastItemModifiedDate'	,dispName:'Date Last Modified'	},
 						Language:		{ dataName:'Language'				,dispName:'Language'			},
@@ -1742,14 +1748,14 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports && typeof require
 		*
 		* @return {Promise} - return `Promise` containing Users
 		*/
-		_newSite.users = function() {
+		_newSite.users = function(inOpt) {
 			return new Promise(function(resolve, reject) {
 				// LOGIC: If `inUrl` exists, then just get the Groups from that site, otherwise, return SiteCollection Groups
 				if ( inUrl ) {
-					// NOTE: A website's Users are: Users with RoleAssignments (if any), plus all users in Groups with RoleAssignments
-					// A: Get individual User grants/perms
-					// B: Get Members (Users) from Group grants/perms
-					// FIXME: LIMIT: Library only supports up to 5000 results!
+					// NOTE: Site `users` are: Users with RoleAssignments -plus- all users in Groups with RoleAssignments
+					// A: Get User [direct] grants/perms
+					// B: Get Group Members [Users] that have grants/perms from group membership
+					// FIXME: LIMIT: Library only supports up to 5000 results! TODO: add paging
 					Promise.all([
 						sprLib.rest({
 							url: _urlBase+'_api/web/RoleAssignments',
@@ -1771,32 +1777,44 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports && typeof require
 
 						// A: Result is an array of user objects
 						// EX: [ {Member: {Id:9,Title:'Brent'}}, {Member:[...]} ]
-						arrAllArrays[0].forEach(function(obj,idx){
+						arrAllArrays[0].forEach(function(obj){
 							obj.Member.Groups = [];
-							arrSiteUsers.push( obj.Member );
-							objTempUsers[obj.Member.Id] = obj.Member;
+							if (
+								!inOpt
+								|| ( inOpt && inOpt.id    && inOpt.id    == obj.Member.Id    )
+								|| ( inOpt && inOpt.title && inOpt.title == obj.Member.Title )
+							) {
+								arrSiteUsers.push( obj.Member );
+								objTempUsers[obj.Member.Id] = obj.Member;
+							}
 						});
 
 						// B: Result is an array of `Member` objects
 						// EX: [ {Member: {Id:1, Title:'Members', Users:[{Id:9,Title:'Brent'},{Id:10,Title:'Elon Musk'}]}}, {Member:[...]} ]
-						arrAllArrays[1].forEach(function(obj,idx){
+						arrAllArrays[1].forEach(function(obj){
 							if ( obj.Member.Users && obj.Member.Users.length > 0 ) {
-								obj.Member.Users.forEach(function(user,idy){
+								obj.Member.Users.forEach(function(user){
 									// A: Remove __metadata (if any - since it's in a sub-object, `metadata:false` will not guarantee absence)
 									if ( user.__metadata ) delete user.__metadata;
 
-									// B: Add group
-									if ( !user.Groups ) user.Groups = [];
-									user.Groups.push({ Id:obj.Member.Id, Title:obj.Member.Title });
+									if (
+										!inOpt
+										|| ( inOpt && inOpt.id    && inOpt.id    == user.Id    )
+										|| ( inOpt && inOpt.title && inOpt.title == user.Title )
+									) {
+										// B: Add group
+										if ( !user.Groups ) user.Groups = [];
+										user.Groups.push({ Id:obj.Member.Id, Title:obj.Member.Title });
 
-									// C: Add User or Add this Group to existing User (ensure uniqueness)
-									if ( !objTempUsers[user.Id] ) {
-										arrSiteUsers.push( user );
-										objTempUsers[user.Id] = obj.Member;
-									}
-									else {
-										if ( !objTempUsers[user.Id].Groups ) objTempUsers[user.Id].Groups = [];
-										objTempUsers[user.Id].Groups.push({ Id:obj.Member.Id, Title:obj.Member.Title });
+										// C: Add User or Add this Group to existing User (ensure uniqueness)
+										if ( !objTempUsers[user.Id] ) {
+											arrSiteUsers.push( user );
+											objTempUsers[user.Id] = obj.Member;
+										}
+										else {
+											if ( !objTempUsers[user.Id].Groups ) objTempUsers[user.Id].Groups = [];
+											objTempUsers[user.Id].Groups.push({ Id:obj.Member.Id, Title:obj.Member.Title });
+										}
 									}
 								});
 							}
@@ -1818,13 +1836,22 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports && typeof require
 						queryLimit: 5000
 					})
 					.then(function(arrData){
-						// A: Filter internal/junk users
-						if ( arrData && Array.isArray(arrData) ) {
-							arrData = arrData.filter(function(user){ return user.Title.indexOf('spocrwl') == -1 && user.Id < 1000000000 });
-						}
+						var arrSiteUsers = [];
 
-						// C: Resolve results (NOTE: empty array is the correct default result)
-						resolve( arrData || [] );
+						// A: Compile results
+						arrData.forEach(function(user){
+							if (
+								!inOpt
+								|| ( inOpt && inOpt.id    && inOpt.id    == user.Id    )
+								|| ( inOpt && inOpt.title && inOpt.title == user.Title )
+							) {
+								// B: Filter internal/junk users
+								if ( user.Title.indexOf('spocrwl') == -1 && user.Id < 1000000000 ) arrSiteUsers.push(user)
+							}
+						});
+
+						// B: Resolve results (NOTE: empty array is the correct default result)
+						resolve( arrSiteUsers || [] );
 					})
 					.catch(function(strErr){
 						reject( strErr );
