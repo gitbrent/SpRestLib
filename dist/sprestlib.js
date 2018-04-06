@@ -34,7 +34,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports && typeof require
 (function(){
 	// APP VERSION/BUILD
 	var APP_VER = "1.7.0-beta";
-	var APP_BLD = "20180404";
+	var APP_BLD = "20180405";
 	var DEBUG = false; // (verbose mode/lots of logging)
 	// ENUMERATIONS
 	// REF: [`SP.BaseType`](https://msdn.microsoft.com/en-us/library/office/jj246925.aspx)
@@ -1901,12 +1901,27 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports && typeof require
 		var _urlBase = "_api/Web";
 		var _urlRest = "/CurrentUser?"; // Default to current user if no options were provided
 
-		// A: Options
-		if ( inOpt && typeof inOpt === 'object' && Object.keys(inOpt).length > 0 && inOpt.baseUrl ) {
+		// STEP 1: Options setup
+		// A: Options check
+		// Check for existance of any keys to filter out `{}` that is sometimes passed - dont warn about those, treat as empty
+		if ( inOpt && Object.keys(inOpt).length > 0
+			&& !inOpt.hasOwnProperty('id') && !inOpt.hasOwnProperty('email')
+			&& !inOpt.hasOwnProperty('login') && !inOpt.hasOwnProperty('title')
+		) {
+			console.warn('Warning: Check your options! Available `user()` options are: `id`,`email`,`login`,`title`');
+			console.warn('Result: Current user is being returned');
+			// NOTE: Treat junk params as null (Clear options to remove junk entries)
+			inOpt = {};
+		}
+		// B: Ensure an `inOpt` value going forward
+		inOpt = inOpt || {};
+
+		// STEP 2: Set `baseUrl`
+		if ( inOpt.hasOwnProperty('baseUrl') ) {
 			_urlBase = ( inOpt.baseUrl.toString().replace(/\/+$/,'') + '/_api/Web');
 		}
 
-		// B: Build query URL based on whether its current user (no parameter) or a passed in object
+		// STEP 3: Build query URL based on whether its current user (no parameter) or a passed in object
 		// NOTE: Use CurrentUser service as it is included in SP-Foundation and will work for everyone
 		// ....: (Users will need SP-Enterprise for UserProfiles service to work)
 		// NOTE: `_api/Web/GetUserById()` for non-existant users results in a heinous error 500 that chokes jQuery.ajax.fail(),
@@ -1916,7 +1931,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports && typeof require
 		else if ( inOpt && inOpt.login ) _urlRest = "/siteusers?$filter=LoginName%20eq%20%27"+ inOpt.login.replace(/#/g,'%23') +"%27&";
 		else if ( inOpt && inOpt.title ) _urlRest = "/siteusers?$filter=Title%20eq%20%27"+     inOpt.title +"%27&";
 
-		// C: Complete URL
+		// STEP 4: Complete URL
 		_urlRest = _urlBase + _urlRest;
 
 		/**
@@ -2029,8 +2044,8 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports && typeof require
 				Promise.resolve()
 				.then(function(){
 					// Per MSDN, the only way to select props is using `AccountName`, so fetch it if it was not passed in
-					// Get Login/AccountName when somehting was passed (as opposed to null/'current user'), but not the AccountName
-					if ( inOpt && !inOpt.login ) return sprLib.user(inOpt).info();
+					// Get Login/AccountName when something was passed (as opposed to null/'current user'), but not the AccountName
+					if ( inOpt && !inOpt.login ) return sprLib.user( inOpt ).info();
 				})
 				.then(function(objUser){
 					// A: Use LoginName if it was just queried

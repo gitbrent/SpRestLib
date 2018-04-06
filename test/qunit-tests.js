@@ -2,7 +2,7 @@
  * NAME: qunit-test.js
  * DESC: tests for qunit-test.html (coded to my O365 Dev Site - YMMV)
  * AUTH: https://github.com/gitbrent/
- * DATE: 20180402
+ * DATE: 20180405
  *
  * HOWTO: Generate text tables for README etc.:
  * sprLib.list('Employees').items(['Id', 'Name', 'Badge_x0020_Number']).then(function(arrData){ console.log(getAsciiTableStr(arrData)) });
@@ -1945,7 +1945,7 @@ QUnit.module( "USER Methods" );
 				sprLib.user(param).info()
 				.then(function(objUser){
 					assert.ok( typeof objUser === 'object', "Pass: objUser is object type: " + typeof objUser );
-					assert.ok( Object.keys(objUser).length == 0,"Pass: `keys(objUser).length == 0` -> " + Object.keys(objUser).length );
+					assert.ok( Object.keys(objUser).length == 0, "Pass: `keys(objUser).length == 0` -> " + Object.keys(objUser).length );
 					done();
 				});
 			});
@@ -1978,6 +1978,23 @@ QUnit.module( "USER Methods" );
 					done();
 				});
 			});
+		});
+	});
+
+	// NEGATIVE-TEST:
+	var param = {'badName':'whatever'};
+	QUnit.test('sprLib.user('+ JSON.stringify(param) +').info()', function(assert){
+		var done = assert.async();
+		// TEST:
+		sprLib.user(param).info()
+		.then(function(objUser){
+			assert.ok( typeof objUser === 'object', "Pass: objUser is object type: " + typeof objUser );
+			assert.ok( Object.keys(objUser).length == 6, "Pass: `keys(objUser).length == 6` -> " + Object.keys(objUser).length );
+			assert.ok( getAsciiTableStr([objUser]), `RESULTS:\n${getAsciiTableStr([objUser])}` );
+			done();
+		})
+		.catch(strErr => {
+			console.log( strErr );
 		});
 	});
 }
