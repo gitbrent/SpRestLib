@@ -34,7 +34,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports && typeof require
 (function(){
 	// APP VERSION/BUILD
 	var APP_VER = "1.7.0-beta";
-	var APP_BLD = "20180405";
+	var APP_BLD = "20180408";
 	var DEBUG = false; // (verbose mode/lots of logging)
 	// ENUMERATIONS
 	// REF: [`SP.BaseType`](https://msdn.microsoft.com/en-us/library/office/jj246925.aspx)
@@ -197,12 +197,12 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports && typeof require
 			// DESIGN: Accept either [ListName] or [ListGUID]
 			_urlBase += ( gRegexGUID.test(inOpt) ? "(guid'"+ inOpt +"')" : "/getbytitle('"+ inOpt.replace(/\s/gi,'%20') +"')" );
 		}
-		else if ( inOpt && typeof inOpt === 'object' && Object.keys(inOpt).length > 0 && inOpt.name ) {
+		else if ( inOpt && typeof inOpt === 'object' && inOpt.hasOwnProperty('name') ) {
 			_urlBase = (inOpt.baseUrl ? inOpt.baseUrl.replace(/\/+$/,'')+'/_api/lists' : _urlBase);
 			_urlBase += ( gRegexGUID.test(inOpt.name) ? "(guid'"+ inOpt.name +"')" : "/getbytitle('"+ inOpt.name.replace(/\s/gi,'%20') +"')" );
 		}
 		else {
-			console.error("ERROR: A 'listName' or 'listGUID' is required! EX: `sprLib.list('Employees')` or `sprLib.list({ name:'Employees' })`");
+			console.error("ERROR: A 'listName' or 'listGUID' is required! EX: `sprLib.list('Employees')` or `sprLib.list({ 'name':'Employees' })`");
 			console.error('ARGS:');
 			console.error(inOpt);
 			return null;
@@ -1645,6 +1645,15 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports && typeof require
 				var arrData = [];
 				var arrQuery = [];
 
+				// STEP 1: Options check
+				if ( inOpt && Object.keys(inOpt).length > 0 && !inOpt.hasOwnProperty('id') && !inOpt.hasOwnProperty('title') ) {
+					console.warn('Warning..: Check your options! Available `site().groups()` options are: `id`,`title`');
+					console.warn('Result...: Invalid filter option: All site groups will be returned');
+					// NOTE: Treat junk filter as null (return all Groups)
+					inOpt = null;
+				}
+
+				// STEP 2: Query group(s)
 				// LOGIC: If `inUrl` exists, then just get the Groups from that site, otherwise, return SiteCollection Groups
 				if ( inUrl ) {
 					// TODO: 1.7.0: Stop querying 1000 groups - use same query as REST
@@ -1750,6 +1759,15 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports && typeof require
 		*/
 		_newSite.users = function(inOpt) {
 			return new Promise(function(resolve, reject) {
+				// STEP 1: Options check
+				if ( inOpt && Object.keys(inOpt).length > 0 && !inOpt.hasOwnProperty('id') && !inOpt.hasOwnProperty('title') ) {
+					console.warn('Warning..: Check your options! Available `site().users()` options are: `id`,`title`');
+					console.warn('Result...: Invalid filter option: All site users will be returned');
+					// NOTE: Treat junk filter as null (return all Groups)
+					inOpt = null;
+				}
+
+				// STEP 2: Query group(s)
 				// LOGIC: If `inUrl` exists, then just get the Groups from that site, otherwise, return SiteCollection Groups
 				if ( inUrl ) {
 					// NOTE: Site `users` are: Users with RoleAssignments -plus- all users in Groups with RoleAssignments
@@ -1901,7 +1919,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports && typeof require
 		var _urlBase = "_api/Web";
 		var _urlRest = "/CurrentUser?"; // Default to current user if no options were provided
 
-		// STEP 1: Options setup
+		// STEP 1: Options setup/check
 		// A: Options check
 		// Check for existance of any keys to filter out `{}` that is sometimes passed - dont warn about those, treat as empty
 		if ( inOpt && Object.keys(inOpt).length > 0

@@ -1,8 +1,8 @@
 /*
  * NAME: qunit-test.js
- * DESC: tests for qunit-test.html (coded to my O365 Dev Site - YMMV)
+ * DESC: tests for qunit-test.html (coded against my personal O365 Dev Site - YMMV)
  * AUTH: https://github.com/gitbrent/
- * DATE: 20180405
+ * DATE: 20180408
  *
  * HOWTO: Generate text tables for README etc.:
  * sprLib.list('Employees').items(['Id', 'Name', 'Badge_x0020_Number']).then(function(arrData){ console.log(getAsciiTableStr(arrData)) });
@@ -1696,7 +1696,7 @@ QUnit.module( "SITE Methods" );
 				//
 				assert.ok( true, `\nEND TEST 2: ************************************************************\n`);
 			})
-			// TEST: Using filters: NEGATIVE TEST
+			// TEST: Using filters: NEGATIVE TEST using bad user id and bad user title
 			.then(function(){
 				return Promise.all([
 					sprLib.site(ARG_SITE).groups({ 'id':999111999 }),
@@ -1709,6 +1709,21 @@ QUnit.module( "SITE Methods" );
 				assert.ok( arrAllArrays[1].length == 0, "arrAllArrays[1].length == 0: "+ arrAllArrays[1].length );
 				//
 				assert.ok( true, `\nEND TEST 3: ************************************************************\n`);
+			})
+			// TEST: Using filters: NEGATIVE TEST using invalid option name
+			.then(function(){
+				console.warn('WARNING: Negative test of `site().groups()` will produce console warnings below:')
+				return sprLib.site(ARG_SITE).groups({ 'junkName':999111999 });
+			})
+			.then(function(arrGroups){
+				//
+				assert.ok( arrGroups.length > 1, "arrGroups.length > 1: "+ arrGroups.length );
+				assert.ok( Object.keys(arrGroups[0]).length == 7, "Object.keys(arrGroups[0]).length == 7: "+ Object.keys(arrGroups[0]).length );
+				assert.ok( arrGroups[0].Users && Array.isArray(arrGroups[0].Users), "arrGroups[0].Users exists and is an array: "+ Array.isArray(arrGroups[0].Users) );
+				assert.ok( Object.keys(arrGroups[0].Users[0]).length == 3, "Object.keys(arrGroups[0].Users[0]).length == 3: "+ Object.keys(arrGroups[0].Users[0]).toString() );
+				assert.ok( getAsciiTableStr(arrGroups), `RESULTS:\n${getAsciiTableStr(arrGroups)}` );
+				//
+				assert.ok( true, `\nEND TEST 4: ************************************************************\n`);
 				done();
 			})
 			.catch(function(err){
@@ -1815,7 +1830,7 @@ QUnit.module( "SITE Methods" );
 				//
 				assert.ok( true, '\nSITE: '+ARG_SITE+'\nEND TEST 2: ************************************************************\n');
 			})
-			// TEST: Using filters: NEGATIVE TEST
+			// TEST: Using filters: NEGATIVE TEST using bad id/title
 			.then(function(){
 				return Promise.all([
 					sprLib.site(ARG_SITE).users({ 'id':999111999 }),
@@ -1829,8 +1844,27 @@ QUnit.module( "SITE Methods" );
 				assert.ok( arrAllArrays[1].length == 0, "arrAllArrays[1].length == 0: "+ arrAllArrays[1].length );
 				//
 				assert.ok( true, '\nSITE: '+ARG_SITE+'\nEND TEST 3: ************************************************************\n');
+			})
+			// TEST: Using filters: NEGATIVE TEST using invalid option name
+			.then(function(){
+				console.warn('WARNING: Negative test of `site().users()` will produce console warnings below:')
+				return sprLib.site(ARG_SITE).users({ 'junkName':999111999 });
+			})
+			.then(function(arrUsers){
+				//
+				// NOTE: assert.ok( arrUsers.length > 1, "arrUsers.length > 1: "+ arrUsers.length );
+				// NOTE: ^^^ we onyl have 1 user in test SP site!!! cant test this
+				assert.ok( Object.keys(arrUsers[0]).length == 6, "Object.keys(arrUsers[0]).length == 6: "+ Object.keys(arrUsers[0]).length );
+				assert.ok( arrUsers[0].Groups && Array.isArray(arrUsers[0].Groups), "arrUsers[0].Groups exists and is an array: "+ Array.isArray(arrUsers[0].Groups) );
+				assert.ok( arrUsers[0].Groups.length > 0, "arrUsers[0].Groups.length > 0: "+ arrUsers[0].Groups.length );
+				assert.ok( arrUsers[0].Groups[0], "arrUsers[0].Groups[0] exists: "+ arrUsers[0].Groups[0] );
+				assert.ok( Object.keys(arrUsers[0].Groups[0]).length == 2, "Object.keys(arrUsers[0].Groups[0]).length == 2: "+ Object.keys(arrUsers[0].Groups[0]).toString() );
+				assert.ok( getAsciiTableStr(arrUsers), `RESULTS:\n${getAsciiTableStr(arrUsers)}` );
+				//
+				assert.ok( true, `\nEND TEST 4: ************************************************************\n`);
 				done();
 			})
+
 			.catch(function(err){
 				assert.ok( (false), err );
 				done();
