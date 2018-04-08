@@ -6,6 +6,7 @@
 **Implemented Enhancements:**
 - Renamed `getItems()` list method to `items()`
 - Updated Node detection to be more accurate
+- Modify user() method option names to be case insensitive [\#17](https://github.com/gitbrent/sprestlib/issues/17) ([gitbrent](https://github.com/gitbrent))
 - Get members of a specific group given its name [\#19](https://github.com/gitbrent/sprestlib/issues/19) ([ra6hi9](https://github.com/ra6hi9))
 
 **Fixed Bugs:**
