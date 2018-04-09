@@ -1148,6 +1148,8 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports && typeof require
 					if ( NODEJS && APP_OPTS.nodeEnabled ) {
 						// AUTH: Cookie is required for GET and POST
 						objAjaxQuery.headers["Cookie"] = APP_OPTS.nodeCookie;
+						// IMPORTANT: 'Content-Length' is required for file upload (etc.), otherwise, SP drops the connection immediately: (-1, System.IO.IOException)
+						if (objAjaxQuery.data) objAjaxQuery.headers["Content-Length"] = objAjaxQuery.data.length;
 						var options = {
 							hostname: APP_OPTS.nodeServer,
 							path:     objAjaxQuery.url,
