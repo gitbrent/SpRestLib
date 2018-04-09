@@ -1097,12 +1097,21 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 			}
 
 			// STEP 5: Execute REST call
+			/* NOTES:
+			* Creating a Library file:
+			* - EX: { url: "_api/web/lists/getByTitle('Site%20Assets')/RootFolder/files/add(overwrite=true,url='brent.txt')" }
+			* - data: passing no data will create an empty file
+			* - data: XMLHttpRequest: `data` must be a JavaScript 'ArrayBuffer' or result is: "(-1, System.IO.IOException) I/O error occurred."
+			* - data: https: `data` must be a JavaScript 'Buffer' or result is: "(-1, System.IO.IOException) I/O error occurred."
+			*/
 			Promise.resolve()
 			.then(function(){
 				return new Promise(function(resolve, reject) {
 					if ( NODEJS && APP_OPTS.nodeEnabled ) {
 						// AUTH: Cookie is required for GET and POST
 						objAjaxQuery.headers["Cookie"] = APP_OPTS.nodeCookie;
+						// IMPORTANT: 'Content-Length' is required (otherwise SP drop the connection immediately: (-1, System.IO.IOException)
+						if (objAjaxQuery.data) objAjaxQuery.headers["Content-Length"] = objAjaxQuery.data.length;
 						var options = {
 							hostname: APP_OPTS.nodeServer,
 							path:     objAjaxQuery.url,
@@ -1181,11 +1190,8 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports );
 				});
 			})
 			.then(function(data){
-console.log('DATA:');
-console.log(data);
 				// A: Parse string to JSON if needed
 				data = ( typeof data === 'string' && data.indexOf('{') == 0 ? JSON.parse(data) : data );
-
 				// B: If result is a single object, make it an array for pasing below (Ex: '_api/site/Owner/Id')
 				var arrObjResult = ( data && data.d && !data.d.results && typeof data.d === 'object' && Object.keys(data.d).length > 0 ? [data.d] : [] );
 
@@ -1193,7 +1199,6 @@ console.log(data);
 				// NOTE: Depending upon which REST endpoint used, SP can return results in various forms (!)
 				// EX..: data.d.results is an [] of {}: [ {Title:'Brent Ely', Email:'Brent.Ely@microsoft.com'}, {}, {} ]
 				// NOTE: Ensure results are an object because SP will return an entire HTML page as a result in some error cases!
-
 				if ( objAjaxQuery.url.toLowerCase().indexOf('owssvr.dll') > -1 && objAjaxQuery.url.toLowerCase().indexOf('includeversions=true') > -1 ) {
 					// IE11: When using jQuery AJAX for AppendText/Versions/getVersions, the `data` result must be parsed directly (no conversion) using `(data).find("z:row")`
 					inOpt.spArrData.push( data );
@@ -1348,7 +1353,6 @@ console.log(data);
 					if ( objRow.__metadata && !inOpt.metadata ) delete objRow.__metadata;
 					inOpt.spArrData.push( objRow );
 				}
-
 				// D:
 				resolve( inOpt.spArrData );
 			})
