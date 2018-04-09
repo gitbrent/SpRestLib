@@ -46,6 +46,7 @@ var SP_HOST = SP_URL.toLowerCase().replace('https://','').replace('http://','');
 var gBinarySecurityToken = "";
 var gAuthCookie1 = "";
 var gAuthCookie2 = "";
+var gStrReqDig = "";
 
 Promise.resolve()
 .then(() => {
@@ -184,21 +185,38 @@ Promise.resolve()
 	return sprLib.rest({ url:'_api/contextinfo', type:'POST' });
 })
 .then(arr => {
-	let strReqDig = arr[0].GetContextWebInformation.FormDigestValue;
+	gStrReqDig = arr[0].GetContextWebInformation.FormDigestValue;
 
 	console.log("\nTEST 3: sprLib.list('Announcements').create()");
 	console.log('---------------------------------------------');
-	console.log('strReqDig..: '+ strReqDig);
+	console.log('gStrReqDig..: '+ gStrReqDig);
 
-	return sprLib.list({ name:'Announcements', requestDigest:strReqDig }).create({ "Title":"created with Node demo" });
+	return sprLib.list({ name:'Announcements', requestDigest:gStrReqDig }).create({ "Title":"created with Node demo" });
 })
 .then((objCrud) => {
 	console.log('..\n..create done!');
 	console.log('New item ID...: '+ objCrud.ID);
 
-	// NEGATIVE-TEST: (check for error msg response)
-	//return sprLib.list('Site Assets').getItems({ listCols:['ColDoesntExist'] });
+	console.log("\nTEST 4: sprLib.rest() - upload a local file to 'Documents' Library");
+	console.log('---------------------------------------------');
+
+	var strFileName = "sprestlib-demo.html";
+	var strUrl = "_api/web/lists/getByTitle('Documents')/RootFolder/files/add(overwrite=true,url='"+strFileName+"')";
+	// this works too?
+	// http://www.somewhere.com/testsite/_api/web/GetFolderByServerRelativeUrl('/testsite/Shared Documents')/Files/add(url='filename.png',overwrite=true)
+	//	var strUrl = "_api/web/GetFolderByServerRelativeUrl('/sites/dev/Shared%20Documents')/Files/add(url='filename.png',overwrite=true)";
+
+	return sprLib.rest({
+		url: strUrl,
+		type: "POST",
+		requestDigest: gStrReqDig,
+		data: new Buffer( fs.readFileSync('./'+strFileName, 'utf8') )
+	});
 })
+.then((arrResults) => {
+	console.log('SUCCESS: "'+ arrResults[0].Name +'" uploaded to: '+ arrResults[0].ServerRelativeUrl );
+})
+
 .then(() => {
 	console.log('\n================================================================================');
 	console.log('...demo complete.\n');
