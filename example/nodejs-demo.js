@@ -204,7 +204,7 @@ Promise.resolve()
 	var strUrl = "_api/web/lists/getByTitle('Documents')/RootFolder/files/add(overwrite=true,url='"+strFileName+"')";
 	// this works too?
 	// http://www.somewhere.com/testsite/_api/web/GetFolderByServerRelativeUrl('/testsite/Shared Documents')/Files/add(url='filename.png',overwrite=true)
-	//	var strUrl = "_api/web/GetFolderByServerRelativeUrl('/sites/dev/Shared%20Documents')/Files/add(url='filename.png',overwrite=true)";
+	// var strUrl = "_api/web/GetFolderByServerRelativeUrl('/sites/dev/Documents')/Files/add(url='filename.png',overwrite=true)";
 
 	return sprLib.rest({
 		url: strUrl,
@@ -216,7 +216,6 @@ Promise.resolve()
 .then((arrResults) => {
 	console.log('SUCCESS: "'+ arrResults[0].Name +'" uploaded to: '+ arrResults[0].ServerRelativeUrl );
 })
-
 .then(() => {
 	console.log('\n================================================================================');
 	console.log('...demo complete.\n');
