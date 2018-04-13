@@ -34,7 +34,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports && typeof require
 (function(){
 	// APP VERSION/BUILD
 	var APP_VER = "1.7.0-beta";
-	var APP_BLD = "20180408";
+	var APP_BLD = "20180411";
 	var DEBUG = false; // (verbose mode/lots of logging)
 	// ENUMERATIONS
 	// REF: [`SP.BaseType`](https://msdn.microsoft.com/en-us/library/office/jj246925.aspx)
@@ -63,7 +63,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports && typeof require
 		"lt" : "<",
 		"lte": "<="
 	};
-	// USER-CONFIGURABLE: UI OPTIONS
+	// USER-CONFIGURABLE OPTIONS
 	var APP_OPTS = {
 		baseUrl:         '..',
 		busySpinnerHtml: '<div class="sprlib-spinner"><div class="sprlib-bounce1"></div><div class="sprlib-bounce2"></div><div class="sprlib-bounce3"></div></div>',
@@ -72,7 +72,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports && typeof require
 		currencyChar:    '$',
 		language:        'en',
 		maxRetries:      2,
-		maxRows:         1000,
+		maxRows:         5000,
 		metadata:        false,
 		nodeCookie:      '',
 		nodeEnabled:     true,
@@ -170,6 +170,52 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports && typeof require
 		// CASE 2: Act as a SETTER
 		APP_OPTS.baseUrl = inStr.replace(/\/+$/,'');
 		if (DEBUG) console.log('APP_OPTS.baseUrl = '+APP_OPTS.baseUrl);
+	}
+
+	// TODO: WIP:
+	sprLib.library = function library(inOpt) {
+		// A: Options setup
+		inOpt = inOpt || {};
+		var _newList = {};
+		var _urlBase = "_api/lists";
+		var _requestDigest = (inOpt.requestDigest || (typeof document !== 'undefined' && document.getElementById('__REQUESTDIGEST') ? document.getElementById('__REQUESTDIGEST').value : null));
+		if ( inOpt.guid ) inOpt.name = inOpt.guid; // Allow `guid` as a synonym for `name` per user request
+
+		// B: Param check
+		if ( inOpt && typeof inOpt === 'string' ) {
+			// DESIGN: Accept either [ListName] or [ListGUID]
+			_urlBase += ( gRegexGUID.test(inOpt) ? "(guid'"+ inOpt +"')" : "/getbytitle('"+ inOpt.replace(/\s/gi,'%20') +"')" );
+		}
+		else if ( inOpt && typeof inOpt === 'object' && inOpt.hasOwnProperty('name') ) {
+			_urlBase = (inOpt.baseUrl ? inOpt.baseUrl.replace(/\/+$/,'')+'/_api/lists' : _urlBase);
+			_urlBase += ( gRegexGUID.test(inOpt.name) ? "(guid'"+ inOpt.name +"')" : "/getbytitle('"+ inOpt.name.replace(/\s/gi,'%20') +"')" );
+		}
+		else {
+			console.error("ERROR: A 'listName' or 'listGUID' is required! EX: `sprLib.library('Documents')` or `sprLib.library({ 'name':'Documents' })`");
+			console.error('ARGS:');
+			console.error(inOpt);
+			return null;
+		}
+
+		// C: Replicate/Overload core List methods
+		_newList.cols  = function(){ var _list = sprLib.list(inOpt); return _list.cols(); };
+		_newList.info  = function(){ var _list = sprLib.list(inOpt); return _list.info(); };
+		_newList.perms = function(){ var _list = sprLib.list(inOpt); return _list.perms(); };
+
+		// D: Add Public Methods
+		// TODO: WIP:
+		_newList.upload = function(inObj){
+			return new Promise(function(resolve, reject) {
+				// STEP 1: Create/Init Options
+				inObj = ( inObj && typeof inObj === 'object' && Object.keys(inObj).length > 0 ? inObj : {} );
+				// TODO: check for required keys
+
+				// TODO: copy REST file upload code from `demo-file-upload` and `nodejs-demo`
+			});
+		};
+
+		// LAST: Return this new List
+		return _newList;
 	}
 
 	// API: LIST (CRUD, select, recycle)
@@ -394,8 +440,8 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports && typeof require
 		* |------------------|---------|-------|-------------------|----------------------|
 		* | `dataName`       | string  | no    | SP.InternalName   | 'Hire_x0020_Date'    |
 		* | `dispName`       | string  | no    | display name      | 'Hire Date'          |
-		* | `currencyFormat` | string  | no    | date format       | `INTL`, `INTLTIME` TODO |
-		* | `dateFormat`     | string  | no    | date format       | `INTL`, `INTLTIME` TODO |
+		* | `currencyFormat` | string  | no    | date format       | `INTL`, `INTLTIME` |
+		* | `dateFormat`     | string  | no    | date format       | `INTL`, `INTLTIME`  |
 		* // TODO: ^^^ lets combine to `format` and be context-sensitive (currency only works with currency etc.)
 		*
 		* listCols properties: used by Library internally
@@ -543,12 +589,12 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports && typeof require
 							// D: Add orderby (if any)
 							if ( inObj.queryOrderby ) objAjaxQuery.url += (objAjaxQuery.url.indexOf('?') > -1 ? '&':'?') + '$orderby=' + inObj.queryOrderby;
 
-							// E: Add maxrows / Next support (if any) or use default b/c SP2013 default is a paltry 100 rows!
+							// E: Add maxrows / Next support
 							if ( inObj.queryNext ) {
 								objAjaxQuery.url += '&p_ID='+ inObj.queryNext.prevId +'&$top='+ inObj.queryNext.maxItems;
 							}
-							else {
-								objAjaxQuery.url += (objAjaxQuery.url.indexOf('?$') > -1 ? '&':'?') + '$top=' + ( inObj.queryLimit ? inObj.queryLimit : APP_OPTS.maxRows );
+							else if ( inObj.queryLimit ) {
+								objAjaxQuery.url += ( (objAjaxQuery.url.indexOf('?$') > -1 ? '&':'?') + '$top=' + inObj.queryLimit );
 							}
 						}
 
@@ -1118,11 +1164,14 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports && typeof require
 					}
 				}
 
-				// queryLimit: Add maxrows (b/c default in SP2013 is a paltry 100 rows)
-				// NOTE: Only applies to GET types (POST with this param are obv. invalid!)
-				if ( (inOpt.queryFilter || objAjaxQuery.url.toLowerCase().indexOf('$select') > -1)
-					&& inOpt.url.toLowerCase().indexOf('$top') == -1 && inOpt.type == "GET" ) {
-					objAjaxQuery.url += ( (objAjaxQuery.url.indexOf('?')>0?'&':'?')+'$top=' + ( inOpt.queryLimit ? inOpt.queryLimit : APP_OPTS.maxRows ) );
+				// NOTE: Only applies to GET [select] queries (POST with this param are obv. invalid!)
+				if (
+					(inOpt.queryFilter || objAjaxQuery.url.toLowerCase().indexOf('$select') > -1)
+					&& inOpt.type == "GET"
+					&& inOpt.url.toLowerCase().indexOf('$top') == -1
+					&& inOpt.queryLimit
+				) {
+					objAjaxQuery.url += ( (objAjaxQuery.url.indexOf('?')>0?'&':'?') + '$top=' + inOpt.queryLimit );
 				}
 
 				// queryFilter: Add filter (if any)
@@ -1244,6 +1293,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports && typeof require
 					(arrObjResult.length > 0 ? arrObjResult : data.d.results).forEach(function(result){
 						var objRow = {};
 
+						// A: Add select columns
 						if ( inOpt.queryCols ) {
 							// NOTE: `queryCols` can be either an object or an array
 							if ( Array.isArray(inOpt.queryCols) ) {
@@ -1357,7 +1407,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports && typeof require
 							});
 						}
 
-						// TODO: 20171107: Add `etag` option to return etag (check to ensure it exists, then set prop value)
+						// B: Remove metadata unless the option to return it is set
 						if ( objRow.__metadata && !inOpt.metadata ) delete objRow.__metadata;
 
 						// C: Support "next" functionality
@@ -1374,6 +1424,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports && typeof require
 							if ( objSkip.prevId && objSkip.maxItems ) objRow.__next = objSkip;
 						}
 
+						// D: Add this row
 						inOpt.spArrData.push( objRow );
 					});
 				}
@@ -1524,8 +1575,6 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports && typeof require
 			});
 		}
 
-		// TODO: v1.7.0: add `inOpt` to subsites
-
 		/**
 		* Get Subsites
 		*
@@ -1659,6 +1708,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports && typeof require
 				// LOGIC: If `inUrl` exists, then just get the Groups from that site, otherwise, return SiteCollection Groups
 				if ( inUrl ) {
 					// TODO: 1.7.0: Stop querying 1000 groups - use same query as REST
+					// FIXME: 1.7.0
 					var arrPromises = [];
 
 					var strFilter = 'Member/PrincipalType eq 8'; // Default is all Groups
@@ -2156,6 +2206,14 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports && typeof require
 		APP_OPTS.nodeServer  = inOpt.server || '';
 	}
 })();
+
+// Polyfill (IE11):
+if (window.NodeList && !NodeList.prototype.forEach) {
+	NodeList.prototype.forEach = function(callback, thisArg) {
+		thisArg = thisArg || window;
+		for (var i = 0; i < this.length; i++){ callback.call(thisArg, this[i], i, this); }
+	};
+}
 
 // [Node.js] support
 if ( NODEJS ) {
