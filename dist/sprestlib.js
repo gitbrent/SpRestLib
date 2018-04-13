@@ -1704,14 +1704,12 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports && typeof require
 					inOpt = null;
 				}
 
+				// TODO: Add all the keys SiteGroups/RoleAssignments (not just the few we specify - SP returns like 10)
+
 				// STEP 2: Query group(s)
 				// LOGIC: If `inUrl` exists, then just get the Groups from that site, otherwise, return SiteCollection Groups
 				if ( inUrl ) {
-					// TODO: 1.7.0: Stop querying 1000 groups - use same query as REST
-					// FIXME: 1.7.0
-					var arrPromises = [];
-
-					var strFilter = 'Member/PrincipalType eq 8'; // Default is all Groups
+					var strFilter = 'Member/PrincipalType eq 8'; // Default is all groups (type=8)
 					if ( inOpt && inOpt.id ) strFilter = "Member/Id eq "+inOpt.id;
 					else if ( inOpt && inOpt.title ) strFilter = "Member/Title eq '"+inOpt.title+"'";
 
@@ -1720,15 +1718,17 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports && typeof require
 						url: _urlBase+'_api/web/RoleAssignments',
 						queryCols: [
 							'Member/Id','Member/Title','Member/Description','Member/OwnerTitle',
-							'Member/PrincipalType','Member/AllowMembersEditMembership'
+							'Member/PrincipalType','Member/AllowMembersEditMembership',
+							'Member/Users/Id','Member/Users/LoginName','Member/Users/Title'
 						],
 						queryFilter: strFilter,
 						queryLimit: APP_OPTS.maxRows
 					})
 					.then(function(arrGroups){
-						// STEP 2: Create array of Groups and Promises
+						// TODO: in `// A: Filter internal/junk groups` below, we filter and not here
+
+						// A: Create/Populate array of Groups and Promises
 						arrGroups.forEach(function(grp,idx){
-							// A: Create object
 							arrData.push({
 								Id: grp.Member.Id,
 								Title: grp.Member.Title,
@@ -1736,29 +1736,12 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports && typeof require
 								OwnerTitle: grp.Member.OwnerTitle,
 								PrincipalType: (ENUM_PRINCIPALTYPES[grp.Member.PrincipalType] || grp.Member.PrincipalType),
 								AllowMembersEditMembership: grp.Member.AllowMembersEditMembership,
-								Users: []
+								Users: grp.Member.Users.map(function(user){ if (user.__metadata) delete user.__metadata; return user; })
 							});
-
-							// B: Create Users promise
-							arrPromises.push(
-								sprLib.rest({
-									url: _urlBase+'_api/web/SiteGroups/GetById('+ grp.Member.Id +')/Users',
-									queryCols: ['Id','LoginName','Title'],
-									queryLimit: APP_OPTS.maxRows
-								})
-							);
 						});
 
-						// STEP 3: Populate Group's Users
-						Promise.all(arrPromises)
-						.then(function(arrAllArrays,idx){
-							arrAllArrays.forEach(function(arrUsers,idx){
-								arrUsers.forEach(function(user,idy){ arrData[idx].Users.push({ Id:user.Id, LoginName:user.LoginName, Title:user.Title }); });
-							});
-
-							// Resolve results (NOTE: empty array is the correct default result)
-							resolve( arrData || [] );
-						});
+						// Resolve results (NOTE: empty array is the correct default result)
+						resolve( arrData || [] );
 					})
 					.catch(function(strErr){
 						reject( strErr );
@@ -1772,8 +1755,9 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports && typeof require
 					sprLib.rest({
 						url: _urlBase+'_api/web/SiteGroups',
 						queryCols: [
-							'Id','Title','PrincipalType','Description','OwnerTitle','AllowMembersEditMembership',
-							'Users/Id','Users/Title','Users/LoginName'
+							'Id','Title','Description','OwnerTitle',
+							'PrincipalType','AllowMembersEditMembership',
+							'Users/Id','Users/LoginName','Users/Title'
 						],
 						queryFilter: strFilter,
 						queryLimit: APP_OPTS.maxRows
