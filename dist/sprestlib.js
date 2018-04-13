@@ -34,7 +34,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports && typeof require
 (function(){
 	// APP VERSION/BUILD
 	var APP_VER = "1.7.0-beta";
-	var APP_BLD = "20180411";
+	var APP_BLD = "20180412";
 	var DEBUG = false; // (verbose mode/lots of logging)
 	// ENUMERATIONS
 	// REF: [`SP.BaseType`](https://msdn.microsoft.com/en-us/library/office/jj246925.aspx)
@@ -63,7 +63,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports && typeof require
 		"lt" : "<",
 		"lte": "<="
 	};
-	// USER-CONFIGURABLE OPTIONS
+	// APP OPTIONS
 	var APP_OPTS = {
 		baseUrl:         '..',
 		busySpinnerHtml: '<div class="sprlib-spinner"><div class="sprlib-bounce1"></div><div class="sprlib-bounce2"></div><div class="sprlib-bounce3"></div></div>',
@@ -403,7 +403,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports && typeof require
 		* | `metadata`    | boolean | no    | whether to return `__metadata` | `metadata: true` |
 		* | `queryFilter` | string  | no    | OData style filter    | `ID eq 1`, `Badge_x0020_Number eq 1234` |
 		* | `queryLimit`  | number  | no    | OData style row limit | `10` would limit number of rows returned to 10 |
-		* | `queryNext`   | object  | no    | Next/Skip options (paging) | `{ prevId:5000, maxItems:1000 }` |
+		* | `queryNext`   | object  | no    | Next/Skip options (paging) | `{ prevId:500, maxItems:1000 }` |
 		* | `queryOrderby`| string  | no    | OData style order by  | `Badge_x0020_Number`, `Badge_x0020_Number desc` [asc sort is SP2013 default] |
 		*
 		* @example - no args - omitting listCols/arguments means "return all" (mirrors SP behavior)
@@ -1723,7 +1723,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports && typeof require
 							'Member/PrincipalType','Member/AllowMembersEditMembership'
 						],
 						queryFilter: strFilter,
-						queryLimit: 5000
+						queryLimit: APP_OPTS.maxRows
 					})
 					.then(function(arrGroups){
 						// STEP 2: Create array of Groups and Promises
@@ -1744,7 +1744,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports && typeof require
 								sprLib.rest({
 									url: _urlBase+'_api/web/SiteGroups/GetById('+ grp.Member.Id +')/Users',
 									queryCols: ['Id','LoginName','Title'],
-									queryLimit: 5000
+									queryLimit: APP_OPTS.maxRows
 								})
 							);
 						});
@@ -1776,7 +1776,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports && typeof require
 							'Users/Id','Users/Title','Users/LoginName'
 						],
 						queryFilter: strFilter,
-						queryLimit: 5000
+						queryLimit: APP_OPTS.maxRows
 					})
 					.then(function(arrData){
 						// A: Filter internal/junk groups
@@ -1825,19 +1825,19 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports && typeof require
 					// NOTE: Site `users` are: Users with RoleAssignments -plus- all users in Groups with RoleAssignments
 					// A: Get User [direct] grants/perms
 					// B: Get Group Members [Users] that have grants/perms from group membership
-					// FIXME: LIMIT: Library only supports up to 5000 results! TODO: add paging
+					// FIXME: LIMIT: Library only supports up to APP_OPTS.maxRows results! TODO: add paging
 					Promise.all([
 						sprLib.rest({
 							url: _urlBase+'_api/web/RoleAssignments',
 							queryCols: ['Member/Id','Member/Email','Member/LoginName','Member/Title','Member/IsSiteAdmin'],
 							queryFilter: 'Member/PrincipalType eq 1',
-							queryLimit: 5000
+							queryLimit: APP_OPTS.maxRows
 						}),
 						sprLib.rest({
 							url: _urlBase+'_api/web/RoleAssignments',
 							queryCols: ['Member/Id','Member/Title','Member/Users/Id','Member/Users/Email','Member/Users/LoginName','Member/Users/Title','Member/Users/IsSiteAdmin'],
 							queryFilter: 'Member/PrincipalType eq 8',
-							queryLimit: 5000
+							queryLimit: APP_OPTS.maxRows
 						})
 					])
 					.then(function(arrAllArrays){
@@ -1903,7 +1903,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports && typeof require
 						url: _urlBase+'_api/web/SiteUsers',
 						queryCols: ['Id','Email','LoginName','Title','IsSiteAdmin','Groups/Id','Groups/Title'],
 						queryFilter: 'PrincipalType eq 1',
-						queryLimit: 5000
+						queryLimit: APP_OPTS.maxRows
 					})
 					.then(function(arrData){
 						var arrSiteUsers = [];
