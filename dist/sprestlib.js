@@ -34,7 +34,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports && typeof require
 (function(){
 	// APP VERSION/BUILD
 	var APP_VER = "1.7.0-beta";
-	var APP_BLD = "20180412";
+	var APP_BLD = "20180416";
 	var DEBUG = false; // (verbose mode/lots of logging)
 	// ENUMERATIONS
 	// REF: [`SP.BaseType`](https://msdn.microsoft.com/en-us/library/office/jj246925.aspx)
@@ -123,6 +123,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports && typeof require
 	*/
 	function doRenewDigestToken() {
 		return new Promise(function(resolve,reject) {
+			/* OLD:
 			// Use SP.js UpdateFormDigest function if available
 			// @see http://www.wictorwilen.se/sharepoint-2013-how-to-refresh-the-request-digest-value-in-javascript
 			// UpdateFormDigest() is syncronous per this SharePoint MVP, so just run and return
@@ -130,6 +131,22 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports && typeof require
 			// Use a very short refresh interval to force token renewal (otherwise, unless it's been 30 min or whatever, no new token will be provided by SP)
 			UpdateFormDigest(_spPageContextInfo.webServerRelativeUrl, 10);
 			resolve();
+			*/
+			sprLib.rest({ url:'_api/contextinfo', type:'POST' })
+			.then(function(arrData){
+				var strToken = (arrData && arrData[0] && arrData[0].GetContextWebInformation && arrData[0].GetContextWebInformation.FormDigestValue ? arrData[0].GetContextWebInformation.FormDigestValue : null);
+
+				// A: Update the page token if it exists
+				if ( typeof document !== 'undefined' && document.getElementById('__REQUESTDIGEST') ) {
+					document.getElementById('__REQUESTDIGEST').value = strToken;
+				}
+
+				// B: Return the digest value
+				resolve( strToken );
+			})
+			.catch(function(strErr){
+				reject( strErr );
+			});
 		});
 	}
 
