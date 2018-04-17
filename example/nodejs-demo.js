@@ -4,8 +4,8 @@
  * DESC: Demonstrate SpRestLib on Node.js
  * REQS: Node 4.x + `npm install sprestlib`
  * EXEC: `node nodejs-demo.js (sp-username) (sp-password) {sp-hostUrl}`
- * VER.: 1.6.0
- * REL.: 20180308
+ * VER.: 1.6.1
+ * REL.: 20180416
  * REFS: HOWTO: Authenticate to SharePoint Online (*.sharepoint.com)
  * - https://allthatjs.com/2012/03/28/remote-authentication-in-sharepoint-online/
  * - http://paulryan.com.au/2014/spo-remote-authentication-rest/
@@ -182,10 +182,10 @@ Promise.resolve()
 	//sprLib.list('Departments').create({ Title:'node test' });
 	// THIS WILL FAIL - "The security validation for this page is invalid and might be corrupted. Please use your web browser's Back button to try your operation again."
 	// a `requestDigest` must be generated and included
-	return sprLib.rest({ url:'_api/contextinfo', type:'POST' });
+	return sprLib.renewSecurityToken();
 })
-.then(arr => {
-	gStrReqDig = arr[0].GetContextWebInformation.FormDigestValue;
+.then(strDigest => {
+	gStrReqDig = strDigest;
 
 	console.log("\nTEST 3: sprLib.list('Announcements').create()");
 	console.log('---------------------------------------------');
