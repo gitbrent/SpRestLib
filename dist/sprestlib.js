@@ -96,6 +96,11 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports && typeof require
 	==================================================================================================
 	*/
 
+	/**
+	* Parse XHR Response Headers for SharePoint codes/error messages and return them as a string.
+	*
+	* @return {string} "(404) List not found."
+	*/
 	function parseErrorMessage(jqXHR) {
 		// STEP 1:
 		jqXHR = jqXHR || {};
@@ -117,9 +122,11 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports && typeof require
 		return strErrText;
 	}
 
-	/*
-	* HOWTO: generate a `requestDigest`
-	* sprLib.rest({ url:'_api/contextinfo', type:'POST' }).then(arr => console.log(arr[0].GetContextWebInformation.FormDigestValue) );
+	/**
+	* Query SharePoint for a current `__REQUESTDIGEST`/contextinfo token used in `X-RequestDigest` headers
+	* Sets the form value for `__REQUESTDIGEST` if it exists
+	*
+	* @return {string} "0x1925741C8C2A5DA6BA9338[...C8ED,18 Apr 2018 03:19:26 -0000"
 	*/
 	function doRenewDigestToken() {
 		return new Promise(function(resolve,reject) {
@@ -175,7 +182,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports && typeof require
 	*
 	* @example - get baseUrl
 	* sprLib.baseUrl();
-	* @returns '/sites/devtest'
+	* @return '/sites/devtest'
 	*
 	* @param {string} `inStr` - URL to use as the root of API calls
 	* @return {string} Return value of APP_OPTS.baseUrl
@@ -2209,7 +2216,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports && typeof require
 })();
 
 // IE11 Polyfill
-if (!NODEJS && typeof window !== 'undefined' && window.NodeList && !NodeList.prototype.forEach) {
+if ( !NODEJS && typeof window !== 'undefined' && window.NodeList && !NodeList.prototype.forEach ) {
 	NodeList.prototype.forEach = function(callback, thisArg) {
 		thisArg = thisArg || window;
 		for (var i = 0; i < this.length; i++){ callback.call(thisArg, this[i], i, this); }
