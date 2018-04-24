@@ -14,7 +14,11 @@ var jvsSrch1 = /\<script type="text\/javascript" src="https:\/\/cdnjs.cloudflare
 
 /* ========== */
 // NOTE: CSS is done during min, so not needed here
-var arrDeployTasks = ['deploy-html','deploy-index','deploy-img','deploy-help','deploy-sitemap'];
+var arrDeployTasks = ['deploy-css','deploy-html','deploy-index','deploy-img','deploy-help','deploy-sitemap'];
+
+gulp.task('deploy-css', ()=>{
+	return gulp.src('./build/SpRestLib/css/*.css').pipe(gulp.dest('../css/'));
+});
 
 gulp.task('deploy-html', ()=>{
 	return gulp.src('./build/SpRestLib/docs/*.html').pipe(gulp.dest('../docs/'));
