@@ -16,6 +16,7 @@ const siteConfig = {
 		{href: 'https://github.com/gitbrent/SpRestLib/releases', label: 'Download'},
 		{doc: 'installation', label: 'Get Started'},
 		{doc: 'api-list', label: 'API Documentation'},
+		{blog: true, label: 'Blog'},
 		{href: 'https://github.com/gitbrent/SpRestLib/', label: 'GitHub'},
 	],
 	headerIcon: 'img/sprestlib.svg',
@@ -35,6 +36,8 @@ const siteConfig = {
 		'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js',
 	],
 	repoUrl: 'https://github.com/gitbrent/SpRestLib',
+	twitter: true,
+	twitterImage: 'img/sprestlib.png',
 };
 
 module.exports = siteConfig;
