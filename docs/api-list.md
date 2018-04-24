@@ -2,32 +2,6 @@
 id: api-list
 title: List/Library (SPList) Methods
 ---
-**************************************************************************************************
-Table of Contents
-- [Syntax](#syntax)
-- [Options](#options-1)
-  - [Options: baseUrl](#options-baseurl)
-  - [Options: requestDigest](#options-requestdigest)
-- [Get Items](#get-items)
-  - [Options](#options-2)
-  - [listCols Object](#listcols-object)
-  - [listCols dataFunc Option](#listcols-datafunc-option)
-  - [Sample Code](#sample-code)
-- [Create Item](#create-item)
-- [Update Item](#update-item)
-- [Delete Item](#delete-item)
-- [Recycle Item](#recycle-item)
-- [Get List Column Properties](#get-list-column-properties)
-  - [Column Properties](#column-properties)
-  - [Sample Code](#sample-code-1)
-- [Get List Info](#get-list-info)
-  - [List Properties](#list-properties)
-  - [Sample Code](#sample-code-2)
-- [Get List Permissions](#get-list-permissions)
-  - [Perm Properties](#perm-properties)
-  - [Sample Code](#sample-code-3)
-  - [Sample Code](#sample-code-4)
-**************************************************************************************************
 
 ## Syntax
 Lists can be accessed by either their name or their GUID:  
