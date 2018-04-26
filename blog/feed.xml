@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rss version="2.0">
+    <channel>
+        <title>SpRestLib Blog</title>
+        <link>https://gitbrent.github.io/SpRestLib/blog</link>
+        <description>The best place to stay up-to-date with the latest SpRestLib news and events.</description>
+        <lastBuildDate>Fri, 20 Apr 2018 06:00:00 GMT</lastBuildDate>
+        <docs>http://blogs.law.harvard.edu/tech/rss</docs>
+        <generator>Feed for Node.js</generator>
+        <image>
+            <title>SpRestLib Blog</title>
+            <url>https://gitbrent.github.io/SpRestLib/img/sprestlib.svg</url>
+            <link>https://gitbrent.github.io/SpRestLib/blog</link>
+        </image>
+        <copyright>Copyright © 2018 Brent Ely</copyright>
+        <item>
+            <title><![CDATA[Creating a SharePoint List Column Using REST]]></title>
+            <link>https://gitbrent.github.io/SpRestLib/blog/2018/04/20/Create-SharePoint-List-Column-Using-Rest.html</link>
+            <guid>https://gitbrent.github.io/SpRestLib/blog/2018/04/20/Create-SharePoint-List-Column-Using-Rest.html</guid>
+            <pubDate>Fri, 20 Apr 2018 06:00:00 GMT</pubDate>
+            <description><![CDATA[<p>Send a REST call to any List or Library to create any type of column</p>
+<p>Very useful!</p>
+]]></description>
+        </item>
+        <item>
+            <title><![CDATA[Uploading a file to a SharePoint library using REST]]></title>
+            <link>https://gitbrent.github.io/SpRestLib/blog/2018/03/19/upload-file-to-sharepoint-library-using-rest.html</link>
+            <guid>https://gitbrent.github.io/SpRestLib/blog/2018/03/19/upload-file-to-sharepoint-library-using-rest.html</guid>
+            <pubDate>Mon, 19 Mar 2018 06:00:00 GMT</pubDate>
+            <description><![CDATA[<p>Two examples of using SpRestLib to upload a file using REST: Node and client browser.</p>
+]]></description>
+        </item>
+    </channel>
+</rss>
