@@ -13,7 +13,6 @@ var cssSrch2 = '<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/hi
 var jvsSrch1 = /\<script type="text\/javascript" src="https:\/\/cdnjs.cloudflare.com\/ajax\/libs\/highlight.*.min.js"\>\<\/script\>/;
 
 /* ========== */
-// NOTE: CSS is done during min, so not needed here
 var arrDeployTasks = ['deploy-css','deploy-html','deploy-index','deploy-img','deploy-help','deploy-sitemap'];
 
 gulp.task('deploy-css', ()=>{

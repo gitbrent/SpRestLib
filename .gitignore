@@ -6,6 +6,8 @@ bower_components/
 *.icloud
 *.lock
 
+example/*
+
 lib/core/metadata.js
 lib/core/MetadataBlog.js
 website/translated_docs

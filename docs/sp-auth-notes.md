@@ -2,15 +2,6 @@
 id: sp-auth-notes
 title: SharePoint Authentication
 ---
-**************************************************************************************************
-Table of Contents
-- [SharePoint Authentication Overview](#sharepoint-authentication-overview)
-- [SharePoint Authentication Requirements](#sharepoint-authentication-requirements)
-  - [GET Operations](#get-operations)
-  - [POST Operations](#post-operations)
-- [SharePoint Authentication Keys](#sharepoint-authentication-keys)
-  - [Example: Retrieve a FormDigestValue value](#example-retrieve-a-formdigestvalue-value)
-**************************************************************************************************
 
 ## SharePoint Authentication Overview
 

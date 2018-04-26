@@ -3,14 +3,6 @@ id: installation
 title: Installation
 sidebar_label: Installation
 ---
-**************************************************************************************************
-Table of Contents
-- [Client-Side](#client-side)
-  - [Include Local Scripts](#include-local-scripts)
-  - [Include Bundle Script](#include-bundle-script)
-  - [Install With Bower](#install-with-bower)
-- [Node.js](#nodejs)
-**************************************************************************************************
 
 ## Client-Side
 

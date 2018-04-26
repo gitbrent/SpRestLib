@@ -2,18 +2,6 @@
 id: api-user
 title: User Methods
 ---
-**************************************************************************************************
-Table of Contents
-- [Syntax](#syntax)
-- [User Query Properties](#user-query-properties)
-- [Get User Information (`SPUser`)](#get-user-information-spuser)
-  - [Sample Code](#sample-code-10)
-- [Get User Groups (`SPGroup`)](#get-user-groups-spgroup)
-  - [Sample Code](#sample-code-11)
-- [Get User Profile Properties (`SP.UserProfile.PersonProperties`)](#get-user-profile-properties-spuserprofilepersonproperties)
-  - [Person Properties](#person-properties)
-  - [Sample Code](#sample-code-12)
-**************************************************************************************************
 
 ## Syntax
 `sprLib.user()`  

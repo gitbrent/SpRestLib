@@ -2,31 +2,6 @@
 id: api-site
 title: Site (SPSite) Methods
 ---
-**************************************************************************************************
-Table of Contents
-- [Syntax](#syntax)
-- [Site Info](#get-site-info)
-  - [Site Properties](#site-properties)
-  - [Sample Code](#sample-code-3)
-- [Site Lists](#get-site-lists)
-  - [List Properties](#list-properties-1)
-  - [Sample Code](#sample-code-4)
-- [Site Permissions](#get-site-permissions)
-  - [Perm Properties](#perm-properties)
-  - [Sample Code](#sample-code-5)
-- [Site Groups](#get-site-groups)
-  - [Group Properties](#group-properties)
-  - [Sample Code](#sample-code-6)
-- [Site Roles](#get-site-roles)
-  - [Role Properties](#role-properties)
-  - [Sample Code](#sample-code-7)
-- [Site Subsites](#get-site-subsites)
-  - [Subsite Properties](#subsite-properties)
-  - [Sample Code](#sample-code-8)
-- [Site Users](#get-site-users)
-  - [User Properties](#user-properties)
-  - [Sample Code](#sample-code-9)
-**************************************************************************************************
 
 ## Syntax
 `sprLib.site().info()`  

@@ -2,13 +2,6 @@
 id: promises
 title: Promise You Will Love It
 ---
-**************************************************************************************************
-Table of Contents
-- [JavaScript Promises Have Arrived](#javascript-promises-have-arrived)
-- [Simple Chains For Async Operations](#simple-chains-for-async-operations)
-- [Promises Example](#promises-example)
-- [Async/Await Example](#async-await-example)
-**************************************************************************************************
 
 ## JavaScript Promises Have Arrived
 

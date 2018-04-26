@@ -46,7 +46,7 @@ Returns:
 Notes:  
 * Omitting the `listCols` option will result in all List columns being returned (mimic SharePoint default behavior)
 
-### Options
+### items Options
 | Option        | Type     | Default   | Description                         | Possible Values / Returns                  |
 | :------------ | :------- | :-------- | :---------------------------------- | :----------------------------------------- |
 | `listCols`    | array    |           | array of column names (OData style) | `listCols: ['Name', 'Badge_x0020_Number']` |
@@ -370,18 +370,18 @@ sprLib.list('Employees').info()
 
 
 
-### Get List Permissions
+## Get List Permissions
 Syntax: `sprLib.list(listName|listGUID).perms()`
 
 Returns: Array of list permissions
 
-#### Perm Properties
+### Perm Properties
 | Property Name    | Type     | Description                                                           |
 | :--------------- | :------- | :-------------------------------------------------------------------- |
 | `Member`         | object   | object with Member properties (`Title`,`PrincipalId`,`PrincipalType`) |
 | `Roles`          | object   | array of Role objects with properties: (`Name`,`Hidden`)              |
 
-#### Sample Code
+### Sample Code
 ```javascript
 sprLib.list('Employees').perms()
 .then(function(arrayResults){ console.table(arrayResults) });
@@ -398,8 +398,8 @@ sprLib.list('Employees').perms()
 */
 ```
 
-#### Sample Code
-Easily Reproduce the "List Permissions" page ('/\_layouts/15/user.aspx')
+### List Permissions page (user.aspx)
+Easily reproduce the "List Permissions" page ('/\_layouts/15/user.aspx')
 ```javascript
 sprLib.list('Employees').perms()
 .then(function(arrPerms){

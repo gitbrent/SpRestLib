@@ -2,16 +2,6 @@
 id: ui-form-binding
 title: Form Binding
 ---
-**************************************************************************************************
-Table of Contents
-- [About](#about)
-- [Supported HTML Tags](#supported-html-tags)
-- [HTML Tag Properties](#html-tag-properties)
-  - [HTML Tag Properties: Table](#html-tag-properties-table)
-  - [HTML Tag Properties: Select](#html-tag-properties-select)
-  - [HTML Tag Properties: Cols Options](#html-tag-properties-cols-options)
-- [Examples](#examples-1)
-**************************************************************************************************
 
 ## About
 Include the optional `sprestlib-ui.js` library to perform control/form binding with an

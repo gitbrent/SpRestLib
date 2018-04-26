@@ -2,17 +2,6 @@
 id: feat-promises
 title: Promise-based Operations
 ---
-**************************************************************************************************
-Table of Contents
-- [(New) ES6/ES2015 Promises vs (Old) Callbacks](#new-es6es2015-promises-vs-old-callbacks)
-- [tl;dr](#tldr)
-- [Async Chaining](#async-chaining)
-  - [Example Logic](#example-logic)
-  - [Example Code](#example-code)
-- [Async Grouping](#async-grouping)
-  - [Example Logic](#example-logic-1)
-  - [Example Code](#example-code-1)
-**************************************************************************************************
 
 SpRestLib exclusively utilizes JavaScript ES6 Promises for asynchronous SharePoint operations.
 

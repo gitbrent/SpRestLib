@@ -2,16 +2,6 @@
 id: feat-utilities
 title: Utility Methods
 ---
-**************************************************************************************************
-Table of Contents
-- [Renew Security Token](#renew-security-token)
-  - [Syntax](#syntax)
-  - [Description](#description)
-- [Get Library Version](#get-library-version)
-  - [Syntax](#syntax1)
-  - [Description](#description1)
-  - [Description](#example)
-**************************************************************************************************
 
 ## Renew Security Token
 

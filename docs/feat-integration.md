@@ -2,10 +2,6 @@
 id: feat-integration
 title: Library Integration
 ---
-**************************************************************************************************
-Table of Contents
-- [Integration with Angular/Typescript/Webpack](#integration-with-angulartypescriptwebpack)
-**************************************************************************************************
 
 ## Integration with Angular/Typescript/Webpack
 

@@ -2,11 +2,6 @@
 id: api-rest
 title: REST API Methods
 ---
-**************************************************************************************************
-Table of Contents
-- [Options](#options)
-- [Examples](#examples)
-**************************************************************************************************
 
 Returns the results of a given REST call to any [SharePoint REST API](https://msdn.microsoft.com/en-us/library/office/dn268594.aspx)
 

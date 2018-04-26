@@ -2,11 +2,6 @@
 id: feat-node
 title: SharePoint via Node.js  
 ---
-**************************************************************************************************
-Table of Contents
-- [Connect To Office 365/SharePoint Online With Node.js](#connect-to-office-365sharepoint-online-with-nodejs)
-- [Demo](#demo)
-**************************************************************************************************
 
 ## Connect To Office 365/SharePoint Online With Node.js
 SpRestLib can be utilized via Node.js to perform powerful operations, generate reports, etc.
