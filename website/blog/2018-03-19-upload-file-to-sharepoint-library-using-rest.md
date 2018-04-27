@@ -4,12 +4,18 @@ authorURL: https://github.com/gitbrent/
 title: Uploading a file to a SharePoint library using REST
 ---
 
-Two examples of using SpRestLib to upload a file using REST: Node and client browser.
+Howto upload a file into a SharePoint Library using REST.  Both Node.js and
+client browsers can encode and upload files easily.
 
 <!--truncate-->
 
-## Using Node.js to upload a file
+*****************************
 
+Provide a source file using a file picker element in web browsers, or use a file path in Node.js.
+
+There are options for overwriting existing files and to select the destination folder.
+
+## Example: Using Node.js to upload a file
 ```javascript
 // see "nodejs-demo.js" for code on how to acquire a DigestToken `gStrReqDig`
 var strFileName = "./someFile.docx";
@@ -28,11 +34,9 @@ sprLib.rest({
 });
 ```
 
-## Using client browser to upload a file
-
+## Example: Using client browser to upload a file
 Given an HTML file picker (`<input type="file" id="filePicker">`):
 ![screen shot 2018-03-18 at 23 38 17](https://user-images.githubusercontent.com/7218970/37578233-7a309bb8-2b05-11e8-9f4d-6a770fa8e097.png)
-
 
 ```javascript
 var reader = new FileReader();
@@ -62,4 +66,5 @@ reader.onerror = function(e){
 };
 ```
 
+## More Examples
 See [`examples/sprestlib-demo-file-upload.html`](https://github.com/gitbrent/SpRestLib/tree/master/example) for a working demo.

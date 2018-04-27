@@ -14,12 +14,13 @@
         </image>
         <copyright>Copyright © 2018 Brent Ely</copyright>
         <item>
-            <title><![CDATA[Creating a SharePoint List Column Using REST]]></title>
-            <link>https://gitbrent.github.io/SpRestLib/blog/2018/04/20/Create-SharePoint-List-Column-Using-Rest.html</link>
-            <guid>https://gitbrent.github.io/SpRestLib/blog/2018/04/20/Create-SharePoint-List-Column-Using-Rest.html</guid>
+            <title><![CDATA[Creating SharePoint List Columns Using REST]]></title>
+            <link>https://gitbrent.github.io/SpRestLib/blog/2018/04/20/create-sharepoint-list-columns-using-rest.html</link>
+            <guid>https://gitbrent.github.io/SpRestLib/blog/2018/04/20/create-sharepoint-list-columns-using-rest.html</guid>
             <pubDate>Fri, 20 Apr 2018 06:00:00 GMT</pubDate>
-            <description><![CDATA[<p>Send a REST call to any List or Library to create any type of column</p>
-<p>Very useful!</p>
+            <description><![CDATA[<p>List and Library fields/columns can be created using the REST API.  A feature
+which is especially useful in many scenarios, such as having to update many subsites with new fields,
+doing migration work, etc.</p>
 ]]></description>
         </item>
         <item>
@@ -27,7 +28,8 @@
             <link>https://gitbrent.github.io/SpRestLib/blog/2018/03/19/upload-file-to-sharepoint-library-using-rest.html</link>
             <guid>https://gitbrent.github.io/SpRestLib/blog/2018/03/19/upload-file-to-sharepoint-library-using-rest.html</guid>
             <pubDate>Mon, 19 Mar 2018 06:00:00 GMT</pubDate>
-            <description><![CDATA[<p>Two examples of using SpRestLib to upload a file using REST: Node and client browser.</p>
+            <description><![CDATA[<p>Howto upload a file into a SharePoint Library using REST.  Both Node.js and
+client browsers can encode and upload files easily.</p>
 ]]></description>
         </item>
     </channel>
