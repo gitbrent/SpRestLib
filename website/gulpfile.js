@@ -15,12 +15,12 @@ var jvsSrch1 = /\<script type="text\/javascript" src="https:\/\/cdnjs.cloudflare
 /* ========== */
 var arrDeployTasks = ['deploy-blog','deploy-css','deploy-help','deploy-html','deploy-img','deploy-index','deploy-sitemap'];
 
-gulp.task('deploy-css', ()=>{
-	return gulp.src('./build/SpRestLib/css/*.css').pipe(gulp.dest('../css/'));
-});
-
 gulp.task('deploy-blog', ()=>{
 	return gulp.src('./build/SpRestLib/blog/**').pipe(gulp.dest('../blog/'));
+});
+
+gulp.task('deploy-css', ()=>{
+	return gulp.src('./build/SpRestLib/css/*.css').pipe(gulp.dest('../css/'));
 });
 
 gulp.task('deploy-html', ()=>{

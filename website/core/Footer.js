@@ -50,9 +50,9 @@ class Footer extends React.Component {
 					<div>
 						<h5>Community</h5>
 						<a
-							href="https://github.com/gitbrent/sprestlib/issues"
+							href="https://plus.google.com/u/1/113247436909611337609"
 							target="_blank">
-							GitHub Issues
+							Google Plus
 						</a>
 						<a
 							href="http://stackoverflow.com/questions/tagged/sprestlib"
@@ -67,6 +67,7 @@ class Footer extends React.Component {
 					</div>
 					<div>
 						<h5>More</h5>
+						<a href="https://github.com/gitbrent/sprestlib/issues">GitHub Issues</a>
 						<a href="https://github.com/gitbrent/sprestlib">GitHub Project</a>
 						<a href="https://www.flaticon.com/packs/creativity">Site Icons</a>
 					</div>
