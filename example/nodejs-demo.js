@@ -5,7 +5,7 @@
  * REQS: Node 4.x + `npm install sprestlib`
  * EXEC: `node nodejs-demo.js (sp-username) (sp-password) {sp-hostUrl}`
  * VER.: 1.6.1
- * REL.: 20180416
+ * REL.: 20180428
  * REFS: HOWTO: Authenticate to SharePoint Online (*.sharepoint.com)
  * - https://allthatjs.com/2012/03/28/remote-authentication-in-sharepoint-online/
  * - http://paulryan.com.au/2014/spo-remote-authentication-rest/
@@ -200,11 +200,10 @@ Promise.resolve()
 	console.log("\nTEST 4: sprLib.rest() - upload a local file to 'Documents' Library");
 	console.log('---------------------------------------------');
 
+	// IMPORTANT: path must be escaped or "TypeError: Request path contains unescaped characters"
+	var strFilePath = "/sites/dev/Shared%20Documents/upload";
 	var strFileName = "sprestlib-demo.html";
-	var strUrl = "_api/web/lists/getByTitle('Documents')/RootFolder/files/add(overwrite=true,url='"+strFileName+"')";
-	// this works too?
-	// http://www.somewhere.com/testsite/_api/web/GetFolderByServerRelativeUrl('/testsite/Shared Documents')/Files/add(url='filename.png',overwrite=true)
-	// var strUrl = "_api/web/GetFolderByServerRelativeUrl('/sites/dev/Documents')/Files/add(url='filename.png',overwrite=true)";
+	var strUrl = "_api/web/GetFolderByServerRelativeUrl('"+strFilePath+"')/Files/add(url='"+strFileName+"',overwrite=true)";
 
 	return sprLib.rest({
 		url: strUrl,
