@@ -34,7 +34,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports && typeof require
 (function(){
 	// APP VERSION/BUILD
 	var APP_VER = "1.7.0-beta";
-	var APP_BLD = "20180416";
+	var APP_BLD = "20180417";
 	var DEBUG = false; // (verbose mode/lots of logging)
 	// ENUMERATIONS
 	// REF: [`SP.BaseType`](https://msdn.microsoft.com/en-us/library/office/jj246925.aspx)
@@ -232,9 +232,66 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports && typeof require
 			return new Promise(function(resolve, reject) {
 				// STEP 1: Create/Init Options
 				inObj = ( inObj && typeof inObj === 'object' && Object.keys(inObj).length > 0 ? inObj : {} );
-				// TODO: check for required keys
+
+				/* options:
+				inObj = {
+					fileName:
+					filePath:
+					arrayBuffer:
+				};
+				*/
+				// TODO: check for required options ^^^
 
 				// TODO: copy REST file upload code from `demo-file-upload` and `nodejs-demo`
+
+				// NODE.JS
+				/*
+				var strFilePath = "/sites/dev/Shared%20Documents/upload";
+				var strFileName = "sprestlib-demo.html";
+				var strUrl = "_api/web/GetFolderByServerRelativeUrl('"+strFilePath+"')/Files/add(url='"+strFileName+"',overwrite=true)";
+				// IMPORTANT: path must be escaped or "TypeError: Request path contains unescaped characters"
+
+				sprLib.rest({
+					url: strUrl,
+					type: "POST",
+					requestDigest: gStrReqDig,
+					data: new Buffer( fs.readFileSync('./'+strFileName, 'utf8') )
+				});
+				.then((arrResults) => {
+					console.log('SUCCESS: "'+ arrResults[0].Name +'" uploaded to: '+ arrResults[0].ServerRelativeUrl );
+				});
+				*/
+
+				// CLIENT BROWSER: ask for a FilePicker or array buffer
+				/*
+				else if ( !$('#filePicker') || !$('#filePicker')[0] || !$('#filePicker')[0].value ) {
+					alert("Please select a file with the File Picker!");
+					return;
+				}
+
+				// STEP 2: Status update
+				$('#console').append('Starting file upload... <br>');
+
+				// STEP 3: Get the local file as an array buffer
+				var reader = new FileReader();
+				reader.readAsArrayBuffer( $('#filePicker')[0].files[0] );
+				reader.onloadend = function(e){
+					var parts = $('#filePicker')[0].value.split('\\');
+					var fileName = parts[parts.length - 1];
+					var strAjaxUrl = _spPageContextInfo.siteAbsoluteUrl
+						+ "/_api/web/lists/getByTitle('"+ $('#selDestLib').val() +"')"
+						+ "/RootFolder/files/add(overwrite=true,url='"+ fileName +"')";
+
+					sprLib.rest({
+						url: strAjaxUrl,
+						type: "POST",
+						data: e.target.result
+					})
+					.then(function(arr){
+						$('#console').append('SUCCESS: "'+ arr[0].Name +'" uploaded to: '+ arr[0].ServerRelativeUrl +'<br>');
+					})
+
+				*/
 			});
 		};
 
