@@ -34,7 +34,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports && typeof require
 (function(){
 	// APP VERSION/BUILD
 	var APP_VER = "1.7.0-beta";
-	var APP_BLD = "20180417";
+	var APP_BLD = "20180429";
 	var DEBUG = false; // (verbose mode/lots of logging)
 	// ENUMERATIONS
 	// REF: [`SP.BaseType`](https://msdn.microsoft.com/en-us/library/office/jj246925.aspx)
@@ -196,56 +196,93 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports && typeof require
 		if (DEBUG) console.log('APP_OPTS.baseUrl = '+APP_OPTS.baseUrl);
 	}
 
-	// TODO: WIP:
-	sprLib.library = function library(inOpt) {
+	// API: FILE
+	/**
+	* @param `inOpt` (object)/(string) - required - (`name` prop reqd)
+	* @example - sprLib.file( '/sites/dev/Shared%20Documents/SomeFolder/MyDoc.docx' );
+	* @example - sprLib.file({ 'name':'/sites/dev/Shared%20Documents/SomeFolder/MyDoc.docx' });
+	* @example - sprLib.file({ 'name':'/MyDocuments/MyDoc.docx', 'requestDigest':'ABC123' });
+	*
+	* @see: [Files and folders REST API reference](https://msdn.microsoft.com/en-us/library/office/dn450841.aspx)
+	*/
+	sprLib.file = function file(inOpt) {
 		// A: Options setup
 		inOpt = inOpt || {};
-		var _newList = {};
-		var _urlBase = "_api/lists";
+		var _newFile = {};
+		var _pathAndName = "";
 		var _requestDigest = (inOpt.requestDigest || (typeof document !== 'undefined' && document.getElementById('__REQUESTDIGEST') ? document.getElementById('__REQUESTDIGEST').value : null));
-		if ( inOpt.guid ) inOpt.name = inOpt.guid; // Allow `guid` as a synonym for `name` per user request
 
 		// B: Param check
 		if ( inOpt && typeof inOpt === 'string' ) {
-			// DESIGN: Accept either [ListName] or [ListGUID]
-			_urlBase += ( gRegexGUID.test(inOpt) ? "(guid'"+ inOpt +"')" : "/getbytitle('"+ inOpt.replace(/\s/gi,'%20') +"')" );
+			_pathAndName = encodeURI(inOpt);
 		}
 		else if ( inOpt && typeof inOpt === 'object' && inOpt.hasOwnProperty('name') ) {
-			_urlBase = (inOpt.baseUrl ? inOpt.baseUrl.replace(/\/+$/,'')+'/_api/lists' : _urlBase);
-			_urlBase += ( gRegexGUID.test(inOpt.name) ? "(guid'"+ inOpt.name +"')" : "/getbytitle('"+ inOpt.name.replace(/\s/gi,'%20') +"')" );
+			_pathAndName = encodeURI(inOpt.name);
 		}
 		else {
-			console.error("ERROR: A 'listName' or 'listGUID' is required! EX: `sprLib.library('Documents')` or `sprLib.library({ 'name':'Documents' })`");
+			console.error("ERROR: A 'fileName' is required! EX: `sprLib.file('Documents/Sample.docx')` or `sprLib.file({ 'name':'Documents/Sample.docx' })`");
 			console.error('ARGS:');
 			console.error(inOpt);
 			return null;
 		}
 
-		// C: Replicate/Overload core List methods
-		_newList.cols  = function(){ var _list = sprLib.list(inOpt); return _list.cols(); };
-		_newList.info  = function(){ var _list = sprLib.list(inOpt); return _list.info(); };
-		_newList.perms = function(){ var _list = sprLib.list(inOpt); return _list.perms(); };
+		// C: Add Public Methods
+		// .info()
+		// .perms()
+		// .version()
+		// .delete() // headers: { "X-HTTP-Method":"DELETE" },
+		// .recycle()
+		// .upload({ data:arrayBuffer/FilePicker/whatev, overwrite:BOOL })
+		// .get() (?) // _api/web/GetFolderByServerRelativeUrl('')/Files/get(url='')
 
-		// D: Add Public Methods
-		// TODO: WIP:
-		_newList.upload = function(inObj){
+		/**
+		* Return an object containing information about the current File
+		*
+		* @example: sprLib.file('/site/Documents/MyDoc.docx').info()
+		*/
+		_newFile.info = function() {
 			return new Promise(function(resolve, reject) {
-				// STEP 1: Create/Init Options
-				inObj = ( inObj && typeof inObj === 'object' && Object.keys(inObj).length > 0 ? inObj : {} );
+				var filePath = _pathAndName.substring(0, _pathAndName.lastIndexOf('/'));
+				var fileName = _pathAndName.substring(_pathAndName.lastIndexOf('/')+1);
 
-				/* options:
-				inObj = {
-					fileName:
-					filePath:
-					arrayBuffer:
-				};
-				*/
-				// TODO: check for required options ^^^
+				sprLib.rest({
+					url: "_api/web/GetFolderByServerRelativeUrl('"+filePath+"')/Files"
+						+ "?$select=Author/Id,CheckedOutByUser/Id,LockedByUser/Id,ModifiedBy/Id,"
+						+ "CheckInComment,CheckOutType,ETag,Exists,Length,Level,MajorVersion,MinorVersion,"
+						+ "Name,ServerRelativeUrl,TimeCreated,TimeLastModified"
+						+ "&$expand=Author,CheckedOutByUser,LockedByUser,ModifiedBy"
+						+ "&$filter=Name eq '"+fileName+"'",
+					metadata: false
+				})
+				.then(function(arrData){
+					// A: Capture info
+					var objData = ( arrData && arrData.length > 0 ? arrData[0] : [] );
 
-				// TODO: copy REST file upload code from `demo-file-upload` and `nodejs-demo`
+					// B: Remove junk
+					['Author', 'CheckedOutByUser', 'LockedByUser', 'ModifiedBy'].forEach(function(field){
+						if ( objData[field].__deferred ) delete objData[field].__deferred;
+						if ( objData[field].__metadata ) delete objData[field].__metadata;
+					});
 
-				// NODE.JS
+					// C: Done
+					resolve( objData );
+				})
+				.catch(function(strErr){
+					reject( strErr );
+				});
+			});
+		}
+
+
+		// TODO: WIP:
+		/**
+		* @see: https://msdn.microsoft.com/en-us/library/office/dn450841.aspx#bk_FileCollectionAdd
+		*/
+		_newFile.upload = function(){
+			return new Promise(function(resolve, reject) {
+				// CASE 1: NODE.JS
 				/*
+				// TODO: _pathAndName -> split for vars below!
 				var strFilePath = "/sites/dev/Shared%20Documents/upload";
 				var strFileName = "sprestlib-demo.html";
 				var strUrl = "_api/web/GetFolderByServerRelativeUrl('"+strFilePath+"')/Files/add(url='"+strFileName+"',overwrite=true)";
@@ -262,7 +299,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports && typeof require
 				});
 				*/
 
-				// CLIENT BROWSER: ask for a FilePicker or array buffer
+				// CASE 2: CLIENT BROWSER: ask for a FilePicker or array buffer
 				/*
 				else if ( !$('#filePicker') || !$('#filePicker')[0] || !$('#filePicker')[0].value ) {
 					alert("Please select a file with the File Picker!");
@@ -295,8 +332,8 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports && typeof require
 			});
 		};
 
-		// LAST: Return this new List
-		return _newList;
+		// LAST: Return this new File
+		return _newFile;
 	}
 
 	// API: LIST (CRUD, select, recycle)
