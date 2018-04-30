@@ -256,12 +256,12 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports && typeof require
 				})
 				.then(function(arrData){
 					// A: Capture info
-					var objData = ( arrData && arrData.length > 0 ? arrData[0] : [] );
+					var objData = ( arrData && arrData.length > 0 ? arrData[0] : {} ); // FYI: Empty object is correct return type when file-not-found
 
 					// B: Remove junk
 					['Author', 'CheckedOutByUser', 'LockedByUser', 'ModifiedBy'].forEach(function(field){
-						if ( objData[field].__deferred ) delete objData[field].__deferred;
-						if ( objData[field].__metadata ) delete objData[field].__metadata;
+						if ( objData[field] && objData[field].__deferred ) delete objData[field].__deferred;
+						if ( objData[field] && objData[field].__metadata ) delete objData[field].__metadata;
 					});
 
 					// C: Done
