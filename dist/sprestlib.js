@@ -227,12 +227,10 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports && typeof require
 		}
 
 		// C: Add Public Methods
-		// .info()
 		// .perms()
 		// .version()
 		// .delete() // headers: { "X-HTTP-Method":"DELETE" },
 		// .recycle()
-		// .upload({ data:arrayBuffer/FilePicker/whatev, overwrite:BOOL })
 		// .get() (?) // _api/web/GetFolderByServerRelativeUrl('')/Files/get(url='')
 
 		/**
@@ -274,7 +272,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports && typeof require
 		}
 
 
-		// TODO: WIP:
+		// TODO: WIP: .upload({ data:arrayBuffer/FilePicker/whatev, overwrite:BOOL })
 		/**
 		* @see: https://msdn.microsoft.com/en-us/library/office/dn450841.aspx#bk_FileCollectionAdd
 		*/
