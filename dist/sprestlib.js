@@ -34,7 +34,7 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports && typeof require
 (function(){
 	// APP VERSION/BUILD
 	var APP_VER = "1.7.0-beta";
-	var APP_BLD = "20180429";
+	var APP_BLD = "20180430";
 	var DEBUG = false; // (verbose mode/lots of logging)
 	// ENUMERATIONS
 	// REF: [`SP.BaseType`](https://msdn.microsoft.com/en-us/library/office/jj246925.aspx)
@@ -332,6 +332,89 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports && typeof require
 
 		// LAST: Return this new File
 		return _newFile;
+	}
+
+	// API: FOLDER
+	/**
+	*
+	* @see: [Files and folders REST API reference](https://msdn.microsoft.com/en-us/library/office/dn450841.aspx#bk_Folder)
+	*/
+	sprLib.folder = function folder(inOpt) {
+		// A: Options setup
+		inOpt = inOpt || {};
+		var _newFolder = {};
+		var _pathAndName = "";
+		var _requestDigest = (inOpt.requestDigest || (typeof document !== 'undefined' && document.getElementById('__REQUESTDIGEST') ? document.getElementById('__REQUESTDIGEST').value : null));
+
+		// B: Options check/set
+		if ( inOpt && typeof inOpt === 'string' ) {
+			_pathAndName = encodeURI(inOpt);
+		}
+		else if ( inOpt && typeof inOpt === 'object' && inOpt.hasOwnProperty('name') ) {
+			_pathAndName = encodeURI(inOpt.name);
+		}
+		else {
+			console.error("ERROR: A 'folderName' is required! EX: `sprLib.folder('Documents/Finance')` or `sprLib.folder({ 'name':'Documents/Finance' })`");
+			console.error('ARGS:');
+			console.error(inOpt);
+			return null;
+		}
+
+		// C: Ensure `_pathAndName` does not end with a slash ("/")
+		_pathAndName = _pathAndName.replace(/\/$/gi,'');
+
+		// D: Public Methods
+		// .perms()
+		// .version()
+		// .delete() // headers: { "X-HTTP-Method":"DELETE" },
+		// .recycle() // POST to: /recycle
+
+		/**
+		* Return an object containing information about the current Folder
+		*
+		* @example: sprLib.folder('/site/Documents/Finance').info()
+		*/
+		_newFolder.info = function() {
+			return new Promise(function(resolve, reject) {
+				var folderPath = _pathAndName.substring(0, _pathAndName.lastIndexOf('/'));
+				var folderName = _pathAndName.substring(_pathAndName.lastIndexOf('/')+1);
+
+				sprLib.rest({
+					url: "_api/web/getfolderbyserverrelativeurl('"+folderPath+"')/Folders"
+						+ "?$select=Folders/Id,ItemCount,Name,ServerRelativeUrl,WelcomePage,"
+						+ "Properties/vti_x005f_timecreated,Properties/vti_x005f_timelastmodified,Properties/vti_x005f_hassubdirs,"
+						+ "Properties/vti_x005f_isbrowsable,Properties/vti_x005f_foldersubfolderitemcount,Properties/vti_x005f_listname"
+						+ "&$expand=Folders,Properties"
+						+ "&$filter=Name eq '"+folderName+"'",
+					metadata: false
+				})
+				.then(function(arrData){
+					// A: Capture info
+					var objData = ( arrData && arrData.length > 0 ? arrData[0] : {} ); // FYI: Empty object is correct return type when file-not-found
+
+					// B: Remap properties
+					if ( objData.Properties.vti_x005f_timecreated )              objData.Created            = objData.Properties.vti_x005f_timecreated;
+					if ( objData.Properties.vti_x005f_listname )                 objData.GUID               = objData.Properties.vti_x005f_listname;
+					if ( objData.Properties.vti_x005f_hassubdirs )               objData.HasSubdirs         = objData.Properties.vti_x005f_hassubdirs;
+					if ( objData.Properties.vti_x005f_isbrowsable )              objData.Hidden             = !objData.Properties.vti_x005f_isbrowsable;
+					if ( objData.Properties.vti_x005f_timelastmodified )         objData.LastModifiedDate   = objData.Properties.vti_x005f_timelastmodified;
+					//if ( objData.Properties.vti_x005f_level )                    objData.Level              = objData.Properties.vti_x005f_level;
+					if ( objData.Properties.vti_x005f_foldersubfolderitemcount ) objData.SubFolderItemCount = objData.Properties.vti_x005f_foldersubfolderitemcount;
+
+					// C: Remove `Properties` key
+					if ( objData.Properties ) delete objData.Properties;
+
+					// D: Done
+					resolve( objData );
+				})
+				.catch(function(strErr){
+					reject( strErr );
+				});
+			});
+		}
+
+		// LAST: Return this new Folder
+		return _newFolder;
 	}
 
 	// API: LIST (CRUD, select, recycle)
