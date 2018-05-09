@@ -28,8 +28,19 @@
 \*/
 
 // Detect Node.js
-// NOTE: `NODEJS` determines which network library to use, so using https-detection is aprops.
-var NODEJS = ( typeof module !== 'undefined' && module.exports && typeof require === 'function' && require.resolve('https') );
+var NODEJS = false;
+{
+	// NOTE: `NODEJS` determines which network library to use, so using https-detection is aprops.
+	if ( typeof module !== 'undefined' && module.exports && typeof require === 'function' ) {
+		try {
+			require.resolve('https');
+			NODEJS = true;
+		}
+		catch (ex) {
+			NODEJS = false;
+		}
+	}
+}
 
 (function(){
 	// APP VERSION/BUILD
@@ -2403,8 +2414,7 @@ if ( !NODEJS && typeof window !== 'undefined' && window.NodeList && !NodeList.pr
 if ( NODEJS ) {
 	// A: Set require vars
 	var https = require("https");
-	var isElectron = require("is-electron");
 
-	// B: Export module
+	// B: Export this module
 	module.exports = sprLib;
 }
