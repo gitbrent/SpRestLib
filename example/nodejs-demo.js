@@ -4,8 +4,8 @@
  * DESC: Demonstrate SpRestLib on Node.js
  * REQS: Node 4.x + `npm install sprestlib`
  * EXEC: `node nodejs-demo.js (sp-username) (sp-password) {sp-hostUrl}`
- * VER.: 1.6.1
- * REL.: 20180428
+ * VER.: 1.7.0-beta
+ * REL.: 20180508
  * REFS: HOWTO: Authenticate to SharePoint Online (*.sharepoint.com)
  * - https://allthatjs.com/2012/03/28/remote-authentication-in-sharepoint-online/
  * - http://paulryan.com.au/2014/spo-remote-authentication-rest/
@@ -14,7 +14,7 @@
 
 // Required Args
 // =============
-if (process.argv.length < 5) {
+if ( process.argv.length < 5 ) {
 	console.log("*ERROR*: Not enough arguments provided\n");
 	console.log("Usage....: node nodejs-demo.js [spUsername] [spPassword] [spHostUrl]");
 	console.log("Example..: node nodejs-demo.js admin@billg.onmicrosoft.com c@ashm0ney https://billg.sharepoint.com");
@@ -33,7 +33,14 @@ else {
 	sprLib = require("sprestlib");
 }
 
-// Lets go
+// Validate library loaded
+if ( !sprLib || !sprLib.version ) {
+	console.log('\nERROR:');
+	console.log('sprLib does not exist!');
+	process.exit(-1);
+}
+
+// Lets go!
 console.log('\nStarting demo...');
 console.log('================================================================================');
 console.log(`> SpRestLib version: ${sprLib.version}\n`); // Loaded okay?
