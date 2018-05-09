@@ -29,12 +29,12 @@
 
 // Detect Node.js
 // NOTE: `NODEJS` determines which network library to use, so using https-detection is aprops.
-var NODEJS = ( typeof module !== 'undefined' && module.exports && typeof require === 'function' && require('https') );
+var NODEJS = ( typeof module !== 'undefined' && module.exports && typeof require === 'function' && require.resolve('https') );
 
 (function(){
 	// APP VERSION/BUILD
 	var APP_VER = "1.7.0-beta";
-	var APP_BLD = "20180430";
+	var APP_BLD = "20180508";
 	var DEBUG = false; // (verbose mode/lots of logging)
 	// ENUMERATIONS
 	// REF: [`SP.BaseType`](https://msdn.microsoft.com/en-us/library/office/jj246925.aspx)
@@ -365,7 +365,8 @@ var NODEJS = ( typeof module !== 'undefined' && module.exports && typeof require
 
 		// D: Public Methods
 		// .perms()
-		// .version()
+		// .versions()
+		// .create() // .add()?
 		// .delete() // headers: { "X-HTTP-Method":"DELETE" },
 		// .recycle() // POST to: /recycle
 
