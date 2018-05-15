@@ -6,7 +6,7 @@
 	<meta name="website"     content="https://github.com/gitbrent/SpRestLib/">
 	<meta name="keywords"    content="SpRestLib, JavaScript, js-sharepoint, OData, REST, SharePoint 2013, SP2013, SharePoint 2016, SP2016, SharePoint Online">
 	<meta name="description" content="Content Editor WebPart to showcase SpRestLib features and capabilities">
-	<meta name="revised"     content="20180327">
+	<meta name="revised"     content="20180514">
 
 	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300">
 	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:700">
@@ -125,7 +125,7 @@
 					$row.append('<td>'+ perm.Member.PrincipalType +'</td>');
 					$row.append('<td/>');
 					perm.Roles.forEach(function(role){
-						if ( !role.Hidden ) $row.find('td:last-child').append('<div class="itemBox">'+ role.Name +'<span style="display:none">; </span></div>');
+						if ( !role.Hidden && role.Name ) $row.find('td:last-child').append('<div class="itemBox">'+ role.Name +'<span style="display:none">; </span></div>');
 					});
 					$('#tabListPerms tbody').append( $row );
 				});
