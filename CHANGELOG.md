@@ -1,16 +1,16 @@
 # Change Log
 
-## [v1.7.0](https://github.com/gitbrent/sprestlib/tree/v1.7.0) (2018-05-11)
+## [v1.7.0](https://github.com/gitbrent/sprestlib/tree/v1.7.0) (2018-05-14)
 [Full Changelog](https://github.com/gitbrent/sprestlib/compare/v1.6.0...v1.7.0)
 
 **Implemented Enhancements:**
-- Renamed `getItems()` list method to `items()`
-- Updated Node detection to be more accurate and work with Angular, etc.
+- Renamed `getItems()` list method to `items()`.
 - Modify user() method option names to be case insensitive [\#17](https://github.com/gitbrent/sprestlib/issues/17) ([gitbrent](https://github.com/gitbrent))
 - Get members of a specific group given its name [\#19](https://github.com/gitbrent/sprestlib/issues/19) ([ra6hi9](https://github.com/ra6hi9))
 
 **Fixed Bugs:**
 - Added `catch()` to core REST method call to properly handle failed queries
+- Updated Node detection to be more accurate and work with Angular, etc. (aka:"ERROR in ./node_modules/sprestlib/dist/sprestlib.js") [\#23](https://github.com/gitbrent/sprestlib/issues/23) ([azmatzuberi](https://github.com/azmatzuberi))
 
 
 
