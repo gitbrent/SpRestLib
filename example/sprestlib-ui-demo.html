@@ -6,7 +6,7 @@
 	<meta name="website"     content="https://github.com/gitbrent/SpRestLib/">
 	<meta name="keywords"    content="SpRestLib, JavaScript, js-sharepoint, OData, REST, SharePoint 2013, SP2013, SharePoint 2016, SP2016, SharePoint Online">
 	<meta name="description" content="Content Editor WebPart to showcase SpRestLib-UI features and capabilities">
-	<meta name="revised"     content="20180216">
+	<meta name="revised"     content="20180514">
 
 	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300">
 	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:700">
@@ -29,14 +29,12 @@
 		!!!==>> Check the img folder for screencaps of the SharePoint setup! <<==!!!
 	-->
 
-	<!--
-	<script type="text/javascript" src="https://cdn.rawgit.com/gitbrent/SpRestLib/v1.5.0/example/css/sprestlib.css"></script>
-	<script type="text/javascript" src="https://cdn.rawgit.com/gitbrent/SpRestLib/v1.5.0/example/css/sprestlib-demo.css"></script>
-	DEBUG Below
-	-->
+	<script type="text/javascript" src="https://cdn.rawgit.com/gitbrent/SpRestLib/v1.7.0/example/css/sprestlib.css"></script>
+	<script type="text/javascript" src="https://cdn.rawgit.com/gitbrent/SpRestLib/v1.7.0/example/css/sprestlib-demo.css"></script>
+	<!-- DEBUG stylesheets
 	<link rel="stylesheet" type="text/css" href="../SiteAssets/sprestlib/css/sprestlib-ui.css">
 	<link rel="stylesheet" type="text/css" href="../SiteAssets/sprestlib/css/sprestlib-demo.css">
-	<!-- ^^^ DEBUG ^^^ -->
+	-->
 	<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.9.0/themes/prism-okaidia.css">
 
 	<script type="text/javascript" src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
@@ -49,7 +47,7 @@
 
 	<script type="text/javascript">
 		$.ajaxSetup({ cache:false });
-		var APP_BLD = 20180216;
+		var APP_BLD = 20180514;
 		var HTML_SPINNER = '<div class="sprlib-spinner"><div class="sprlib-bounce1"></div><div class="sprlib-bounce2"></div><div class="sprlib-bounce3"></div></div>';
 
 		// ==================================================================================================================
@@ -145,11 +143,18 @@
 
 		// ==================================================================================================================
 		$(document).ready(function(){
-			// **DEBUG**
-			// Dynamically load library as SP Online is *BAD* about caching
-			$.getScript("../SiteAssets/sprestlib/js/sprestlib.js", function(){
-				$.getScript("../SiteAssets/sprestlib/js/sprestlib-ui.js", function(){ doPageLoad(); });
-			});
+			// If you're me: Load newest/local copy for dev/test work :-)
+			if ( window.location.href.toLowerCase().indexOf('gitbrent') > -1 ) {
+				// Dynamically load library as SP Online is *BAD* about caching
+				$.getScript("../SiteAssets/sprestlib/js/sprestlib.js", function(){
+					$.getScript("../SiteAssets/sprestlib/js/sprestlib-ui.js", function(){
+						$('#libChkSprLib > div:last-child').text( sprLib.version );
+						console.log('FYI: Local copy of `sprestlib.js` loaded successfully...');
+						console.log( sprLib.version );
+						doPageLoad();
+					});
+				});
+			}
 		});
 	</script>
 </head>
