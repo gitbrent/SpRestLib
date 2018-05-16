@@ -44,8 +44,8 @@ var NODEJS = false;
 
 (function(){
 	// APP VERSION/BUILD
-	var APP_VER = "1.7.0";
-	var APP_BLD = "20180514";
+	var APP_VER = "1.8.0-beta";
+	var APP_BLD = "20180515";
 	var DEBUG = false; // (verbose mode/lots of logging)
 	// ENUMERATIONS
 	// REF: [`SP.BaseType`](https://msdn.microsoft.com/en-us/library/office/jj246925.aspx)
