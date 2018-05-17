@@ -43,12 +43,18 @@ class Footer extends React.Component {
 						<a href={this.docUrl('api-rest.html', this.props.language)}>
 							SharePoint API Reference
 						</a>
+						<a href={this.props.config.baseUrl + 'blog'}>SharePoint Development Guides</a>
 						<a href={this.docUrl('feat-promises.html', this.props.language)}>
 							About JavaScript Promises
 						</a>
 					</div>
 					<div>
 						<h5>Community</h5>
+						<a
+							href="https://twitter.com/SpRestLib"
+							target="_blank">
+							Twitter
+						</a>
 						<a
 							href="https://plus.google.com/u/1/113247436909611337609"
 							target="_blank">
