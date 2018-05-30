@@ -37,14 +37,24 @@ class Footer extends React.Component {
 					</a>
 					<div>
 						<h5>Docs</h5>
-						<a href={this.docUrl('installation.html', this.props.language)}>
-							Getting Started
+						<a
+							href={this.docUrl('installation.html')}
+							onClick={()=>ga('send','event','Link','click','link-footer-Installation')}>
+							Getting Started with SpRestLib
 						</a>
-						<a href={this.docUrl('api-rest.html', this.props.language)}>
+						<a
+							href={this.docUrl('api-rest.html')}
+							onClick={()=>ga('send','event','Link','click','link-footer-ApiRest')}>
 							SharePoint API Reference
 						</a>
-						<a href={this.props.config.baseUrl + 'blog'}>SharePoint Development Guides</a>
-						<a href={this.docUrl('feat-promises.html', this.props.language)}>
+						<a
+							href={this.props.config.baseUrl + 'blog'}
+							onClick={()=>ga('send','event','Link','click','link-footer-SpDevGuides')}>
+							SharePoint Development Guides
+						</a>
+						<a
+							href={this.docUrl('feat-promises.html')}
+							onClick={()=>ga('send','event','Link','click','link-footer-AboutPromises')}>
 							About JavaScript Promises
 						</a>
 					</div>
