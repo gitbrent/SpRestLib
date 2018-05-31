@@ -21,7 +21,7 @@ using the JavaScript SharePoint App Model.
 * Form Population - Populate form elements using data-bind declarative binding system like Knockout or AngluarJS
 
 ### Supported Environments:
-* SharePoint 2013 (SP2013), SharePoint 2016 (SP2016), SharePoint Online (O365)
+* SharePoint 2013 (SP2013), SharePoint 2016 (SP2016), SharePoint Online (Office 365)
 
 
 **************************************************************************************************
@@ -177,15 +177,11 @@ var sprLib = require("sprestlib");
 ## User Methods
 [User Methods](https://gitbrent.github.io/SpRestLib/docs/api-user.html)
 
-
-**************************************************************************************************
-## Form Binding (SpRestLib UI)
-[Form Binding](https://gitbrent.github.io/SpRestLib/docs/ui-form-binding.html)
-
-
-**************************************************************************************************
 ## Utility Methods
 [Utility Methods](https://gitbrent.github.io/SpRestLib/docs/feat-utilities.html)
+
+## Form Binding (SpRestLib UI)
+[Form Binding](https://gitbrent.github.io/SpRestLib/docs/ui-form-binding.html)
 
 
 **************************************************************************************************
