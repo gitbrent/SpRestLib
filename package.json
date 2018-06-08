@@ -20,6 +20,7 @@
 		"gulp-uglify": "^3.0.0"
 	},
 	"main": "dist/sprestlib.js",
+	"types": "dist/sprestlib.d.ts",
 	"directories": {
 		"example": "example",
 		"lib": "dist"
