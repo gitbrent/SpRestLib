@@ -4,79 +4,68 @@
 // Definitions: https://github.com/DefinitelyTyped/DefinitelyTyped
 
 /*
-http://blog.wolksoftware.com/contributing-to-definitelytyped
-https://www.typescriptlang.org/docs/handbook/declaration-files/templates/global-d-ts.html
-http://definitelytyped.org/guides/best-practices.html
-https://github.com/ConquestArrow/dtsmake/blob/c02c32c2f30c4cb61a39d2c0678c083df2fbb30d/example/dist/mylib.d.ts
-https://www.youtube.com/watch?v=wYVaCTmdj3g
-https://www.stevefenton.co.uk/2013/01/complex-typescript-definitions-made-easy/
-https://github.com/DefinitelyTyped/DefinitelyTyped/blob/master/types/jquery/index.d.ts
+	REFS:
+	https://www.typescriptlang.org/docs/handbook/declaration-files/by-example.html
+	https://www.typescriptlang.org/docs/handbook/declaration-files/templates/global-d-ts.html
+	http://blog.wolksoftware.com/contributing-to-definitelytyped
+	http://definitelytyped.org/guides/best-practices.html
+	https://github.com/ConquestArrow/dtsmake/blob/c02c32c2f30c4cb61a39d2c0678c083df2fbb30d/example/dist/mylib.d.ts
+	https://www.youtube.com/watch?v=wYVaCTmdj3g
+	https://www.stevefenton.co.uk/2013/01/complex-typescript-definitions-made-easy/
+	https://github.com/DefinitelyTyped/DefinitelyTyped/blob/master/types/jquery/index.d.ts
 */
 
-/*
 declare namespace sprLib {
 	const version: string;
 
 	function baseUrl(): string;
-	function baseUrl(inStr: string): void;
+	function baseUrl(baseUrl: string): void;
 
-	function list(inOpt: object): object;
-	//function list(inOpt: object) { function cols(): object; }
-}
-*/
+	/**
+	* SharePoint List/Library API.
+	*
+	* @see \`{@link https://gitbrent.github.io/SpRestLib/docs/api-list.html }\`
+	* @since 1.0
+	*/
+	class list {
+		constructor(listName: string);
+		constructor(listGuid: string);
+		constructor(options: object);
 
-declare module sprLib {
-	const version: string;
-
-	export class list {
-	    constructor (listName: string);
 		cols(): object[];
-	    info(): object;
+		info(): object[];
 		perms(): object[];
+
+		items(options: object): object[];
+		create(options: object): object[];
+		update(options: object): object[];
+		delete(options: object): number;
+		recycle(options: object): number;
 	}
 
-//	var List: typeof list;
-//	function list(listName: string): typeof list;
-	//function list(listName: string): object;
+	function rest(options: object): object[];
 
-//declare function extends list cols(options: object): object;
+	class site {
+		constructor(siteUrl?: string);
 
-	export class library {
-		constructor (libraryName: string);
-		constructor (libraryGuid: string);
-		info() : object;
+		info(): object[];
+		lists(): object[];
+		subsites(): object[];
+		perms(): object[];
+		roles(): object[];
+		groups(): object[];
+		users(): object[];
 	}
+
+	class user {
+		constructor(options: object);
+
+		// TODO: FIXME:
+	}
+
+	function nodeConfig(options: object);
+
+	function renewSecurityToken();
 }
 
-/*
-declare module sprLib {
-	//export local version: string;
-
-	export class list {
-		static cols() : object;
-		static info() : object;
-		static items(options: object) : object[];
-	}
-
-	export interface library {
-	    static class info() : object;
-	}
-
-	class list2 {
-		static info() : object;
-		static cols() : object;
-	}
-}
-*/
-/*
-interface sprLib {
-	list: {
-		cols(): object;
-		items(query: string) : void;
-	};
-}
-*/
-
-//sprLib.list('name').cols().then
-//sprLib.library('guid').info
-sprLib.list.prototype.cols()
+//sprLib.site.prototype.
