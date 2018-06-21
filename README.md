@@ -2,7 +2,7 @@
 
 # SpRestLib
 
-## JavaScript Library for SharePoint REST Web Services
+## SharePoint REST Web Services JavaScript Library
 Provides a clean, concise API that greatly simplifies asynchronous REST interaction with SharePoint. Easily read/write List
 items (CRUD), execute REST calls, and gather site/user/group information. Enables rapid development of SharePoint Apps/Add-ins
 using the JavaScript SharePoint App Model.  
@@ -90,6 +90,8 @@ using the JavaScript SharePoint App Model.
 - [Issues / Suggestions](#issues--suggestions)
   - [Authentication](#authentication)
   - [Bugs](#bugs)
+- [Supported SharePoint Versions](#supported-sharepoint-versions)
+  - [Backwards Compatibility](#backwards-compatibility)
 - [Special Thanks](#special-thanks)
 - [License](#license)
 
@@ -203,6 +205,15 @@ See [SharePoint Authentication Notes](https://gitbrent.github.io/SpRestLib/docs/
 Please file issues or suggestions on the [issues page on GitHub](https://github.com/gitbrent/SpRestLib/issues/new), or even better, [submit a pull request](https://github.com/gitbrent/SpRestLib/pulls). Feedback is always welcome!
 
 When reporting issues, please include a code snippet or a link demonstrating the problem.
+
+
+
+**************************************************************************************************
+# Supported SharePoint Versions
+
+## Backwards Compatibility
+*Does SpRestLib support SharePoint 2010 or 2007?*  
+Unfortunately, older versions cannot be supported.  The SharePoint 2007/2010 API utilized SOAP web services with XML (`_vti_bin/lists.asmx` endpoints) while the current API uses a completely new (`_api/web/lists()` endpoint) backed by REST services.
 
 
 
