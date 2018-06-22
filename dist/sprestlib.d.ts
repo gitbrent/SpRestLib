@@ -1,4 +1,4 @@
-// Type definitions for sprestlib v1.8.0
+// Type definitions for sprestlib v1.7.0
 // Project: https://gitbrent.github.io/SpRestLib/
 // Definitions by: Brent Ely <https://github.com/gitbrent/>
 // Definitions: https://github.com/DefinitelyTyped/DefinitelyTyped
@@ -20,6 +20,10 @@ declare namespace sprLib {
 
 	function baseUrl(): string;
 	function baseUrl(baseUrl: string): void;
+
+	function nodeConfig(options: object): void;
+
+	function renewSecurityToken(): void;
 
 	/**
 	* SharePoint List/Library API.
@@ -60,12 +64,10 @@ declare namespace sprLib {
 	class user {
 		constructor(options: object);
 
-		// TODO: FIXME:
+		info(): object;
+		groups(): object[];
+		profile(arrProfileKeys: object): object;
 	}
-
-	function nodeConfig(options: object);
-
-	function renewSecurityToken();
 }
 
-//sprLib.site.prototype.
+//sprLib.renewSecurityToken()
