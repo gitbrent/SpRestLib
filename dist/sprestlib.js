@@ -605,6 +605,8 @@ var NODEJS = false;
 		/**
 		* Get specified or all List/Library column values - optionally: filter, sort, limit
 		*
+		* @param options - array of column names
+		*
 		* Options:
 		*
 		* | property      | type    | reqd  | description       | example/allowed vals |
@@ -665,6 +667,8 @@ var NODEJS = false;
 		*
 		* @see: Field Ref.: https://msdn.microsoft.com/en-us/library/office/dn600182.aspx
 		* @see: FieldTypes: https://msdn.microsoft.com/en-us/library/office/microsoft.sharepoint.client.fieldtype.aspx
+		* @see: DOCS: https://gitbrent.github.io/SpRestLib/docs/api-list.html
+		* @since 1.0
 		*/
 		_newList.items = function(inObj) {
 			var listGUID = '';
