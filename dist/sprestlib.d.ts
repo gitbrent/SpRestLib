@@ -1,7 +1,9 @@
-// Type definitions for sprestlib v1.7.0
+// Type definitions for sprestlib 1.7.0
 // Project: https://gitbrent.github.io/SpRestLib/
 // Definitions by: Brent Ely <https://github.com/gitbrent/>
+//                 Jandos <https://github.com/Wireliner>
 // Definitions: https://github.com/DefinitelyTyped/DefinitelyTyped
+// TypeScript Version: 2.3
 
 declare namespace sprLib {
   const version: string;
