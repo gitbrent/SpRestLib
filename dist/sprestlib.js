@@ -27,25 +27,10 @@
 |*|  SOFTWARE.
 \*/
 
-// Detect Node.js
-var NODEJS = false;
-{
-	// NOTE: `NODEJS` determines which network library to use, so using https-detection is apropos.
-	if ( typeof module !== 'undefined' && module.exports && typeof require === 'function' ) {
-		try {
-			require.resolve('https');
-			NODEJS = true;
-		}
-		catch (ex) {
-			NODEJS = false;
-		}
-	}
-}
-
 (function(){
 	// APP VERSION/BUILD
 	var APP_VER = "1.8.0-beta";
-	var APP_BLD = "20180515";
+	var APP_BLD = "20180623";
 	var DEBUG = false; // (verbose mode/lots of logging)
 	// ENUMERATIONS
 	// REF: [`SP.BaseType`](https://msdn.microsoft.com/en-us/library/office/jj246925.aspx)
@@ -85,11 +70,13 @@ var NODEJS = false;
 		maxRetries:      2,
 		maxRows:         5000,
 		metadata:        false,
+		isNodeEnabled:   false,
 		nodeCookie:      '',
-		nodeEnabled:     true,
 		nodeServer:      '',
 		retryAfter:      1000
 	};
+	// LIBRARY DEPS
+	var https = null;
 	// GLOBAL VARS
 	var gRegexGUID = /^[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}$/i;
 	var gRetryCounter = 0;
@@ -1409,7 +1396,12 @@ var NODEJS = false;
 			Promise.resolve()
 			.then(function(){
 				return new Promise(function(resolve, reject) {
-					if ( NODEJS && APP_OPTS.nodeEnabled ) {
+					if ( APP_OPTS.isNodeEnabled ) {
+						if ( !https ) {
+							// Declare https on-demand so APP_OPTS applies (if we init `https` with the library Angular/React/etc will fail on load as users have not had a chance to select any options)
+							try { https = require("https"); } catch(ex){ console.error("Unable to load `https`"); throw 'LIB-MISSING-FS'; }
+						}
+
 						// AUTH: Cookie is required for GET and POST
 						objAjaxQuery.headers["Cookie"] = APP_OPTS.nodeCookie;
 						// IMPORTANT: 'Content-Length' is required for file upload (etc.), otherwise, SP drops the connection immediately: (-1, System.IO.IOException)
@@ -1666,7 +1658,7 @@ var NODEJS = false;
 				// var strErrCode = jqXHR.status.toString();
 				// var strSpeCode = JSON.parse(jqXHR.responseText).error['code'].split(',')[0];
 				// INFO: ( strErrCode == '403' && strSpeCode == '-2130575252' )
-				if ( !(NODEJS && !APP_OPTS.nodeEnabled) && typeof strErr == 'string' && strErr.indexOf('(403)') > -1 && gRetryCounter <= APP_OPTS.maxRetries ) {
+				if ( !APP_OPTS.isNodeEnabled && typeof strErr == 'string' && strErr.indexOf('(403)') > -1 && gRetryCounter <= APP_OPTS.maxRetries ) {
 					Promise.resolve()
 					.then(function(){
 						return sprLib.renewSecurityToken();
@@ -2400,25 +2392,21 @@ var NODEJS = false;
 	// API: NODEJS: Setup
 	sprLib.nodeConfig = function nodeConfig(inOpt) {
 		inOpt = (inOpt && typeof inOpt === 'object' ? inOpt : {});
-		APP_OPTS.nodeCookie  = inOpt.cookie || '';
-		APP_OPTS.nodeEnabled = (typeof inOpt.nodeEnabled !== 'undefined' ? inOpt.nodeEnabled : true);
-		APP_OPTS.nodeServer  = inOpt.server || '';
+		APP_OPTS.isNodeEnabled = (typeof inOpt.nodeEnabled !== 'undefined' ? inOpt.nodeEnabled : true);
+		APP_OPTS.nodeCookie = inOpt.cookie || '';
+		APP_OPTS.nodeServer = inOpt.server || '';
 	}
 })();
 
 // IE11 Polyfill
-if ( !NODEJS && typeof window !== 'undefined' && window.NodeList && !NodeList.prototype.forEach ) {
+if ( typeof window !== 'undefined' && window.NodeList && !NodeList.prototype.forEach ) {
 	NodeList.prototype.forEach = function(callback, thisArg) {
 		thisArg = thisArg || window;
 		for (var i = 0; i < this.length; i++){ callback.call(thisArg, this[i], i, this); }
 	};
 }
 
-// [Node.js] support
-if ( NODEJS ) {
-	// A: Set require vars
-	var https = require("https");
-
-	// B: Export this module
+// Export library
+if ( typeof module !== 'undefined' && module.exports && typeof require === 'function' ) {
 	module.exports = sprLib;
 }
