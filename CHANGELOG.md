@@ -1,5 +1,16 @@
 # Change Log
 
+## [v1.8.0](https://github.com/gitbrent/sprestlib/tree/v1.8.0) (2018-??-??)
+[Full Changelog](https://github.com/gitbrent/sprestlib/compare/v1.7.0...v1.8.0)
+
+**Implemented Enhancements:**
+- Add Typescript Definitions [\#24](https://github.com/gitbrent/sprestlib/issues/24) ([Wireliner](https://github.com/Wireliner))
+**Fixed Bugs:**
+
+
+
+
+
 ## [v1.7.0](https://github.com/gitbrent/sprestlib/tree/v1.7.0) (2018-05-14)
 [Full Changelog](https://github.com/gitbrent/sprestlib/compare/v1.6.0...v1.7.0)
 
