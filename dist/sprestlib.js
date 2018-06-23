@@ -1399,7 +1399,7 @@
 					if ( APP_OPTS.isNodeEnabled ) {
 						if ( !https ) {
 							// Declare https on-demand so APP_OPTS applies (if we init `https` with the library Angular/React/etc will fail on load as users have not had a chance to select any options)
-							try { https = require("https"); } catch(ex){ console.error("Unable to load `https`"); throw 'LIB-MISSING-FS'; }
+							try { https = require("https"); } catch(ex){ console.error("Unable to load `https`"); throw 'LIB-MISSING-HTTPS'; }
 						}
 
 						// AUTH: Cookie is required for GET and POST
