@@ -224,7 +224,10 @@
 			return null;
 		}
 
-		// C: Add Public Methods
+		// C: Ensure `_pathAndName` does not end with a slash ("/")
+		_pathAndName = _pathAndName.replace(/\/$/gi,'');
+
+		// D: Add Public Methods
 		// .perms()
 		// .version()
 		// .delete() // headers: { "X-HTTP-Method":"DELETE" },
@@ -274,13 +277,15 @@
 		/**
 		* @see: https://msdn.microsoft.com/en-us/library/office/dn450841.aspx#bk_FileCollectionAdd
 		*/
-		_newFile.upload = function(){
+		_newFile.upload = function() {
 			return new Promise(function(resolve, reject) {
 				// CASE 1: NODE.JS
 				/*
 				// TODO: _pathAndName -> split for vars below!
 				var strFilePath = "/sites/dev/Shared%20Documents/upload";
 				var strFileName = "sprestlib-demo.html";
+				//var folderPath = _pathAndName.substring(0, _pathAndName.lastIndexOf('/'));
+				//var folderName = _pathAndName.substring(_pathAndName.lastIndexOf('/')+1);
 				var strUrl = "_api/web/GetFolderByServerRelativeUrl('"+strFilePath+"')/Files/add(url='"+strFileName+"',overwrite=true)";
 				// IMPORTANT: path must be escaped or "TypeError: Request path contains unescaped characters"
 
