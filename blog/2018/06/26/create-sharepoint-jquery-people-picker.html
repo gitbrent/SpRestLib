@@ -1,0 +1,82 @@
+<!DOCTYPE html><html lang="en"><head><meta charSet="utf-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><title>Creating SharePoint jQuery People-Picker with SpRestLib · SpRestLib</title><meta name="viewport" content="width=device-width"/><meta name="generator" content="Docusaurus"/><meta property="og:title" content="Creating SharePoint jQuery People-Picker with SpRestLib · SpRestLib"/><meta property="og:type" content="website"/><meta property="og:url" content="https://gitbrent.github.io/SpRestLib/blog/2018/06/26/create-sharepoint-jquery-people-picker.html"/><meta property="og:description" content="Create a fully-functional jQuery People Picker against your local SharePoint ActiveDirectory structure using only"/><meta name="twitter:card" content="summary"/><meta name="twitter:image" content="https://gitbrent.github.io/SpRestLib/img/sprestlib.png"/><link rel="shortcut icon" href="/SpRestLib/img/favicon.png"/><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/hybrid.min.css"/><link rel="alternate" type="application/atom+xml" href="https://gitbrent.github.io/blog/atom.xml" title="SpRestLib Blog ATOM Feed"/><link rel="alternate" type="application/rss+xml" href="https://gitbrent.github.io/blog/feed.xml" title="SpRestLib Blog RSS Feed"/><script>
+              (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+              (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+              m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+              })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+              ga('create', 'UA-75147115-3', 'auto');
+              ga('send', 'pageview');
+            </script><script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script><link rel="stylesheet" href="/SpRestLib/css/main.css"/></head><body class="sideNavVisible separateOnPageNav"><div class="fixedHeaderContainer"><div class="headerWrapper wrapper"><header><a href="/SpRestLib/"><img class="logo" src="/SpRestLib/img/sprestlib.svg" alt="SpRestLib"/><h2 class="headerTitleWithLogo">SpRestLib</h2></a><div class="navigationWrapper navigationSlider"><nav class="slidingNav"><ul class="nav-site nav-site-internal"><li class=""><a href="https://github.com/gitbrent/SpRestLib/releases" target="_self">Download</a></li><li class=""><a href="/SpRestLib/docs/installation.html" target="_self">Get Started</a></li><li class=""><a href="/SpRestLib/docs/api-list.html" target="_self">API Documentation</a></li><li class="siteNavGroupActive"><a href="/SpRestLib/blog" target="_self">SharePoint Guides</a></li><li class=""><a href="https://github.com/gitbrent/SpRestLib/" target="_self">GitHub</a></li></ul></nav></div></header></div></div><div class="navPusher"><div class="docMainWrapper wrapper"><div class="container docsNavContainer" id="docsNav"><nav class="toc"><div class="toggleNav"><section class="navWrapper wrapper"><div class="navBreadcrumb wrapper"><div class="navToggle" id="navToggler"><i></i></div><h2><i>›</i><span>Recent Posts</span></h2></div><div class="navGroups"><div class="navGroup navGroupActive"><h3>Recent Posts</h3><ul><li class="navListItem navListItemActive"><a class="navItem navItemActive" href="/SpRestLib/blog/2018/06/26/create-sharepoint-jquery-people-picker.html">Creating SharePoint jQuery People-Picker with SpRestLib</a></li><li class="navListItem"><a class="navItem" href="/SpRestLib/blog/2018/04/20/create-sharepoint-list-columns-using-rest.html">Creating SharePoint List Columns Using REST</a></li><li class="navListItem"><a class="navItem" href="/SpRestLib/blog/2018/03/19/upload-file-to-sharepoint-library-using-rest.html">Uploading a file to a SharePoint library using REST</a></li></ul></div></div></section></div><script>
+          var toggler = document.getElementById('navToggler');
+          var nav = document.getElementById('docsNav');
+          toggler.onclick = function() {
+            nav.classList.toggle('docsSliderActive');
+          };
+        </script></nav></div><div class="container mainContainer documentContainer postContainer blogContainer"><div class="wrapper"><div class="lonePost"><div class="post"><header class="postHeader"><h1><a href="/SpRestLib/blog/2018/06/26/create-sharepoint-jquery-people-picker.html">Creating SharePoint jQuery People-Picker with SpRestLib</a></h1><p class="post-meta">June 26, 2018</p><div class="authorBlock"><p class="post-authorName"><a href="https://github.com/gitbrent/" target="_blank" rel="noreferrer noopener">Brent Ely</a></p></div></header><div><span><p>Create a fully-functional jQuery People Picker against your local SharePoint ActiveDirectory structure using only
+jQuery and SpRestLib.</p>
+<!--truncate-->
+<hr>
+<h2><a class="anchor" aria-hidden="true" id="example"></a><a href="#example" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Example</h2>
+<p>Find every HTML element with the <code>pickSPUser</code> class and initialize it as an SpRestLib-Picker</p>
+<p>Libraries:</p>
+<pre><code class="hljs css html"><span class="hljs-tag">&lt;<span class="hljs-name">link</span> <span class="hljs-attr">rel</span>=<span class="hljs-string">"stylesheet"</span> <span class="hljs-attr">href</span>=<span class="hljs-string">"https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css"</span> /&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">script</span> <span class="hljs-attr">src</span>=<span class="hljs-string">"https://code.jquery.com/jquery-3.3.1.min.js"</span>&gt;</span><span class="undefined"></span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">script</span> <span class="hljs-attr">src</span>=<span class="hljs-string">"https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"</span>&gt;</span><span class="undefined"></span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">script</span> <span class="hljs-attr">src</span>=<span class="hljs-string">"https://cdn.rawgit.com/gitbrent/SpRestLib/v1.7.0/dist/sprestlib.bundle.js"</span>&gt;</span><span class="undefined"></span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span>
+</code></pre>
+<p>JavaScript:</p>
+<pre><code class="hljs css javascript">$(<span class="hljs-string">'.pickSPUser'</span>).each(<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params"></span>)</span>{
+    $(<span class="hljs-keyword">this</span>)
+    .prop(<span class="hljs-string">'placeholder'</span>, <span class="hljs-string">'Enter Last, First...'</span>)
+    .autocomplete({
+        <span class="hljs-attr">minLength</span>: <span class="hljs-number">3</span>,
+        <span class="hljs-attr">source</span>: <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">doRestQuery</span>(<span class="hljs-params">request,response</span>)</span>{
+            sprLib.rest({
+                <span class="hljs-attr">url</span> : <span class="hljs-string">'../_api/SP.UI.ApplicationPages.ClientPeoplePickerWebServiceInterface.clientPeoplePickerSearchUser'</span>,
+                <span class="hljs-attr">type</span>: <span class="hljs-string">'POST'</span>,
+                <span class="hljs-attr">data</span>: <span class="hljs-built_in">JSON</span>.stringify({
+                    <span class="hljs-string">'queryParams'</span>:{
+                        <span class="hljs-string">'__metadata'</span>:{ <span class="hljs-string">'type'</span>:<span class="hljs-string">'SP.UI.ApplicationPages.ClientPeoplePickerQueryParameters'</span> },
+                        <span class="hljs-string">'AllowEmailAddresses'</span>:<span class="hljs-literal">true</span>, <span class="hljs-string">'AllowMultipleEntities'</span>:<span class="hljs-literal">false</span>, <span class="hljs-string">'AllUrlZones'</span>:<span class="hljs-literal">false</span>,
+                        <span class="hljs-string">'MaximumEntitySuggestions'</span>:<span class="hljs-number">20</span>, <span class="hljs-string">'PrincipalSource'</span>:<span class="hljs-number">15</span>, <span class="hljs-string">'PrincipalType'</span>:<span class="hljs-number">1</span>,
+                        <span class="hljs-string">'QueryString'</span>:request.term
+                    }
+                })
+            })
+            .then(<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">arrData</span>)</span>{
+                <span class="hljs-keyword">if</span> ( arrData &amp;&amp; arrData.length &gt; <span class="hljs-number">0</span> ) {
+                    <span class="hljs-keyword">var</span> results = <span class="hljs-built_in">JSON</span>.parse(arrData[<span class="hljs-number">0</span>].ClientPeoplePickerSearchUser);
+                    <span class="hljs-keyword">if</span> ( results.length &gt; <span class="hljs-number">0</span> ) {
+                        response( $.map(results,<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">item</span>)</span>{ <span class="hljs-keyword">return</span> {<span class="hljs-attr">label</span>:item.DisplayText, <span class="hljs-attr">value</span>:item.EntityData.SIPAddress} }) );
+                    }
+                }
+            })
+            .catch(<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">strErr</span>)</span>{ <span class="hljs-built_in">console</span>.error(strErr); })
+        },
+        <span class="hljs-attr">select</span>: <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">event,ui</span>)</span>{
+            <span class="hljs-keyword">var</span> elePickerId = $($(<span class="hljs-keyword">this</span>).context).prop(<span class="hljs-string">'id'</span>);
+            sprLib.user({ <span class="hljs-attr">email</span>:ui.item.value }).info().then(<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">objUser</span>)</span>{ $(<span class="hljs-string">'#'</span>+elePickerId).val(objUser.Id) });
+
+            <span class="hljs-comment">// Hide input with selected Person value / Create/Show PP-UI</span>
+            $(event.target).hide().after(
+                <span class="hljs-string">'&lt;div id="PP'</span>+ elePickerId +<span class="hljs-string">'" class="pt-pickSPUser ui-state-default ui-corner-all addHoverEffectDone"&gt;'</span>
+                + <span class="hljs-string">'  &lt;div class="table"&gt;'</span>
+                + <span class="hljs-string">'    &lt;div class="pt-pickSPUser-person-cntr"&gt;&lt;span&gt;'</span>+ui.item.label+<span class="hljs-string">'&lt;/span&gt;&lt;/div&gt;'</span>
+                + <span class="hljs-string">'    &lt;div style="padding-left:10px"&gt;'</span>
+                + <span class="hljs-string">'      &lt;a href="javascript:" onclick="$(\'#'</span>+elePickerId+<span class="hljs-string">'\').show().text(\'\').val(\'\'); $(\'#PP'</span>+elePickerId+<span class="hljs-string">'\').remove();"&gt;'</span>
+                + <span class="hljs-string">'      &lt;img alt="Delete" src="../SiteAssets/img/delete_16.png" alt="Remove" title="Remove" style="vertical-align:middle"&gt;&lt;/a&gt;'</span>
+                + <span class="hljs-string">'    &lt;/div&gt;'</span>
+                + <span class="hljs-string">'  &lt;/div&gt;'</span>
+                + <span class="hljs-string">'&lt;/div&gt;'</span>
+            );
+        }
+    });
+});
+</code></pre>
+<h3><a class="anchor" aria-hidden="true" id="result"></a><a href="#result" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Result</h3>
+<p><img src="https://user-images.githubusercontent.com/7218970/37578233-7a309bb8-2b05-11e8-9f4d-6a770fa8e097.png" alt="screen shot 2018-03-18 at 23 38 17">
+// TODO: ^^^</p>
+<h2><a class="anchor" aria-hidden="true" id="more-examples"></a><a href="#more-examples" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>More Examples</h2>
+<p>See <a href="https://github.com/gitbrent/SpRestLib/tree/master/example"><code>examples/sprestlib-demo-file-upload.html</code></a> for a working demo.
+// TODO: ^^^</p>
+</span></div></div><div class="blogSocialSection"><div class="blogSocialSectionItem"><a href="https://twitter.com/share" class="twitter-share-button" data-text="Creating SharePoint jQuery People-Picker with SpRestLib" data-url="https://gitbrent.github.io/SpRestLib/blog/2018/06/26/create-sharepoint-jquery-people-picker.html" data-related="true" data-show-count="false"></a></div></div></div><div class="blog-recent"><a class="button" href="/SpRestLib/blog">Recent Posts</a></div></div></div></div><footer class="nav-footer" id="footer"><section class="sitemap"><a href="/SpRestLib/" class="nav-home"><img src="/SpRestLib/img/sprestlib.svg" alt="SpRestLib" width="66" height="58"/></a><div><h5>Docs</h5><a href="/SpRestLib/docs/installation.html">Getting Started with SpRestLib</a><a href="/SpRestLib/docs/api-rest.html">SharePoint API Reference</a><a href="/SpRestLib/blog">SharePoint Development Guides</a><a href="/SpRestLib/docs/feat-promises.html">About JavaScript Promises</a></div><div><h5>Community</h5><a href="https://twitter.com/SpRestLib" target="_blank">Twitter</a><a href="https://plus.google.com/u/1/113247436909611337609" target="_blank">Google Plus</a><a href="http://stackoverflow.com/questions/tagged/sprestlib" target="_blank">Stack Overflow</a><a href="https://www.youtube.com/channel/UCxZcCampOHn-47kvtcK_oVQ" target="_blank">YouTube Channel</a></div><div><h5>More</h5><a href="https://github.com/gitbrent/sprestlib/issues">GitHub Issues</a><a href="https://github.com/gitbrent/sprestlib">GitHub Project</a><a href="https://www.flaticon.com/packs/creativity">Site Icons</a></div></section><section class="copyright">Copyright © 2018 Brent Ely</section></footer></div><script>window.twttr=(function(d,s, id){var js,fjs=d.getElementsByTagName(s)[0],t=window.twttr||{};if(d.getElementById(id))return t;js=d.createElement(s);js.id=id;js.src='https://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js, fjs);t._e = [];t.ready = function(f) {t._e.push(f);};return t;}(document, 'script', 'twitter-wjs'));</script></body></html>

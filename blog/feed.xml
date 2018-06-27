@@ -4,7 +4,7 @@
         <title>SpRestLib Blog</title>
         <link>https://gitbrent.github.io/SpRestLib/blog</link>
         <description>The best place to stay up-to-date with the latest SpRestLib news and events.</description>
-        <lastBuildDate>Fri, 20 Apr 2018 06:00:00 GMT</lastBuildDate>
+        <lastBuildDate>Tue, 26 Jun 2018 06:00:00 GMT</lastBuildDate>
         <docs>http://blogs.law.harvard.edu/tech/rss</docs>
         <generator>Feed for Node.js</generator>
         <image>
@@ -13,6 +13,15 @@
             <link>https://gitbrent.github.io/SpRestLib/blog</link>
         </image>
         <copyright>Copyright © 2018 Brent Ely</copyright>
+        <item>
+            <title><![CDATA[Creating SharePoint jQuery People-Picker with SpRestLib]]></title>
+            <link>https://gitbrent.github.io/SpRestLib/blog/2018/06/26/create-sharepoint-jquery-people-picker.html</link>
+            <guid>https://gitbrent.github.io/SpRestLib/blog/2018/06/26/create-sharepoint-jquery-people-picker.html</guid>
+            <pubDate>Tue, 26 Jun 2018 06:00:00 GMT</pubDate>
+            <description><![CDATA[<p>Create a fully-functional jQuery People Picker against your local SharePoint ActiveDirectory structure using only
+jQuery and SpRestLib.</p>
+]]></description>
+        </item>
         <item>
             <title><![CDATA[Creating SharePoint List Columns Using REST]]></title>
             <link>https://gitbrent.github.io/SpRestLib/blog/2018/04/20/create-sharepoint-list-columns-using-rest.html</link>
