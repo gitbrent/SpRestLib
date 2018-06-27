@@ -6,8 +6,14 @@ title: SharePoint via Node.js
 ## Connect To Office 365/SharePoint Online With Node.js
 SpRestLib can be utilized via Node.js to perform powerful operations, generate reports, etc.
 
+Node mode is disabled by default, so setting the `nodeEnabled` flag is necessary:
+
+```
+`sprLib.nodeConfig({ nodeEnabled:true });`
+```
+
 ## Demo
-See `example/nodejs-demo.js` for a complete, working demo of connecting to SharePoint Online.
+See `example/nodejs-demo.js` for a complete, working Node demo showing how to connect to Office.com/SharePoint Online.
 
 ```bash
 [brent@macbook 22:26:35] ~/Documents/GitHub/SpRestLib/example
@@ -15,7 +21,7 @@ $ node nodejs-demo.js [spUsername] [spPassword] [spHostUrl]
 
 Starting demo...
 ================================================================================
-> SpRestLib version: 1.4.0
+> SpRestLib version: 1.7.0
 
  * STEP 1/2: Auth into login.microsoftonline.com ...
  * STEP 2/2: Auth into SharePoint ...

@@ -14,14 +14,17 @@
           };
         </script></nav></div><div class="container mainContainer"><div class="wrapper"><div class="post"><header class="postHeader"><h1>SharePoint via Node.js</h1></header><article><div><span><h2><a class="anchor" aria-hidden="true" id="connect-to-office-365-sharepoint-online-with-nodejs"></a><a href="#connect-to-office-365-sharepoint-online-with-nodejs" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Connect To Office 365/SharePoint Online With Node.js</h2>
 <p>SpRestLib can be utilized via Node.js to perform powerful operations, generate reports, etc.</p>
+<p>Node mode is disabled by default, so setting the <code>nodeEnabled</code> flag is necessary:</p>
+<pre><code class="hljs"><span class="hljs-string">`sprLib.nodeConfig({ nodeEnabled:true });`</span>
+</code></pre>
 <h2><a class="anchor" aria-hidden="true" id="demo"></a><a href="#demo" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Demo</h2>
-<p>See <code>example/nodejs-demo.js</code> for a complete, working demo of connecting to SharePoint Online.</p>
+<p>See <code>example/nodejs-demo.js</code> for a complete, working Node demo showing how to connect to Office.com/SharePoint Online.</p>
 <pre><code class="hljs css bash">[brent@macbook 22:26:35] ~/Documents/GitHub/SpRestLib/example
 $ node nodejs-demo.js [spUsername] [spPassword] [spHostUrl]
 
 Starting demo...
 ================================================================================
-&gt; SpRestLib version: 1.4.0
+&gt; SpRestLib version: 1.7.0
 
  * STEP 1/2: Auth into login.microsoftonline.com ...
  * STEP 2/2: Auth into SharePoint ...
