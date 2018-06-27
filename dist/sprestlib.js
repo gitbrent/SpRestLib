@@ -30,7 +30,7 @@
 (function(){
 	// APP VERSION/BUILD
 	var APP_VER = "1.8.0-beta";
-	var APP_BLD = "20180623";
+	var APP_BLD = "20180626";
 	var DEBUG = false; // (verbose mode/lots of logging)
 	// ENUMERATIONS
 	// REF: [`SP.BaseType`](https://msdn.microsoft.com/en-us/library/office/jj246925.aspx)
@@ -201,6 +201,7 @@
 	* @example - sprLib.file({ 'name':'/sites/dev/Shared%20Documents/SomeFolder/MyDoc.docx' });
 	* @example - sprLib.file({ 'name':'/MyDocuments/MyDoc.docx', 'requestDigest':'ABC123' });
 	*
+	* @since 1.8.0
 	* @see: [Files and folders REST API reference](https://msdn.microsoft.com/en-us/library/office/dn450841.aspx)
 	*/
 	sprLib.file = function file(inOpt) {
@@ -339,7 +340,9 @@
 
 	// API: FOLDER
 	/**
+	* @param `inOpt` (object)/(string) - required - (`name` prop reqd)
 	*
+	* @since 1.8.0
 	* @see: [Files and folders REST API reference](https://msdn.microsoft.com/en-us/library/office/dn450841.aspx#bk_Folder)
 	*/
 	sprLib.folder = function folder(inOpt) {
@@ -432,6 +435,7 @@
 	* @example - string - sprLib.list({ name:'Documents' });
 	* @example - string - sprLib.list({ name:'Documents', baseUrl:'/sites/dev/sandbox' });
 	* @example - string - sprLib.list({ name:'Documents', baseUrl:'/sites/dev/sandbox', requestDigest:'8675309,05 Dec 2017 01:23:45 -0000' });
+	* @since 1.0.0
 	*/
 	sprLib.list = function list(inOpt) {
 		// A: Options setup
@@ -1290,6 +1294,8 @@
 		queryLimit:   10
 	})
 	.then(function(arrayResults){ console.table(arrayResults) });
+	*
+	* @since 1.0.0
 	*/
 	// sprLib.rest({ url:"/sites/dev/_api/web/sitegroups" }).then(function(data){ console.table(data); }); (data.d.results)
 	// sprLib.rest({ url:"/_api/web/lists/getbytitle('Employees')" }).then(function(data){ console.table(data); }); (data.d)
@@ -2411,7 +2417,7 @@ if ( typeof window !== 'undefined' && window.NodeList && !NodeList.prototype.for
 	};
 }
 
-// Export library
-if ( typeof module !== 'undefined' && module.exports && typeof require === 'function' ) {
+// Export library if possible
+if ( typeof module !== 'undefined' && module.exports ) {
 	module.exports = sprLib;
 }
