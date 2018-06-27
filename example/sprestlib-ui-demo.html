@@ -6,13 +6,20 @@
 	<meta name="website"     content="https://github.com/gitbrent/SpRestLib/">
 	<meta name="keywords"    content="SpRestLib, JavaScript, js-sharepoint, OData, REST, SharePoint 2013, SP2013, SharePoint 2016, SP2016, SharePoint Online">
 	<meta name="description" content="Content Editor WebPart to showcase SpRestLib-UI features and capabilities">
-	<meta name="revised"     content="20180514">
+	<meta name="revised"     content="20180626">
 
 	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300">
 	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:700">
 	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto+Mono">
 	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:400">
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-fork-ribbon-css/0.2.0/gh-fork-ribbon.min.css">
+	<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.9.0/themes/prism-okaidia.css">
+	<!-- DEBUG stylesheets
+	<link rel="stylesheet" type="text/css" href="../SiteAssets/sprestlib/css/sprestlib-ui.css">
+	<link rel="stylesheet" type="text/css" href="../SiteAssets/sprestlib/css/sprestlib-demo.css">
+	-->
+	<link rel="stylesheet" href="https://cdn.rawgit.com/gitbrent/SpRestLib/v1.7.0/example/css/sprestlib-ui.css">
+	<link rel="stylesheet" href="https://cdn.rawgit.com/gitbrent/SpRestLib/v1.7.0/example/css/sprestlib-demo.css">
 
 	<!-- HOWTO / FAQ / SETUP -->
 	<!--
@@ -29,25 +36,17 @@
 		!!!==>> Check the img folder for screencaps of the SharePoint setup! <<==!!!
 	-->
 
-	<script type="text/javascript" src="https://cdn.rawgit.com/gitbrent/SpRestLib/v1.7.0/example/css/sprestlib.css"></script>
-	<script type="text/javascript" src="https://cdn.rawgit.com/gitbrent/SpRestLib/v1.7.0/example/css/sprestlib-demo.css"></script>
-	<!-- DEBUG stylesheets
-	<link rel="stylesheet" type="text/css" href="../SiteAssets/sprestlib/css/sprestlib-ui.css">
-	<link rel="stylesheet" type="text/css" href="../SiteAssets/sprestlib/css/sprestlib-demo.css">
-	-->
-	<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.9.0/themes/prism-okaidia.css">
-
-	<script type="text/javascript" src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
-	<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.29.0/js/jquery.tablesorter.min.js"></script>
-	<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.9.0/prism.min.js"></script>
-	<script type="text/javascript" src="https://cdn.rawgit.com/sorensen/ascii-table/v0.0.9/ascii-table.min.js"></script>
+	<script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.29.0/js/jquery.tablesorter.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.9.0/prism.min.js"></script>
+	<script src="https://cdn.rawgit.com/sorensen/ascii-table/v0.0.9/ascii-table.min.js"></script>
 	<!-- DEBUG:
-	<script type="text/javascript" src="https://cdn.rawgit.com/gitbrent/SpRestLib/v1.5.0/dist/sprestlib-ui.bundle.js"></script>
+	<script src="https://cdn.rawgit.com/gitbrent/SpRestLib/v1.5.0/dist/sprestlib-ui.bundle.js"></script>
 	-->
 
-	<script type="text/javascript">
+	<script>
 		$.ajaxSetup({ cache:false });
-		var APP_BLD = 20180514;
+		var APP_BLD = 20180626;
 		var HTML_SPINNER = '<div class="sprlib-spinner"><div class="sprlib-bounce1"></div><div class="sprlib-bounce2"></div><div class="sprlib-bounce3"></div></div>';
 
 		// ==================================================================================================================
@@ -266,7 +265,7 @@
 				</div>
 
 				<!-- Populate HTML elements before doc.ready is fired -->
-				<script type="text/javascript">
+				<script>
 					var htmlEleTab1 = '<table class="tabModern" data-sprlib=\'{ "list":"Documents", "cols":["Id","FileLeafRef","Title"], "limit":30, "showBusy":true }\'></table>';
 					$('#htmlEleTab1Code pre code').text( htmlEleTab1 );
 					$('#htmlEleTab1Html').html( htmlEleTab1 );
@@ -323,7 +322,7 @@
 					</div>
 				</div>
 				<!-- Populate HTML elements before doc.ready is fired -->
-				<script type="text/javascript">
+				<script>
 				var htmlEleSel1 = '<select data-sprlib=\'{ "list":"Site Assets", "value":"Id", "text":"FileLeafRef", "order":"ID desc", "limit":20 }\'></select>';
 				$('#htmlEleSel1Code pre code').text( htmlEleSel1 );
 				$('#htmlEleSel1Html').html( htmlEleSel1 );
@@ -349,7 +348,7 @@
 					</div>
 				</div>
 				<!-- Populate HTML elements before doc.ready is fired -->
-				<script type="text/javascript">
+				<script>
 					var htmlEleSpan = '<span id="eleSpan" data-sprlib=\'\n  { "list":"Employees", "value":"Name", "filter":{"col":"Badge_x0020_Number", "op":"eq", "val":"666"} }\'>\n</span>';
 					$('#htmlEleSpanCode pre code').text( htmlEleSpan );
 					$('#htmlEleSpanHtml').html( htmlEleSpan.replace('\n','') );
