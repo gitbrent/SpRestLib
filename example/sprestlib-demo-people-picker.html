@@ -7,6 +7,7 @@
 	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300">
 	<link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
 	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootswatch/4.1.1/yeti/bootstrap.min.css">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.css">
 	<style>
 		#console {
 			font-family: Consolas, "Courier New", monospace;
@@ -64,19 +65,17 @@
 			            .catch(function(strErr){ console.error(strErr); })
 			        },
 			        select: function(event,ui){
-			            var elePickerId = $($(this).context).prop('id');
+			            var elePickerId = event.target.id;
 			            sprLib.user({ email:ui.item.value }).info().then(function(objUser){ $('#'+elePickerId).val(objUser.Id) });
 
 			            // Hide input with selected Person value / Create/Show PP-UI
 			            $(event.target).hide().after(
-			                '<div id="PP'+ elePickerId +'" class="pt-pickSPUser ui-state-default ui-corner-all addHoverEffectDone">'
-			                + '  <div class="table">'
-			                + '    <div class="pt-pickSPUser-person-cntr"><span>'+ui.item.label+'</span></div>'
-			                + '    <div style="padding-left:10px">'
+			                '<div id="PP'+ elePickerId +'" class="px-2 py-1 pt-pickSPUser ui-state-default ui-corner-all addHoverEffectDone" style="display:inline-block">'
+			                + '    <span class="pt-pickSPUser-person-cntr"><span>'+ui.item.label+'</span></span>'
+			                + '    <span class="pl-2">'
 			                + '      <a href="javascript:" onclick="$(\'#'+elePickerId+'\').show().text(\'\').val(\'\'); $(\'#PP'+elePickerId+'\').remove();">'
-			                + '      <img alt="Delete" src="../SiteAssets/img/delete_16.png" alt="Remove" title="Remove" style="vertical-align:middle"></a>'
-			                + '    </div>'
-			                + '  </div>'
+			                + '      <i class="fa fa-times-circle" style="color:red; font-size:125%;" title="remove"></i></a>'
+			                + '    </span>'
 			                + '</div>'
 			            );
 			        }
@@ -99,7 +98,7 @@
 				<label class="mb-0">People Picker:</label>
 			</div>
 			<div class="col-10">
-				<input type="text" class="pickSPUser form-control w-50">
+				<input id="spPicker" type="text" class="pickSPUser form-control w-50">
 			</div>
 		</div>
 	</div>
