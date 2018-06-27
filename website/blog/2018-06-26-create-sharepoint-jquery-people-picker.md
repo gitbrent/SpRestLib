@@ -17,7 +17,7 @@ Find every HTML element with the `pickSPUser` class and initialize it as an SpRe
 
 Libraries:
 ```html
-<link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css" />
+<link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
 <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
 <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
 <script src="https://cdn.rawgit.com/gitbrent/SpRestLib/v1.7.0/dist/sprestlib.bundle.js"></script>
@@ -32,7 +32,7 @@ $('.pickSPUser').each(function(){
 		minLength: 3,
 		source: function doRestQuery(request,response){
 			sprLib.rest({
-				url : '../_api/SP.UI.ApplicationPages.ClientPeoplePickerWebServiceInterface.clientPeoplePickerSearchUser',
+				url : '_api/SP.UI.ApplicationPages.ClientPeoplePickerWebServiceInterface.clientPeoplePickerSearchUser',
 				type: 'POST',
 				data: JSON.stringify({
 					'queryParams':{
@@ -75,9 +75,8 @@ $('.pickSPUser').each(function(){
 ```
 
 ### Result
-![screen shot 2018-03-18 at 23 38 17](https://user-images.githubusercontent.com/7218970/37578233-7a309bb8-2b05-11e8-9f4d-6a770fa8e097.png)
-// TODO: ^^^
+![jQuery SharePoint People Picker](https://raw.githubusercontent.com/gitbrent/SpRestLib/master/example/img/demo-sharepoint-jquery-people-picker-1.png)
+![jQuery SharePoint People Picker](https://raw.githubusercontent.com/gitbrent/SpRestLib/master/example/img/demo-sharepoint-jquery-people-picker-2.png)
 
-## More Examples
-See [`examples/sprestlib-demo-file-upload.html`](https://github.com/gitbrent/SpRestLib/tree/master/example) for a working demo.
-// TODO: ^^^
+## Code Sample
+See [`examples/sprestlib-demo-people-picker.html`](https://github.com/gitbrent/SpRestLib/tree/master/example) for a working demo.
