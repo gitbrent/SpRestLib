@@ -18,8 +18,11 @@ jQuery and SpRestLib.</p>
 <hr>
 <h2><a class="anchor" aria-hidden="true" id="example"></a><a href="#example" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Example</h2>
 <p>Find every HTML element with the <code>pickSPUser</code> class and initialize it as an SpRestLib-Picker</p>
-<p>Libraries:</p>
-<pre><code class="hljs css html"><span class="hljs-tag">&lt;<span class="hljs-name">link</span> <span class="hljs-attr">rel</span>=<span class="hljs-string">"stylesheet"</span> <span class="hljs-attr">href</span>=<span class="hljs-string">"https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css"</span> /&gt;</span>
+<p>CSS and JS:</p>
+<pre><code class="hljs css html"><span class="hljs-tag">&lt;<span class="hljs-name">link</span> <span class="hljs-attr">rel</span>=<span class="hljs-string">"stylesheet"</span> <span class="hljs-attr">href</span>=<span class="hljs-string">"https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css"</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">link</span> <span class="hljs-attr">rel</span>=<span class="hljs-string">"stylesheet"</span> <span class="hljs-attr">href</span>=<span class="hljs-string">"https://stackpath.bootstrapcdn.com/bootswatch/4.1.1/yeti/bootstrap.min.css"</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">link</span> <span class="hljs-attr">rel</span>=<span class="hljs-string">"stylesheet"</span> <span class="hljs-attr">href</span>=<span class="hljs-string">"https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.css"</span>&gt;</span>
+
 <span class="hljs-tag">&lt;<span class="hljs-name">script</span> <span class="hljs-attr">src</span>=<span class="hljs-string">"https://code.jquery.com/jquery-3.3.1.min.js"</span>&gt;</span><span class="undefined"></span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span>
 <span class="hljs-tag">&lt;<span class="hljs-name">script</span> <span class="hljs-attr">src</span>=<span class="hljs-string">"https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"</span>&gt;</span><span class="undefined"></span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span>
 <span class="hljs-tag">&lt;<span class="hljs-name">script</span> <span class="hljs-attr">src</span>=<span class="hljs-string">"https://cdn.rawgit.com/gitbrent/SpRestLib/v1.7.0/dist/sprestlib.bundle.js"</span>&gt;</span><span class="undefined"></span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span>
@@ -32,7 +35,7 @@ jQuery and SpRestLib.</p>
         <span class="hljs-attr">minLength</span>: <span class="hljs-number">3</span>,
         <span class="hljs-attr">source</span>: <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">doRestQuery</span>(<span class="hljs-params">request,response</span>)</span>{
             sprLib.rest({
-                <span class="hljs-attr">url</span> : <span class="hljs-string">'../_api/SP.UI.ApplicationPages.ClientPeoplePickerWebServiceInterface.clientPeoplePickerSearchUser'</span>,
+                <span class="hljs-attr">url</span> : <span class="hljs-string">'_api/SP.UI.ApplicationPages.ClientPeoplePickerWebServiceInterface.clientPeoplePickerSearchUser'</span>,
                 <span class="hljs-attr">type</span>: <span class="hljs-string">'POST'</span>,
                 <span class="hljs-attr">data</span>: <span class="hljs-built_in">JSON</span>.stringify({
                     <span class="hljs-string">'queryParams'</span>:{
@@ -54,19 +57,17 @@ jQuery and SpRestLib.</p>
             .catch(<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">strErr</span>)</span>{ <span class="hljs-built_in">console</span>.error(strErr); })
         },
         <span class="hljs-attr">select</span>: <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">event,ui</span>)</span>{
-            <span class="hljs-keyword">var</span> elePickerId = $($(<span class="hljs-keyword">this</span>).context).prop(<span class="hljs-string">'id'</span>);
+            <span class="hljs-keyword">var</span> elePickerId = event.target.id;
             sprLib.user({ <span class="hljs-attr">email</span>:ui.item.value }).info().then(<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">objUser</span>)</span>{ $(<span class="hljs-string">'#'</span>+elePickerId).val(objUser.Id) });
 
             <span class="hljs-comment">// Hide input with selected Person value / Create/Show PP-UI</span>
             $(event.target).hide().after(
-                <span class="hljs-string">'&lt;div id="PP'</span>+ elePickerId +<span class="hljs-string">'" class="pt-pickSPUser ui-state-default ui-corner-all addHoverEffectDone"&gt;'</span>
-                + <span class="hljs-string">'  &lt;div class="table"&gt;'</span>
-                + <span class="hljs-string">'    &lt;div class="pt-pickSPUser-person-cntr"&gt;&lt;span&gt;'</span>+ui.item.label+<span class="hljs-string">'&lt;/span&gt;&lt;/div&gt;'</span>
-                + <span class="hljs-string">'    &lt;div style="padding-left:10px"&gt;'</span>
-                + <span class="hljs-string">'      &lt;a href="javascript:" onclick="$(\'#'</span>+elePickerId+<span class="hljs-string">'\').show().text(\'\').val(\'\'); $(\'#PP'</span>+elePickerId+<span class="hljs-string">'\').remove();"&gt;'</span>
-                + <span class="hljs-string">'      &lt;img alt="Delete" src="../SiteAssets/img/delete_16.png" alt="Remove" title="Remove" style="vertical-align:middle"&gt;&lt;/a&gt;'</span>
-                + <span class="hljs-string">'    &lt;/div&gt;'</span>
-                + <span class="hljs-string">'  &lt;/div&gt;'</span>
+                <span class="hljs-string">'&lt;div id="PP'</span>+ elePickerId +<span class="hljs-string">'" class="px-2 py-1 pt-pickSPUser ui-state-default ui-corner-all addHoverEffectDone" style="display:inline-block"&gt;'</span>
+                + <span class="hljs-string">'  &lt;span class="pt-pickSPUser-person-cntr"&gt;&lt;span&gt;'</span>+ui.item.label+<span class="hljs-string">'&lt;/span&gt;&lt;/span&gt;'</span>
+                + <span class="hljs-string">'  &lt;span class="pl-2"&gt;'</span>
+                + <span class="hljs-string">'    &lt;a href="javascript:" onclick="$(\'#'</span>+elePickerId+<span class="hljs-string">'\').show().text(\'\').val(\'\'); $(\'#PP'</span>+elePickerId+<span class="hljs-string">'\').remove();"&gt;'</span>
+                + <span class="hljs-string">'    &lt;i class="fa fa-times-circle" style="color:red; font-size:125%;" title="remove"&gt;&lt;/i&gt;&lt;/a&gt;'</span>
+                + <span class="hljs-string">'  &lt;/span&gt;'</span>
                 + <span class="hljs-string">'&lt;/div&gt;'</span>
             );
         }
@@ -74,9 +75,9 @@ jQuery and SpRestLib.</p>
 });
 </code></pre>
 <h3><a class="anchor" aria-hidden="true" id="result"></a><a href="#result" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Result</h3>
-<p><img src="https://user-images.githubusercontent.com/7218970/37578233-7a309bb8-2b05-11e8-9f4d-6a770fa8e097.png" alt="screen shot 2018-03-18 at 23 38 17">
-// TODO: ^^^</p>
-<h2><a class="anchor" aria-hidden="true" id="more-examples"></a><a href="#more-examples" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>More Examples</h2>
-<p>See <a href="https://github.com/gitbrent/SpRestLib/tree/master/example"><code>examples/sprestlib-demo-file-upload.html</code></a> for a working demo.
-// TODO: ^^^</p>
+<p><img src="/SpRestLib/docs/assets/demo-sharepoint-jquery-people-picker-1.png" alt="jQuery SharePoint People Picker">
+<img src="/SpRestLib/docs/assets/demo-sharepoint-jquery-people-picker-2.png" alt="jQuery SharePoint People Picker">
+<img src="/SpRestLib/docs/assets/demo-sharepoint-jquery-people-picker-3.png" alt="jQuery SharePoint People Picker"></p>
+<h2><a class="anchor" aria-hidden="true" id="code-sample"></a><a href="#code-sample" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Code Sample</h2>
+<p>See <a href="https://github.com/gitbrent/SpRestLib/tree/master/example"><code>examples/sprestlib-demo-people-picker.html</code></a> for a working demo.</p>
 </span></div></div><div class="blogSocialSection"><div class="blogSocialSectionItem"><a href="https://twitter.com/share" class="twitter-share-button" data-text="Creating SharePoint jQuery People-Picker with SpRestLib" data-url="https://gitbrent.github.io/SpRestLib/blog/2018/06/26/create-sharepoint-jquery-people-picker.html" data-related="true" data-show-count="false"></a></div></div></div><div class="blog-recent"><a class="button" href="/SpRestLib/blog">Recent Posts</a></div></div></div></div><footer class="nav-footer" id="footer"><section class="sitemap"><a href="/SpRestLib/" class="nav-home"><img src="/SpRestLib/img/sprestlib.svg" alt="SpRestLib" width="66" height="58"/></a><div><h5>Docs</h5><a href="/SpRestLib/docs/installation.html">Getting Started with SpRestLib</a><a href="/SpRestLib/docs/api-rest.html">SharePoint API Reference</a><a href="/SpRestLib/blog">SharePoint Development Guides</a><a href="/SpRestLib/docs/feat-promises.html">About JavaScript Promises</a></div><div><h5>Community</h5><a href="https://twitter.com/SpRestLib" target="_blank">Twitter</a><a href="https://plus.google.com/u/1/113247436909611337609" target="_blank">Google Plus</a><a href="http://stackoverflow.com/questions/tagged/sprestlib" target="_blank">Stack Overflow</a><a href="https://www.youtube.com/channel/UCxZcCampOHn-47kvtcK_oVQ" target="_blank">YouTube Channel</a></div><div><h5>More</h5><a href="https://github.com/gitbrent/sprestlib/issues">GitHub Issues</a><a href="https://github.com/gitbrent/sprestlib">GitHub Project</a><a href="https://www.flaticon.com/packs/creativity">Site Icons</a></div></section><section class="copyright">Copyright © 2018 Brent Ely</section></footer></div><script>window.twttr=(function(d,s, id){var js,fjs=d.getElementsByTagName(s)[0],t=window.twttr||{};if(d.getElementById(id))return t;js=d.createElement(s);js.id=id;js.src='https://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js, fjs);t._e = [];t.ready = function(f) {t._e.push(f);};return t;}(document, 'script', 'twitter-wjs'));</script></body></html>
