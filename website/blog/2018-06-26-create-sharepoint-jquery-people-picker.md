@@ -15,9 +15,12 @@ jQuery and SpRestLib.
 
 Find every HTML element with the `pickSPUser` class and initialize it as an SpRestLib-Picker
 
-Libraries:
+CSS and JS:
 ```html
 <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootswatch/4.1.1/yeti/bootstrap.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.css">
+
 <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
 <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
 <script src="https://cdn.rawgit.com/gitbrent/SpRestLib/v1.7.0/dist/sprestlib.bundle.js"></script>
@@ -54,29 +57,30 @@ $('.pickSPUser').each(function(){
 			.catch(function(strErr){ console.error(strErr); })
 		},
 		select: function(event,ui){
-			var elePickerId = $($(this).context).prop('id');
-			sprLib.user({ email:ui.item.value }).info().then(function(objUser){ $('#'+elePickerId).val(objUser.Id) });
+            var elePickerId = event.target.id;
+            sprLib.user({ email:ui.item.value }).info().then(function(objUser){ $('#'+elePickerId).val(objUser.Id) });
 
-			// Hide input with selected Person value / Create/Show PP-UI
-			$(event.target).hide().after(
-				'<div id="PP'+ elePickerId +'" class="pt-pickSPUser ui-state-default ui-corner-all addHoverEffectDone">'
-				+ '  <div class="table">'
-				+ '    <div class="pt-pickSPUser-person-cntr"><span>'+ui.item.label+'</span></div>'
-				+ '    <div style="padding-left:10px">'
-				+ '      <a href="javascript:" onclick="$(\'#'+elePickerId+'\').show().text(\'\').val(\'\'); $(\'#PP'+elePickerId+'\').remove();">'
-				+ '      <img alt="Delete" src="../SiteAssets/img/delete_16.png" alt="Remove" title="Remove" style="vertical-align:middle"></a>'
-				+ '    </div>'
-				+ '  </div>'
-				+ '</div>'
-			);
-		}
+            // Hide input with selected Person value / Create/Show PP-UI
+            $(event.target).hide().after(
+                '<div id="PP'+ elePickerId +'" class="px-2 py-1 pt-pickSPUser ui-state-default ui-corner-all addHoverEffectDone" style="display:inline-block">'
+                + '  <span class="pt-pickSPUser-person-cntr"><span>'+ui.item.label+'</span></span>'
+                + '  <span class="pl-2">'
+                + '    <a href="javascript:" onclick="$(\'#'+elePickerId+'\').show().text(\'\').val(\'\'); $(\'#PP'+elePickerId+'\').remove();">'
+                + '    <i class="fa fa-times-circle" style="color:red; font-size:125%;" title="remove"></i></a>'
+                + '  </span>'
+                + '</div>'
+            );
+        }
 	});
 });
 ```
 
+
 ### Result
-![jQuery SharePoint People Picker](https://raw.githubusercontent.com/gitbrent/SpRestLib/master/example/img/demo-sharepoint-jquery-people-picker-1.png)
-![jQuery SharePoint People Picker](https://raw.githubusercontent.com/gitbrent/SpRestLib/master/example/img/demo-sharepoint-jquery-people-picker-2.png)
+![jQuery SharePoint People Picker](/SpRestLib/docs/assets/demo-sharepoint-jquery-people-picker-1.png)
+![jQuery SharePoint People Picker](/SpRestLib/docs/assets/demo-sharepoint-jquery-people-picker-2.png)
+![jQuery SharePoint People Picker](/SpRestLib/docs/assets/demo-sharepoint-jquery-people-picker-3.png)
+
 
 ## Code Sample
 See [`examples/sprestlib-demo-people-picker.html`](https://github.com/gitbrent/SpRestLib/tree/master/example) for a working demo.
