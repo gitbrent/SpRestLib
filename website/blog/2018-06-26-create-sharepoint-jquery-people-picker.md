@@ -4,8 +4,8 @@ authorURL: https://github.com/gitbrent/
 title: Creating SharePoint jQuery People-Picker with SpRestLib
 ---
 
-Create a fully-functional jQuery People Picker against your local SharePoint ActiveDirectory structure using only
-jQuery and SpRestLib.
+Create a fully-functional People Picker against your local SharePoint ActiveDirectory structure using
+jQuery-UI `autocomplete` and SpRestLib.
 
 <!--truncate-->
 

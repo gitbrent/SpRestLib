@@ -14,8 +14,8 @@
         <link href="https://gitbrent.github.io/SpRestLib/blog/2018/06/26/create-sharepoint-jquery-people-picker.html">
         </link>
         <updated>2018-06-26T06:00:00Z</updated>
-        <summary type="html"><![CDATA[<p>Create a fully-functional jQuery People Picker against your local SharePoint ActiveDirectory structure using only
-jQuery and SpRestLib.</p>
+        <summary type="html"><![CDATA[<p>Create a fully-functional People Picker against your local SharePoint ActiveDirectory structure using
+jQuery-UI <code>autocomplete</code> and SpRestLib.</p>
 ]]></summary>
         <author>
             <name>Brent Ely</name>
