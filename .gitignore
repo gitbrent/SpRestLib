@@ -7,5 +7,12 @@ bower_components/
 .icloud
 *.icloud
 package-lock.json
+### Docusaurus
 blog/
 website/
+css/
+docs/
+*.html
+img/*
+BingSiteAuth.xml
+sitemap.xml
