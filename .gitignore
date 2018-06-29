@@ -12,7 +12,4 @@ blog/
 website/
 css/
 docs/
-*.html
-img/*
-BingSiteAuth.xml
-sitemap.xml
+img/
