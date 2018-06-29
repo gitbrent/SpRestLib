@@ -2,7 +2,7 @@
  * NAME: qunit-test.js
  * DESC: tests for qunit-test.html (coded against my personal O365 Dev Site - YMMV)
  * AUTH: https://github.com/gitbrent/
- * DATE: 20180408
+ * DATE: 20180628
  *
  * HOWTO: Generate text tables for README etc.:
  * sprLib.list('Employees').items(['Id', 'Name', 'Badge_x0020_Number']).then(function(arrData){ console.log(getAsciiTableStr(arrData)) });
@@ -1024,6 +1024,12 @@ QUnit.module( "LIST > ITEM GET Methods" );
 					},
 					queryLimit: 10,
 					queryOrderby: "Modified desc"
+				}),
+				sprLib.list({ name:'Site Assets', baseUrl:'/sites/dev/sandbox' }).items({
+					listCols: {
+						fileName: { dataName:'FileLeafRef', getVersions:true }
+					},
+					queryLimit: 1
 				})
 			])
 			.then(function(arrayResults){
@@ -1047,6 +1053,14 @@ QUnit.module( "LIST > ITEM GET Methods" );
 				assert.ok( result[0].Versioned_x0020_Comments, "result[0].Versioned_x0020_Comments: "+ result[0].Versioned_x0020_Comments );
 				assert.ok( Array.isArray(result[0].Versioned_x0020_Comments), "result[0].VC is Array(): "+ Array.isArray(result[0].Versioned_x0020_Comments) );
 				assert.ok( result[0].Versioned_x0020_Comments.length > 0, "result[0].Versioned_x0020_Comments.length > 0: "+ result[0].Versioned_x0020_Comments.length );
+				assert.ok( getAsciiTableStr(result), `RESULTS:\n${getAsciiTableStr(result)}` );
+
+				var result = arrayResults[3];
+				assert.ok( true, "TEST: getVersions with baseUrl\n------------------" );
+				assert.ok( Object.keys(result[0]).filter(key=>{return key.indexOf('_')!=0}).length == 1, "result[0] (no '__meta/__next') has length == 1: "+ Object.keys(result[0]).filter(key=>{return key.indexOf('_')!=0}).length );
+				assert.ok( result[0].fileName, "result[0].fileName: "+ result[0].fileName );
+				assert.ok( Array.isArray(result[0].fileName), "result[0].VC is Array(): "+ Array.isArray(result[0].fileName) );
+				assert.ok( result[0].fileName.length > 0, "result[0].fileName.length > 0: "+ result[0].fileName.length );
 				assert.ok( getAsciiTableStr(result), `RESULTS:\n${getAsciiTableStr(result)}` );
 
 				done();
