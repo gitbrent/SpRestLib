@@ -30,7 +30,7 @@
 (function(){
 	// APP VERSION/BUILD
 	var APP_VER = "1.8.0-beta";
-	var APP_BLD = "20180626";
+	var APP_BLD = "20180628";
 	var DEBUG = false; // (verbose mode/lots of logging)
 	// ENUMERATIONS
 	// REF: [`SP.BaseType`](https://msdn.microsoft.com/en-us/library/office/jj246925.aspx)
@@ -958,7 +958,7 @@
 						// STEP 1: Query SharePoint
 						// Convert our dataName array into a comma-delim string, then replace ',' with '%20' and our query string is constrcuted!
 						sprLib.rest({
-							url: "_vti_bin/owssvr.dll?Cmd=Display&List="
+							url: (inOpt.baseUrl ? inOpt.baseUrl+'/' : '')+"_vti_bin/owssvr.dll?Cmd=Display&List="
 								+ "%7B"+ listGUID +"%7D"+"&XMLDATA=TRUE&IncludeVersions=TRUE"
 								+ "&Query=ID%20"+ arrAppendColNames.toString().replace(/\,/g,'%20') +"%20"
 								+ "Modified%20Editor%20"
@@ -1018,7 +1018,8 @@
 			});
 		}
 
-		// DEPRECATED: TODO: Remove in 2.0.0
+		// DEPRECATED:
+		// TODO-2.0
 		_newList.getItems = _newList.items;
 
 		// CRUD ---------------------------------------------------------------------
