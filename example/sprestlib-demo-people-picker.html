@@ -35,7 +35,7 @@
 		// ==================================================================================================================
 
 		function appStart() {
-			// Initialize and-and-all People-Pickers
+			// Initialize all People-Pickers
 			$('.pickSPUser').each(function(){
 			    $(this)
 			    .prop('placeholder', 'Enter Last, First...')
@@ -68,7 +68,7 @@
 			            var elePickerId = event.target.id;
 			            sprLib.user({ email:ui.item.value }).info().then(function(objUser){ $('#'+elePickerId).val(objUser.Id) });
 
-			            // Hide input with selected Person value / Create/Show PP-UI
+			            // Update UI: Hide text input, show person box
 			            $(event.target).hide().after(
 			                '<div id="PP'+ elePickerId +'" class="px-2 py-1 pt-pickSPUser ui-state-default ui-corner-all addHoverEffectDone" style="display:inline-block">'
 			                + '    <span class="pt-pickSPUser-person-cntr"><span>'+ui.item.label+'</span></span>'
