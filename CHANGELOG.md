@@ -5,8 +5,9 @@
 
 **Implemented Enhancements:**
 - Add Typescript Definitions [\#24](https://github.com/gitbrent/sprestlib/issues/24) ([Wireliner](https://github.com/Wireliner))
-**Fixed Bugs:**
 
+**Fixed Bugs:**
+- Defect: The list() `baseUrl` option is ignored by the underlying versions query. [\#27](https://github.com/gitbrent/sprestlib/issues/27) ([gitbrent](https://github.com/gitbrent))
 
 
 
