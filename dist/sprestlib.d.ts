@@ -9,7 +9,7 @@ declare namespace sprLib {
   function baseUrl(): string;
   function baseUrl(baseUrl: string): void;
 
-  function nodeConfig(options: object): void;
+  function nodeConfig(options: Object): void;
 
   function renewSecurityToken(): void;
 
@@ -19,41 +19,56 @@ declare namespace sprLib {
    * @see \`{@link https://gitbrent.github.io/SpRestLib/docs/api-list.html }\`
    * @since 1.0
    */
+
+  interface ListOptions {
+    name: string;
+    baseUrl?: string;
+    requestDigest?: string;
+  }
+
   class list {
     constructor(listName: string);
     constructor(listGuid: string);
-    constructor(options: object);
+    constructor(options: ListOptions);
 
-    cols(): object[];
-    info(): object[];
-    perms(): object[];
+    cols(): Object[];
+    info(): Object[];
+    perms(): Object[];
 
-    items(options: object): Promise<object[]>;
-    create(options: object): Promise<object[]>;
-    update(options: object): Promise<object[]>;
-    delete(options: object): Promise<number>;
-    recycle(options: object): Promise<number>;
+    items(options: Object): Promise<Object[]>;
+    create(options: Object): Promise<Object[]>;
+    update(options: Object): Promise<Object[]>;
+    delete(options: Object): Promise<number>;
+    recycle(options: Object): Promise<number>;
   }
 
-  function rest(options: object): Promise<object[]>;
+  interface RestOptions {
+    url: string;
+    type: 'GET' | 'POST' | 'DELETE';
+    requestDigest?: string;
+    data?: Object;
+    headers?: any;
+  }
+
+  function rest(options: RestOptions): Promise<Object[]>;
 
   class site {
     constructor(siteUrl?: string);
 
-    info(): object[];
-    lists(): object[];
-    subsites(): object[];
-    perms(): object[];
-    roles(): object[];
-    groups(): object[];
-    users(): object[];
+    info(): Object[];
+    lists(): Object[];
+    subsites(): Object[];
+    perms(): Object[];
+    roles(): Object[];
+    groups(): Object[];
+    users(): Object[];
   }
 
   class user {
-    constructor(options?: object);
+    constructor(options?: Object);
 
-    info(): Promise<object>;
-    groups(): object[];
-    profile(arrProfileKeys: object): object;
+    info(): Promise<Object>;
+    groups(): Object[];
+    profile(arrProfileKeys: Object): Object;
   }
 }
