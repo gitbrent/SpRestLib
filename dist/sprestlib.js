@@ -30,7 +30,7 @@
 (function(){
 	// APP VERSION/BUILD
 	var APP_VER = "1.8.0-beta";
-	var APP_BLD = "20180628";
+	var APP_BLD = "20180630";
 	var DEBUG = false; // (verbose mode/lots of logging)
 	// ENUMERATIONS
 	// REF: [`SP.BaseType`](https://msdn.microsoft.com/en-us/library/office/jj246925.aspx)
@@ -246,12 +246,13 @@
 				var fileName = _pathAndName.substring(_pathAndName.lastIndexOf('/')+1);
 
 				sprLib.rest({
-					url: "_api/web/GetFolderByServerRelativeUrl('"+filePath+"')/Files"
+					//url: "_api/web/GetFolderByServerRelativeUrl('"+filePath+"')/Files"
+					url: "_api/web/GetFileByServerRelativeUrl('"+_pathAndName+"')"
 						+ "?$select=Author/Id,CheckedOutByUser/Id,LockedByUser/Id,ModifiedBy/Id,"
 						+ "CheckInComment,CheckOutType,ETag,Exists,Length,Level,MajorVersion,MinorVersion,"
 						+ "Name,ServerRelativeUrl,TimeCreated,TimeLastModified"
-						+ "&$expand=Author,CheckedOutByUser,LockedByUser,ModifiedBy"
-						+ "&$filter=Name eq '"+fileName+"'",
+						+ "&$expand=Author,CheckedOutByUser,LockedByUser,ModifiedBy",
+						//+ "&$filter=Name eq '"+fileName+"'",
 					metadata: false
 				})
 				.then(function(arrData){
@@ -272,6 +273,48 @@
 				});
 			});
 		}
+
+		/**
+		* Get File's version metadata
+		* Return an object containing information about the File version
+		*
+		* @param `inVer` - version label
+		*
+		* @example: sprLib.file('/site/Documents/MyDoc.docx').version('99')
+		* @returns: object containing version properties
+		* @see: https://msdn.microsoft.com/en-us/library/office/dn450841.aspx
+		*/
+		_newFile.version = function(inVer) {
+			return new Promise(function(resolve, reject) {
+				sprLib.rest({
+					url: "_api/web/GetFileByServerRelativeUrl('"+_pathAndName+"')"
+						+ "?$select=Author/Id,CheckedOutByUser/Id,LockedByUser/Id,ModifiedBy/Id,"
+						+ "CheckInComment,CheckOutType,ETag,Exists,Length,Level,MajorVersion,MinorVersion,"
+						+ "Name,ServerRelativeUrl,TimeCreated,TimeLastModified,UniqueId"
+						+ "&$expand=Author,CheckedOutByUser,LockedByUser,ModifiedBy"
+						+ "&$filter=VersionLabel eq '"+ vers +"'",
+					metadata: false
+				})
+				.then(function(arrData){
+					// A: Capture info
+					var objData = ( arrData && arrData.length > 0 ? arrData[0] : {} ); // FYI: Empty object is correct return type when file-not-found
+
+					// B: Remove junk
+					['Author', 'CheckedOutByUser', 'LockedByUser', 'ModifiedBy'].forEach(function(field){
+						if ( objData[field] && objData[field].__deferred ) delete objData[field].__deferred;
+						if ( objData[field] && objData[field].__metadata ) delete objData[field].__metadata;
+					});
+
+					// C: Done
+					resolve( objData );
+				})
+				.catch(function(strErr){
+					reject( strErr );
+				});
+			});
+		}
+
+
 
 
 		// TODO: WIP: .upload({ data:arrayBuffer/FilePicker/whatev, overwrite:BOOL })
