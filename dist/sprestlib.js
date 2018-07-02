@@ -30,7 +30,7 @@
 (function(){
 	// APP VERSION/BUILD
 	var APP_VER = "1.8.0-beta";
-	var APP_BLD = "20180630";
+	var APP_BLD = "20180701";
 	var DEBUG = false; // (verbose mode/lots of logging)
 	// ENUMERATIONS
 	// REF: [`SP.BaseType`](https://msdn.microsoft.com/en-us/library/office/jj246925.aspx)
@@ -211,6 +211,9 @@
 		var _pathAndName = "";
 		var _requestDigest = (inOpt.requestDigest || (typeof document !== 'undefined' && document.getElementById('__REQUESTDIGEST') ? document.getElementById('__REQUESTDIGEST').value : null));
 
+		// TODO: 20180701: need to honor `_baseUrl`
+		// TODO: include `baseUrl` param? OR do we parse URL from file and use that? (e.g.: `filePath` is the baseUrl)
+
 		// B: Param check
 		if ( inOpt && typeof inOpt === 'string' ) {
 			_pathAndName = encodeURI(inOpt);
@@ -229,15 +232,16 @@
 		_pathAndName = _pathAndName.replace(/\/$/gi,'');
 
 		// D: Add Public Methods
-		// .perms()
-		// .version()
 		// .delete() // headers: { "X-HTTP-Method":"DELETE" },
 		// .recycle()
 		// .get() (?) // _api/web/GetFolderByServerRelativeUrl('')/Files/get(url='')
+		// @see: https://msdn.microsoft.com/en-us/library/office/dn450841.aspx#bk_FileCollection
+		// "The GetFileByServerRelativeUrl endpoint is recommended way to get a file. See SP.File request examples."
 
 		/**
-		* Return an object containing information about the current File
+		* Get File information
 		*
+		* @returns: an object containing information about the current File
 		* @example: sprLib.file('/site/Documents/MyDoc.docx').info()
 		*/
 		_newFile.info = function() {
@@ -246,13 +250,10 @@
 				var fileName = _pathAndName.substring(_pathAndName.lastIndexOf('/')+1);
 
 				sprLib.rest({
-					//url: "_api/web/GetFolderByServerRelativeUrl('"+filePath+"')/Files"
-					url: "_api/web/GetFileByServerRelativeUrl('"+_pathAndName+"')"
-						+ "?$select=Author/Id,CheckedOutByUser/Id,LockedByUser/Id,ModifiedBy/Id,"
-						+ "CheckInComment,CheckOutType,ETag,Exists,Length,Level,MajorVersion,MinorVersion,"
-						+ "Name,ServerRelativeUrl,TimeCreated,TimeLastModified"
-						+ "&$expand=Author,CheckedOutByUser,LockedByUser,ModifiedBy",
-						//+ "&$filter=Name eq '"+fileName+"'",
+					url: "_api/web/GetFileByServerRelativeUrl('"+ _pathAndName +"')",
+					queryCols: ['Author/Id','CheckedOutByUser/Id','LockedByUser/Id','ModifiedBy/Id',
+						'CheckInComment','CheckOutType','ETag','Exists','Length','Level','MajorVersion','MinorVersion',
+						'Name','ServerRelativeUrl','TimeCreated','TimeLastModified','UniqueId'],
 					metadata: false
 				})
 				.then(function(arrData){
@@ -275,6 +276,50 @@
 		}
 
 		/**
+		* Get File permissions
+		*
+		* @returns: array of objects with `Member` and `Roles` properties
+		* @example: sprLib.file('/site/Documents/MyDoc.docx').perms().then( arr => console.log(arr) );
+		* .--------------------------------------------------------------------------------------------------------------------------------------------------------------------------.
+		* |                                        Member                                         |                                      Roles                                       |
+		* |---------------------------------------------------------------------------------------|----------------------------------------------------------------------------------|
+		* | {"Title":"Dev Site Members","PrincipalType":"SharePoint Group","PrincipalId":8}       | [{"Hidden":false,"Name":"Design"},{"Hidden":false,"Name":"Edit"}]                |
+		* | {"Title":"Dev Site Owners","PrincipalType":"SharePoint Group","PrincipalId":6}        | [{"Hidden":false,"Name":"Full Control"},{"Hidden":true,"Name":"Limited Access"}] |
+		* | {"Title":"Dev Site Visitors","PrincipalType":"SharePoint Group","PrincipalId":7}      | [{"Hidden":false,"Name":"Read"}]                                                 |
+		* | {"Title":"Excel Services Viewers","PrincipalType":"SharePoint Group","PrincipalId":5} | [{"Hidden":false,"Name":"View Only"}]                                            |
+		* '--------------------------------------------------------------------------------------------------------------------------------------------------------------------------'
+		*/
+		_newFile.perms = function() {
+			return new Promise(function(resolve, reject) {
+				sprLib.rest({
+					url: "_api/web/GetFileByServerRelativeUrl('"+_pathAndName+"')/ListItemAllFields/RoleAssignments",
+					queryCols: ['PrincipalId','Member/PrincipalType','Member/Title','RoleDefinitionBindings/Name','RoleDefinitionBindings/Hidden']
+				})
+				.then(function(arrData){
+					// STEP 1: Transform: Results s/b 2 keys with props inside each
+					arrData.forEach(function(objItem,idx){
+						// A: "Rename" the `RoleDefinitionBindings` key to be user-friendly
+						Object.defineProperty(objItem, 'Roles', Object.getOwnPropertyDescriptor(objItem, 'RoleDefinitionBindings'));
+						delete objItem.RoleDefinitionBindings;
+
+						// B: Move `PrincipalId` inside {Member}
+						objItem.Member.PrincipalId = objItem.PrincipalId;
+						delete objItem.PrincipalId;
+
+						// C: Decode PrincipalType into text
+						objItem.Member.PrincipalType = ENUM_PRINCIPALTYPES[objItem.Member.PrincipalType] || objItem.Member.PrincipalType;
+					});
+
+					// STEP 2: Resolve results (NOTE: empty array is the correct default result)
+					resolve( arrData || [] );
+				})
+				.catch(function(strErr){
+					reject( strErr );
+				});
+			});
+		}
+
+		/**
 		* Get File's version metadata
 		* Return an object containing information about the File version
 		*
@@ -287,12 +332,11 @@
 		_newFile.version = function(inVer) {
 			return new Promise(function(resolve, reject) {
 				sprLib.rest({
-					url: "_api/web/GetFileByServerRelativeUrl('"+_pathAndName+"')"
-						+ "?$select=Author/Id,CheckedOutByUser/Id,LockedByUser/Id,ModifiedBy/Id,"
-						+ "CheckInComment,CheckOutType,ETag,Exists,Length,Level,MajorVersion,MinorVersion,"
-						+ "Name,ServerRelativeUrl,TimeCreated,TimeLastModified,UniqueId"
-						+ "&$expand=Author,CheckedOutByUser,LockedByUser,ModifiedBy"
-						+ "&$filter=VersionLabel eq '"+ vers +"'",
+					url: "_api/web/GetFileByServerRelativeUrl('"+ _pathAndName +"')",
+					queryCols: ['Author/Id','CheckedOutByUser/Id','LockedByUser/Id','ModifiedBy/Id',
+						'CheckInComment','CheckOutType','ETag','Exists','Length','Level','MajorVersion','MinorVersion',
+						'Name','ServerRelativeUrl','TimeCreated','TimeLastModified','UniqueId'],
+					queryFilter: "VersionLabel eq '"+ inVer +"'",
 					metadata: false
 				})
 				.then(function(arrData){
