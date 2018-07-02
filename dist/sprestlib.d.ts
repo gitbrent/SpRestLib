@@ -1,4 +1,4 @@
-// Type definitions for sprestlib 1.7.0
+// Type definitions for sprestlib 1.8.0
 // Project: https://gitbrent.github.io/SpRestLib/
 // Definitions by: Brent Ely <https://github.com/gitbrent/>
 //                 Jandos <https://github.com/Wireliner>
@@ -15,27 +15,33 @@ declare namespace sprLib {
 
   function renewSecurityToken(): void;
 
+  class file {
+    constructor(fileName: string);
+
+    info(): Promise<Object>;
+    perms(): Promise<Object[]>;
+    version(): Promise<Object>;
+  }
+
   /**
    * SharePoint List/Library API.
    *
    * @see \`{@link https://gitbrent.github.io/SpRestLib/docs/api-list.html }\`
    * @since 1.0
    */
-
   interface ListOptions {
     name: string;
     baseUrl?: string;
     requestDigest?: string;
   }
-
   class list {
     constructor(listName: string);
     constructor(listGuid: string);
     constructor(options: ListOptions);
 
-    cols(): Object[];
-    info(): Object[];
-    perms(): Object[];
+    cols(): Promise<Object[]>;
+    info(): Promise<Object>;
+    perms(): Promise<Object[]>;
 
     items(options: Object): Promise<Object[]>;
     create(options: Object): Promise<Object[]>;
@@ -46,31 +52,37 @@ declare namespace sprLib {
 
   interface RestOptions {
     url: string;
-    type: 'GET' | 'POST' | 'DELETE';
+    type?: 'GET' | 'POST' | 'DELETE';
     requestDigest?: string;
     data?: Object;
     headers?: any;
   }
-
   function rest(options: RestOptions): Promise<Object[]>;
 
   class site {
     constructor(siteUrl?: string);
 
-    info(): Object[];
-    lists(): Object[];
-    subsites(): Object[];
-    perms(): Object[];
-    roles(): Object[];
-    groups(): Object[];
-    users(): Object[];
+    info(): Promise<Object>;
+    lists(): Promise<Object[]>;
+    subsites(): Promise<Object[]>;
+    perms(): Promise<Object[]>;
+    roles(): Promise<Object[]>;
+    groups(): Promise<Object[]>;
+    users(): Promise<Object[]>;
+  }
+
+  interface UserOptions {
+    id?: string;
+    email?: string;
+    login?: string;
+    title?: string;
   }
 
   class user {
-    constructor(options?: Object);
+    constructor(options?: UserOptions);
 
     info(): Promise<Object>;
-    groups(): Object[];
+    groups(): Promise<Object[]>;
     profile(arrProfileKeys: Object): Object;
   }
 }
