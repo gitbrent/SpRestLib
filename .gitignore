@@ -8,3 +8,7 @@ bower_components/
 *.icloud
 package-lock.json
 website/
+blog/
+css/
+docs/
+img/
