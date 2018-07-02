@@ -27,25 +27,10 @@
 |*|  SOFTWARE.
 \*/
 
-// Detect Node.js
-var NODEJS = false;
-{
-	// NOTE: `NODEJS` determines which network library to use, so using https-detection is apropos.
-	if ( typeof module !== 'undefined' && module.exports && typeof require === 'function' ) {
-		try {
-			require.resolve('https');
-			NODEJS = true;
-		}
-		catch (ex) {
-			NODEJS = false;
-		}
-	}
-}
-
 (function(){
 	// APP VERSION/BUILD
 	var APP_VER = "1.8.0-beta";
-	var APP_BLD = "20180515";
+	var APP_BLD = "20180701";
 	var DEBUG = false; // (verbose mode/lots of logging)
 	// ENUMERATIONS
 	// REF: [`SP.BaseType`](https://msdn.microsoft.com/en-us/library/office/jj246925.aspx)
@@ -85,11 +70,13 @@ var NODEJS = false;
 		maxRetries:      2,
 		maxRows:         5000,
 		metadata:        false,
+		isNodeEnabled:   false,
 		nodeCookie:      '',
-		nodeEnabled:     true,
 		nodeServer:      '',
 		retryAfter:      1000
 	};
+	// LIBRARY DEPS
+	var https = null;
 	// GLOBAL VARS
 	var gRegexGUID = /^[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}$/i;
 	var gRetryCounter = 0;
@@ -214,6 +201,7 @@ var NODEJS = false;
 	* @example - sprLib.file({ 'name':'/sites/dev/Shared%20Documents/SomeFolder/MyDoc.docx' });
 	* @example - sprLib.file({ 'name':'/MyDocuments/MyDoc.docx', 'requestDigest':'ABC123' });
 	*
+	* @since 1.8.0
 	* @see: [Files and folders REST API reference](https://msdn.microsoft.com/en-us/library/office/dn450841.aspx)
 	*/
 	sprLib.file = function file(inOpt) {
@@ -222,6 +210,9 @@ var NODEJS = false;
 		var _newFile = {};
 		var _pathAndName = "";
 		var _requestDigest = (inOpt.requestDigest || (typeof document !== 'undefined' && document.getElementById('__REQUESTDIGEST') ? document.getElementById('__REQUESTDIGEST').value : null));
+
+		// TODO: 20180701: need to honor `_baseUrl`
+		// TODO: include `baseUrl` param? OR do we parse URL from file and use that? (e.g.: `filePath` is the baseUrl)
 
 		// B: Param check
 		if ( inOpt && typeof inOpt === 'string' ) {
@@ -237,16 +228,20 @@ var NODEJS = false;
 			return null;
 		}
 
-		// C: Add Public Methods
-		// .perms()
-		// .version()
+		// C: Ensure `_pathAndName` does not end with a slash ("/")
+		_pathAndName = _pathAndName.replace(/\/$/gi,'');
+
+		// D: Add Public Methods
 		// .delete() // headers: { "X-HTTP-Method":"DELETE" },
 		// .recycle()
 		// .get() (?) // _api/web/GetFolderByServerRelativeUrl('')/Files/get(url='')
+		// @see: https://msdn.microsoft.com/en-us/library/office/dn450841.aspx#bk_FileCollection
+		// "The GetFileByServerRelativeUrl endpoint is recommended way to get a file. See SP.File request examples."
 
 		/**
-		* Return an object containing information about the current File
+		* Get File information
 		*
+		* @returns: an object containing information about the current File
 		* @example: sprLib.file('/site/Documents/MyDoc.docx').info()
 		*/
 		_newFile.info = function() {
@@ -255,12 +250,93 @@ var NODEJS = false;
 				var fileName = _pathAndName.substring(_pathAndName.lastIndexOf('/')+1);
 
 				sprLib.rest({
-					url: "_api/web/GetFolderByServerRelativeUrl('"+filePath+"')/Files"
-						+ "?$select=Author/Id,CheckedOutByUser/Id,LockedByUser/Id,ModifiedBy/Id,"
-						+ "CheckInComment,CheckOutType,ETag,Exists,Length,Level,MajorVersion,MinorVersion,"
-						+ "Name,ServerRelativeUrl,TimeCreated,TimeLastModified"
-						+ "&$expand=Author,CheckedOutByUser,LockedByUser,ModifiedBy"
-						+ "&$filter=Name eq '"+fileName+"'",
+					url: "_api/web/GetFileByServerRelativeUrl('"+ _pathAndName +"')",
+					queryCols: ['Author/Id','CheckedOutByUser/Id','LockedByUser/Id','ModifiedBy/Id',
+						'CheckInComment','CheckOutType','ETag','Exists','Length','Level','MajorVersion','MinorVersion',
+						'Name','ServerRelativeUrl','TimeCreated','TimeLastModified','UniqueId'],
+					metadata: false
+				})
+				.then(function(arrData){
+					// A: Capture info
+					var objData = ( arrData && arrData.length > 0 ? arrData[0] : {} ); // FYI: Empty object is correct return type when file-not-found
+
+					// B: Remove junk
+					['Author', 'CheckedOutByUser', 'LockedByUser', 'ModifiedBy'].forEach(function(field){
+						if ( objData[field] && objData[field].__deferred ) delete objData[field].__deferred;
+						if ( objData[field] && objData[field].__metadata ) delete objData[field].__metadata;
+					});
+
+					// C: Done
+					resolve( objData );
+				})
+				.catch(function(strErr){
+					reject( strErr );
+				});
+			});
+		}
+
+		/**
+		* Get File permissions
+		*
+		* @returns: array of objects with `Member` and `Roles` properties
+		* @example: sprLib.file('/site/Documents/MyDoc.docx').perms().then( arr => console.log(arr) );
+		* .--------------------------------------------------------------------------------------------------------------------------------------------------------------------------.
+		* |                                        Member                                         |                                      Roles                                       |
+		* |---------------------------------------------------------------------------------------|----------------------------------------------------------------------------------|
+		* | {"Title":"Dev Site Members","PrincipalType":"SharePoint Group","PrincipalId":8}       | [{"Hidden":false,"Name":"Design"},{"Hidden":false,"Name":"Edit"}]                |
+		* | {"Title":"Dev Site Owners","PrincipalType":"SharePoint Group","PrincipalId":6}        | [{"Hidden":false,"Name":"Full Control"},{"Hidden":true,"Name":"Limited Access"}] |
+		* | {"Title":"Dev Site Visitors","PrincipalType":"SharePoint Group","PrincipalId":7}      | [{"Hidden":false,"Name":"Read"}]                                                 |
+		* | {"Title":"Excel Services Viewers","PrincipalType":"SharePoint Group","PrincipalId":5} | [{"Hidden":false,"Name":"View Only"}]                                            |
+		* '--------------------------------------------------------------------------------------------------------------------------------------------------------------------------'
+		*/
+		_newFile.perms = function() {
+			return new Promise(function(resolve, reject) {
+				sprLib.rest({
+					url: "_api/web/GetFileByServerRelativeUrl('"+_pathAndName+"')/ListItemAllFields/RoleAssignments",
+					queryCols: ['PrincipalId','Member/PrincipalType','Member/Title','RoleDefinitionBindings/Name','RoleDefinitionBindings/Hidden']
+				})
+				.then(function(arrData){
+					// STEP 1: Transform: Results s/b 2 keys with props inside each
+					arrData.forEach(function(objItem,idx){
+						// A: "Rename" the `RoleDefinitionBindings` key to be user-friendly
+						Object.defineProperty(objItem, 'Roles', Object.getOwnPropertyDescriptor(objItem, 'RoleDefinitionBindings'));
+						delete objItem.RoleDefinitionBindings;
+
+						// B: Move `PrincipalId` inside {Member}
+						objItem.Member.PrincipalId = objItem.PrincipalId;
+						delete objItem.PrincipalId;
+
+						// C: Decode PrincipalType into text
+						objItem.Member.PrincipalType = ENUM_PRINCIPALTYPES[objItem.Member.PrincipalType] || objItem.Member.PrincipalType;
+					});
+
+					// STEP 2: Resolve results (NOTE: empty array is the correct default result)
+					resolve( arrData || [] );
+				})
+				.catch(function(strErr){
+					reject( strErr );
+				});
+			});
+		}
+
+		/**
+		* Get File's version metadata
+		* Return an object containing information about the File version
+		*
+		* @param `inVer` - version label
+		*
+		* @example: sprLib.file('/site/Documents/MyDoc.docx').version('99')
+		* @returns: object containing version properties
+		* @see: https://msdn.microsoft.com/en-us/library/office/dn450841.aspx
+		*/
+		_newFile.version = function(inVer) {
+			return new Promise(function(resolve, reject) {
+				sprLib.rest({
+					url: "_api/web/GetFileByServerRelativeUrl('"+ _pathAndName +"')",
+					queryCols: ['Author/Id','CheckedOutByUser/Id','LockedByUser/Id','ModifiedBy/Id',
+						'CheckInComment','CheckOutType','ETag','Exists','Length','Level','MajorVersion','MinorVersion',
+						'Name','ServerRelativeUrl','TimeCreated','TimeLastModified','UniqueId'],
+					queryFilter: "VersionLabel eq '"+ inVer +"'",
 					metadata: false
 				})
 				.then(function(arrData){
@@ -283,17 +359,21 @@ var NODEJS = false;
 		}
 
 
+
+
 		// TODO: WIP: .upload({ data:arrayBuffer/FilePicker/whatev, overwrite:BOOL })
 		/**
 		* @see: https://msdn.microsoft.com/en-us/library/office/dn450841.aspx#bk_FileCollectionAdd
 		*/
-		_newFile.upload = function(){
+		_newFile.upload = function() {
 			return new Promise(function(resolve, reject) {
 				// CASE 1: NODE.JS
 				/*
 				// TODO: _pathAndName -> split for vars below!
 				var strFilePath = "/sites/dev/Shared%20Documents/upload";
 				var strFileName = "sprestlib-demo.html";
+				//var folderPath = _pathAndName.substring(0, _pathAndName.lastIndexOf('/'));
+				//var folderName = _pathAndName.substring(_pathAndName.lastIndexOf('/')+1);
 				var strUrl = "_api/web/GetFolderByServerRelativeUrl('"+strFilePath+"')/Files/add(url='"+strFileName+"',overwrite=true)";
 				// IMPORTANT: path must be escaped or "TypeError: Request path contains unescaped characters"
 
@@ -347,7 +427,9 @@ var NODEJS = false;
 
 	// API: FOLDER
 	/**
+	* @param `inOpt` (object)/(string) - required - (`name` prop reqd)
 	*
+	* @since 1.8.0
 	* @see: [Files and folders REST API reference](https://msdn.microsoft.com/en-us/library/office/dn450841.aspx#bk_Folder)
 	*/
 	sprLib.folder = function folder(inOpt) {
@@ -440,6 +522,7 @@ var NODEJS = false;
 	* @example - string - sprLib.list({ name:'Documents' });
 	* @example - string - sprLib.list({ name:'Documents', baseUrl:'/sites/dev/sandbox' });
 	* @example - string - sprLib.list({ name:'Documents', baseUrl:'/sites/dev/sandbox', requestDigest:'8675309,05 Dec 2017 01:23:45 -0000' });
+	* @since 1.0.0
 	*/
 	sprLib.list = function list(inOpt) {
 		// A: Options setup
@@ -962,7 +1045,7 @@ var NODEJS = false;
 						// STEP 1: Query SharePoint
 						// Convert our dataName array into a comma-delim string, then replace ',' with '%20' and our query string is constrcuted!
 						sprLib.rest({
-							url: "_vti_bin/owssvr.dll?Cmd=Display&List="
+							url: (inOpt.baseUrl ? inOpt.baseUrl+'/' : '')+"_vti_bin/owssvr.dll?Cmd=Display&List="
 								+ "%7B"+ listGUID +"%7D"+"&XMLDATA=TRUE&IncludeVersions=TRUE"
 								+ "&Query=ID%20"+ arrAppendColNames.toString().replace(/\,/g,'%20') +"%20"
 								+ "Modified%20Editor%20"
@@ -1022,7 +1105,8 @@ var NODEJS = false;
 			});
 		}
 
-		// DEPRECATED: TODO: Remove in 2.0.0
+		// DEPRECATED:
+		// TODO-2.0
 		_newList.getItems = _newList.items;
 
 		// CRUD ---------------------------------------------------------------------
@@ -1298,6 +1382,8 @@ var NODEJS = false;
 		queryLimit:   10
 	})
 	.then(function(arrayResults){ console.table(arrayResults) });
+	*
+	* @since 1.0.0
 	*/
 	// sprLib.rest({ url:"/sites/dev/_api/web/sitegroups" }).then(function(data){ console.table(data); }); (data.d.results)
 	// sprLib.rest({ url:"/_api/web/lists/getbytitle('Employees')" }).then(function(data){ console.table(data); }); (data.d)
@@ -1409,7 +1495,12 @@ var NODEJS = false;
 			Promise.resolve()
 			.then(function(){
 				return new Promise(function(resolve, reject) {
-					if ( NODEJS && APP_OPTS.nodeEnabled ) {
+					if ( APP_OPTS.isNodeEnabled ) {
+						if ( !https ) {
+							// Declare https on-demand so APP_OPTS applies (if we init `https` with the library Angular/React/etc will fail on load as users have not had a chance to select any options)
+							try { https = require("https"); } catch(ex){ console.error("Unable to load `https`"); throw 'LIB-MISSING-HTTPS'; }
+						}
+
 						// AUTH: Cookie is required for GET and POST
 						objAjaxQuery.headers["Cookie"] = APP_OPTS.nodeCookie;
 						// IMPORTANT: 'Content-Length' is required for file upload (etc.), otherwise, SP drops the connection immediately: (-1, System.IO.IOException)
@@ -1666,7 +1757,7 @@ var NODEJS = false;
 				// var strErrCode = jqXHR.status.toString();
 				// var strSpeCode = JSON.parse(jqXHR.responseText).error['code'].split(',')[0];
 				// INFO: ( strErrCode == '403' && strSpeCode == '-2130575252' )
-				if ( !(NODEJS && !APP_OPTS.nodeEnabled) && typeof strErr == 'string' && strErr.indexOf('(403)') > -1 && gRetryCounter <= APP_OPTS.maxRetries ) {
+				if ( !APP_OPTS.isNodeEnabled && typeof strErr == 'string' && strErr.indexOf('(403)') > -1 && gRetryCounter <= APP_OPTS.maxRetries ) {
 					Promise.resolve()
 					.then(function(){
 						return sprLib.renewSecurityToken();
@@ -2400,25 +2491,21 @@ var NODEJS = false;
 	// API: NODEJS: Setup
 	sprLib.nodeConfig = function nodeConfig(inOpt) {
 		inOpt = (inOpt && typeof inOpt === 'object' ? inOpt : {});
-		APP_OPTS.nodeCookie  = inOpt.cookie || '';
-		APP_OPTS.nodeEnabled = (typeof inOpt.nodeEnabled !== 'undefined' ? inOpt.nodeEnabled : true);
-		APP_OPTS.nodeServer  = inOpt.server || '';
+		APP_OPTS.isNodeEnabled = (typeof inOpt.nodeEnabled !== 'undefined' ? inOpt.nodeEnabled : true);
+		APP_OPTS.nodeCookie = inOpt.cookie || '';
+		APP_OPTS.nodeServer = inOpt.server || '';
 	}
 })();
 
 // IE11 Polyfill
-if ( !NODEJS && typeof window !== 'undefined' && window.NodeList && !NodeList.prototype.forEach ) {
+if ( typeof window !== 'undefined' && window.NodeList && !NodeList.prototype.forEach ) {
 	NodeList.prototype.forEach = function(callback, thisArg) {
 		thisArg = thisArg || window;
 		for (var i = 0; i < this.length; i++){ callback.call(thisArg, this[i], i, this); }
 	};
 }
 
-// [Node.js] support
-if ( NODEJS ) {
-	// A: Set require vars
-	var https = require("https");
-
-	// B: Export this module
+// Export library if possible
+if ( typeof module !== 'undefined' && module.exports ) {
 	module.exports = sprLib;
 }

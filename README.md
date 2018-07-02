@@ -187,7 +187,7 @@ var sprLib = require("sprestlib");
 [SharePoint Authentication Notes](https://gitbrent.github.io/SpRestLib/docs/sp-auth-notes.html)
 
 ## Integration with Other Libraries
-Using SpRestLib with React, Angular, etc.
+Using SpRestLib with React, Angular, SharePoint Electron, etc.
 [Integration with Other Libraries](https://gitbrent.github.io/SpRestLib/docs/feat-integration.html)
 
 ## Connect to SharePoint Online/Office.com with Node.js

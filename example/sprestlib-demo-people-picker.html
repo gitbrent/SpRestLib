@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en-us">
+<head>
+	<title>SpRestLib Demo :: jQuery People Picker</title>
+	<meta name="author" content="https://github.com/gitbrent">
+
+	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300">
+	<link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootswatch/4.1.1/yeti/bootstrap.min.css">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.css">
+	<style>
+		#console {
+			font-family: Consolas, "Courier New", monospace;
+			padding: 5px;
+			background: #eee;
+			border: 1px #ccc solid;
+		}
+
+		#console span {
+			color: red;
+			background: yellow;
+			font-weight: bold;
+			font-size: large;
+		}
+	</style>
+
+	<script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+	<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
+	<script src="https://cdn.rawgit.com/gitbrent/SpRestLib/v1.7.0/dist/sprestlib.bundle.js"></script>
+
+	<script>
+		// APP
+		var APP_BLD = 20180626;
+
+		// ==================================================================================================================
+
+		function appStart() {
+			// Initialize all People-Pickers
+			$('.pickSPUser').each(function(){
+			    $(this)
+			    .prop('placeholder', 'Enter Last, First...')
+			    .autocomplete({
+			        minLength: 3,
+			        source: function doRestQuery(request,response){
+			            sprLib.rest({
+			                url : '_api/SP.UI.ApplicationPages.ClientPeoplePickerWebServiceInterface.clientPeoplePickerSearchUser',
+			                type: 'POST',
+			                data: JSON.stringify({
+			                    'queryParams':{
+			                        '__metadata':{ 'type':'SP.UI.ApplicationPages.ClientPeoplePickerQueryParameters' },
+			                        'AllowEmailAddresses':true, 'AllowMultipleEntities':false, 'AllUrlZones':false,
+			                        'MaximumEntitySuggestions':20, 'PrincipalSource':15, 'PrincipalType':1,
+			                        'QueryString':request.term
+			                    }
+			                })
+			            })
+			            .then(function(arrData){
+			                if ( arrData && arrData.length > 0 ) {
+			                    var results = JSON.parse(arrData[0].ClientPeoplePickerSearchUser);
+			                    if ( results.length > 0 ) {
+			                        response( $.map(results,function(item){ return {label:item.DisplayText, value:item.EntityData.SIPAddress} }) );
+			                    }
+			                }
+			            })
+			            .catch(function(strErr){ console.error(strErr); })
+			        },
+			        select: function(event,ui){
+			            var elePickerId = event.target.id;
+			            sprLib.user({ email:ui.item.value }).info().then(function(objUser){ $('#'+elePickerId).val(objUser.Id) });
+
+			            // Update UI: Hide text input, show person box
+			            $(event.target).hide().after(
+			                '<div id="PP'+ elePickerId +'" class="px-2 py-1 pt-pickSPUser ui-state-default ui-corner-all addHoverEffectDone" style="display:inline-block">'
+			                + '    <span class="pt-pickSPUser-person-cntr"><span>'+ui.item.label+'</span></span>'
+			                + '    <span class="pl-2">'
+			                + '      <a href="javascript:" onclick="$(\'#'+elePickerId+'\').show().text(\'\').val(\'\'); $(\'#PP'+elePickerId+'\').remove();">'
+			                + '      <i class="fa fa-times-circle" style="color:red; font-size:125%;" title="remove"></i></a>'
+			                + '    </span>'
+			                + '</div>'
+			            );
+			        }
+			    });
+			});
+		}
+
+		// ==================================================================================================================
+		window.onload = function(){ appStart(); SetFullScreenMode(true); }
+	</script>
+</head>
+<body>
+	<h1>SpRestLib Demo :: jQuery People Picker</h1>
+
+	<h4 class="text-primary">Demo</h4>
+
+	<div class="container bg-light w-50 p-3 mx-0 mb-4">
+		<div class="row align-items-center">
+			<div class="col-2 text-nowrap">
+				<label class="mb-0">People Picker:</label>
+			</div>
+			<div class="col-10">
+				<input id="spPicker" type="text" class="pickSPUser form-control w-50">
+			</div>
+		</div>
+	</div>
+
+	<!--
+	<div id="contConsole">
+		<tt><div id="console"></div></tt>
+	</div>
+	-->
+</body>
+</html>

@@ -5,7 +5,7 @@
  * REQS: Node 4.x + `npm install sprestlib`
  * EXEC: `node nodejs-demo.js (sp-username) (sp-password) {sp-hostUrl}`
  * VER.: 1.8.0-beta
- * REL.: 20180515
+ * REL.: 20180623
  * REFS: HOWTO: Authenticate to SharePoint Online (*.sharepoint.com)
  * - https://allthatjs.com/2012/03/28/remote-authentication-in-sharepoint-online/
  * - http://paulryan.com.au/2014/spo-remote-authentication-rest/
@@ -40,10 +40,13 @@ if ( !sprLib || !sprLib.version ) {
 	process.exit(-1);
 }
 
+// SETUP: Set `nodeEnabled` flag so SpRestLib knows this is a Node app (tells library to use the `https` module)
+sprLib.nodeConfig({ nodeEnabled:true });
+
 // Lets go!
 console.log('\nStarting demo...');
 console.log('================================================================================');
-console.log(`> SpRestLib version: ${sprLib.version}\n`); // Loaded okay?
+console.log(`> SpRestLib version: ${sprLib.version}\n`);
 
 // Office365/On-Prem/Hosted Vars
 var SP_USER = process.argv[2];

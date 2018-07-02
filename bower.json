@@ -1,11 +1,10 @@
 {
   "name": "sprestlib",
-  "description": "JavaScript Library for SharePoint REST Web Services",
+  "description": "SharePoint REST Web Services JavaScript Library",
   "main": [
     "dist/sprestlib.js"
   ],
   "dependencies": {
-    "jquery": "^3.2.1",
     "promise": "^0.2.2"
   },
   "authors": [
@@ -13,32 +12,26 @@
   ],
   "license": "MIT",
   "keywords": [
-    "sharepoint-group-library",
-    "javascript-odata",
-    "javascript-odata-library",
     "javascript-rest-library",
+    "javascript-sharepoint-rest",
+    "javascript-sharepoint-services",
+    "javascript-sharepoint-web-services",
     "javascript-sp-web-services",
     "sharepoint-javascript",
     "sharepoint-javascript-framework",
     "sharepoint-javascript-library",
+    "sharepoint-javascript-list",
     "sharepoint-javascript-rest",
     "sharepoint-javascript-webpart",
-    "sharepoint-javascript-web-part",
-    "sharepoint-list",
-    "sharepoint-list-crud",
+    "sharepoint-angular",
+    "sharepoint-react",
     "sharepoint-node",
-    "sharepoint-o365",
-    "sharepoint-online",
-    "sharepoint-rest",
     "sharepoint-rest-api",
     "sharepoint-rest-library",
-    "sharepoint-user-library",
     "sharepoint-web-services",
-    "sharepoint-web-services-library",
-    "sp2013",
-    "sp2016"
+    "sharepoint-web-services-library"
   ],
-  "homepage": "https://github.com/gitbrent/SpRestLib",
+  "homepage": "https://gitbrent.github.io/SpRestLib/",
   "ignore": [
     "**/.*",
     "node_modules",
