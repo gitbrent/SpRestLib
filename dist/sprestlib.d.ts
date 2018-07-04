@@ -34,6 +34,14 @@ declare namespace sprLib {
     baseUrl?: string;
     requestDigest?: string;
   }
+  interface ListItemsOptions {
+    listCols: Array<string> | Object;
+    metadata?: boolean;
+    queryFilter?: string;
+    queryLimit?: number;
+    queryNext?: Object;
+    queryOrderBy?: string;
+  }
   class list {
     constructor(listName: string);
     constructor(listGuid: string);
@@ -43,7 +51,7 @@ declare namespace sprLib {
     info(): Promise<Object>;
     perms(): Promise<Object[]>;
 
-    items(options: Object): Promise<Object[]>;
+    items(options: ListItemsOptions): Promise<Object[]>;
     create(options: Object): Promise<Object[]>;
     update(options: Object): Promise<Object[]>;
     delete(options: Object): Promise<number>;
@@ -53,9 +61,9 @@ declare namespace sprLib {
   interface RestOptions {
     url: string;
     type?: 'GET' | 'POST' | 'DELETE';
-    requestDigest?: string;
     data?: Object;
     headers?: any;
+    requestDigest?: string;
   }
   function rest(options: RestOptions): Promise<Object[]>;
 
