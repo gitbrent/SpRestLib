@@ -10,6 +10,8 @@ package-lock.json
 ### Docusaurus
 blog/
 website/
-css/
 docs/
 img/
+css/hybrid.min.css
+css/main.css
+css/style.bundle.css
