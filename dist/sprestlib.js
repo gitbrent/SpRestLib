@@ -6,7 +6,7 @@
 |*|
 |*|  This library is released under the MIT Public License (MIT)
 |*|
-|*|  SpRestLib (C) 2016-2018 Brent Ely -- https://github.com/gitbrent
+|*|  SpRestLib (C) 2016-present Brent Ely (https://github.com/gitbrent)
 |*|
 |*|  Permission is hereby granted, free of charge, to any person obtaining a copy
 |*|  of this software and associated documentation files (the "Software"), to deal
@@ -30,7 +30,7 @@
 (function(){
 	// APP VERSION/BUILD
 	var APP_VER = "1.8.0-beta";
-	var APP_BLD = "20180701";
+	var APP_BLD = "20180707";
 	var DEBUG = false; // (verbose mode/lots of logging)
 	// ENUMERATIONS
 	// REF: [`SP.BaseType`](https://msdn.microsoft.com/en-us/library/office/jj246925.aspx)
@@ -175,14 +175,9 @@
 	/**
 	* Getter/Setter for the app option APP_OPTS.baseUrl (our _api call base)
 	*
-	* @example - set baseUrl
-	* sprLib.baseUrl('/sites/devtest');
-	*
-	* @example - get baseUrl
-	* sprLib.baseUrl();
-	* @return '/sites/devtest'
-	*
 	* @param {string} `inStr` - URL to use as the root of API calls
+	* @example - set baseUrl - `sprLib.baseUrl('/sites/devtest');`
+	* @example - get baseUrl - `sprLib.baseUrl();`
 	* @return {string} Return value of APP_OPTS.baseUrl
 	*/
 	sprLib.baseUrl = function baseUrl(inStr) {
@@ -196,12 +191,15 @@
 
 	// API: FILE
 	/**
-	* @param `inOpt` (object)/(string) - required - (`name` prop reqd)
-	* @example - sprLib.file( '/sites/dev/Shared%20Documents/SomeFolder/MyDoc.docx' );
-	* @example - sprLib.file({ 'name':'/sites/dev/Shared%20Documents/SomeFolder/MyDoc.docx' });
-	* @example - sprLib.file({ 'name':'/MyDocuments/MyDoc.docx', 'requestDigest':'ABC123' });
+	* SharePoint Library File Resource methods
+	* "Represents a file in a SharePoint Web site that can be a Web Part Page, an item in a document library, or a file in a folder."
 	*
+	* @param `inOpt` (object)/(string) - required - (`name` prop reqd)
+	* @example - `sprLib.file('/sites/dev/Shared%20Documents/SomeFolder/MyDoc.docx');`
+	* @example - `sprLib.file({ 'name':'/sites/dev/Shared%20Documents/SomeFolder/MyDoc.docx' });`
+	* @example - `sprLib.file({ 'name':'/MyDocuments/MyDoc.docx', 'requestDigest':'ABC1234567890' });`
 	* @since 1.8.0
+	* @see: [File API](https://gitbrent.github.io/SpRestLib/docs/api-file.html)
 	* @see: [Files and folders REST API reference](https://msdn.microsoft.com/en-us/library/office/dn450841.aspx)
 	*/
 	sprLib.file = function file(inOpt) {
@@ -213,6 +211,9 @@
 
 		// TODO: 20180701: need to honor `_baseUrl`
 		// TODO: include `baseUrl` param? OR do we parse URL from file and use that? (e.g.: `filePath` is the baseUrl)
+		// EX: sprLib.file({ 'name':'Shared%20Documents/SomeFolder/MyDoc.docx' });
+		// We dont want to require a full path, right?
+		// Use `getfilebyserverrelativeurl()`?? @see: https://msdn.microsoft.com/en-us/library/office/dn450841.aspx#bk_FileRequestExamples
 
 		// B: Param check
 		if ( inOpt && typeof inOpt === 'string' ) {
@@ -232,6 +233,7 @@
 		_pathAndName = _pathAndName.replace(/\/$/gi,'');
 
 		// D: Add Public Methods
+		// .checkin/checkout -- @see: https://msdn.microsoft.com/en-us/library/office/dn450841.aspx#bk_FileCheckOut
 		// .delete() // headers: { "X-HTTP-Method":"DELETE" },
 		// .recycle()
 		// .get() (?) // _api/web/GetFolderByServerRelativeUrl('')/Files/get(url='')
@@ -324,9 +326,8 @@
 		* Return an object containing information about the File version
 		*
 		* @param `inVer` - version label
-		*
 		* @example: sprLib.file('/site/Documents/MyDoc.docx').version('99')
-		* @returns: object containing version properties
+		* @returns: Object containing version properties
 		* @see: https://msdn.microsoft.com/en-us/library/office/dn450841.aspx
 		*/
 		_newFile.version = function(inVer) {
@@ -358,8 +359,11 @@
 			});
 		}
 
-
-
+		/*
+		// WIP: get file
+		web/getfilebyserverrelativeurl('/Shared Documents/filename.docx')/$value
+		/sites/dev/_api/web/getfilebyserverrelativeurl('/sites/dev/SiteAssets/qunit-tests.js')
+		*/
 
 		// TODO: WIP: .upload({ data:arrayBuffer/FilePicker/whatev, overwrite:BOOL })
 		/**
@@ -456,7 +460,9 @@
 		// C: Ensure `_pathAndName` does not end with a slash ("/")
 		_pathAndName = _pathAndName.replace(/\/$/gi,'');
 
-		// D: Public Methods
+		// D: Public Methods ----------------------------------------------
+		// .files() - return all files/folders in folder- http://<site url>/_api/web/getfolderbyserverrelativeurl('/<folder name>')/files
+		// .folders() - return folders = /folders
 		// .perms()
 		// .versions()
 		// .create() // .add()?
@@ -464,9 +470,10 @@
 		// .recycle() // POST to: /recycle
 
 		/**
-		* Return an object containing information about the current Folder
+		* Get information (properties) for a Folder
 		*
 		* @example: sprLib.folder('/site/Documents/Finance').info()
+		* @returns: Object with Folder properties
 		*/
 		_newFolder.info = function() {
 			return new Promise(function(resolve, reject) {
@@ -487,19 +494,55 @@
 					var objData = ( arrData && arrData.length > 0 ? arrData[0] : {} ); // FYI: Empty object is correct return type when file-not-found
 
 					// B: Remap properties
-					if ( objData.Properties.vti_x005f_timecreated )              objData.Created            = objData.Properties.vti_x005f_timecreated;
-					if ( objData.Properties.vti_x005f_listname )                 objData.GUID               = objData.Properties.vti_x005f_listname;
-					if ( objData.Properties.vti_x005f_hassubdirs )               objData.HasSubdirs         = objData.Properties.vti_x005f_hassubdirs;
-					if ( objData.Properties.vti_x005f_isbrowsable )              objData.Hidden             = !objData.Properties.vti_x005f_isbrowsable;
-					if ( objData.Properties.vti_x005f_timelastmodified )         objData.LastModifiedDate   = objData.Properties.vti_x005f_timelastmodified;
-					//if ( objData.Properties.vti_x005f_level )                    objData.Level              = objData.Properties.vti_x005f_level;
-					if ( objData.Properties.vti_x005f_foldersubfolderitemcount ) objData.SubFolderItemCount = objData.Properties.vti_x005f_foldersubfolderitemcount;
+					if ( objData.Properties ) {
+						if ( objData.Properties.vti_x005f_timecreated )              objData.Created            = objData.Properties.vti_x005f_timecreated;
+						if ( objData.Properties.vti_x005f_listname )                 objData.GUID               = objData.Properties.vti_x005f_listname;
+						if ( objData.Properties.vti_x005f_hassubdirs )               objData.HasSubdirs         = objData.Properties.vti_x005f_hassubdirs;
+						if ( objData.Properties.vti_x005f_isbrowsable )              objData.Hidden             = !objData.Properties.vti_x005f_isbrowsable;
+						if ( objData.Properties.vti_x005f_timelastmodified )         objData.LastModifiedDate   = objData.Properties.vti_x005f_timelastmodified;
+						//if ( objData.Properties.vti_x005f_level )                    objData.Level              = objData.Properties.vti_x005f_level;
+						if ( objData.Properties.vti_x005f_foldersubfolderitemcount ) objData.SubFolderItemCount = objData.Properties.vti_x005f_foldersubfolderitemcount;
+					}
 
-					// C: Remove `Properties` key
+					// C: Remove some keys
+					if ( objData.Folders    ) delete objData.Folders;
 					if ( objData.Properties ) delete objData.Properties;
 
 					// D: Done
 					resolve( objData );
+				})
+				.catch(function(strErr){
+					reject( strErr );
+				});
+			});
+		}
+
+		/**
+		* Return all Files in a Folder
+		*
+		* @example - relative URL: `sprLib.folder('Shared Documents').files()`
+		* @example - absolute URL: `sprLib.folder('/sites/dev/Shared Documents').files()`
+		* @returns: Object[] with Files and their properties
+		*/
+		_newFolder.files = function() {
+			return new Promise(function(resolve, reject) {
+				sprLib.rest({
+					url: "_api/web/GetFolderByServerRelativeUrl('"+ _pathAndName +"')/Files",
+					queryCols: ['Author/Id','CheckedOutByUser/Id','LockedByUser/Id','ModifiedBy/Id',
+						'CheckInComment','CheckOutType','ETag','Exists','Length','Level','MajorVersion','MinorVersion',
+						'Name','ServerRelativeUrl','TimeCreated','TimeLastModified','Title','UniqueId'],
+					metadata: false
+				})
+				.then(function(arrData){
+					// STEP 1: Transform results
+					arrData.forEach(function(file){
+						// These 2 values come back as `[]` when there's no value, and that sucks, so fix them
+						if ( file.CheckedOutByUser && Array.isArray(file.CheckedOutByUser) && file.CheckedOutByUser.length == 0 ) file.CheckedOutByUser = null;
+						if ( file.LockedByUser && Array.isArray(file.LockedByUser) && file.LockedByUser.length == 0 ) file.LockedByUser = null;
+					})
+
+					// STEP 2: Resolve results (NOTE: empty array is the correct default result)
+					resolve( arrData || [] );
 				})
 				.catch(function(strErr){
 					reject( strErr );
