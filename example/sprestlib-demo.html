@@ -6,7 +6,7 @@
 	<meta name="website"     content="https://github.com/gitbrent/SpRestLib/">
 	<meta name="keywords"    content="SpRestLib, JavaScript, js-sharepoint, OData, REST, SharePoint 2013, SP2013, SharePoint 2016, SP2016, SharePoint Online">
 	<meta name="description" content="Content Editor WebPart to showcase SpRestLib features and capabilities">
-	<meta name="revised"     content="20180514">
+	<meta name="revised"     content="20180707">
 
 	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300">
 	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:700">
@@ -25,21 +25,21 @@
 		*) Check the img folder for screencaps of the SharePoint setup!
 	-->
 
-	<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.8.3/themes/prism-coy.css">
-	<link rel="stylesheet" type="text/css" href="https://cdn.rawgit.com/gitbrent/SpRestLib/master/example/css/sprestlib-demo.css">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.8.3/themes/prism-coy.css">
+	<link rel="stylesheet" href="https://cdn.rawgit.com/gitbrent/SpRestLib/master/example/css/sprestlib-demo.css">
 	<!-- DEBUG
-	<link rel="stylesheet" type="text/css" href="../SiteAssets/sprestlib/css/sprestlib-demo.css">
+	<link rel="stylesheet" href="../SiteAssets/sprestlib/css/sprestlib-demo.css">
 	-->
 
-	<script type="text/javascript" src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
-	<script type="text/javascript" src="https://cdn.rawgit.com/gitbrent/SpRestLib/master/dist/sprestlib.bundle.js"></script>
-	<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.29.0/js/jquery.tablesorter.min.js"></script>
-	<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.8.3/prism.min.js"></script>
-	<script type="text/javascript" src="https://cdn.rawgit.com/sorensen/ascii-table/v0.0.9/ascii-table.min.js"></script>
+	<script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+	<script src="https://cdn.rawgit.com/gitbrent/SpRestLib/master/dist/sprestlib.bundle.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.29.0/js/jquery.tablesorter.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.8.3/prism.min.js"></script>
+	<script src="https://cdn.rawgit.com/sorensen/ascii-table/v0.0.9/ascii-table.min.js"></script>
 
-	<script type="text/javascript">
+	<script>
 		$.ajaxSetup({ cache:false });
-		var APP_BLD = 20180514;
+		var APP_BLD = 20180708;
 		var HTML_SPINNER = '<div class="sprlib-spinner"><div class="sprlib-bounce1"></div><div class="sprlib-bounce2"></div><div class="sprlib-bounce3"></div></div>';
 		var LAYOUTS_URL = _spPageContextInfo.layoutsUrl || '_layouts/15';
 
@@ -133,6 +133,92 @@
 			})
 			.catch(function(errMsg){
 				$('$tab1-ListPerms .tableRows').after( '<table><tbody><tr><td>'+errMsg+'</td></tr></tbody></table>' );
+			});
+		}
+
+		function handleFileChange() {
+			// TODO:
+		}
+
+		function handleFoldChange() {
+			// A: Clear results
+			$('#contFoldInfo table').remove();
+			$('#contFoldFiles table, #contFoldFolds table').remove();
+			// B: Return if nothing selected
+			if ( !$('#selSiteFolds').val() ) return;
+
+			// INFO:
+			$('#contFoldInfo pre code').text( 'sprLib.folder(\''+ $('#selSiteFolds').val() +'\').info()' );
+			sprLib.folder($('#selSiteFolds').val()).info()
+			.then(function(objInfo){
+				var $table = $('<table class="tabModern"><tbody></tbody></table>');
+				$table.append('<thead><tr><th>Prop Name</th><th>Prop Value</th></tr></thead>');
+				Object.keys(objInfo).sort().forEach(function(key,idx){
+					$table.find('tbody').append('<tr><th>'+ key +'</th>'+'<td class="code">'+ objInfo[key] +'</td></tr>');
+				});
+				$('#contFoldInfo').append( $table );
+			})
+
+			// FILES:
+			$('#contFoldFiles pre code').text( 'sprLib.folder(\''+ $('#selSiteFolds').val() +'\').files()' );
+			sprLib.folder($('#selSiteFolds').val()).files()
+			.then(function(arrObjs){
+				var arrShowCols = ['Name', 'Created', 'Modified', 'ModifiedBy', 'Length', 'MajorVersion'];
+				var $table = $('<table class="tabModern"><thead><tr></tr></thead><tbody></tbody></table>');
+				// thead
+				arrShowCols.forEach(function(col){ $table.find('thead tr').append('<th>'+col+'</th>'); });
+				// tbody
+				arrObjs.forEach(function(obj){
+					var $row = $('<tr/>');
+					arrShowCols.forEach(function(col){
+						var strCell = obj[col];
+
+						if ( col == "ModifiedBy" ) strCell = obj.ModifiedBy.Title;
+						else if ( col == "Created" ) strCell = new Date(obj.Created).toLocaleString();
+						else if ( col == "Modified" ) strCell = new Date(obj.Modified).toLocaleString();
+
+						$row.append('<td>'+ strCell +'</td>');
+					});
+					$table.find('tbody').append( $row );
+				});
+
+				$('#contFoldFiles').append( $table );
+				if ( $.tablesorter ) $('#contFoldFiles table').tablesorter({ sortList:[[0,0]] });
+			})
+			.catch(function(errMsg){
+				$('#contFoldFiles').append('<table><tbody><tr><td>'+errMsg+'</td></tr></tbody></table>');
+				console.error(errMsg);
+			});
+
+			// FOLDERS:
+			$('#contFoldFolds pre code').text( 'sprLib.folder(\''+ $('#selSiteFolds').val() +'\').folders()' );
+			sprLib.folder($('#selSiteFolds').val()).folders()
+			.then(function(arrObjs){
+				var arrShowCols = ['Name', 'Created', 'Modified', 'FolderCount', 'ItemCount'];
+				var $table = $('<table class="tabModern"><thead><tr></tr></thead><tbody></tbody></table>');
+				// thead
+				arrShowCols.forEach(function(col){ $table.find('thead tr').append('<th>'+col+'</th>'); });
+				// tbody
+				arrObjs.forEach(function(obj){
+					var $row = $('<tr/>');
+					arrShowCols.forEach(function(col){
+						var strCell = obj[col];
+
+						if ( col == "ModifiedBy" && obj.ModifiedBy ) strCell = obj.ModifiedBy.Title;
+						else if ( col == "Created" ) strCell = new Date(obj.Created).toLocaleString();
+						else if ( col == "Modified" ) strCell = new Date(obj.Modified).toLocaleString();
+
+						$row.append('<td>'+ strCell +'</td>');
+					});
+					$table.find('tbody').append( $row );
+				});
+
+				$('#contFoldFolds').append( $table );
+				if ( $.tablesorter ) $('#contFoldFolds table').tablesorter({ sortList:[[0,0]] });
+			})
+			.catch(function(errMsg){
+				$('#contFoldFolds').append('<table><tbody><tr><td>'+errMsg+'</td></tr></tbody></table>');
+				console.error(errMsg);
 			});
 		}
 
@@ -393,6 +479,27 @@
 				});
 			}
 
+			// TAB: File
+			{
+				// TODO:
+				// https://gitbrent.sharepoint.com/sites/dev/_api/lists/getbytitle('Documents')/items?$select=Title
+				// https://gitbrent.sharepoint.com/sites/dev/_api/web/getfolderbyserverrelativeurl('Shared%20Documents')/files?$select=Name,ServerRelativeUrl&$filter=Exists eq true
+			}
+
+			// TAB: Folder
+			{
+				// A: Populate <select> with List names
+				sprLib.site().lists()
+				.then(function(arrResults){
+					arrResults
+					.sort(function(a,b){ return (a.Title > b.Title) ? 1 : ((b.Title > a.Title) ? -1 : 0); })
+					.forEach(function(obj,idx){
+						if ( !obj.Hidden && obj.BaseType == "Library" ) $('#selSiteFolds').append('<option value="'+ obj.ServerRelativeUrl +'">'+ obj.Title +'</option>');
+					});
+					$('#contFoldSelect .sprlib-spinner').remove();
+				});
+			}
+
 			// TAB: User/Groups
 			{
 				var user1Code = "sprLib.user().info()\n"
@@ -483,11 +590,13 @@
 		<div id="navTabs" class="flexTabs">
 			<ul>
 				<li class="active" onclick="$('#navTabs').find('> div, li').removeClass('active'); $(this).addClass('active'); $('#tabSetup').addClass('active');">Setup</li>
-				<li onclick="$('#navTabs').find('> div, li').removeClass('active'); $(this).addClass('active'); $('#tabSite').addClass('active');">Site Methods</li>
-				<li onclick="$('#navTabs').find('> div, li').removeClass('active'); $(this).addClass('active'); $('#tabList').addClass('active');">List Methods</li>
-				<li onclick="$('#navTabs').find('> div, li').removeClass('active'); $(this).addClass('active'); $('#tabUser').addClass('active');">User Methods</li>
-				<li onclick="$('#navTabs').find('> div, li').removeClass('active'); $(this).addClass('active'); $('#tabRest').addClass('active');">REST API Calls</li>
-				<li onclick="$('#navTabs').find('> div, li').removeClass('active'); $(this).addClass('active'); $('#tabSand').addClass('active');">Code Sandbox</li>
+				<li onclick="$('#navTabs').find('> div, li').removeClass('active'); $(this).addClass('active'); $('#tabList').addClass('active');">List/Library</li>
+				<li onclick="$('#navTabs').find('> div, li').removeClass('active'); $(this).addClass('active'); $('#tabFile').addClass('active');">File</li>
+				<li onclick="$('#navTabs').find('> div, li').removeClass('active'); $(this).addClass('active'); $('#tabFold').addClass('active');">Folder</li>
+				<li onclick="$('#navTabs').find('> div, li').removeClass('active'); $(this).addClass('active'); $('#tabSite').addClass('active');">Site</li>
+				<li onclick="$('#navTabs').find('> div, li').removeClass('active'); $(this).addClass('active'); $('#tabUser').addClass('active');">User</li>
+				<li onclick="$('#navTabs').find('> div, li').removeClass('active'); $(this).addClass('active'); $('#tabRest').addClass('active');">REST API</li>
+				<li onclick="$('#navTabs').find('> div, li').removeClass('active'); $(this).addClass('active'); $('#tabSand').addClass('active');">Sandbox</li>
 			</ul>
 
 			<div id="tabSetup" data-tab="Setup" class="active">
@@ -537,6 +646,124 @@
 							</div>
 						</div>
 					</div>
+				</div>
+			</div>
+
+			<div id="tabList" data-tab="List Methods">
+				<div class="subTitle secTitle">List/Library Methods</div>
+				<p class="desc">
+					Select one of the Lists/Libraries found on this site to view its properties.<br>
+					Note: Only non-hidden Lists/Libraries are shown
+				</p>
+
+				<div id="contListSelect" class="divTable" style="width:auto; margin-bottom:20px;">
+					<div class="th" style="padding:0; font-size:120%; vertical-align:middle;">
+						Site Lists/Libraries
+					</div>
+					<div>
+						<div class="sprlib-spinner"><div class="sprlib-bounce1"></div><div class="sprlib-bounce2"></div><div class="sprlib-bounce3"></div></div>
+						<select id="selSiteLists" onchange="handleListChange()">
+							<option value="">Select...</option>
+						</select>
+					</div>
+				</div>
+
+				<div class="subTitle" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
+					<div class="arrow active"></div>List Information
+				</div>
+				<div id="tab1-ListInfo">
+					<pre><code class="language-javascript">sprLib.list('listName').info()</code></pre>
+				</div>
+
+				<div class="subTitle" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
+					<div class="arrow"></div>List Columns
+				</div>
+				<div id="tab1-ListCols" style="display:none">
+					<pre><code class="language-javascript">sprLib.list('listName').cols()</code></pre>
+				</div>
+
+				<div class="subTitle" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
+					<div class="arrow"></div>List Permissions
+				</div>
+				<div id="tab1-ListPerms" style="display:none">
+					<pre><code class="language-javascript">sprLib.list('listName').perms()</code></pre>
+
+					<table id="tabListPerms" class="tabModern">
+						<thead>
+							<tr>
+								<th>Name</th>
+								<th>Type</th>
+								<th class="sorter-false showGrpDesc">Permissions</th>
+							</tr>
+						</thead>
+						<tbody></tbody>
+					</table>
+				</div>
+			</div>
+
+			<div id="tabFile" data-tab="File Methods">
+				<div class="subTitle secTitle">File Methods</div>
+				<p class="desc">
+					Select one of the Files found on this site to view its properties.<br>
+				</p>
+
+				<div id="contFileSelect" class="divTable" style="width:auto; margin-bottom:20px;">
+					<div class="th" style="padding:0; font-size:120%; vertical-align:middle;">
+						Shared Documents Files
+					</div>
+					<div>
+						<div class="sprlib-spinner"><div class="sprlib-bounce1"></div><div class="sprlib-bounce2"></div><div class="sprlib-bounce3"></div></div>
+						<select id="selSiteFiles" onchange="handleFileChange()">
+							<option value="">Select...</option>
+						</select>
+					</div>
+				</div>
+
+				<div class="subTitle" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
+					<div class="arrow active"></div>File Information
+				</div>
+				<div id="tab-FileInfo">
+					<pre><code class="language-javascript">sprLib.file('fileName').info()</code></pre>
+				</div>
+			</div>
+
+			<div id="tabFold" data-tab="Folder Methods">
+				<div class="subTitle secTitle">Folder Methods</div>
+				<p class="desc">
+					Select one of the Folders found on this site to view its properties.<br>
+				</p>
+
+				<div id="contFoldSelect" class="divTable" style="width:auto; margin-bottom:20px;">
+					<div class="th" style="padding:0; font-size:120%; vertical-align:middle;">
+						Folders
+					</div>
+					<div>
+						<div class="sprlib-spinner"><div class="sprlib-bounce1"></div><div class="sprlib-bounce2"></div><div class="sprlib-bounce3"></div></div>
+						<select id="selSiteFolds" onchange="handleFoldChange()">
+							<option value="">Select...</option>
+						</select>
+					</div>
+				</div>
+
+				<div class="subTitle" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
+					<div class="arrow active"></div>Folder Information
+				</div>
+				<div id="contFoldInfo">
+					<pre><code class="language-javascript">sprLib.folder('folderName').info()</code></pre>
+				</div>
+
+				<div class="subTitle" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
+					<div class="arrow"></div>Folder Contents: Files
+				</div>
+				<div id="contFoldFiles" style="display:none">
+					<pre><code class="language-javascript">sprLib.folder('folderName').files()</code></pre>
+				</div>
+
+				<div class="subTitle" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
+					<div class="arrow"></div>Folder Contents: Folders
+				</div>
+				<div id="contFoldFolds" style="display:none">
+					<pre><code class="language-javascript">sprLib.folder('folderName').folders()</code></pre>
 				</div>
 			</div>
 
@@ -669,58 +896,6 @@
 								<th>IsSiteAdmin</th>
 								<th>Groups</th>
 								<th class="sorter-false">Group Details</th>
-							</tr>
-						</thead>
-						<tbody></tbody>
-					</table>
-				</div>
-			</div>
-
-			<div id="tabList" data-tab="List Methods">
-				<div class="subTitle secTitle">List/Library Methods</div>
-				<p class="desc">
-					Select one of the Lists/Libraries found on this site to view its properties.<br>
-					Note: Only non-hidden Lists/Libraries are shown
-				</p>
-
-				<div id="contListSelect" class="divTable" style="width:auto; margin-bottom:20px;">
-					<div class="th" style="padding:0; font-size:120%; vertical-align:middle;">
-						Site Lists/Libraries
-					</div>
-					<div>
-						<div class="sprlib-spinner"><div class="sprlib-bounce1"></div><div class="sprlib-bounce2"></div><div class="sprlib-bounce3"></div></div>
-						<select id="selSiteLists" onchange="handleListChange()">
-							<option value="">Select...</option>
-						</select>
-					</div>
-				</div>
-
-				<div class="subTitle" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
-					<div class="arrow active"></div>List Information
-				</div>
-				<div id="tab1-ListInfo">
-					<pre><code class="language-javascript">sprLib.list('listName').info()</code></pre>
-				</div>
-
-				<div class="subTitle" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
-					<div class="arrow"></div>List Columns
-				</div>
-				<div id="tab1-ListCols" style="display:none">
-					<pre><code class="language-javascript">sprLib.list('listName').cols()</code></pre>
-				</div>
-
-				<div class="subTitle" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
-					<div class="arrow"></div>List Permissions
-				</div>
-				<div id="tab1-ListPerms" style="display:none">
-					<pre><code class="language-javascript">sprLib.list('listName').perms()</code></pre>
-
-					<table id="tabListPerms" class="tabModern">
-						<thead>
-							<tr>
-								<th>Name</th>
-								<th>Type</th>
-								<th class="sorter-false showGrpDesc">Permissions</th>
 							</tr>
 						</thead>
 						<tbody></tbody>
