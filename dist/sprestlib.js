@@ -30,7 +30,7 @@
 (function(){
 	// APP VERSION/BUILD
 	var APP_VER = "1.8.0-beta";
-	var APP_BLD = "20180707";
+	var APP_BLD = "20180708";
 	var DEBUG = false; // (verbose mode/lots of logging)
 	// ENUMERATIONS
 	// REF: [`SP.BaseType`](https://msdn.microsoft.com/en-us/library/office/jj246925.aspx)
@@ -113,7 +113,7 @@
 			strErrText = "(" + jqXHR.status + ") " + JSON.parse(jqXHR.responseText).error['message'].value;
 		}
 		catch (ex) {
-			if (DEBUG) console.warn('Unable to parse jqXHR response:\n' + jqXHR.responseText);
+			if (DEBUG) { console.warn('Unable to parse jqXHR response:\n' + jqXHR.responseText); }
 		}
 
 		// Done!
@@ -206,7 +206,7 @@
 		// A: Options setup
 		inOpt = inOpt || {};
 		var _newFile = {};
-		var _pathAndName = "";
+		var _fullName = "", _fldName = "", _dirName = "";
 		var _requestDigest = (inOpt.requestDigest || (typeof document !== 'undefined' && document.getElementById('__REQUESTDIGEST') ? document.getElementById('__REQUESTDIGEST').value : null));
 
 		// TODO: 20180701: need to honor `_baseUrl`
@@ -217,10 +217,10 @@
 
 		// B: Param check
 		if ( inOpt && typeof inOpt === 'string' ) {
-			_pathAndName = encodeURI(inOpt);
+			_fullName = encodeURI(inOpt);
 		}
 		else if ( inOpt && typeof inOpt === 'object' && inOpt.hasOwnProperty('name') ) {
-			_pathAndName = encodeURI(inOpt.name);
+			_fullName = encodeURI(inOpt.name);
 		}
 		else {
 			console.error("ERROR: A 'fileName' is required! EX: `sprLib.file('Documents/Sample.docx')` or `sprLib.file({ 'name':'Documents/Sample.docx' })`");
@@ -229,8 +229,10 @@
 			return null;
 		}
 
-		// C: Ensure `_pathAndName` does not end with a slash ("/")
-		_pathAndName = _pathAndName.replace(/\/$/gi,'');
+		// C: Ensure `_fullName` does not end with a slash ("/")
+		_fullName = _fullName.replace(/\/$/gi,'');
+		_dirName = _fullName.substring(0, _fullName.lastIndexOf('/'));
+		_fldName = _fullName.substring(_fullName.lastIndexOf('/')+1);
 
 		// D: Add Public Methods
 		// .checkin/checkout -- @see: https://msdn.microsoft.com/en-us/library/office/dn450841.aspx#bk_FileCheckOut
@@ -248,11 +250,8 @@
 		*/
 		_newFile.info = function() {
 			return new Promise(function(resolve, reject) {
-				var filePath = _pathAndName.substring(0, _pathAndName.lastIndexOf('/'));
-				var fileName = _pathAndName.substring(_pathAndName.lastIndexOf('/')+1);
-
 				sprLib.rest({
-					url: "_api/web/GetFileByServerRelativeUrl('"+ _pathAndName +"')",
+					url: "_api/web/GetFileByServerRelativeUrl('"+ _fullName +"')",
 					queryCols: ['Author/Id','CheckedOutByUser/Id','LockedByUser/Id','ModifiedBy/Id',
 						'CheckInComment','CheckOutType','ETag','Exists','Length','Level','MajorVersion','MinorVersion',
 						'Name','ServerRelativeUrl','TimeCreated','TimeLastModified','UniqueId'],
@@ -294,7 +293,7 @@
 		_newFile.perms = function() {
 			return new Promise(function(resolve, reject) {
 				sprLib.rest({
-					url: "_api/web/GetFileByServerRelativeUrl('"+_pathAndName+"')/ListItemAllFields/RoleAssignments",
+					url: "_api/web/GetFileByServerRelativeUrl('"+ _fullName +"')/ListItemAllFields/RoleAssignments",
 					queryCols: ['PrincipalId','Member/PrincipalType','Member/Title','RoleDefinitionBindings/Name','RoleDefinitionBindings/Hidden']
 				})
 				.then(function(arrData){
@@ -333,7 +332,7 @@
 		_newFile.version = function(inVer) {
 			return new Promise(function(resolve, reject) {
 				sprLib.rest({
-					url: "_api/web/GetFileByServerRelativeUrl('"+ _pathAndName +"')",
+					url: "_api/web/GetFileByServerRelativeUrl('"+ _fullName +"')",
 					queryCols: ['Author/Id','CheckedOutByUser/Id','LockedByUser/Id','ModifiedBy/Id',
 						'CheckInComment','CheckOutType','ETag','Exists','Length','Level','MajorVersion','MinorVersion',
 						'Name','ServerRelativeUrl','TimeCreated','TimeLastModified','UniqueId'],
@@ -373,11 +372,11 @@
 			return new Promise(function(resolve, reject) {
 				// CASE 1: NODE.JS
 				/*
-				// TODO: _pathAndName -> split for vars below!
+				// TODO: _fullName -> split for vars below!
 				var strFilePath = "/sites/dev/Shared%20Documents/upload";
 				var strFileName = "sprestlib-demo.html";
-				//var folderPath = _pathAndName.substring(0, _pathAndName.lastIndexOf('/'));
-				//var folderName = _pathAndName.substring(_pathAndName.lastIndexOf('/')+1);
+				//var _dirName = _fullName.substring(0, _fullName.lastIndexOf('/'));
+				//var _fldName = _fullName.substring(_fullName.lastIndexOf('/')+1);
 				var strUrl = "_api/web/GetFolderByServerRelativeUrl('"+strFilePath+"')/Files/add(url='"+strFileName+"',overwrite=true)";
 				// IMPORTANT: path must be escaped or "TypeError: Request path contains unescaped characters"
 
@@ -440,15 +439,15 @@
 		// A: Options setup
 		inOpt = inOpt || {};
 		var _newFolder = {};
-		var _pathAndName = "";
+		var _fullName = "";
 		var _requestDigest = (inOpt.requestDigest || (typeof document !== 'undefined' && document.getElementById('__REQUESTDIGEST') ? document.getElementById('__REQUESTDIGEST').value : null));
 
 		// B: Options check/set
 		if ( inOpt && typeof inOpt === 'string' ) {
-			_pathAndName = encodeURI(inOpt);
+			_fullName = encodeURI(inOpt);
 		}
 		else if ( inOpt && typeof inOpt === 'object' && inOpt.hasOwnProperty('name') ) {
-			_pathAndName = encodeURI(inOpt.name);
+			_fullName = encodeURI(inOpt.name);
 		}
 		else {
 			console.error("ERROR: A 'folderName' is required! EX: `sprLib.folder('Documents/Finance')` or `sprLib.folder({ 'name':'Documents/Finance' })`");
@@ -457,17 +456,17 @@
 			return null;
 		}
 
-		// C: Ensure `_pathAndName` does not end with a slash ("/")
-		_pathAndName = _pathAndName.replace(/\/$/gi,'');
+		// C: Ensure `_fullName` does not end with a slash ("/")
+		_fullName = _fullName.replace(/\/$/gi,'');
 
 		// D: Public Methods ----------------------------------------------
-		// .files() - return all files/folders in folder- http://<site url>/_api/web/getfolderbyserverrelativeurl('/<folder name>')/files
-		// .folders() - return folders = /folders
 		// .perms()
-		// .versions()
 		// .create() // .add()?
 		// .delete() // headers: { "X-HTTP-Method":"DELETE" },
 		// .recycle() // POST to: /recycle
+		//
+		// a uniuqe folder:
+		// /sites/dev/_api/web/GetFolderByServerRelativePath(decodedurl='/sites/dev/SiteAssets/js')
 
 		/**
 		* Get information (properties) for a Folder
@@ -477,39 +476,42 @@
 		*/
 		_newFolder.info = function() {
 			return new Promise(function(resolve, reject) {
-				var folderPath = _pathAndName.substring(0, _pathAndName.lastIndexOf('/'));
-				var folderName = _pathAndName.substring(_pathAndName.lastIndexOf('/')+1);
-
 				sprLib.rest({
-					url: "_api/web/getfolderbyserverrelativeurl('"+folderPath+"')/Folders"
-						+ "?$select=Folders/Id,ItemCount,Name,ServerRelativeUrl,WelcomePage,"
-						+ "Properties/vti_x005f_timecreated,Properties/vti_x005f_timelastmodified,Properties/vti_x005f_hassubdirs,"
-						+ "Properties/vti_x005f_isbrowsable,Properties/vti_x005f_foldersubfolderitemcount,Properties/vti_x005f_listname"
-						+ "&$expand=Folders,Properties"
-						+ "&$filter=Name eq '"+folderName+"'",
+					url: "_api/web/GetFolderByServerRelativePath(decodedurl='"+ _fullName +"')",
+					queryCols: [
+						'Name','ItemCount','ServerRelativeUrl','StorageMetrics/TotalSize',
+						'Properties/vti_x005f_timecreated','Properties/vti_x005f_timelastmodified','Properties/vti_x005f_hassubdirs',
+						'Properties/vti_x005f_isbrowsable','Properties/vti_x005f_foldersubfolderitemcount','Properties/vti_x005f_listname'
+					],
 					metadata: false
 				})
 				.then(function(arrData){
 					// A: Capture info
-					var objData = ( arrData && arrData.length > 0 ? arrData[0] : {} ); // FYI: Empty object is correct return type when file-not-found
+					var objFolder = ( arrData && arrData.length > 0 ? arrData[0] : {} ); // FYI: Empty object is correct return type when file-not-found
 
 					// B: Remap properties
-					if ( objData.Properties ) {
-						if ( objData.Properties.vti_x005f_timecreated )              objData.Created            = objData.Properties.vti_x005f_timecreated;
-						if ( objData.Properties.vti_x005f_listname )                 objData.GUID               = objData.Properties.vti_x005f_listname;
-						if ( objData.Properties.vti_x005f_hassubdirs )               objData.HasSubdirs         = objData.Properties.vti_x005f_hassubdirs;
-						if ( objData.Properties.vti_x005f_isbrowsable )              objData.Hidden             = !objData.Properties.vti_x005f_isbrowsable;
-						if ( objData.Properties.vti_x005f_timelastmodified )         objData.LastModifiedDate   = objData.Properties.vti_x005f_timelastmodified;
-						//if ( objData.Properties.vti_x005f_level )                    objData.Level              = objData.Properties.vti_x005f_level;
-						if ( objData.Properties.vti_x005f_foldersubfolderitemcount ) objData.SubFolderItemCount = objData.Properties.vti_x005f_foldersubfolderitemcount;
+					if ( objFolder.Properties ) {
+						objFolder.Created     = ( objFolder.Properties.vti_x005f_timecreated ? objFolder.Properties.vti_x005f_timecreated : null );
+						objFolder.FolderCount = ( objFolder.Properties.vti_x005f_foldersubfolderitemcount ? objFolder.Properties.vti_x005f_foldersubfolderitemcount : 0 );
+						objFolder.ItemCount   = ( objFolder.ItemCount ? objFolder.ItemCount : 0 );
+						objFolder.GUID        = ( objFolder.Properties.vti_x005f_listname ? objFolder.Properties.vti_x005f_listname : null );
+						objFolder.HasSubdirs  = ( objFolder.Properties.vti_x005f_hassubdirs ? objFolder.Properties.vti_x005f_hassubdirs == "true" : false );
+						objFolder.Hidden      = ( objFolder.Properties.vti_x005f_isbrowsable ? objFolder.Properties.vti_x005f_isbrowsable == "false" : false );
+						objFolder.Level       = ( objFolder.Properties.vti_x005f_level ? objFolder.Properties.vti_x005f_level : 1 );
+						objFolder.Modified    = ( objFolder.Properties.vti_x005f_timelastmodified ? objFolder.Properties.vti_x005f_timelastmodified : null );
+
+						delete objFolder.Properties;
 					}
 
-					// C: Remove some keys
-					if ( objData.Folders    ) delete objData.Folders;
-					if ( objData.Properties ) delete objData.Properties;
+					// C: Remap storage metrics
+					if ( objFolder.StorageMetrics && objFolder.StorageMetrics.TotalSize ) {
+						objFolder.TotalSize = Number(objFolder.StorageMetrics.TotalSize) || 0;
 
-					// D: Done
-					resolve( objData );
+						delete objFolder.StorageMetrics;
+					}
+
+					// Done
+					resolve( objFolder );
 				})
 				.catch(function(strErr){
 					reject( strErr );
@@ -518,28 +520,83 @@
 		}
 
 		/**
-		* Return all Files in a Folder
+		* Get Files and their properties
 		*
 		* @example - relative URL: `sprLib.folder('Shared Documents').files()`
 		* @example - absolute URL: `sprLib.folder('/sites/dev/Shared Documents').files()`
-		* @returns: Object[] with Files and their properties
+		* @returns: Promise<Object[]> with Files and their properties
 		*/
 		_newFolder.files = function() {
 			return new Promise(function(resolve, reject) {
 				sprLib.rest({
-					url: "_api/web/GetFolderByServerRelativeUrl('"+ _pathAndName +"')/Files",
-					queryCols: ['Author/Id','CheckedOutByUser/Id','LockedByUser/Id','ModifiedBy/Id',
+					url: "_api/web/GetFolderByServerRelativePath(decodedurl='"+ _fullName +"')/Files",
+					queryCols: [
+						'Author/Id','CheckedOutByUser/Id','LockedByUser/Id','ModifiedBy/Id',
+						'Author/Title','CheckedOutByUser/Title','LockedByUser/Title','ModifiedBy/Title',
 						'CheckInComment','CheckOutType','ETag','Exists','Length','Level','MajorVersion','MinorVersion',
-						'Name','ServerRelativeUrl','TimeCreated','TimeLastModified','Title','UniqueId'],
+						'Name','ServerRelativeUrl','TimeCreated','TimeLastModified','Title','UniqueId'
+					],
 					metadata: false
 				})
 				.then(function(arrData){
 					// STEP 1: Transform results
 					arrData.forEach(function(file){
-						// These 2 values come back as `[]` when there's no value, and that sucks, so fix them
+						// A: Rename some cols
+						file.Created  = file.TimeCreated;      delete file.TimeCreated;
+						file.Modified = file.TimeLastModified; delete file.TimeLastModified;
+
+						// B: Convert numbers
+						if ( file.Length && !isNaN(Number(file.Length)) ) file.Length = Number(file.Length);
+
+						// C: These 2 values come back as `[]` when there's no value, and that sucks, so fix them
 						if ( file.CheckedOutByUser && Array.isArray(file.CheckedOutByUser) && file.CheckedOutByUser.length == 0 ) file.CheckedOutByUser = null;
 						if ( file.LockedByUser && Array.isArray(file.LockedByUser) && file.LockedByUser.length == 0 ) file.LockedByUser = null;
 					})
+
+					// STEP 2: Resolve results (NOTE: empty array is the correct default result)
+					resolve( arrData || [] );
+				})
+				.catch(function(strErr){
+					reject( strErr );
+				});
+			});
+		}
+
+		/**
+		* Get Folders and their properties
+		*
+		* @example - relative URL: `sprLib.folder('Shared Documents').folders()`
+		* @example - absolute URL: `sprLib.folder('/sites/dev/Shared Documents').folders()`
+		* @returns: Promise<Object[]> with Folders and their properties
+		*/
+		_newFolder.folders = function() {
+			return new Promise(function(resolve, reject) {
+				sprLib.rest({
+					url: "_api/web/GetFolderByServerRelativePath(decodedurl='"+ _fullName +"')/Folders",
+					queryCols: [
+						'Name','ItemCount','ServerRelativeUrl',
+						'Properties/vti_x005f_timecreated','Properties/vti_x005f_timelastmodified','Properties/vti_x005f_hassubdirs',
+						'Properties/vti_x005f_isbrowsable','Properties/vti_x005f_foldersubfolderitemcount','Properties/vti_x005f_listname'
+					],
+					metadata: false
+				})
+				.then(function(arrData){
+					// STEP 1: Transform results
+					arrData.forEach(function(objFolder){
+						// A: Remap properties
+						if ( objFolder.Properties ) {
+							objFolder.Created     = ( objFolder.Properties.vti_x005f_timecreated ? objFolder.Properties.vti_x005f_timecreated : null );
+							objFolder.FolderCount = ( objFolder.Properties.vti_x005f_foldersubfolderitemcount ? objFolder.Properties.vti_x005f_foldersubfolderitemcount : 0 );
+							objFolder.ItemCount   = ( objFolder.ItemCount ? objFolder.ItemCount : 0 );
+							objFolder.GUID        = ( objFolder.Properties.vti_x005f_listname ? objFolder.Properties.vti_x005f_listname : null );
+							objFolder.HasSubdirs  = ( objFolder.Properties.vti_x005f_hassubdirs ? objFolder.Properties.vti_x005f_hassubdirs == "true" : false );
+							objFolder.Hidden      = ( objFolder.Properties.vti_x005f_isbrowsable ? objFolder.Properties.vti_x005f_isbrowsable == "false" : false );
+							objFolder.Level       = ( objFolder.Properties.vti_x005f_level ? objFolder.Properties.vti_x005f_level : 1 );
+							objFolder.Modified    = ( objFolder.Properties.vti_x005f_timelastmodified ? objFolder.Properties.vti_x005f_timelastmodified : null );
+
+							delete folder.Properties;
+						}
+					});
 
 					// STEP 2: Resolve results (NOTE: empty array is the correct default result)
 					resolve( arrData || [] );
