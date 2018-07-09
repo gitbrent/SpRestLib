@@ -2,6 +2,30 @@
 id: feat-utilities
 title: Utility Methods
 ---
+## Base Url
+
+### Syntax: Get
+`sprLib.baseUrl()`
+
+### Syntax: Set
+`sprLib.baseUrl(url)`
+
+### Description
+Sets the root/base URL for SharePoint operations.
+
+This way the library can be run against any location.  Useful when querying subsites or when you don't want to have to
+include the `baseUrl` with every sprLib call.
+
+### Example
+```javascript
+// Get baseUrl
+var strBaseUrl = sprLib.baseUrl();
+
+// Set baseUrl
+sprLib.baseUrl('/sites/devtest');
+```
+
+
 
 ## Renew Security Token
 
@@ -19,6 +43,8 @@ be an application that provides a tool-like interface (e.g.: List Mass Updater) 
 expire before all operations have completed.
 
 NOTE: SpRestLib will refresh the token automatically as needed during CRUD operations.
+
+
 
 ## Get Library Version
 
