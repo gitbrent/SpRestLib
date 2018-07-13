@@ -6,7 +6,7 @@
 	<meta name="website"     content="https://github.com/gitbrent/SpRestLib/">
 	<meta name="keywords"    content="SpRestLib, JavaScript, js-sharepoint, OData, REST, SharePoint 2013, SP2013, SharePoint 2016, SP2016, SharePoint Online">
 	<meta name="description" content="Content Editor WebPart to showcase SpRestLib features and capabilities">
-	<meta name="revised"     content="20180707">
+	<meta name="revised"     content="20180712">
 
 	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300">
 	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:700">
@@ -137,6 +137,45 @@
 		}
 
 		function handleFileChange() {
+			// A: Clear results
+			$('#contFileInfo table').remove();
+			$('#tabFilePerms tbody').empty();
+			// B: Return if nothing selected
+			if ( !$('#selSiteFiles').val() ) return;
+
+			// INFO:
+			$('#contFileInfo pre code').text( 'sprLib.file(\''+ $('#selSiteFiles').val() +'\').info()' );
+			sprLib.file($('#selSiteFiles').val()).info()
+			.then(function(objInfo){
+				var $table = $('<table class="tabModern"><tbody></tbody></table>');
+				$table.append('<thead><tr><th>Prop Name</th><th>Prop Value</th></tr></thead>');
+				Object.keys(objInfo).sort().forEach(function(key,idx){
+					$table.find('tbody').append('<tr><th>'+ key +'</th>'+'<td class="code">'+ objInfo[key] +'</td></tr>');
+				});
+				$('#contFileInfo').append( $table );
+			});
+
+			$('#contFilePerms pre code').text( 'sprLib.file(\''+ $('#selSiteFiles').val() +'\').perms()' );
+			sprLib.file($('#selSiteFiles').val()).perms()
+			.then(function(arrPerms){
+				arrPerms.forEach(function(perm){
+					// A-1: Create row
+					var $row = $('<tr/>');
+					$row.append('<th><a href="../'+LAYOUTS_URL+'/people.aspx?MembershipGroupId='+ perm.Member.PrincipalId +'" target="_blank">'+ perm.Member.Title +'</a></th>');
+					$row.append('<td>'+ perm.Member.PrincipalType +'</td>');
+					$row.append('<td/>');
+					perm.Roles.forEach(function(role){
+						if ( !role.Hidden && role.Name ) $row.find('td:last-child').append('<div class="itemBox">'+ role.Name +'<span style="display:none">; </span></div>');
+					});
+					$('#tabFilePerms tbody').append( $row );
+				});
+				if ( $.tablesorter ) $('#contFilePerms table').tablesorter({ sortList:[[0,0]] });
+			})
+			.catch(function(errMsg){
+				$('#contFilePerms').append('<table><tbody><tr><td>'+errMsg+'</td></tr></tbody></table>');
+				console.error(errMsg);
+			});
+
 			// TODO:
 		}
 
@@ -481,9 +520,15 @@
 
 			// TAB: File
 			{
-				// TODO:
-				// https://gitbrent.sharepoint.com/sites/dev/_api/lists/getbytitle('Documents')/items?$select=Title
-				// https://gitbrent.sharepoint.com/sites/dev/_api/web/getfolderbyserverrelativeurl('Shared%20Documents')/files?$select=Name,ServerRelativeUrl&$filter=Exists eq true
+				sprLib.folder('Shared Documents').files()
+				.then(function(arrResults){
+					arrResults
+					.sort(function(a,b){ return (a.Name > b.Name) ? 1 : ((b.Name > a.Name) ? -1 : 0); })
+					.forEach(function(obj,idx){
+						if ( !obj.Hidden ) $('#selSiteFiles').append('<option value="'+ obj.ServerRelativeUrl +'">'+ obj.Name +'</option>');
+					});
+					$('#contFileSelect .sprlib-spinner').remove();
+				});
 			}
 
 			// TAB: Folder
@@ -704,12 +749,12 @@
 			<div id="tabFile" data-tab="File Methods">
 				<div class="subTitle secTitle">File Methods</div>
 				<p class="desc">
-					Select one of the Files found on this site to view its properties.<br>
+					Select a File below to view file properties.<br>
 				</p>
 
 				<div id="contFileSelect" class="divTable" style="width:auto; margin-bottom:20px;">
 					<div class="th" style="padding:0; font-size:120%; vertical-align:middle;">
-						Shared Documents Files
+						"Shared Documents" Files
 					</div>
 					<div>
 						<div class="sprlib-spinner"><div class="sprlib-bounce1"></div><div class="sprlib-bounce2"></div><div class="sprlib-bounce3"></div></div>
@@ -722,8 +767,32 @@
 				<div class="subTitle" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
 					<div class="arrow active"></div>File Information
 				</div>
-				<div id="tab-FileInfo">
+				<div id="contFileInfo">
 					<pre><code class="language-javascript">sprLib.file('fileName').info()</code></pre>
+				</div>
+
+				<div class="subTitle" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
+					<div class="arrow"></div>File Permissions
+				</div>
+				<div id="contFilePerms" style="display:none">
+					<pre><code class="language-javascript">sprLib.file('fileName').perms()</code></pre>
+					<table id="tabFilePerms" class="tabModern">
+						<thead>
+							<tr>
+								<th>Name</th>
+								<th>Type</th>
+								<th class="sorter-false showGrpDesc">Permissions</th>
+							</tr>
+						</thead>
+						<tbody></tbody>
+					</table>
+				</div>
+
+				<div class="subTitle" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
+					<div class="arrow"></div>File Version
+				</div>
+				<div id="contFileVer" style="display:none">
+					<pre><code class="language-javascript">sprLib.file('fileName').version()</code></pre>
 				</div>
 			</div>
 
