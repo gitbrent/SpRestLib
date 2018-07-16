@@ -30,7 +30,7 @@
 (function(){
 	// APP VERSION/BUILD
 	var APP_VER = "1.8.0-beta";
-	var APP_BLD = "20180708";
+	var APP_BLD = "20180715";
 	var DEBUG = false; // (verbose mode/lots of logging)
 	// ENUMERATIONS
 	// REF: [`SP.BaseType`](https://msdn.microsoft.com/en-us/library/office/jj246925.aspx)
@@ -231,11 +231,19 @@
 
 		// C: Ensure `_fullName` does not end with a slash ("/")
 		_fullName = _fullName.replace(/\/$/gi,'');
-		_dirName = _fullName.substring(0, _fullName.lastIndexOf('/'));
-		_fldName = _fullName.substring(_fullName.lastIndexOf('/')+1);
+		//_dirName = _fullName.substring(0, _fullName.lastIndexOf('/'));
+		//_fldName = _fullName.substring(_fullName.lastIndexOf('/')+1);
 
-		// D: Add Public Methods
+		// D: Ensure a full path
+		// Allow relative names for web users
+		_spPageContextInfo.webServerRelativeUrl
+		if ( _fullName.indexOf('/') != 0 && _spPageContextInfo && _spPageContextInfo.webServerRelativeUrl ) {
+			_fullName = _spPageContextInfo.webServerRelativeUrl + _fullName;
+		}
+
+		// Add Public Methods
 		// .checkin/checkout -- @see: https://msdn.microsoft.com/en-us/library/office/dn450841.aspx#bk_FileCheckOut
+		// https://msdn.microsoft.com/en-us/library/office/dn450841.aspx#bk_FileCheckIn
 		// .delete() // headers: { "X-HTTP-Method":"DELETE" },
 		// .recycle()
 		// .get() (?) // _api/web/GetFolderByServerRelativeUrl('')/Files/get(url='')
@@ -243,23 +251,37 @@
 		// "The GetFileByServerRelativeUrl endpoint is recommended way to get a file. See SP.File request examples."
 
 		/**
-		* Get File information
+		* Get information about a File
+		* Optionally include a version tag to get info about a certain file version
 		*
+		* @param `inOpt` (object) - (`version` prop optional)
 		* @returns: an object containing information about the current File
 		* @example: sprLib.file('/site/Documents/MyDoc.docx').info()
+		* @example: sprLib.file('/site/Documents/MyDoc.docx').info({ version:12 })
 		*/
-		_newFile.info = function() {
+		_newFile.info = function(inOpt) {
 			return new Promise(function(resolve, reject) {
+				var objData = {};
+
+				// A: Check opts
+				if ( inOpt && inOpt.hasOwnProperty('version') && isNaN(Number(inOpt.version)) ) {
+					console.error("ERROR: 'version' should be a number! EX: `sprLib.file('Sample.docx').info({ version:12 })`");
+					console.error("ARGS:");
+					console.error(inOpt);
+					return null;
+				}
+
+				// B: Get file info
 				sprLib.rest({
 					url: "_api/web/GetFileByServerRelativeUrl('"+ _fullName +"')",
 					queryCols: ['Author/Id','CheckedOutByUser/Id','LockedByUser/Id','ModifiedBy/Id',
 						'CheckInComment','CheckOutType','ETag','Exists','Length','Level','MajorVersion','MinorVersion',
-						'Name','ServerRelativeUrl','TimeCreated','TimeLastModified','UniqueId'],
+						'Name','ServerRelativeUrl','TimeCreated','TimeLastModified','UniqueId','UIVersionLabel'],
 					metadata: false
 				})
 				.then(function(arrData){
 					// A: Capture info
-					var objData = ( arrData && arrData.length > 0 ? arrData[0] : {} ); // FYI: Empty object is correct return type when file-not-found
+					objData = ( arrData && arrData.length > 0 ? arrData[0] : {} ); // FYI: Empty object is correct return type when file-not-found
 
 					// B: Remove junk
 					['Author', 'CheckedOutByUser', 'LockedByUser', 'ModifiedBy'].forEach(function(field){
@@ -267,7 +289,35 @@
 						if ( objData[field] && objData[field].__metadata ) delete objData[field].__metadata;
 					});
 
-					// C: Done
+					// C: Handle version option
+					if ( inOpt && inOpt.version ) {
+						return sprLib.rest({
+							url: "_api/web/GetFileByServerRelativeUrl('"+ _fullName +"')/versions("+ (Number(inOpt.version)*512) +")",
+							queryCols: ['CheckInComment','Created','IsCurrentVersion','Length','VersionLabel'],
+							metadata: false
+						})
+						.catch(function(strErr){
+							throw strErr;
+						})
+					}
+					else {
+						return null;
+					}
+				})
+				.then(function(arrVersion){
+					if ( arrVersion && arrVersion[0] ) {
+						// Gather version metadata
+						Object.keys(arrVersion[0]).forEach(function(key){
+							if ( key != 'VersionLabel' ) objData[key] = arrVersion[0][key];
+						});
+
+						// Update version metdata from first query
+						objData.MajorVersion = arrVersion[0].VersionLabel.split('.')[0];
+						objData.MinorVersion = arrVersion[0].VersionLabel.split('.')[1];
+						objData.UIVersionLabel = arrVersion[0].VersionLabel;
+					}
+
+					// Done
 					resolve( objData );
 				})
 				.catch(function(strErr){
@@ -320,46 +370,10 @@
 			});
 		}
 
-		/**
-		* Get File's version metadata
-		* Return an object containing information about the File version
-		*
-		* @param `inVer` - version label
-		* @example: sprLib.file('/site/Documents/MyDoc.docx').version('99')
-		* @returns: Object containing version properties
-		* @see: https://msdn.microsoft.com/en-us/library/office/dn450841.aspx
-		*/
-		_newFile.version = function(inVer) {
-			return new Promise(function(resolve, reject) {
-				sprLib.rest({
-					url: "_api/web/GetFileByServerRelativeUrl('"+ _fullName +"')",
-					queryCols: ['Author/Id','CheckedOutByUser/Id','LockedByUser/Id','ModifiedBy/Id',
-						'CheckInComment','CheckOutType','ETag','Exists','Length','Level','MajorVersion','MinorVersion',
-						'Name','ServerRelativeUrl','TimeCreated','TimeLastModified','UniqueId'],
-					queryFilter: "VersionLabel eq '"+ inVer +"'",
-					metadata: false
-				})
-				.then(function(arrData){
-					// A: Capture info
-					var objData = ( arrData && arrData.length > 0 ? arrData[0] : {} ); // FYI: Empty object is correct return type when file-not-found
-
-					// B: Remove junk
-					['Author', 'CheckedOutByUser', 'LockedByUser', 'ModifiedBy'].forEach(function(field){
-						if ( objData[field] && objData[field].__deferred ) delete objData[field].__deferred;
-						if ( objData[field] && objData[field].__metadata ) delete objData[field].__metadata;
-					});
-
-					// C: Done
-					resolve( objData );
-				})
-				.catch(function(strErr){
-					reject( strErr );
-				});
-			});
-		}
 
 		/*
 		// WIP: get file
+		// @see: https://msdn.microsoft.com/en-us/library/office/dn450841.aspx#bk_FileRequestExamples
 		web/getfilebyserverrelativeurl('/Shared Documents/filename.docx')/$value
 		/sites/dev/_api/web/getfilebyserverrelativeurl('/sites/dev/SiteAssets/qunit-tests.js')
 		*/

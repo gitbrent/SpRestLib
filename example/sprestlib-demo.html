@@ -39,7 +39,7 @@
 
 	<script>
 		$.ajaxSetup({ cache:false });
-		var APP_BLD = 20180708;
+		var APP_BLD = 20180715;
 		var HTML_SPINNER = '<div class="sprlib-spinner"><div class="sprlib-bounce1"></div><div class="sprlib-bounce2"></div><div class="sprlib-bounce3"></div></div>';
 		var LAYOUTS_URL = _spPageContextInfo.layoutsUrl || '_layouts/15';
 
@@ -138,8 +138,9 @@
 
 		function handleFileChange() {
 			// A: Clear results
-			$('#contFileInfo table').remove();
+			$('#contFileInfo table, #contFileVer table').remove();
 			$('#tabFilePerms tbody').empty();
+			$('#tabList .text-danger').remove();
 			// B: Return if nothing selected
 			if ( !$('#selSiteFiles').val() ) return;
 
@@ -150,11 +151,28 @@
 				var $table = $('<table class="tabModern"><tbody></tbody></table>');
 				$table.append('<thead><tr><th>Prop Name</th><th>Prop Value</th></tr></thead>');
 				Object.keys(objInfo).sort().forEach(function(key,idx){
-					$table.find('tbody').append('<tr><th>'+ key +'</th>'+'<td class="code">'+ objInfo[key] +'</td></tr>');
+					$table.find('tbody').append('<tr><th>'+ key +'</th>'+'<td class="code">'+ ( typeof objInfo[key] === 'object' ? JSON.stringify(objInfo[key],null,3) : objInfo[key]) +'</td></tr>');
 				});
 				$('#contFileInfo').append( $table );
 			});
 
+			// INFO: (using `version`)
+			$('#contFileVer pre code').text( 'sprLib.file(\''+ $('#selSiteFiles').val() +'\').info({ version:1.0 })' );
+			sprLib.file($('#selSiteFiles').val()).info({ version:1 })
+			.catch(function(errMsg){
+				$('#contFileVer').append('<h5 class="text-danger">'+errMsg+'</h5>');
+				console.error(errMsg);
+			})
+			.then(function(objInfo){
+				var $table = $('<table class="tabModern"><tbody></tbody></table>');
+				$table.append('<thead><tr><th>Prop Name</th><th>Prop Value</th></tr></thead>');
+				Object.keys(objInfo).sort().forEach(function(key,idx){
+					$table.find('tbody').append('<tr><th>'+ key +'</th>'+'<td class="code">'+ ( typeof objInfo[key] === 'object' ? JSON.stringify(objInfo[key],null,3) : objInfo[key]) +'</td></tr>');
+				});
+				$('#contFileVer').append( $table );
+			});
+
+			// PERMS:
 			$('#contFilePerms pre code').text( 'sprLib.file(\''+ $('#selSiteFiles').val() +'\').perms()' );
 			sprLib.file($('#selSiteFiles').val()).perms()
 			.then(function(arrPerms){
@@ -175,8 +193,6 @@
 				$('#contFilePerms').append('<table><tbody><tr><td>'+errMsg+'</td></tr></tbody></table>');
 				console.error(errMsg);
 			});
-
-			// TODO:
 		}
 
 		function handleFoldChange() {
@@ -772,6 +788,13 @@
 				</div>
 
 				<div class="subTitle" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
+					<div class="arrow"></div>File Information (version:1)
+				</div>
+				<div id="contFileVer" style="display:none">
+					<pre><code class="language-javascript">sprLib.file('fileName').info({ version:1 })</code></pre>
+				</div>
+
+				<div class="subTitle" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
 					<div class="arrow"></div>File Permissions
 				</div>
 				<div id="contFilePerms" style="display:none">
@@ -786,13 +809,6 @@
 						</thead>
 						<tbody></tbody>
 					</table>
-				</div>
-
-				<div class="subTitle" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
-					<div class="arrow"></div>File Version
-				</div>
-				<div id="contFileVer" style="display:none">
-					<pre><code class="language-javascript">sprLib.file('fileName').version()</code></pre>
 				</div>
 			</div>
 
