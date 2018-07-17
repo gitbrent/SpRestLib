@@ -6,7 +6,7 @@
 	<meta name="website"     content="https://github.com/gitbrent/SpRestLib/">
 	<meta name="keywords"    content="SpRestLib, JavaScript, js-sharepoint, OData, REST, SharePoint 2013, SP2013, SharePoint 2016, SP2016, SharePoint Online">
 	<meta name="description" content="Content Editor WebPart to showcase SpRestLib features and capabilities">
-	<meta name="revised"     content="20180712">
+	<meta name="revised"     content="20180716">
 
 	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300">
 	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:700">
@@ -39,7 +39,7 @@
 
 	<script>
 		$.ajaxSetup({ cache:false });
-		var APP_BLD = 20180715;
+		var APP_BLD = 20180716;
 		var HTML_SPINNER = '<div class="sprlib-spinner"><div class="sprlib-bounce1"></div><div class="sprlib-bounce2"></div><div class="sprlib-bounce3"></div></div>';
 		var LAYOUTS_URL = _spPageContextInfo.layoutsUrl || '_layouts/15';
 
@@ -193,6 +193,22 @@
 				$('#contFilePerms').append('<table><tbody><tr><td>'+errMsg+'</td></tr></tbody></table>');
 				console.error(errMsg);
 			});
+
+			// GET:
+			$('#contFileGet pre code').text( 'sprLib.file(\''+ $('#selSiteFiles').val() +'\').get()' );
+			$('#codeGetFile').text(
+				"sprLib.file('"+ $('#selSiteFiles').val() +"').get()\n"+
+				'.then(function(blob){\n'+
+				'    var url = (window.URL || window.webkitURL).createObjectURL(blob);\n'+
+				'    var link = document.createElement("a");\n'+
+				'    link.setAttribute("href", url);\n'+
+				'    link.setAttribute("download", _fileName);\n'+
+				'    link.style = "visibility:hidden";\n'+
+				'    document.body.appendChild(link);\n'+
+				'    link.click();\n'+
+				'    setTimeout(function(){ document.body.removeChild(link); }, 500);\n'+
+				'});'
+			);
 		}
 
 		function handleFoldChange() {
@@ -810,6 +826,20 @@
 						<tbody></tbody>
 					</table>
 				</div>
+
+				<div class="subTitle" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
+					<div class="arrow"></div>Get File
+				</div>
+				<div id="contFileGet" style="display:none">
+					<pre><code class="language-javascript">sprLib.file('filename').get()</code></pre>
+					<div>
+						DEMO: Saving a SharePoint file (text or binary) using client web browser.
+						Promise returns a blob, which can be saved easily without FileSaver or other libraries.
+						<pre><code id="codeGetFile" class="language-javascript"></code></pre>
+						<button type="button" class="flatBtn flatBtn-green" onclick="eval($('#codeGetFile').text())">Get Selected File</button>
+					</div>
+				</div>
+
 			</div>
 
 			<div id="tabFold" data-tab="Folder Methods">
