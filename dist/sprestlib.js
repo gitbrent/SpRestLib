@@ -30,7 +30,7 @@
 (function(){
 	// APP VERSION/BUILD
 	var APP_VER = "1.8.0-beta";
-	var APP_BLD = "20180715";
+	var APP_BLD = "20180716";
 	var DEBUG = false; // (verbose mode/lots of logging)
 	// ENUMERATIONS
 	// REF: [`SP.BaseType`](https://msdn.microsoft.com/en-us/library/office/jj246925.aspx)
@@ -231,8 +231,8 @@
 
 		// C: Ensure `_fullName` does not end with a slash ("/")
 		_fullName = _fullName.replace(/\/$/gi,'');
-		//_dirName = _fullName.substring(0, _fullName.lastIndexOf('/'));
-		//_fldName = _fullName.substring(_fullName.lastIndexOf('/')+1);
+		//_pathName = _fullName.substring(0, _fullName.lastIndexOf('/'));
+		_fileName = _fullName.substring(_fullName.lastIndexOf('/')+1);
 
 		// D: Ensure a full path
 		// Allow relative names for web users
@@ -371,12 +371,28 @@
 		}
 
 
-		/*
-		// WIP: get file
-		// @see: https://msdn.microsoft.com/en-us/library/office/dn450841.aspx#bk_FileRequestExamples
-		web/getfilebyserverrelativeurl('/Shared Documents/filename.docx')/$value
-		/sites/dev/_api/web/getfilebyserverrelativeurl('/sites/dev/SiteAssets/qunit-tests.js')
+		/**
+		* get file
+		*
+		* @returns: blob
+		* @see: https://msdn.microsoft.com/en-us/library/office/dn450841.aspx#bk_FileRequestExamples
 		*/
+		_newFile.get = function() {
+			return new Promise(function(resolve, reject) {
+				sprLib.rest({
+					url: "_api/web/GetFileByServerRelativeUrl('"+ _fullName +"')/$value",
+					headers: {'binaryStringResponseBody':true}
+				})
+				.then(data => {
+					// A: Return blob from ArrayBuffer
+					resolve( new Blob([data], {type:"application/octet-stream"}) );
+				})
+				.catch(function(strErr){
+					reject( strErr );
+				});
+			});
+		}
+
 
 		// TODO: WIP: .upload({ data:arrayBuffer/FilePicker/whatev, overwrite:BOOL })
 		/**
@@ -1662,6 +1678,8 @@
 					else {
 						// A:
 						var request = new XMLHttpRequest();
+						if ( inOpt.headers && inOpt.headers.binaryStringResponseBody ) request.responseType = 'arraybuffer';
+
 						request.open(objAjaxQuery.type, objAjaxQuery.url, true);
 
 						// B:
@@ -1672,11 +1690,16 @@
 						// C:
 						request.onload = function() {
 							if ( request.status >= 200 && request.status < 400 ) {
-								// Try XML first as `owssvr` (versions) query returns a true XML document
-								resolve(request.responseXML || request.responseText);
+								if ( inOpt.headers && inOpt.headers.binaryStringResponseBody ) {
+									resolve(request.response); // ArrayBuffer
+								}
+								else {
+									// Try XML first as `owssvr` (versions) query returns a true XML document
+									resolve(request.responseXML || request.responseText);
+								}
 							}
 							else {
-								reject( parseErrorMessage(request) + "\n\nURL used: " + objAjaxQuery.url );
+								reject(parseErrorMessage(request) + "\n\nURL used: " + objAjaxQuery.url);
 							}
 						};
 
@@ -1694,176 +1717,181 @@
 				});
 			})
 			.then(function(data){
-				// A: Parse string to JSON if needed
-				data = ( typeof data === 'string' && data.indexOf('{') == 0 ? JSON.parse(data) : data );
-
-				// B: If result is a single object, make it an array for pasing below (Ex: '_api/site/Owner/Id')
-				var arrObjResult = ( data && data.d && !data.d.results && typeof data.d === 'object' && Object.keys(data.d).length > 0 ? [data.d] : [] );
-
-				// C: Iterate over results
-				// NOTE: Depending upon which REST endpoint used, SP can return results in various forms (!)
-				// EX..: data.d.results is an [] of {}: [ {Title:'Brent Ely', Email:'Brent.Ely@microsoft.com'}, {}, {} ]
-				// NOTE: Ensure results are an object because SP will return an entire HTML page as a result in some error cases!
-
-				if ( objAjaxQuery.url.toLowerCase().indexOf('owssvr.dll') > -1 && objAjaxQuery.url.toLowerCase().indexOf('includeversions=true') > -1 ) {
-					// IE11: When using jQuery AJAX for AppendText/Versions/getVersions, the `data` result must be parsed directly (no conversion) using `(data).find("z:row")`
-					inOpt.spArrData.push( data );
+				// Handle `binaryStringResponseBody` option (data is base64 string)
+				if ( inOpt.headers && inOpt.headers.binaryStringResponseBody ) {
+					resolve( data );
 				}
-				else if ( arrObjResult.length > 0 || (data && data.d && data.d.results && typeof data.d.results === 'object') ) {
-					(arrObjResult.length > 0 ? arrObjResult : data.d.results).forEach(function(result){
-						var objRow = {};
+				else {
+					// A: Parse string to JSON if needed
+					data = ( typeof data === 'string' && data.indexOf('{') == 0 ? JSON.parse(data) : data );
 
-						// A: Add select columns
-						if ( inOpt.queryCols ) {
-							// NOTE: `queryCols` can be either an object or an array
-							if ( Array.isArray(inOpt.queryCols) ) {
-								inOpt.queryCols.forEach(function(key){
-									objRow[key] = ( APP_OPTS.cleanColHtml && col.listDataType == 'string' ? colVal.replace(/<div(.|\n)*?>/gi,'').replace(/<\/div>/gi,'') : colVal );
-								});
+					// B: If result is a single object, make it an array for pasing below (Ex: '_api/site/Owner/Id')
+					var arrObjResult = ( data && data.d && !data.d.results && typeof data.d === 'object' && Object.keys(data.d).length > 0 ? [data.d] : [] );
+
+					// C: Iterate over results
+					// NOTE: Depending upon which REST endpoint used, SP can return results in various forms (!)
+					// EX..: data.d.results is an [] of {}: [ {Title:'Brent Ely', Email:'Brent.Ely@microsoft.com'}, {}, {} ]
+					// NOTE: Ensure results are an object because SP will return an entire HTML page as a result in some error cases!
+					if ( objAjaxQuery.url.toLowerCase().indexOf('owssvr.dll') > -1 && objAjaxQuery.url.toLowerCase().indexOf('includeversions=true') > -1 ) {
+						// IE11: When using jQuery AJAX for AppendText/Versions/getVersions, the `data` result must be parsed directly (no conversion) using `(data).find("z:row")`
+						inOpt.spArrData.push( data );
+					}
+					else if ( arrObjResult.length > 0 || (data && data.d && data.d.results && typeof data.d.results === 'object') ) {
+						(arrObjResult.length > 0 ? arrObjResult : data.d.results).forEach(function(result){
+							var objRow = {};
+
+							// A: Add select columns
+							if ( inOpt.queryCols ) {
+								// NOTE: `queryCols` can be either an object or an array
+								if ( Array.isArray(inOpt.queryCols) ) {
+									inOpt.queryCols.forEach(function(key){
+										objRow[key] = ( APP_OPTS.cleanColHtml && col.listDataType == 'string' ? colVal.replace(/<div(.|\n)*?>/gi,'').replace(/<\/div>/gi,'') : colVal );
+									});
+								}
+								else {
+									Object.keys(inOpt.queryCols).forEach(function(key){
+										var col = inOpt.queryCols[key];
+										var arrCol = [];
+										var colVal = "";
+
+										// B.3.1: Get value(s) for this key
+
+										// Handle Lookups that return an array of 'results' (eg: `LookupMulti`)
+										if ( col.dataName && col.dataName.indexOf('/') > -1
+											&& result[col.dataName.split('/')[0]] && result[col.dataName.split('/')[0]].results )
+										{
+											// A:
+											// NOTE: `listCols` can have "Dept/Id" and "Dept/Title", but SP only returns *ONE* result with both vals
+											// ....: So, skip any subsequent listCol's once results have been captured
+											if ( objRow[key] ) return;
+
+											// B: Default for this column type is empty array as multi-lookup returns an array of `results`
+											colVal = [];
+
+											// C: Add any results
+											result[col.dataName.split('/')[0]].results.forEach(function(objResult,idx){
+												// EX: {__metadata:Object, Id:2, Title:"Human Resources"}
+												if ( objResult.__metadata ) delete objResult.__metadata;
+												// Capture any-and-all columns returned (aside from removal of above)
+												colVal.push( objResult );
+											});
+										}
+										// Handle Lookup/Person/Url/etc. Ex: 'Manager/Title'
+										else if ( col.dataName && col.dataName.indexOf('/') > -1 ) {
+											// NOTE: While most lookups are single-level ('Manager/Title') there can be deeper levels as well ('Users/Member/Id')
+											// NOTE: dataName will be comma-sep fields when colName is an object with fields. (Ex: "Member/Users/Id,Member/Users/Title")
+											// Loop over each field. Ex: 'Member/Id,Member/Title'->['Member/Id','Member/Title']
+											col.dataName.split(',').forEach(function(strField,idx){
+												// A: Split lookup name
+												var arrKeys = strField.split('/');
+
+												// B: Remove extraneous `__metadata` and `__deferred` objects
+												if ( result[arrKeys[0]] && result[arrKeys[0]].__metadata ) delete result[arrKeys[0]].__metadata;
+												if ( result[arrKeys[0]] && result[arrKeys[0]].__deferred ) delete result[arrKeys[0]].__deferred;
+
+												// C: Some lookups return arrays. Ex: 'Member/Users/Id' result => { Member:{ Users:{ results:[] } } }
+												// HACK(ish): Avoid complex algorithm and only support up to 2-5 levels deep
+												var lastChild = null;
+												if ( arrKeys.length == 2 ) {
+													// C.1:
+													lastChild = result[arrKeys[0]];
+													if ( lastChild && typeof lastChild === 'object' && Object.keys(lastChild)[0] == 'results' ) {
+														result[arrKeys[0]] = lastChild.results;
+													}
+													// C.2: Capture value
+													// CASE 1: `dataName` was passed in by user: return the actual field user asked for.
+													// EXAMPLE: `Title: { dataName:'Member/Title' }` = return Title:Title (not a Member.Title object)
+													// NOTE: Detect use of names listCols by comparing key to dataName
+													if ( key != arrKeys[0] && key != col.dataName ) colVal = result[arrKeys[0]][arrKeys[1]];
+													// CASE 2: Other - in this case return the complete object (Ex: { Title:'Manager' })
+													// IMPORTANT: This de facto returns all the *other* fields queried. Eg: 'Manager/Id' and 'Manager/Title' were in cols
+													// We want to return a *single* object with these 2 elements, so they can be derefereced using 'Manger.Title' etc.
+													// Capture any-and-all columns returned (aside from removal of above)
+													else colVal = result[arrKeys[0]];
+												}
+												else if ( arrKeys.length == 3 ) {
+													// C.1:
+													lastChild = result[arrKeys[0]][arrKeys[1]];
+													if ( lastChild && typeof lastChild === 'object' && Object.keys(lastChild)[0] == 'results' ) {
+														result[arrKeys[0]][arrKeys[1]] = lastChild.results;
+													}
+													// C.2: Capture value
+													colVal = ( key != arrKeys[0] && key != col.dataName ? result[arrKeys[0]][arrKeys[1]][arrKeys[2]] : result[arrKeys[0]] );
+												}
+												else if ( arrKeys.length == 4 ) {
+													// C.1:
+													lastChild = result[arrKeys[0]][arrKeys[1]][arrKeys[2]];
+													if ( lastChild && typeof lastChild === 'object' && Object.keys(lastChild)[0] == 'results' ) {
+														result[arrKeys[0]][arrKeys[1]][arrKeys[2]] = lastChild.results;
+													}
+													// C.2: Capture value
+													colVal = ( key != arrKeys[0] && key != col.dataName ? result[arrKeys[0]][arrKeys[1]][arrKeys[2]][arrKeys[3]] : result[arrKeys[0]] );
+												}
+												else if ( arrKeys.length > 4 ) {
+													console.log('This is madness!!');
+												}
+											});
+
+											// D: Value clean-up (things like empty multi-person fields may end up being `{}`)
+											if ( typeof colVal === 'object' && !Array.isArray(colVal) && Object.keys(colVal).length == 0 ) colVal = [];
+										}
+										else if ( col.dataName ) {
+											arrCol = col.dataName.split('/');
+											colVal = ( arrCol.length > 1 ? result[arrCol[0]][arrCol[1]] : result[arrCol[0]] );
+										}
+
+										// DESIGN: If `dataType` exists, then transform result
+										// TODO: vvv this is old right?
+										if ( col.dataType == 'DateTime' ) objRow[key] = new Date(colVal);
+										else objRow[key] = ( APP_OPTS.cleanColHtml && col.listDataType == 'string' ? colVal.replace(/<div(.|\n)*?>/gi,'').replace(/<\/div>/gi,'') : colVal );
+									});
+								}
 							}
 							else {
-								Object.keys(inOpt.queryCols).forEach(function(key){
-									var col = inOpt.queryCols[key];
-									var arrCol = [];
-									var colVal = "";
-
-									// B.3.1: Get value(s) for this key
-
-									// Handle Lookups that return an array of 'results' (eg: `LookupMulti`)
-									if ( col.dataName && col.dataName.indexOf('/') > -1
-										&& result[col.dataName.split('/')[0]] && result[col.dataName.split('/')[0]].results )
-									{
-										// A:
-										// NOTE: `listCols` can have "Dept/Id" and "Dept/Title", but SP only returns *ONE* result with both vals
-										// ....: So, skip any subsequent listCol's once results have been captured
-										if ( objRow[key] ) return;
-
-										// B: Default for this column type is empty array as multi-lookup returns an array of `results`
-										colVal = [];
-
-										// C: Add any results
-										result[col.dataName.split('/')[0]].results.forEach(function(objResult,idx){
-											// EX: {__metadata:Object, Id:2, Title:"Human Resources"}
-											if ( objResult.__metadata ) delete objResult.__metadata;
-											// Capture any-and-all columns returned (aside from removal of above)
-											colVal.push( objResult );
-										});
-									}
-									// Handle Lookup/Person/Url/etc. Ex: 'Manager/Title'
-									else if ( col.dataName && col.dataName.indexOf('/') > -1 ) {
-										// NOTE: While most lookups are single-level ('Manager/Title') there can be deeper levels as well ('Users/Member/Id')
-										// NOTE: dataName will be comma-sep fields when colName is an object with fields. (Ex: "Member/Users/Id,Member/Users/Title")
-										// Loop over each field. Ex: 'Member/Id,Member/Title'->['Member/Id','Member/Title']
-										col.dataName.split(',').forEach(function(strField,idx){
-											// A: Split lookup name
-											var arrKeys = strField.split('/');
-
-											// B: Remove extraneous `__metadata` and `__deferred` objects
-											if ( result[arrKeys[0]] && result[arrKeys[0]].__metadata ) delete result[arrKeys[0]].__metadata;
-											if ( result[arrKeys[0]] && result[arrKeys[0]].__deferred ) delete result[arrKeys[0]].__deferred;
-
-											// C: Some lookups return arrays. Ex: 'Member/Users/Id' result => { Member:{ Users:{ results:[] } } }
-											// HACK(ish): Avoid complex algorithm and only support up to 2-5 levels deep
-											var lastChild = null;
-											if ( arrKeys.length == 2 ) {
-												// C.1:
-												lastChild = result[arrKeys[0]];
-												if ( lastChild && typeof lastChild === 'object' && Object.keys(lastChild)[0] == 'results' ) {
-													result[arrKeys[0]] = lastChild.results;
-												}
-												// C.2: Capture value
-												// CASE 1: `dataName` was passed in by user: return the actual field user asked for.
-												// EXAMPLE: `Title: { dataName:'Member/Title' }` = return Title:Title (not a Member.Title object)
-												// NOTE: Detect use of names listCols by comparing key to dataName
-												if ( key != arrKeys[0] && key != col.dataName ) colVal = result[arrKeys[0]][arrKeys[1]];
-												// CASE 2: Other - in this case return the complete object (Ex: { Title:'Manager' })
-												// IMPORTANT: This de facto returns all the *other* fields queried. Eg: 'Manager/Id' and 'Manager/Title' were in cols
-												// We want to return a *single* object with these 2 elements, so they can be derefereced using 'Manger.Title' etc.
-												// Capture any-and-all columns returned (aside from removal of above)
-												else colVal = result[arrKeys[0]];
-											}
-											else if ( arrKeys.length == 3 ) {
-												// C.1:
-												lastChild = result[arrKeys[0]][arrKeys[1]];
-												if ( lastChild && typeof lastChild === 'object' && Object.keys(lastChild)[0] == 'results' ) {
-													result[arrKeys[0]][arrKeys[1]] = lastChild.results;
-												}
-												// C.2: Capture value
-												colVal = ( key != arrKeys[0] && key != col.dataName ? result[arrKeys[0]][arrKeys[1]][arrKeys[2]] : result[arrKeys[0]] );
-											}
-											else if ( arrKeys.length == 4 ) {
-												// C.1:
-												lastChild = result[arrKeys[0]][arrKeys[1]][arrKeys[2]];
-												if ( lastChild && typeof lastChild === 'object' && Object.keys(lastChild)[0] == 'results' ) {
-													result[arrKeys[0]][arrKeys[1]][arrKeys[2]] = lastChild.results;
-												}
-												// C.2: Capture value
-												colVal = ( key != arrKeys[0] && key != col.dataName ? result[arrKeys[0]][arrKeys[1]][arrKeys[2]][arrKeys[3]] : result[arrKeys[0]] );
-											}
-											else if ( arrKeys.length > 4 ) {
-												console.log('This is madness!!');
-											}
-										});
-
-										// D: Value clean-up (things like empty multi-person fields may end up being `{}`)
-										if ( typeof colVal === 'object' && !Array.isArray(colVal) && Object.keys(colVal).length == 0 ) colVal = [];
-									}
-									else if ( col.dataName ) {
-										arrCol = col.dataName.split('/');
-										colVal = ( arrCol.length > 1 ? result[arrCol[0]][arrCol[1]] : result[arrCol[0]] );
-									}
-
-									// DESIGN: If `dataType` exists, then transform result
-									// TODO: vvv this is old right?
-									if ( col.dataType == 'DateTime' ) objRow[key] = new Date(colVal);
-									else objRow[key] = ( APP_OPTS.cleanColHtml && col.listDataType == 'string' ? colVal.replace(/<div(.|\n)*?>/gi,'').replace(/<\/div>/gi,'') : colVal );
+								Object.keys(result).forEach(function(key){
+									var val = result[key];
+									objRow[key] = val;
 								});
 							}
-						}
-						else {
-							Object.keys(result).forEach(function(key){
-								var val = result[key];
-								objRow[key] = val;
-							});
-						}
 
-						// B: Remove metadata unless the option to return it is set
+							// B: Remove metadata unless the option to return it is set
+							if ( objRow.__metadata && !inOpt.metadata ) delete objRow.__metadata;
+
+							// C: Support "next" functionality
+							if ( data.d.__next ) {
+								var objSkip = { prevId:'', maxItems:'' };
+								data.d.__next.split('&').forEach(function(str,idx){
+									if ( str.indexOf('p_ID%3d') > -1 ) {
+										objSkip.prevId = str.split('&')[0].split('%3d')[2];
+									}
+									else if ( str.indexOf('%24top=') > -1 ) {
+										objSkip.maxItems = str.substring(str.lastIndexOf('=')+1);
+									}
+								});
+								if ( objSkip.prevId && objSkip.maxItems ) objRow.__next = objSkip;
+							}
+
+							// D: Add this row
+							inOpt.spArrData.push( objRow );
+						});
+					}
+					// EX..: data.d or data is an [object]: { listTitle:'Game Systems', numberOfItems:25 }
+					else if ( (data && data.d ? data.d : (data ? data : false)) && typeof (data.d || data) === 'object' && Object.keys(data.d || data).length > 0 ) {
+						var objRow = {};
+						var objData = (data.d || data);
+
+						Object.keys(objData).forEach(function(key){
+							var result = objData[key];
+							objRow[key] = result;
+						});
+
 						if ( objRow.__metadata && !inOpt.metadata ) delete objRow.__metadata;
-
-						// C: Support "next" functionality
-						if ( data.d.__next ) {
-							var objSkip = { prevId:'', maxItems:'' };
-							data.d.__next.split('&').forEach(function(str,idx){
-								if ( str.indexOf('p_ID%3d') > -1 ) {
-									objSkip.prevId = str.split('&')[0].split('%3d')[2];
-								}
-								else if ( str.indexOf('%24top=') > -1 ) {
-									objSkip.maxItems = str.substring(str.lastIndexOf('=')+1);
-								}
-							});
-							if ( objSkip.prevId && objSkip.maxItems ) objRow.__next = objSkip;
-						}
-
-						// D: Add this row
 						inOpt.spArrData.push( objRow );
-					});
+					}
+
+					// D:
+					resolve( inOpt.spArrData );
 				}
-				// EX..: data.d or data is an [object]: { listTitle:'Game Systems', numberOfItems:25 }
-				else if ( (data && data.d ? data.d : (data ? data : false)) && typeof (data.d || data) === 'object' && Object.keys(data.d || data).length > 0 ) {
-					var objRow = {};
-					var objData = (data.d || data);
-
-					Object.keys(objData).forEach(function(key){
-						var result = objData[key];
-						objRow[key] = result;
-					});
-
-					if ( objRow.__metadata && !inOpt.metadata ) delete objRow.__metadata;
-					inOpt.spArrData.push( objRow );
-				}
-
-				// D:
-				resolve( inOpt.spArrData );
 			})
 			.catch(function(strErr){
 				// ROBUST: Renew token when needed (use `gRetryCounter` to prevent race condition)
