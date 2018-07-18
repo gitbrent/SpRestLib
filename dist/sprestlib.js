@@ -30,7 +30,7 @@
 (function(){
 	// APP VERSION/BUILD
 	var APP_VER = "1.8.0-beta";
-	var APP_BLD = "20180716";
+	var APP_BLD = "20180717";
 	var DEBUG = false; // (verbose mode/lots of logging)
 	// ENUMERATIONS
 	// REF: [`SP.BaseType`](https://msdn.microsoft.com/en-us/library/office/jj246925.aspx)
@@ -251,6 +251,28 @@
 		// "The GetFileByServerRelativeUrl endpoint is recommended way to get a file. See SP.File request examples."
 
 		/**
+		* Get a File (binary or text)
+		*
+		* @returns: a File as a Blob
+		* @see: https://msdn.microsoft.com/en-us/library/office/dn450841.aspx#bk_FileRequestExamples
+		*/
+		_newFile.get = function() {
+			return new Promise(function(resolve, reject) {
+				sprLib.rest({
+					url: "_api/web/GetFileByServerRelativeUrl('"+ _fullName +"')/$value",
+					headers: {'binaryStringResponseBody':true}
+				})
+				.then(data => {
+					// A: Return blob from ArrayBuffer
+					resolve( new Blob([data], {type:"application/octet-stream"}) );
+				})
+				.catch(function(strErr){
+					reject( strErr );
+				});
+			});
+		}
+
+		/**
 		* Get information about a File
 		* Optionally include a version tag to get info about a certain file version
 		*
@@ -370,29 +392,7 @@
 			});
 		}
 
-
-		/**
-		* get file
-		*
-		* @returns: blob
-		* @see: https://msdn.microsoft.com/en-us/library/office/dn450841.aspx#bk_FileRequestExamples
-		*/
-		_newFile.get = function() {
-			return new Promise(function(resolve, reject) {
-				sprLib.rest({
-					url: "_api/web/GetFileByServerRelativeUrl('"+ _fullName +"')/$value",
-					headers: {'binaryStringResponseBody':true}
-				})
-				.then(data => {
-					// A: Return blob from ArrayBuffer
-					resolve( new Blob([data], {type:"application/octet-stream"}) );
-				})
-				.catch(function(strErr){
-					reject( strErr );
-				});
-			});
-		}
-
+		// WIP BELOW:
 
 		// TODO: WIP: .upload({ data:arrayBuffer/FilePicker/whatev, overwrite:BOOL })
 		/**
@@ -2401,6 +2401,7 @@
 	sprLib.user = function user(inOpt) {
 		var _newUser = {};
 		var _urlBase = "_api/Web";
+		var _urlProf = "_api";
 		var _urlRest = "/CurrentUser?"; // Default to current user if no options were provided
 
 		// STEP 1: Options setup/check
@@ -2408,8 +2409,8 @@
 		// Check for existance of any keys to filter out `{}` that is sometimes passed - dont warn about those, treat as empty
 		if ( inOpt && Object.keys(inOpt).length > 0
 			&& !inOpt.hasOwnProperty('id') && !inOpt.hasOwnProperty('email')
-			&& !inOpt.hasOwnProperty('login') && !inOpt.hasOwnProperty('title')
-		) {
+			&& !inOpt.hasOwnProperty('login') && !inOpt.hasOwnProperty('title') )
+		{
 			console.warn('Warning: Check your options! Available `user()` options are: `id`,`email`,`login`,`title`');
 			console.warn('Result: Current user is being returned');
 			// NOTE: Treat junk params as null (Clear options to remove junk entries)
@@ -2417,10 +2418,13 @@
 		}
 		// B: Ensure an `inOpt` value going forward
 		inOpt = inOpt || {};
+		// C: Setup digest as UserProfile does a `POST`
+		inOpt.digest = (inOpt.requestDigest || (typeof document !== 'undefined' && document.getElementById('__REQUESTDIGEST') ? document.getElementById('__REQUESTDIGEST').value : null));
 
 		// STEP 2: Set `baseUrl`
 		if ( inOpt.hasOwnProperty('baseUrl') ) {
 			_urlBase = ( inOpt.baseUrl.toString().replace(/\/+$/,'') + '/_api/Web');
+			_urlProf = ( inOpt.baseUrl.toString().replace(/\/+$/,'') + '/_api');
 		}
 
 		// STEP 3: Build query URL based on whether its current user (no parameter) or a passed in object
@@ -2558,7 +2562,7 @@
 					// NOTE: Both of these queries returns an object of [PersonProperties](https://msdn.microsoft.com/en-us/library/office/dn790354.aspx#bk_PersonProperties)
 					if ( !userAcctName ) {
 						return sprLib.rest({
-							url: "_api/SP.UserProfiles.PeopleManager/GetMyProperties",
+							url: _urlProf+"/SP.UserProfiles.PeopleManager/GetMyProperties",
 							metadata: false
 						});
 					}
@@ -2566,7 +2570,8 @@
 						// NOTE: Encode "#" to "%23" or query fails!
 						// NOTE: Per MSDN we can only query with `accountName`
 						return sprLib.rest({
-							url: "_api/SP.UserProfiles.PeopleManager/GetPropertiesFor(accountName=@v)?@v='"+userAcctName+"'",
+							url: _urlProf+"/SP.UserProfiles.PeopleManager/GetPropertiesFor(accountName=@v)?@v='"+userAcctName+"'",
+							headers: { "Accept":"application/json;odata=verbose", "X-RequestDigest":inOpt.digest },
 							type: 'POST',
 							metadata: false
 						});
