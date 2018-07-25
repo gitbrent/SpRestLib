@@ -261,7 +261,7 @@
 					url: "_api/web/GetFileByServerRelativeUrl('"+ _fullName +"')/$value",
 					headers: {'binaryStringResponseBody':true}
 				})
-				.then(data => {
+				.then(function(data){
 					if ( typeof Blob !== 'undefined' ) {
 						// Web browser: Return blob from ArrayBuffer
 						resolve( new Blob([data], {type:"application/octet-stream"}) );
@@ -279,12 +279,12 @@
 						//console.log( Buffer.from(data,'base64').length );
 						//console.log(data);
 						//console.log( data.toString('utf8') );
-						//
+						/*
 						console.log( Buffer.from(data,'ascii').length );
 						console.log( Buffer.from(data,'binary').byteLength );
 						console.log( Buffer.from(data,'utf16le').length );
 						console.log( Buffer.from(data).byteLength );
-						//JSON.stringify
+						*/
 
 						//console.log( Uint8Array.from(Buffer.from(data,'binary')).length );
 						//console.log( Buffer.from(Uint8Array.from(data)).length );
