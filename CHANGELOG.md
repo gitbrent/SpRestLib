@@ -8,7 +8,7 @@
 
 **Fixed Bugs:**
 - Defect: The list() `baseUrl` option is ignored by the underlying versions query. [\#27](https://github.com/gitbrent/sprestlib/issues/27) ([gitbrent](https://github.com/gitbrent))
-
+- sprLib.user(options).profile() using "post"? [\#30](https://github.com/gitbrent/sprestlib/issues/30) ([YakQin](https://github.com/YakQin))
 
 
 
