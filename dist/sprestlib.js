@@ -30,7 +30,7 @@
 (function(){
 	// APP VERSION/BUILD
 	var APP_VER = "1.8.0-beta";
-	var APP_BLD = "20180717";
+	var APP_BLD = "20180724";
 	var DEBUG = false; // (verbose mode/lots of logging)
 	// ENUMERATIONS
 	// REF: [`SP.BaseType`](https://msdn.microsoft.com/en-us/library/office/jj246925.aspx)
@@ -236,7 +236,6 @@
 
 		// D: Ensure a full path
 		// Allow relative names for web users
-		_spPageContextInfo.webServerRelativeUrl
 		if ( _fullName.indexOf('/') != 0 && _spPageContextInfo && _spPageContextInfo.webServerRelativeUrl ) {
 			_fullName = _spPageContextInfo.webServerRelativeUrl + _fullName;
 		}
@@ -263,8 +262,38 @@
 					headers: {'binaryStringResponseBody':true}
 				})
 				.then(data => {
-					// A: Return blob from ArrayBuffer
-					resolve( new Blob([data], {type:"application/octet-stream"}) );
+					if ( typeof Blob !== 'undefined' ) {
+						// Web browser: Return blob from ArrayBuffer
+						resolve( new Blob([data], {type:"application/octet-stream"}) );
+					}
+					else {
+						// TODO: FIXME: only text files work with this buffer setup - binary files are corrupted
+						// @see: https://stackoverflow.com/questions/17836438/getting-binary-content-in-node-js-with-http-request
+						// @see: https://stackoverflow.com/questions/14653349/node-js-can%C2%B4t-create-blobs
+						// @see: https://nodejs.org/api/buffer.html#buffer_class_method_buffer_from_buffer
+
+						// Nodejs: Return ArrayBuffer
+						//resolve( Uint8Array.from(Buffer.from(data)).buffer );
+
+						//console.log( Buffer.from(data,'utf8').length );
+						//console.log( Buffer.from(data,'base64').length );
+						//console.log(data);
+						//console.log( data.toString('utf8') );
+						//
+						console.log( Buffer.from(data,'ascii').length );
+						console.log( Buffer.from(data,'binary').byteLength );
+						console.log( Buffer.from(data,'utf16le').length );
+						console.log( Buffer.from(data).byteLength );
+						//JSON.stringify
+
+						//console.log( Uint8Array.from(Buffer.from(data,'binary')).length );
+						//console.log( Buffer.from(Uint8Array.from(data)).length );
+						//console.log( Buffer.from(data,'hex').length );
+						resolve( Buffer.from(data,'binary') ); // works for text
+						//resolve( Buffer.from(data) );
+						//resolve( Buffer.from(data,'binary') ); // works for text
+						//resolve( Buffer.from(data) ); // works for text
+					}
 				})
 				.catch(function(strErr){
 					reject( strErr );
@@ -2418,8 +2447,6 @@
 		}
 		// B: Ensure an `inOpt` value going forward
 		inOpt = inOpt || {};
-		// C: Setup digest as UserProfile does a `POST`
-		inOpt.digest = (inOpt.requestDigest || (typeof document !== 'undefined' && document.getElementById('__REQUESTDIGEST') ? document.getElementById('__REQUESTDIGEST').value : null));
 
 		// STEP 2: Set `baseUrl`
 		if ( inOpt.hasOwnProperty('baseUrl') ) {
@@ -2571,8 +2598,6 @@
 						// NOTE: Per MSDN we can only query with `accountName`
 						return sprLib.rest({
 							url: _urlProf+"/SP.UserProfiles.PeopleManager/GetPropertiesFor(accountName=@v)?@v='"+userAcctName+"'",
-							headers: { "Accept":"application/json;odata=verbose", "X-RequestDigest":inOpt.digest },
-							type: 'POST',
 							metadata: false
 						});
 					}
