@@ -2438,12 +2438,11 @@
 		// Check for existance of any keys to filter out `{}` that is sometimes passed - dont warn about those, treat as empty
 		if ( inOpt && Object.keys(inOpt).length > 0
 			&& !inOpt.hasOwnProperty('id') && !inOpt.hasOwnProperty('email')
-			&& !inOpt.hasOwnProperty('login') && !inOpt.hasOwnProperty('title') )
+			&& !inOpt.hasOwnProperty('login') && !inOpt.hasOwnProperty('title') && !inOpt.hasOwnProperty('baseUrl') )
 		{
-			console.warn('Warning: Check your options! Available `user()` options are: `id`,`email`,`login`,`title`');
-			console.warn('Result: Current user is being returned');
-			// NOTE: Treat junk params as null (Clear options to remove junk entries)
-			inOpt = {};
+			console.warn('Warning: Unknown option(s) passed. Available `user()` options are: `baseUrl`,`id`,`email`,`login`,`title`');
+			console.warn('Result: The current user is being returned');
+			inOpt = {}; // NOTE: Treat junk params as null (Clear options to remove junk entries)
 		}
 		// B: Ensure an `inOpt` value going forward
 		inOpt = inOpt || {};
@@ -2464,7 +2463,7 @@
 		else if ( inOpt && inOpt.login ) _urlRest = "/siteusers?$filter=LoginName%20eq%20%27"+ inOpt.login.replace(/#/g,'%23') +"%27&";
 		else if ( inOpt && inOpt.title ) _urlRest = "/siteusers?$filter=Title%20eq%20%27"+     inOpt.title +"%27&";
 
-		// STEP 4: Complete URL
+		// STEP 4: Build complete URL
 		_urlRest = _urlBase + _urlRest;
 
 		/**
