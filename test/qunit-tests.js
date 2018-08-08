@@ -2,7 +2,7 @@
  * NAME: qunit-test.js
  * DESC: tests for qunit-test.html (coded against my personal O365 Dev Site - YMMV)
  * AUTH: https://github.com/gitbrent/
- * DATE: 20180628
+ * DATE: 20180807
  *
  * HOWTO: Generate text tables for README etc.:
  * sprLib.list('Employees').items(['Id', 'Name', 'Badge_x0020_Number']).then(function(arrData){ console.log(getAsciiTableStr(arrData)) });
@@ -1204,6 +1204,34 @@ QUnit.module( "LIST > ITEM GET Methods" );
 }
 
 // ================================================================================================
+QUnit.module( "FILE > ITEM GET Methods" );
+// ================================================================================================
+{
+	// get - done via test in `DEMO_SpRestLib`
+	// info
+	// perms
+	QUnit.test("sprLib.file('whatever').get()", function(assert){
+		var done = assert.async();
+
+		sprLib.folder('SiteAssets').files()
+		.then(arrFiles => {
+			// TEST:
+			sprLib.file( arrFiles[0].ServerRelativeUrl ).info()
+			.then(function(objInfo){
+				assert.ok( Object.keys(objInfo).length > 0, "Object.keys(objInfo).length > 0: "+ Object.keys(objInfo).length );
+				assert.ok( getAsciiTableStr([objInfo]) , `RESULTS:\n${getAsciiTableStr([objInfo])}`);
+				done();
+			})
+			.catch(function(errorMessage){
+				assert.ok( (false), errorMessage );
+				done();
+			});
+		});
+	});
+
+}
+
+// ================================================================================================
 QUnit.module( "QA: Result Parsing" );
 // ================================================================================================
 {
@@ -1578,10 +1606,7 @@ QUnit.module( "requestDigest Tests" );
 	});
 }
 
-// ================================================================================================
-QUnit.module( "SITE Methods" );
-// ================================================================================================
-{
+QUnit.module("SITE Methods", function(){
 	var arrTestUrls = [ null, SITEURL1, SITEURL2 ];
 
 	// DESC: info()
@@ -1921,12 +1946,9 @@ QUnit.module( "SITE Methods" );
 			});
 		});
 	});
-}
+});
 
-// ================================================================================================
-QUnit.module( "USER Methods" );
-// ================================================================================================
-{
+QUnit.module("USER Methods", function(){
 	var gObjCurrUser = {};
 
 	sprLib.user().info()
@@ -2045,7 +2067,9 @@ QUnit.module( "USER Methods" );
 			console.log( strErr );
 		});
 	});
-}
+});
+
+
 
 // TODO: Add Utility methods
 
