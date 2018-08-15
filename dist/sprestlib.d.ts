@@ -35,7 +35,7 @@ declare namespace sprLib {
     requestDigest?: string;
   }
   interface ListItemsOptions {
-    listCols: Array<string> | Object;
+    listCols?: Array<string> | Object;
     metadata?: boolean;
     queryFilter?: string;
     queryLimit?: number;
