@@ -10,6 +10,7 @@
 - Defect: The list() `baseUrl` option is ignored by the underlying versions query. [\#27](https://github.com/gitbrent/sprestlib/issues/27) ([gitbrent](https://github.com/gitbrent))
 - sprLib.user(options).profile() using "post"? [\#30](https://github.com/gitbrent/sprestlib/issues/30) ([YakQin](https://github.com/YakQin))
 - The `baseUrl` option no longer works in `user()` methods [\#31](https://github.com/gitbrent/sprestlib/issues/31) ([YakQin](https://github.com/YakQin))
+- Typescript fix: listCols should be optional [\#33](https://github.com/gitbrent/sprestlib/pull/33) ([csoren](https://github.com/csoren))
 
 
 
