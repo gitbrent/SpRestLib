@@ -15,12 +15,23 @@ declare namespace sprLib {
 
   function renewSecurityToken(): void;
 
+  interface FileInfoOptions {
+    version?: number;
+  }
   class file {
     constructor(fileName: string);
 
-    info(): Promise<Object>;
+    get(): Promise<Blob>;
+    info(options: FileInfoOptions): Promise<Object>;
     perms(): Promise<Object[]>;
-    version(): Promise<Object>;
+  }
+
+  class folder {
+    constructor(folderName: string);
+
+    info(): Promise<Object>;
+    files(): Promise<Object[]>;
+    folders(): Promise<Object[]>;
   }
 
   /**
