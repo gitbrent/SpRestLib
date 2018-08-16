@@ -289,10 +289,13 @@
 						//console.log( Uint8Array.from(Buffer.from(data,'binary')).length );
 						//console.log( Buffer.from(Uint8Array.from(data)).length );
 						//console.log( Buffer.from(data,'hex').length );
-						resolve( Buffer.from(data,'binary') ); // works for text
+						//resolve( Buffer.from(data,'binary') ); // works for text
 						//resolve( Buffer.from(data) );
 						//resolve( Buffer.from(data,'binary') ); // works for text
 						//resolve( Buffer.from(data) ); // works for text
+
+						// NOTE: FIXME: Below used for 1.8.0
+						resolve( Buffer.from(data,'binary') ); // works for text
 					}
 				})
 				.catch(function(strErr){

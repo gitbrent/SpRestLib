@@ -5,7 +5,7 @@
  * REQS: Node 4.x + `npm install sprestlib`
  * EXEC: `node nodejs-demo.js (sp-username) (sp-password) {sp-hostUrl}`
  * VER.: 1.8.0-beta
- * REL.: 20180721
+ * REL.: 20180815
  * REFS: HOWTO: Authenticate to SharePoint Online (*.sharepoint.com)
  * - https://allthatjs.com/2012/03/28/remote-authentication-in-sharepoint-online/
  * - http://paulryan.com.au/2014/spo-remote-authentication-rest/
@@ -225,25 +225,21 @@ Promise.resolve()
 .then((arrResults) => {
 	console.log('SUCCESS: "'+ arrResults[0].Name +'" uploaded to: '+ arrResults[0].ServerRelativeUrl );
 
-	var strFilename = '/sites/dev/Shared Documents/COPYME-valign.pptx'; // binary (24047 bytes)
-//	var strFilename = '/sites/dev/Shared Documents/sprestlib-demo.html'; // text (33140 bytes)
+	var strFilename = '/sites/dev/Shared Documents/sprestlib-demo.html';
 
-	// TODO: better test
-	if ( process.cwd().indexOf('brent') ) {
-		console.log("\nTEST 5: sprLib.file().get() - get a file from 'Documents' Library");
-		console.log("------------------------------------------------------------");
-		return sprLib.file(strFilename).get();
-	}
-
+	console.log("\nTEST 5: sprLib.file().get() - get a file from 'Documents' Library");
+	console.log("------------------------------------------------------------");
+	return sprLib.file(strFilename).get();
 })
 .then((fileBuffer) => {
 	if ( fileBuffer ) {
-		//console.log('SUCCESS: "'+ 'file' +'" fetched : '+ arrResults[0].ServerRelativeUrl );
-
-		fs.writeFileSync('demo.pptx', fileBuffer, 'binary');//Buffer(new Uint8Array(this.result)));
-//		fs.writeFileSync('demo.html', fileBuffer); // works for text
-		//fs.writeFileSync('demo.html', Buffer.from(fileBuffer)); // works for text
-//		fs.writeFileSync('demo.pptx', Buffer.from(fileBuffer)); // ?
+		var strFileGet = 'file-get-dl-'+ new Date().toISOString() +'.html';
+		// TODO: FIXME: works for text only as of 1.8.0
+		fs.writeFileSync(strFileGet, Buffer.from(fileBuffer));
+		console.log('SUCCESS: "'+ strFileGet +'" downloaded!');
+	}
+	else {
+		console.log('FAIL: `fileBuffer` is empty');
 	}
 })
 .then(() => {
