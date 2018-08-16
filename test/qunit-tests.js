@@ -2,7 +2,7 @@
  * NAME: qunit-test.js
  * DESC: tests for qunit-test.html (coded against my personal O365 Dev Site - YMMV)
  * AUTH: https://github.com/gitbrent/
- * DATE: 20180808
+ * DATE: 20180815
  *
  * HOWTO: Generate text tables for README etc.:
  * sprLib.list('Employees').items(['Id', 'Name', 'Badge_x0020_Number']).then(function(arrData){ console.log(getAsciiTableStr(arrData)) });
@@ -1220,6 +1220,20 @@ QUnit.module( "FILE - Methods", function(){
 });
 
 QUnit.module( "FOLDER - Methods", function(){
+	QUnit.test("sprLib.folder('"+BASEURL+"/SiteAssets').info()", function(assert){
+		var done = assert.async();
+		sprLib.folder(BASEURL+'/SiteAssets').info()
+		.then(function(objInfo){
+			assert.ok( Object.keys(objInfo).length > 0, "Object.keys(objInfo).length > 0: "+ Object.keys(objInfo).length );
+			assert.ok( getAsciiTableStr([objInfo]) , `RESULTS:\n${getAsciiTableStr([objInfo])}`);
+			done();
+		})
+		.catch(function(errorMessage){
+			assert.ok( (false), errorMessage );
+			done();
+		});
+	});
+
 	QUnit.test("sprLib.folder('SiteAssets').info()", function(assert){
 		var done = assert.async();
 		sprLib.folder('SiteAssets').info()
