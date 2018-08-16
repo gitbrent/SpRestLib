@@ -493,8 +493,10 @@
 	// API: FOLDER
 	/**
 	* @param `inOpt` (object)/(string) - required - (`name` prop reqd)
-	*
+	* @example - `sprLib.folder('/sites/dev/SiteAssets/');`
+	* @example - `sprLib.folder({ 'name':'/sites/dev/SiteAssets/' });`
 	* @since 1.8.0
+	* @see: [File API](https://gitbrent.github.io/SpRestLib/docs/api-folder.html)
 	* @see: [Files and folders REST API reference](https://msdn.microsoft.com/en-us/library/office/dn450841.aspx#bk_Folder)
 	*/
 	sprLib.folder = function folder(inOpt) {
@@ -502,7 +504,6 @@
 		inOpt = inOpt || {};
 		var _newFolder = {};
 		var _fullName = "";
-		var _requestDigest = (inOpt.requestDigest || (typeof document !== 'undefined' && document.getElementById('__REQUESTDIGEST') ? document.getElementById('__REQUESTDIGEST').value : null));
 
 		// B: Options check/set
 		if ( inOpt && typeof inOpt === 'string' ) {
