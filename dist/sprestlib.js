@@ -30,7 +30,7 @@
 (function(){
 	// APP VERSION/BUILD
 	var APP_VER = "1.8.0-beta";
-	var APP_BLD = "20180724";
+	var APP_BLD = "20180815";
 	var DEBUG = false; // (verbose mode/lots of logging)
 	// ENUMERATIONS
 	// REF: [`SP.BaseType`](https://msdn.microsoft.com/en-us/library/office/jj246925.aspx)
@@ -427,8 +427,8 @@
 		/**
 		* @see: https://msdn.microsoft.com/en-us/library/office/dn450841.aspx#bk_FileCollectionAdd
 		*/
-		_newFile.upload = function() {
-			return new Promise(function(resolve, reject) {
+		//_newFile.upload = function() {
+		//	return new Promise(function(resolve, reject) {
 				// CASE 1: NODE.JS
 				/*
 				// TODO: _fullName -> split for vars below!
@@ -480,8 +480,8 @@
 					})
 
 				*/
-			});
-		};
+		//	});
+		//};
 
 		// LAST: Return this new File
 		return _newFile;
@@ -524,8 +524,8 @@
 		// .delete() // headers: { "X-HTTP-Method":"DELETE" },
 		// .recycle() // POST to: /recycle
 		//
-		// a uniuqe folder:
-		// /sites/dev/_api/web/GetFolderByServerRelativePath(decodedurl='/sites/dev/SiteAssets/js')
+		// a unique folder:
+		// /sites/dev/_api/web/GetFolderByServerRelativeUrl('/sites/dev/SiteAssets/js')
 
 		/**
 		* Get information (properties) for a Folder
@@ -536,7 +536,7 @@
 		_newFolder.info = function() {
 			return new Promise(function(resolve, reject) {
 				sprLib.rest({
-					url: "_api/web/GetFolderByServerRelativePath(decodedurl='"+ _fullName +"')",
+					url: "_api/web/GetFolderByServerRelativeUrl('"+ _fullName +"')",
 					queryCols: [
 						'Name','ItemCount','ServerRelativeUrl','StorageMetrics/TotalSize',
 						'Properties/vti_x005f_timecreated','Properties/vti_x005f_timelastmodified','Properties/vti_x005f_hassubdirs',
@@ -588,7 +588,7 @@
 		_newFolder.files = function() {
 			return new Promise(function(resolve, reject) {
 				sprLib.rest({
-					url: "_api/web/GetFolderByServerRelativePath(decodedurl='"+ _fullName +"')/Files",
+					url: "_api/web/GetFolderByServerRelativeUrl('"+ _fullName +"')/Files",
 					queryCols: [
 						'Author/Id','CheckedOutByUser/Id','LockedByUser/Id','ModifiedBy/Id',
 						'Author/Title','CheckedOutByUser/Title','LockedByUser/Title','ModifiedBy/Title',
@@ -631,7 +631,7 @@
 		_newFolder.folders = function() {
 			return new Promise(function(resolve, reject) {
 				sprLib.rest({
-					url: "_api/web/GetFolderByServerRelativePath(decodedurl='"+ _fullName +"')/Folders",
+					url: "_api/web/GetFolderByServerRelativeUrl('"+ _fullName +"')/Folders",
 					queryCols: [
 						'Name','ItemCount','ServerRelativeUrl',
 						'Properties/vti_x005f_timecreated','Properties/vti_x005f_timelastmodified','Properties/vti_x005f_hassubdirs',
