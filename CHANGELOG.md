@@ -5,6 +5,9 @@
 
 **Implemented Enhancements:**
 - Add Typescript Definitions [\#24](https://github.com/gitbrent/sprestlib/issues/24) ([Wireliner](https://github.com/Wireliner))
+- New File Methods: `get()`, `info()`, `perms()` [\#20](https://github.com/gitbrent/sprestlib/issues/20) ([ra6hi9](https://github.com/ra6hi9))([YakQin](https://github.com/YakQin))([gitbrent](https://github.com/gitbrent))
+- New Folder Methods: `info()`, `files()`, `folders()` [\#20](https://github.com/gitbrent/sprestlib/issues/20) ([ra6hi9](https://github.com/ra6hi9))([YakQin](https://github.com/YakQin))([gitbrent](https://github.com/gitbrent))
+- Two new properties added to `list().cols()`: `choiceValues` and `allowFillInChoices`
 
 **Fixed Bugs:**
 - Defect: The list() `baseUrl` option is ignored by the underlying versions query. [\#27](https://github.com/gitbrent/sprestlib/issues/27) ([gitbrent](https://github.com/gitbrent))
