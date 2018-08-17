@@ -275,8 +275,8 @@ Returns: Array of columns with name value pairs of property values
 | `isRequired`   | boolean  | is a value required in this column?        |
 | `isUnique`     | boolean  | are unique values enforced on this column? |
 | `maxLength`    | boolean  | the maximum length of the column value     |
-| `choiceValues  | array    | allowed choice values                      |
-| `allowFillInChoices | boolean | are fill-in (custom) choices allowed?  |
+| `choiceValues` | array    | allowed choice values                      |
+| `allowFillInChoices` | boolean | are fill-in (custom) choices allowed? |
 
 ### Sample Code
 ```javascript
@@ -285,9 +285,9 @@ sprLib.list('Announcements').cols()
 
 // Result:
 /*
-.-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------.
+.---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------.
 |      dispName       |     dataName      |  dataType   | isAppend | isNumPct | isReadOnly | isRequired | isUnique | defaultValue | maxLength | choiceValues | allowFillInChoices |
-|---------------------|-------------------|-------------|----------|----------|------------|------------|----------|--------------|-----------|--------------|------------------------|
+|---------------------|-------------------|-------------|----------|----------|------------|------------|----------|--------------|-----------|--------------|--------------------|
 | ID                  | ID                | Counter     | false    | false    | true       | false      | false    | null         | null      | null         | null               |
 | Content Type        | ContentType       | Computed    | false    | false    | false      | false      | false    | null         | null      | null         | null               |
 | Title               | Title             | Text        | false    | false    | false      | true       | false    | null         |       255 | null         | null               |
@@ -305,8 +305,8 @@ sprLib.list('Announcements').cols()
 | Compliance Asset Id | ComplianceAssetId | Text        | false    | false    | true       | false      | false    | null         |       255 | null         | null               |
 | Body                | Body              | Note        | false    | false    | false      | false      | false    | null         | null      | null         | null               |
 | Expires             | Expires           | DateTime    | false    | false    | false      | false      | false    | null         | null      | null         | null               |
-| Status              | Status            | Choice      | false    | false    | false      | false      | false    | null         | null      | [Red,Amber,Green]  | false            |
-'-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------'
+| Status              | Status            | Choice      | false    | false    | false      | false      | false    | null         | null      | [1, 2, 3, 4] | false              |
+'---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------'
 */
 ```
 
