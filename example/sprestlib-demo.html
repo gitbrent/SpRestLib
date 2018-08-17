@@ -6,7 +6,7 @@
 	<meta name="website"     content="https://github.com/gitbrent/SpRestLib/">
 	<meta name="keywords"    content="SpRestLib, JavaScript, js-sharepoint, OData, REST, SharePoint 2013, SP2013, SharePoint 2016, SP2016, SharePoint Online">
 	<meta name="description" content="Content Editor WebPart to showcase SpRestLib features and capabilities">
-	<meta name="revised"     content="20180716">
+	<meta name="revised"     content="20180816">
 
 	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300">
 	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:700">
@@ -32,14 +32,15 @@
 	-->
 
 	<script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
-	<script src="https://cdn.rawgit.com/gitbrent/SpRestLib/master/dist/sprestlib.bundle.js"></script>
+	<!--<script src="https://cdn.rawgit.com/gitbrent/SpRestLib/e34598d5/dist/sprestlib.bundle.js"></script>-->
+	<script src="https://gitcdn.link/repo/gitbrent/SpRestLib/master/dist/sprestlib.bundle.js"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.29.0/js/jquery.tablesorter.min.js"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.8.3/prism.min.js"></script>
 	<script src="https://cdn.rawgit.com/sorensen/ascii-table/v0.0.9/ascii-table.min.js"></script>
 
 	<script>
 		$.ajaxSetup({ cache:false });
-		var APP_BLD = 20180716;
+		var APP_BLD = 20180816;
 		var HTML_SPINNER = '<div class="sprlib-spinner"><div class="sprlib-bounce1"></div><div class="sprlib-bounce2"></div><div class="sprlib-bounce3"></div></div>';
 		var LAYOUTS_URL = _spPageContextInfo.layoutsUrl || '_layouts/15';
 
@@ -552,7 +553,7 @@
 
 			// TAB: File
 			{
-				sprLib.folder('Shared Documents').files()
+				sprLib.folder('SiteAssets').files()
 				.then(function(arrResults){
 					arrResults
 					.sort(function(a,b){ return (a.Name > b.Name) ? 1 : ((b.Name > a.Name) ? -1 : 0); })
@@ -786,7 +787,7 @@
 
 				<div id="contFileSelect" class="divTable" style="width:auto; margin-bottom:20px;">
 					<div class="th" style="padding:0; font-size:120%; vertical-align:middle;">
-						"Shared Documents" Files
+						"Site Assets" Files
 					</div>
 					<div>
 						<div class="sprlib-spinner"><div class="sprlib-bounce1"></div><div class="sprlib-bounce2"></div><div class="sprlib-bounce3"></div></div>
