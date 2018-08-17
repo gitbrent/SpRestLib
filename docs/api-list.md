@@ -275,6 +275,8 @@ Returns: Array of columns with name value pairs of property values
 | `isRequired`   | boolean  | is a value required in this column?        |
 | `isUnique`     | boolean  | are unique values enforced on this column? |
 | `maxLength`    | boolean  | the maximum length of the column value     |
+| `choiceValues  | array    | allowed choice values                      |
+| `allowFillInChoices | boolean | are fill-in (custom) choices allowed?  |
 
 ### Sample Code
 ```javascript
@@ -283,27 +285,28 @@ sprLib.list('Announcements').cols()
 
 // Result:
 /*
-.---------------------------------------------------------------------------------------------------------------------------------------------.
-|      dispName       |     dataName      |  dataType   | isAppend | isNumPct | isReadOnly | isRequired | isUnique | defaultValue | maxLength |
-|---------------------|-------------------|-------------|----------|----------|------------|------------|----------|--------------|-----------|
-| ID                  | ID                | Counter     | false    | false    | true       | false      | false    | null         | null      |
-| Content Type        | ContentType       | Computed    | false    | false    | false      | false      | false    | null         | null      |
-| Title               | Title             | Text        | false    | false    | false      | true       | false    | null         |       255 |
-| Modified            | Modified          | DateTime    | false    | false    | true       | false      | false    | null         | null      |
-| Created             | Created           | DateTime    | false    | false    | true       | false      | false    | null         | null      |
-| Created By          | Author            | User        | false    | false    | true       | false      | false    | null         | null      |
-| Modified By         | Editor            | User        | false    | false    | true       | false      | false    | null         | null      |
-| Attachments         | Attachments       | Attachments | false    | false    | false      | false      | false    | null         | null      |
-| Title               | LinkTitleNoMenu   | Computed    | false    | false    | true       | false      | false    | null         | null      |
-| Title               | LinkTitle         | Computed    | false    | false    | true       | false      | false    | null         | null      |
-| Item Child Count    | ItemChildCount    | Lookup      | false    | false    | true       | false      | false    | null         | null      |
-| Folder Child Count  | FolderChildCount  | Lookup      | false    | false    | true       | false      | false    | null         | null      |
-| App Created By      | AppAuthor         | Lookup      | false    | false    | true       | false      | false    | null         | null      |
-| App Modified By     | AppEditor         | Lookup      | false    | false    | true       | false      | false    | null         | null      |
-| Compliance Asset Id | ComplianceAssetId | Text        | false    | false    | true       | false      | false    | null         |       255 |
-| Body                | Body              | Note        | false    | false    | false      | false      | false    | null         | null      |
-| Expires             | Expires           | DateTime    | false    | false    | false      | false      | false    | null         | null      |
-'---------------------------------------------------------------------------------------------------------------------------------------------'
+.-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------.
+|      dispName       |     dataName      |  dataType   | isAppend | isNumPct | isReadOnly | isRequired | isUnique | defaultValue | maxLength | choiceValues | allowFillInChoices |
+|---------------------|-------------------|-------------|----------|----------|------------|------------|----------|--------------|-----------|--------------|------------------------|
+| ID                  | ID                | Counter     | false    | false    | true       | false      | false    | null         | null      | null         | null               |
+| Content Type        | ContentType       | Computed    | false    | false    | false      | false      | false    | null         | null      | null         | null               |
+| Title               | Title             | Text        | false    | false    | false      | true       | false    | null         |       255 | null         | null               |
+| Modified            | Modified          | DateTime    | false    | false    | true       | false      | false    | null         | null      | null         | null               |
+| Created             | Created           | DateTime    | false    | false    | true       | false      | false    | null         | null      | null         | null               |
+| Created By          | Author            | User        | false    | false    | true       | false      | false    | null         | null      | null         | null               |
+| Modified By         | Editor            | User        | false    | false    | true       | false      | false    | null         | null      | null         | null               |
+| Attachments         | Attachments       | Attachments | false    | false    | false      | false      | false    | null         | null      | null         | null               |
+| Title               | LinkTitleNoMenu   | Computed    | false    | false    | true       | false      | false    | null         | null      | null         | null               |
+| Title               | LinkTitle         | Computed    | false    | false    | true       | false      | false    | null         | null      | null         | null               |
+| Item Child Count    | ItemChildCount    | Lookup      | false    | false    | true       | false      | false    | null         | null      | null         | null               |
+| Folder Child Count  | FolderChildCount  | Lookup      | false    | false    | true       | false      | false    | null         | null      | null         | null               |
+| App Created By      | AppAuthor         | Lookup      | false    | false    | true       | false      | false    | null         | null      | null         | null               |
+| App Modified By     | AppEditor         | Lookup      | false    | false    | true       | false      | false    | null         | null      | null         | null               |
+| Compliance Asset Id | ComplianceAssetId | Text        | false    | false    | true       | false      | false    | null         |       255 | null         | null               |
+| Body                | Body              | Note        | false    | false    | false      | false      | false    | null         | null      | null         | null               |
+| Expires             | Expires           | DateTime    | false    | false    | false      | false      | false    | null         | null      | null         | null               |
+| Status              | Status            | Choice      | false    | false    | false      | false      | false    | null         | null      | [Red,Amber,Green]  | false            |
+'-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------'
 */
 ```
 
