@@ -30,7 +30,7 @@
 (function(){
 	// APP VERSION/BUILD
 	var APP_VER = "1.8.0-beta";
-	var APP_BLD = "20180815";
+	var APP_BLD = "20180816";
 	var DEBUG = false; // (verbose mode/lots of logging)
 	// ENUMERATIONS
 	// REF: [`SP.BaseType`](https://msdn.microsoft.com/en-us/library/office/jj246925.aspx)
@@ -528,6 +528,8 @@
 		// .delete() // headers: { "X-HTTP-Method":"DELETE" },
 		// .recycle() // POST to: /recycle
 		//
+		// FYI: /_api/web/GetFolderByServerRelativeUrl(‘{folder url}’)/ListItemAllFields/breakroleinheritance(true)
+		//
 		// a unique folder:
 		// /sites/dev/_api/web/GetFolderByServerRelativeUrl('/sites/dev/SiteAssets/js')
 
@@ -581,6 +583,59 @@
 				});
 			});
 		}
+
+		/**
+		* Get Folder permissions
+		*
+		* @returns: array of objects with `Member` and `Roles` properties
+		* @example: sprLib.folder('/site/SiteAssets/').perms().then( arr => console.log(arr) );
+		* .--------------------------------------------------------------------------------------------------------------------------------------------------------------------------.
+		* |                                        Member                                         |                                      Roles                                       |
+		* |---------------------------------------------------------------------------------------|----------------------------------------------------------------------------------|
+		* | {"Title":"Dev Site Members","PrincipalType":"SharePoint Group","PrincipalId":8}       | [{"Hidden":false,"Name":"Design"},{"Hidden":false,"Name":"Edit"}]                |
+		* | {"Title":"Dev Site Owners","PrincipalType":"SharePoint Group","PrincipalId":6}        | [{"Hidden":false,"Name":"Full Control"},{"Hidden":true,"Name":"Limited Access"}] |
+		* | {"Title":"Dev Site Visitors","PrincipalType":"SharePoint Group","PrincipalId":7}      | [{"Hidden":false,"Name":"Read"}]                                                 |
+		* | {"Title":"Excel Services Viewers","PrincipalType":"SharePoint Group","PrincipalId":5} | [{"Hidden":false,"Name":"View Only"}]                                            |
+		* '--------------------------------------------------------------------------------------------------------------------------------------------------------------------------'
+		*/
+		/*
+		_newFolder.perms = function() {
+			return new Promise(function(resolve, reject) {
+				// TODO: WIP:
+				// using same thing we use for Files, but using "Folder" URL fails on Office365:
+				// Uncaught (in promise) (404) Cannot find resource for the request SP.RequestContext.current/web/GetFolderByServerRelativeUrl('/sites/dev/SiteAssets')/ListItemAllFields/.
+				sprLib.rest({
+					url: "_api/web/GetFolderByServerRelativeUrl('"+ _fullName +"')/Folders",
+					queryCols: ['ListItemAllFields/RoleAssignments/PrincipalId','ListItemAllFields/RoleAssignments/Member/PrincipalType','ListItemAllFields/RoleAssignments/Member/Title','ListItemAllFields/RoleAssignments/RoleDefinitionBindings/Name','ListItemAllFields/RoleAssignments/RoleDefinitionBindings/Hidden']
+				})
+				.then(function(arrData){
+					// STEP 1: Transform: Results s/b 2 keys with props inside each
+					arrData.forEach(function(objItem,idx){
+						// TODO: FIXME: WIP: below is not correct/complete
+						objItem.RoleAssignments = objItem.ListItemAllFields.RoleAssignments;
+						delete objItem.ListItemAllFields;
+
+						// A: "Rename" the `RoleDefinitionBindings` key to be user-friendly
+						Object.defineProperty(objItem, 'Roles', Object.getOwnPropertyDescriptor(objItem, 'RoleDefinitionBindings'));
+						delete objItem.RoleDefinitionBindings;
+
+						// B: Move `PrincipalId` inside {Member}
+						objItem.Member.PrincipalId = objItem.PrincipalId;
+						delete objItem.PrincipalId;
+
+						// C: Decode PrincipalType into text
+						objItem.Member.PrincipalType = ENUM_PRINCIPALTYPES[objItem.Member.PrincipalType] || objItem.Member.PrincipalType;
+					});
+
+					// STEP 2: Resolve results (NOTE: empty array is the correct default result)
+					resolve( arrData || [] );
+				})
+				.catch(function(strErr){
+					reject( strErr );
+				});
+			});
+		}
+		*/
 
 		/**
 		* Get Files and their properties
@@ -744,6 +799,7 @@
 			return new Promise(function(resolve, reject) {
 				sprLib.rest({
 					url: _urlBase+"?$select=Fields&$expand=Fields",
+					queryLimit: 5000,
 					metadata: false
 				})
 				.then(function(arrData){
@@ -764,7 +820,9 @@
 								isRequired:   result.Required,
 								isUnique:     result.EnforceUniqueValues,
 								defaultValue: ( result.DefaultValue || null ),
-								maxLength:    ( result.MaxLength || null )
+								maxLength:    ( result.MaxLength || null ),
+								choiceValues: ( result.Choices && result.Choices.results ? result.Choices.results : null ),
+								allowFillInChoices: ( result.FillInChoice == true || result.FillInChoice == false ? result.FillInChoice : null )
 							});
 						}
 					});
@@ -1634,7 +1692,8 @@
 					&& inOpt.type == "GET"
 					&& inOpt.url.toLowerCase().indexOf('$top') == -1
 					&& inOpt.queryLimit
-				) {
+				)
+				{
 					objAjaxQuery.url += ( (objAjaxQuery.url.indexOf('?')>0?'&':'?') + '$top=' + inOpt.queryLimit );
 				}
 
@@ -1852,13 +1911,23 @@
 													colVal = ( key != arrKeys[0] && key != col.dataName ? result[arrKeys[0]][arrKeys[1]][arrKeys[2]] : result[arrKeys[0]] );
 												}
 												else if ( arrKeys.length == 4 ) {
-													// C.1:
-													lastChild = result[arrKeys[0]][arrKeys[1]][arrKeys[2]];
-													if ( lastChild && typeof lastChild === 'object' && Object.keys(lastChild)[0] == 'results' ) {
-														result[arrKeys[0]][arrKeys[1]][arrKeys[2]] = lastChild.results;
+													var finalResult = "";
+
+													// C.1: Parse value
+													// Handle results that are arrays (not just a singleton) - eg: `ListItemAllFields/RoleAssignments[{Member:...}]`
+													if ( Array.isArray(result[arrKeys[0]][arrKeys[1]]) ) {
+														finalResult = result[arrKeys[0]][arrKeys[1]];
 													}
+													else if ( result[arrKeys[0]] && result[arrKeys[0]][arrKeys[1]] && result[arrKeys[0]][arrKeys[1]][arrKeys[2]] ) {
+														finalResult = result[arrKeys[0]][arrKeys[1]][arrKeys[2]];
+													}
+													else if ( result[arrKeys[0]] && result[arrKeys[0]][arrKeys[1]] && result[arrKeys[0]][arrKeys[1]][arrKeys[2]] && result[arrKeys[0]][arrKeys[1]][arrKeys[2]][arrKeys[3]] ) {
+														finalResult = result[arrKeys[0]][arrKeys[1]][arrKeys[2]][arrKeys[3]];
+													}
+
 													// C.2: Capture value
-													colVal = ( key != arrKeys[0] && key != col.dataName ? result[arrKeys[0]][arrKeys[1]][arrKeys[2]][arrKeys[3]] : result[arrKeys[0]] );
+													colVal = ( key != arrKeys[0] && key != col.dataName ? finalResult : result[arrKeys[0]] );
+
 												}
 												else if ( arrKeys.length > 4 ) {
 													console.log('This is madness!!');
