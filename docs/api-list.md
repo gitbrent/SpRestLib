@@ -267,7 +267,7 @@ Returns: Array of columns with name value pairs of property values
 | :------------- | :------- | :----------------------------------------- |
 | `dispName`     | string   | display name                               |
 | `dataName`     | string   | internal name - used in REST queries and in `listCols` arguments |
-| `dataType`     | string   | column type (FieldTypeKind) values: `Boolean`, `Calculated`, `Currency`, `DateTime`, `Note`, `Number`, `Text` |
+| `dataType`     | string   | column type (FieldTypeKind) value (ex: `Boolean`, `DateTime`, `Text`) |
 | `defaultValue` | boolean  | the default value (if any)                 |
 | `isAppend`     | boolean  | is this an append text column?             |
 | `isNumPct`     | boolean  | is this a percentage number column?        |
