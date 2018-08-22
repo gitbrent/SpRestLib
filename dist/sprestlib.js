@@ -30,7 +30,7 @@
 (function(){
 	// APP VERSION/BUILD
 	var APP_VER = "1.8.0-beta";
-	var APP_BLD = "20180816";
+	var APP_BLD = "20180821";
 	var DEBUG = false; // (verbose mode/lots of logging)
 	// ENUMERATIONS
 	// REF: [`SP.BaseType`](https://msdn.microsoft.com/en-us/library/office/jj246925.aspx)
@@ -359,13 +359,14 @@
 					}
 				})
 				.then(function(arrVersion){
-					if ( arrVersion && arrVersion[0] ) {
+					// NOTE: Check for `VersionLabel` as it is not present when items are not version controlled!
+					if ( arrVersion && arrVersion[0] && arrVersion[0].VersionLabel ) {
 						// Gather version metadata
 						Object.keys(arrVersion[0]).forEach(function(key){
 							if ( key != 'VersionLabel' ) objData[key] = arrVersion[0][key];
 						});
 
-						// Update version metdata from first query
+						// Update version metadata from first query
 						objData.MajorVersion = arrVersion[0].VersionLabel.split('.')[0];
 						objData.MinorVersion = arrVersion[0].VersionLabel.split('.')[1];
 						objData.UIVersionLabel = arrVersion[0].VersionLabel;
@@ -504,6 +505,7 @@
 		inOpt = inOpt || {};
 		var _newFolder = {};
 		var _fullName = "";
+		// TODO: store `listGUID` and `listName` on _newFolder, then check/use them in subsequent ops
 
 		// B: Options check/set
 		if ( inOpt && typeof inOpt === 'string' ) {
@@ -523,6 +525,7 @@
 		_fullName = _fullName.replace(/\/$/gi,'');
 
 		// D: Public Methods ----------------------------------------------
+		// TODO: implement these Methods:
 		// .perms()
 		// .create() // .add()?
 		// .delete() // headers: { "X-HTTP-Method":"DELETE" },
@@ -530,7 +533,7 @@
 		//
 		// FYI: /_api/web/GetFolderByServerRelativeUrl(‘{folder url}’)/ListItemAllFields/breakroleinheritance(true)
 		//
-		// a unique folder:
+		// FYI: a unique folder:
 		// /sites/dev/_api/web/GetFolderByServerRelativeUrl('/sites/dev/SiteAssets/js')
 
 		/**
@@ -541,28 +544,32 @@
 		*/
 		_newFolder.info = function() {
 			return new Promise(function(resolve, reject) {
+				var objFolder = null;
+
 				sprLib.rest({
 					url: "_api/web/GetFolderByServerRelativeUrl('"+ _fullName +"')",
 					queryCols: [
 						'Name','ItemCount','ServerRelativeUrl','StorageMetrics/TotalSize',
+						'Properties/vti_x005f_parentid','Properties/vti_x005f_listtitle','Properties/vti_x005f_listname',
 						'Properties/vti_x005f_timecreated','Properties/vti_x005f_timelastmodified','Properties/vti_x005f_hassubdirs',
-						'Properties/vti_x005f_isbrowsable','Properties/vti_x005f_foldersubfolderitemcount','Properties/vti_x005f_listname'
+						'Properties/vti_x005f_isbrowsable','Properties/vti_x005f_foldersubfolderitemcount'
 					],
 					metadata: false
 				})
 				.then(function(arrData){
 					// A: Capture info
-					var objFolder = ( arrData && arrData.length > 0 ? arrData[0] : {} ); // FYI: Empty object is correct return type when file-not-found
+					objFolder = ( arrData && arrData.length > 0 ? arrData[0] : {} ); // FYI: Empty object is correct return type when file-not-found
 
 					// B: Remap properties
 					if ( objFolder.Properties ) {
 						objFolder.Created     = ( objFolder.Properties.vti_x005f_timecreated ? objFolder.Properties.vti_x005f_timecreated : null );
 						objFolder.FolderCount = ( objFolder.Properties.vti_x005f_foldersubfolderitemcount ? objFolder.Properties.vti_x005f_foldersubfolderitemcount : 0 );
 						objFolder.ItemCount   = ( objFolder.ItemCount ? objFolder.ItemCount : 0 );
-						objFolder.GUID        = ( objFolder.Properties.vti_x005f_listname ? objFolder.Properties.vti_x005f_listname : null );
+						objFolder.ParentGUID  = ( objFolder.Properties.vti_x005f_parentid ? objFolder.Properties.vti_x005f_parentid : null );
 						objFolder.HasSubdirs  = ( objFolder.Properties.vti_x005f_hassubdirs ? objFolder.Properties.vti_x005f_hassubdirs == "true" : false );
 						objFolder.Hidden      = ( objFolder.Properties.vti_x005f_isbrowsable ? objFolder.Properties.vti_x005f_isbrowsable == "false" : false );
-						objFolder.Level       = ( objFolder.Properties.vti_x005f_level ? objFolder.Properties.vti_x005f_level : 1 );
+						objFolder.ListGUID    = ( objFolder.Properties.vti_x005f_listname ? objFolder.Properties.vti_x005f_listname : null );
+						objFolder.ListTitle   = ( objFolder.Properties.vti_x005f_listtitle ? objFolder.Properties.vti_x005f_listtitle : null ); // NOTE: wont exist for subfolders
 						objFolder.Modified    = ( objFolder.Properties.vti_x005f_timelastmodified ? objFolder.Properties.vti_x005f_timelastmodified : null );
 
 						delete objFolder.Properties;
@@ -573,6 +580,32 @@
 						objFolder.TotalSize = Number(objFolder.StorageMetrics.TotalSize) || 0;
 
 						delete objFolder.StorageMetrics;
+					}
+
+					// D: Start chain for `HasUniqueRoleAssignments` prop
+					if ( objFolder.ListGUID ) {
+						return sprLib.rest({
+							url: "_api/web/Lists(guid'"+ objFolder.ListGUID.replace(/\{|\}/g,'') +"')/rootFolder/Folders",
+							queryCols: ['ListItemAllFields/Id'],
+						});
+					}
+					else {
+						return null;
+					}
+				})
+				.then(function(arrResults){
+					if ( arrResults && arrResults[0] && arrResults[0].ListItemAllFields && arrResults[0].ListItemAllFields.Id ) {
+						return sprLib.rest({
+							url: "_api/web/Lists(guid'"+ objFolder.ListGUID.replace(/\{|\}/g,'') +"')/items('"+arrResults[0].ListItemAllFields.Id+"')/HasUniqueRoleAssignments"
+						});
+					}
+					else {
+						return null;
+					}
+				})
+				.then(function(arrResults){
+					if ( arrResults && arrResults[0] ) {
+						objFolder.HasUniqueRoleAssignments = arrResults[0].HasUniqueRoleAssignments;
 					}
 
 					// Done
@@ -588,7 +621,7 @@
 		* Get Folder permissions
 		*
 		* @returns: array of objects with `Member` and `Roles` properties
-		* @example: sprLib.folder('/site/SiteAssets/').perms().then( arr => console.log(arr) );
+		* @example: sprLib.folder('/site/SiteAssets/BACKUPS').perms().then( arr => console.log(arr) );
 		* .--------------------------------------------------------------------------------------------------------------------------------------------------------------------------.
 		* |                                        Member                                         |                                      Roles                                       |
 		* |---------------------------------------------------------------------------------------|----------------------------------------------------------------------------------|
@@ -598,23 +631,37 @@
 		* | {"Title":"Excel Services Viewers","PrincipalType":"SharePoint Group","PrincipalId":5} | [{"Hidden":false,"Name":"View Only"}]                                            |
 		* '--------------------------------------------------------------------------------------------------------------------------------------------------------------------------'
 		*/
-		/*
 		_newFolder.perms = function() {
 			return new Promise(function(resolve, reject) {
-				// TODO: WIP:
-				// using same thing we use for Files, but using "Folder" URL fails on Office365:
-				// Uncaught (in promise) (404) Cannot find resource for the request SP.RequestContext.current/web/GetFolderByServerRelativeUrl('/sites/dev/SiteAssets')/ListItemAllFields/.
+				// Check if this is a Library or a Folder
+				// NOTE: `vti_x005f_listtitle` only exists for top-level Library (any folders will not contain this property)
+				// NOTE: The `vti_x005f_level` prop is useless; the value is 1 for 'SiteAssets' and 'SiteAssets/BACKUPS'!
 				sprLib.rest({
-					url: "_api/web/GetFolderByServerRelativeUrl('"+ _fullName +"')/Folders",
-					queryCols: ['ListItemAllFields/RoleAssignments/PrincipalId','ListItemAllFields/RoleAssignments/Member/PrincipalType','ListItemAllFields/RoleAssignments/Member/Title','ListItemAllFields/RoleAssignments/RoleDefinitionBindings/Name','ListItemAllFields/RoleAssignments/RoleDefinitionBindings/Hidden']
+					url: "_api/web/GetFolderByServerRelativeUrl('"+ _fullName +"')/Properties",
+					queryCols: ['vti_x005f_listtitle']
+				})
+				.then(function(arrData){
+					// Is this a top-level Library (eg: 'SiteAssets')?
+					if ( arrData && arrData[0] && arrData[0].vti_x005f_listtitle ) {
+						resolve(
+							sprLib.list({
+								baseUrl: _fullName.substring(0,_fullName.lastIndexOf('/')),
+								name:    arrData[0].vti_x005f_listtitle
+							}).perms()
+						);
+					}
+
+					// Else this is an actual folder, so mimic code from `file().perms()`
+					// NOTE: This only works on actual folders (not a Library like `SiteAssets`, but a folder like `SiteAssets/BACKUPS`)
+					// WORKAROUND(?): use "/sites/dev/_api/Web/Lists/GetByTitle('Site%20Assets')/rootFolder/Folders?$expand=ListItemAllFields&$filter=Name%20eq%20%27BACKUP%27" -- to transform Library into a folder...?
+					return sprLib.rest({
+						url: "_api/web/GetFolderByServerRelativeUrl('"+ _fullName +"')/ListItemAllFields/RoleAssignments",
+						queryCols: ['PrincipalId','Member/PrincipalType','Member/Title','RoleDefinitionBindings/Name','RoleDefinitionBindings/Hidden']
+					});
 				})
 				.then(function(arrData){
 					// STEP 1: Transform: Results s/b 2 keys with props inside each
 					arrData.forEach(function(objItem,idx){
-						// TODO: FIXME: WIP: below is not correct/complete
-						objItem.RoleAssignments = objItem.ListItemAllFields.RoleAssignments;
-						delete objItem.ListItemAllFields;
-
 						// A: "Rename" the `RoleDefinitionBindings` key to be user-friendly
 						Object.defineProperty(objItem, 'Roles', Object.getOwnPropertyDescriptor(objItem, 'RoleDefinitionBindings'));
 						delete objItem.RoleDefinitionBindings;
@@ -635,7 +682,6 @@
 				});
 			});
 		}
-		*/
 
 		/**
 		* Get Files and their properties
@@ -709,7 +755,6 @@
 							objFolder.GUID        = ( objFolder.Properties.vti_x005f_listname ? objFolder.Properties.vti_x005f_listname : null );
 							objFolder.HasSubdirs  = ( objFolder.Properties.vti_x005f_hassubdirs ? objFolder.Properties.vti_x005f_hassubdirs == "true" : false );
 							objFolder.Hidden      = ( objFolder.Properties.vti_x005f_isbrowsable ? objFolder.Properties.vti_x005f_isbrowsable == "false" : false );
-							objFolder.Level       = ( objFolder.Properties.vti_x005f_level ? objFolder.Properties.vti_x005f_level : 1 );
 							objFolder.Modified    = ( objFolder.Properties.vti_x005f_timelastmodified ? objFolder.Properties.vti_x005f_timelastmodified : null );
 
 							delete folder.Properties;
