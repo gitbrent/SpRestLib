@@ -6,13 +6,7 @@
 	<meta name="website"     content="https://github.com/gitbrent/SpRestLib/">
 	<meta name="keywords"    content="SpRestLib, JavaScript, js-sharepoint, OData, REST, SharePoint 2013, SP2013, SharePoint 2016, SP2016, SharePoint Online">
 	<meta name="description" content="Content Editor WebPart to showcase SpRestLib features and capabilities">
-	<meta name="revised"     content="20180816">
-
-	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300">
-	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:700">
-	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto+Mono">
-	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:400">
-	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-fork-ribbon-css/0.2.0/gh-fork-ribbon.min.css">
+	<meta name="revised"     content="20180821">
 
 	<!-- HOWTO / FAQ / SETUP -->
 	<!--
@@ -25,22 +19,24 @@
 		*) Check the img folder for screencaps of the SharePoint setup!
 	-->
 
-	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.8.3/themes/prism-coy.css">
-	<link rel="stylesheet" href="https://cdn.rawgit.com/gitbrent/SpRestLib/master/example/css/sprestlib-demo.css">
-	<!-- DEBUG
-	<link rel="stylesheet" href="../SiteAssets/sprestlib/css/sprestlib-demo.css">
-	-->
+	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300">
+	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:700">
+	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto+Mono">
+	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:400">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-fork-ribbon-css/0.2.0/gh-fork-ribbon.min.css">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.15.0/themes/prism-okaidia.css">
+	<!-- <link rel="stylesheet" href="../SiteAssets/sprestlib/css/sprestlib-demo.css"> DEBUG -->
+	<link rel="stylesheet" href="https://cdn.rawgit.com/gitbrent/SpRestLib/9684a98e/example/css/sprestlib-demo.css">
 
 	<script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
-	<!--<script src="https://cdn.rawgit.com/gitbrent/SpRestLib/e34598d5/dist/sprestlib.bundle.js"></script>-->
-	<script src="https://gitcdn.link/repo/gitbrent/SpRestLib/master/dist/sprestlib.bundle.js"></script>
+	<script src="https://cdn.rawgit.com/gitbrent/SpRestLib/9684a98e/dist/sprestlib.bundle.js"></script>
+	<!--<script src="https://gitcdn.link/repo/gitbrent/SpRestLib/master/dist/sprestlib.bundle.js"></script>-->
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.29.0/js/jquery.tablesorter.min.js"></script>
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.8.3/prism.min.js"></script>
 	<script src="https://cdn.rawgit.com/sorensen/ascii-table/v0.0.9/ascii-table.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.15.0/prism.min.js"></script>
 
 	<script>
-		$.ajaxSetup({ cache:false });
-		var APP_BLD = 20180816;
+		var APP_BLD = 20180821;
 		var HTML_SPINNER = '<div class="sprlib-spinner"><div class="sprlib-bounce1"></div><div class="sprlib-bounce2"></div><div class="sprlib-bounce3"></div></div>';
 		var LAYOUTS_URL = _spPageContextInfo.layoutsUrl || '_layouts/15';
 
@@ -135,6 +131,11 @@
 			.catch(function(errMsg){
 				$('$tab1-ListPerms .tableRows').after( '<table><tbody><tr><td>'+errMsg+'</td></tr></tbody></table>' );
 			});
+
+			// LAST: Re-highlight code
+			$('#tabList code').each(function(idx,ele){
+				Prism.highlightElement( $(ele)[0] );
+			});
 		}
 
 		function handleFileChange() {
@@ -210,6 +211,11 @@
 				'    setTimeout(function(){ document.body.removeChild(link); }, 500);\n'+
 				'});'
 			);
+
+			// LAST: Re-highlight code
+			$('#tabFile code').each(function(idx,ele){
+				Prism.highlightElement( $(ele)[0] );
+			});
 		}
 
 		function handleFoldChange() {
@@ -230,6 +236,28 @@
 				});
 				$('#contFoldInfo').append( $table );
 			})
+
+			// PERMS:
+			$('#contFoldPerms pre code').text( 'sprLib.file(\''+ $('#selSiteFolds').val() +'\').perms()' );
+			sprLib.folder($('#selSiteFolds').val()).perms()
+			.then(function(arrPerms){
+				arrPerms.forEach(function(perm){
+					// A-1: Create row
+					var $row = $('<tr/>');
+					$row.append('<th><a href="../'+LAYOUTS_URL+'/people.aspx?MembershipGroupId='+ perm.Member.PrincipalId +'" target="_blank">'+ perm.Member.Title +'</a></th>');
+					$row.append('<td>'+ perm.Member.PrincipalType +'</td>');
+					$row.append('<td/>');
+					perm.Roles.forEach(function(role){
+						if ( !role.Hidden && role.Name ) $row.find('td:last-child').append('<div class="itemBox">'+ role.Name +'<span style="display:none">; </span></div>');
+					});
+					$('#tabFoldPerms tbody').append( $row );
+				});
+				if ( $.tablesorter ) $('#contFoldPerms table').tablesorter({ sortList:[[0,0]] });
+			})
+			.catch(function(errMsg){
+				$('#contFoldPerms').append('<table><tbody><tr><td>'+errMsg+'</td></tr></tbody></table>');
+				console.error(errMsg);
+			});
 
 			// FILES:
 			$('#contFoldFiles pre code').text( 'sprLib.folder(\''+ $('#selSiteFolds').val() +'\').files()' );
@@ -291,6 +319,11 @@
 			.catch(function(errMsg){
 				$('#contFoldFolds').append('<table><tbody><tr><td>'+errMsg+'</td></tr></tbody></table>');
 				console.error(errMsg);
+			});
+
+			// LAST: Re-highlight code
+			$('#tabFold code').each(function(idx,ele){
+				Prism.highlightElement( $(ele)[0] );
 			});
 		}
 
@@ -634,6 +667,9 @@
 					+ ".then(function(data){ return data; });"
 				);
 			}
+
+			// LAST: Highlight all generated code
+			Prism.highlightAll();
 		}
 
 		// ==================================================================================================================
@@ -866,6 +902,23 @@
 				</div>
 				<div id="contFoldInfo">
 					<pre><code class="language-javascript">sprLib.folder('folderName').info()</code></pre>
+				</div>
+
+				<div class="subTitle" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
+					<div class="arrow"></div>Folder Permissions
+				</div>
+				<div id="contFoldPerms" style="display:none">
+					<pre><code class="language-javascript">sprLib.folder('folderName').perms()</code></pre>
+					<table id="tabFolderPerms" class="tabModern">
+						<thead>
+							<tr>
+								<th>Name</th>
+								<th>Type</th>
+								<th class="sorter-false showGrpDesc">Permissions</th>
+							</tr>
+						</thead>
+						<tbody></tbody>
+					</table>
 				</div>
 
 				<div class="subTitle" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
