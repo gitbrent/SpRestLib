@@ -218,18 +218,41 @@
 			});
 		}
 
-		function handleFoldChange() {
+		function handleFoldLibChange() {
+			// A: Empty select
+			$('#selFoldFlds').empty();
+			$('#selFoldFlds').append('<option value="">Select...</option>');
+
+			// B: Return if nothing selected
+			if ( !$('#selFoldLibs').val() ) return;
+
+			// C: Show busy
+			$('#contFoldFldSelect .sprlib-spinner').show();
+
+			// D: Populate <select> with List names
+			sprLib.folder($('#selFoldLibs').val()).folders()
+			.then(function(arrResults){
+				arrResults
+				.sort(function(a,b){ return (a.Title > b.Title) ? 1 : ((b.Title > a.Title) ? -1 : 0); })
+				.forEach(function(obj,idx){
+					if ( !obj.Hidden ) $('#selFoldFlds').append('<option value="'+ obj.ServerRelativeUrl +'">'+ obj.Name +'</option>');
+				});
+				$('#contFoldFldSelect .sprlib-spinner').hide();
+			});
+		}
+
+		function handleFoldFldChange() {
 			// A: Clear results
 			$('#contFoldInfo table').remove();
 			$('#contFoldFiles table, #contFoldFolds table').remove();
 			$('#tabFoldPerms tbody').empty();
 
 			// B: Return if nothing selected
-			if ( !$('#selSiteFolds').val() ) return;
+			if ( !$('#selFoldFlds').val() ) return;
 
 			// INFO:
-			$('#contFoldInfo pre code').text( 'sprLib.folder(\''+ $('#selSiteFolds').val() +'\').info()' );
-			sprLib.folder($('#selSiteFolds').val()).info()
+			$('#contFoldInfo pre code').text( 'sprLib.folder(\''+ $('#selFoldFlds').val() +'\').info()' );
+			sprLib.folder($('#selFoldFlds').val()).info()
 			.then(function(objInfo){
 				var $table = $('<table class="tabModern"><tbody></tbody></table>');
 				$table.append('<thead><tr><th>Prop Name</th><th>Prop Value</th></tr></thead>');
@@ -240,8 +263,8 @@
 			})
 
 			// PERMS:
-			$('#contFoldPerms pre code').text( 'sprLib.file(\''+ $('#selSiteFolds').val() +'\').perms()' );
-			sprLib.folder($('#selSiteFolds').val()).perms()
+			$('#contFoldPerms pre code').text( 'sprLib.file(\''+ $('#selFoldFlds').val() +'\').perms()' );
+			sprLib.folder($('#selFoldFlds').val()).perms()
 			.then(function(arrPerms){
 				arrPerms.forEach(function(perm){
 					// A-1: Create row
@@ -262,8 +285,8 @@
 			});
 
 			// FILES:
-			$('#contFoldFiles pre code').text( 'sprLib.folder(\''+ $('#selSiteFolds').val() +'\').files()' );
-			sprLib.folder($('#selSiteFolds').val()).files()
+			$('#contFoldFiles pre code').text( 'sprLib.folder(\''+ $('#selFoldFlds').val() +'\').files()' );
+			sprLib.folder($('#selFoldFlds').val()).files()
 			.then(function(arrObjs){
 				var arrShowCols = ['Name', 'Created', 'Modified', 'ModifiedBy', 'Length', 'MajorVersion'];
 				var $table = $('<table class="tabModern"><thead><tr></tr></thead><tbody></tbody></table>');
@@ -293,8 +316,8 @@
 			});
 
 			// FOLDERS:
-			$('#contFoldFolds pre code').text( 'sprLib.folder(\''+ $('#selSiteFolds').val() +'\').folders()' );
-			sprLib.folder($('#selSiteFolds').val()).folders()
+			$('#contFoldFolds pre code').text( 'sprLib.folder(\''+ $('#selFoldFlds').val() +'\').folders()' );
+			sprLib.folder($('#selFoldFlds').val()).folders()
 			.then(function(arrObjs){
 				var arrShowCols = ['Name', 'Created', 'Modified', 'FolderCount', 'ItemCount'];
 				var $table = $('<table class="tabModern"><thead><tr></tr></thead><tbody></tbody></table>');
@@ -607,9 +630,10 @@
 					arrResults
 					.sort(function(a,b){ return (a.Title > b.Title) ? 1 : ((b.Title > a.Title) ? -1 : 0); })
 					.forEach(function(obj,idx){
-						if ( !obj.Hidden && obj.BaseType == "Library" ) $('#selSiteFolds').append('<option value="'+ obj.ServerRelativeUrl +'">'+ obj.Title +'</option>');
+						if ( !obj.Hidden && obj.BaseType == "Library" ) $('#selFoldLibs').append('<option value="'+ obj.ServerRelativeUrl +'">'+ obj.Title +'</option>');
 					});
-					$('#contFoldSelect .sprlib-spinner').remove();
+					$('#contFoldLibSelect .sprlib-spinner').remove();
+					$('#contFoldFldSelect .sprlib-spinner').hide();
 				});
 			}
 
@@ -887,13 +911,24 @@
 					Select one of the Folders found on this site to view its properties.<br>
 				</p>
 
-				<div id="contFoldSelect" class="divTable" style="width:auto; margin-bottom:20px;">
+				<div id="contFoldLibSelect" class="divTable" style="width:auto; margin-bottom:10px;">
 					<div class="th" style="padding:0; font-size:120%; vertical-align:middle;">
-						Folders
+						Libraries
 					</div>
 					<div>
 						<div class="sprlib-spinner"><div class="sprlib-bounce1"></div><div class="sprlib-bounce2"></div><div class="sprlib-bounce3"></div></div>
-						<select id="selSiteFolds" onchange="handleFoldChange()">
+						<select id="selFoldLibs" onchange="handleFoldLibChange()">
+							<option value="">Select...</option>
+						</select>
+					</div>
+				</div>
+				<div id="contFoldFldSelect" class="divTable" style="width:auto; margin-bottom:20px;">
+					<div class="th" style="padding:0; font-size:120%; vertical-align:middle;">
+						Library Folders
+					</div>
+					<div>
+						<div class="sprlib-spinner"><div class="sprlib-bounce1"></div><div class="sprlib-bounce2"></div><div class="sprlib-bounce3"></div></div>
+						<select id="selFoldFlds" onchange="handleFoldFldChange()">
 							<option value="">Select...</option>
 						</select>
 					</div>
