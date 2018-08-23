@@ -6,7 +6,7 @@
 	<meta name="website"     content="https://github.com/gitbrent/SpRestLib/">
 	<meta name="keywords"    content="SpRestLib, JavaScript, js-sharepoint, OData, REST, SharePoint 2013, SP2013, SharePoint 2016, SP2016, SharePoint Online">
 	<meta name="description" content="Content Editor WebPart to showcase SpRestLib features and capabilities">
-	<meta name="revised"     content="20180821">
+	<meta name="revised"     content="20180822">
 
 	<!-- HOWTO / FAQ / SETUP -->
 	<!--
@@ -36,7 +36,7 @@
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.15.0/prism.min.js"></script>
 
 	<script>
-		var APP_BLD = 20180821;
+		var APP_BLD = 20180822;
 		var HTML_SPINNER = '<div class="sprlib-spinner"><div class="sprlib-bounce1"></div><div class="sprlib-bounce2"></div><div class="sprlib-bounce3"></div></div>';
 		var LAYOUTS_URL = _spPageContextInfo.layoutsUrl || '_layouts/15';
 
@@ -222,6 +222,8 @@
 			// A: Clear results
 			$('#contFoldInfo table').remove();
 			$('#contFoldFiles table, #contFoldFolds table').remove();
+			$('#tabFoldPerms tbody').empty();
+
 			// B: Return if nothing selected
 			if ( !$('#selSiteFolds').val() ) return;
 
@@ -909,7 +911,7 @@
 				</div>
 				<div id="contFoldPerms" style="display:none">
 					<pre><code class="language-javascript">sprLib.folder('folderName').perms()</code></pre>
-					<table id="tabFolderPerms" class="tabModern">
+					<table id="tabFoldPerms" class="tabModern">
 						<thead>
 							<tr>
 								<th>Name</th>

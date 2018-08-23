@@ -30,7 +30,7 @@
 (function(){
 	// APP VERSION/BUILD
 	var APP_VER = "1.8.0-beta";
-	var APP_BLD = "20180821";
+	var APP_BLD = "20180822";
 	var DEBUG = false; // (verbose mode/lots of logging)
 	// ENUMERATIONS
 	// REF: [`SP.BaseType`](https://msdn.microsoft.com/en-us/library/office/jj246925.aspx)
@@ -643,39 +643,46 @@
 				.then(function(arrData){
 					// Is this a top-level Library (eg: 'SiteAssets')?
 					if ( arrData && arrData[0] && arrData[0].vti_x005f_listtitle ) {
+						return arrData[0].vti_x005f_listtitle;
+					}
+					// Else this is an actual folder, so mimic code from `file().perms()`
+					else {
+						// NOTE: This only works on actual folders (not a Library like `SiteAssets`, but a folder like `SiteAssets/BACKUPS`)
+						// WORKAROUND(?): use "/sites/dev/_api/Web/Lists/GetByTitle('Site%20Assets')/rootFolder/Folders?$expand=ListItemAllFields&$filter=Name%20eq%20%27BACKUP%27" -- to transform Library into a folder...?
+						return sprLib.rest({
+							url: "_api/web/GetFolderByServerRelativeUrl('"+ _fullName +"')/ListItemAllFields/RoleAssignments",
+							queryCols: ['PrincipalId','Member/PrincipalType','Member/Title','RoleDefinitionBindings/Name','RoleDefinitionBindings/Hidden']
+						});
+					}
+				})
+				.then(function(data){
+					// Is this a top-level Library (eg: 'SiteAssets')?
+					if ( typeof data === 'string' ) {
 						resolve(
 							sprLib.list({
 								baseUrl: _fullName.substring(0,_fullName.lastIndexOf('/')),
-								name:    arrData[0].vti_x005f_listtitle
+								name: data
 							}).perms()
 						);
 					}
+					else if ( Array.isArray(data) ) {
+						// STEP 1: Transform: Results s/b 2 keys with props inside each
+						data.forEach(function(objItem,idx){
+							// A: "Rename" the `RoleDefinitionBindings` key to be user-friendly
+							Object.defineProperty(objItem, 'Roles', Object.getOwnPropertyDescriptor(objItem, 'RoleDefinitionBindings'));
+							delete objItem.RoleDefinitionBindings;
 
-					// Else this is an actual folder, so mimic code from `file().perms()`
-					// NOTE: This only works on actual folders (not a Library like `SiteAssets`, but a folder like `SiteAssets/BACKUPS`)
-					// WORKAROUND(?): use "/sites/dev/_api/Web/Lists/GetByTitle('Site%20Assets')/rootFolder/Folders?$expand=ListItemAllFields&$filter=Name%20eq%20%27BACKUP%27" -- to transform Library into a folder...?
-					return sprLib.rest({
-						url: "_api/web/GetFolderByServerRelativeUrl('"+ _fullName +"')/ListItemAllFields/RoleAssignments",
-						queryCols: ['PrincipalId','Member/PrincipalType','Member/Title','RoleDefinitionBindings/Name','RoleDefinitionBindings/Hidden']
-					});
-				})
-				.then(function(arrData){
-					// STEP 1: Transform: Results s/b 2 keys with props inside each
-					arrData.forEach(function(objItem,idx){
-						// A: "Rename" the `RoleDefinitionBindings` key to be user-friendly
-						Object.defineProperty(objItem, 'Roles', Object.getOwnPropertyDescriptor(objItem, 'RoleDefinitionBindings'));
-						delete objItem.RoleDefinitionBindings;
+							// B: Move `PrincipalId` inside {Member}
+							objItem.Member.PrincipalId = objItem.PrincipalId;
+							delete objItem.PrincipalId;
 
-						// B: Move `PrincipalId` inside {Member}
-						objItem.Member.PrincipalId = objItem.PrincipalId;
-						delete objItem.PrincipalId;
+							// C: Decode PrincipalType into text
+							objItem.Member.PrincipalType = ENUM_PRINCIPALTYPES[objItem.Member.PrincipalType] || objItem.Member.PrincipalType;
+						});
 
-						// C: Decode PrincipalType into text
-						objItem.Member.PrincipalType = ENUM_PRINCIPALTYPES[objItem.Member.PrincipalType] || objItem.Member.PrincipalType;
-					});
-
-					// STEP 2: Resolve results (NOTE: empty array is the correct default result)
-					resolve( arrData || [] );
+						// STEP 2: Resolve results (NOTE: empty array is the correct default result)
+						resolve( data || [] );
+					}
 				})
 				.catch(function(strErr){
 					reject( strErr );
