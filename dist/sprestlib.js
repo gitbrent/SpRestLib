@@ -30,7 +30,7 @@
 (function(){
 	// APP VERSION/BUILD
 	var APP_VER = "1.8.0-beta";
-	var APP_BLD = "20180822";
+	var APP_BLD = "20180823";
 	var DEBUG = false; // (verbose mode/lots of logging)
 	// ENUMERATIONS
 	// REF: [`SP.BaseType`](https://msdn.microsoft.com/en-us/library/office/jj246925.aspx)
@@ -1106,8 +1106,8 @@
 						var objAjaxQuery = {
 							url     : _urlBase+"/items",
 							type    : "GET",
-							cache   : inObj.cache || APP_OPTS.cache,
-							metadata: inObj.metadata || APP_OPTS.metadata,
+							cache   : (typeof inObj.cache === 'boolean' ? inObj.cache : APP_OPTS.cache),
+							metadata: (typeof inObj.metadata === 'boolean' ? inObj.metadata : APP_OPTS.metadata),
 							headers : { "Accept":"application/json;odata=verbose", "X-RequestDigest":_requestDigest }
 						};
 						var arrExpands = [], strExpands = "";
@@ -1668,9 +1668,9 @@
 			// STEP 1: Options setup
 			inOpt = inOpt || {};
 			inOpt.spArrData = [];
-			inOpt.cache    = inOpt.cache    || APP_OPTS.cache;
+			inOpt.cache    = (typeof inOpt.cache === 'boolean' ? inOpt.cache : APP_OPTS.cache);
 			inOpt.digest   = (inOpt.requestDigest || (typeof document !== 'undefined' && document.getElementById('__REQUESTDIGEST') ? document.getElementById('__REQUESTDIGEST').value : null));
-			inOpt.metadata = (typeof inOpt.metadata !== 'undefined' && inOpt.metadata != null ? inOpt.metadata : APP_OPTS.metadata);
+			inOpt.metadata = (typeof inOpt.metadata === 'boolean' ? inOpt.metadata : APP_OPTS.metadata);
 			inOpt.type     = inOpt.restType || inOpt.type || "GET";
 			inOpt.url      = (inOpt.restUrl || inOpt.url || APP_OPTS.baseUrl).replace(/\"/g, "'");
 
