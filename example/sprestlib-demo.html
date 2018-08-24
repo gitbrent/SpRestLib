@@ -4,9 +4,9 @@
 	<meta charset="utf-8">
 	<meta name="author"      content="https://github.com/gitbrent/">
 	<meta name="website"     content="https://github.com/gitbrent/SpRestLib/">
-	<meta name="keywords"    content="SpRestLib, JavaScript, js-sharepoint, OData, REST, SharePoint 2013, SP2013, SharePoint 2016, SP2016, SharePoint Online">
-	<meta name="description" content="Content Editor WebPart to showcase SpRestLib features and capabilities">
-	<meta name="revised"     content="20180822">
+	<meta name="keywords"    content="SpRestLib, JavaScript, js-sharepoint, SP2013 REST, SharePoint 2013, SP2013, SharePoint 2016, SharePoint Online">
+	<meta name="description" content="Content Editor Webpart: SpRestLib features and capabilities">
+	<meta name="revised"     content="20180823">
 
 	<!-- HOWTO / FAQ / SETUP -->
 	<!--
@@ -29,14 +29,14 @@
 	<link rel="stylesheet" href="https://cdn.rawgit.com/gitbrent/SpRestLib/9684a98e/example/css/sprestlib-demo.css">
 
 	<script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
-	<script src="https://cdn.rawgit.com/gitbrent/SpRestLib/9684a98e/dist/sprestlib.bundle.js"></script>
-	<!--<script src="https://gitcdn.link/repo/gitbrent/SpRestLib/master/dist/sprestlib.bundle.js"></script>-->
+	<!--<script src="https://cdn.rawgit.com/gitbrent/SpRestLib/9684a98e/dist/sprestlib.bundle.js"></script>-->
+	<script src="https://gitcdn.link/repo/gitbrent/SpRestLib/master/dist/sprestlib.bundle.js"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.29.0/js/jquery.tablesorter.min.js"></script>
 	<script src="https://cdn.rawgit.com/sorensen/ascii-table/v0.0.9/ascii-table.min.js"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.15.0/prism.min.js"></script>
 
 	<script>
-		var APP_BLD = 20180822;
+		var APP_BLD = 20180823;
 		var HTML_SPINNER = '<div class="sprlib-spinner"><div class="sprlib-bounce1"></div><div class="sprlib-bounce2"></div><div class="sprlib-bounce3"></div></div>';
 		var LAYOUTS_URL = _spPageContextInfo.layoutsUrl || '_layouts/15';
 
@@ -235,7 +235,8 @@
 				arrResults
 				.sort(function(a,b){ return (a.Title > b.Title) ? 1 : ((b.Title > a.Title) ? -1 : 0); })
 				.forEach(function(obj,idx){
-					if ( !obj.Hidden ) $('#selFoldFlds').append('<option value="'+ obj.ServerRelativeUrl +'">'+ obj.Name +'</option>');
+					// NOTE: `/Forms` folder is special that `ListItemAllFields` will fail on!
+					if ( !obj.Hidden && obj.Name != 'Forms' ) $('#selFoldFlds').append('<option value="'+ obj.ServerRelativeUrl +'">'+ obj.Name +'</option>');
 				});
 				$('#contFoldFldSelect .sprlib-spinner').hide();
 			});
@@ -243,6 +244,7 @@
 
 		function handleFoldFldChange() {
 			// A: Clear results
+			$('#tabFold .error').remove();
 			$('#contFoldInfo table').remove();
 			$('#contFoldFiles table, #contFoldFolds table').remove();
 			$('#tabFoldPerms tbody').empty();
@@ -280,7 +282,7 @@
 				if ( $.tablesorter ) $('#contFoldPerms table').tablesorter({ sortList:[[0,0]] });
 			})
 			.catch(function(errMsg){
-				$('#contFoldPerms').append('<table><tbody><tr><td>'+errMsg+'</td></tr></tbody></table>');
+				$('#contFoldPerms table').after('<h6 class="error text-danger">'+errMsg+'</h6>');
 				console.error(errMsg);
 			});
 
@@ -913,7 +915,7 @@
 
 				<div id="contFoldLibSelect" class="divTable" style="width:auto; margin-bottom:10px;">
 					<div class="th" style="padding:0; font-size:120%; vertical-align:middle;">
-						Libraries
+						Select a Library:
 					</div>
 					<div>
 						<div class="sprlib-spinner"><div class="sprlib-bounce1"></div><div class="sprlib-bounce2"></div><div class="sprlib-bounce3"></div></div>
@@ -924,7 +926,7 @@
 				</div>
 				<div id="contFoldFldSelect" class="divTable" style="width:auto; margin-bottom:20px;">
 					<div class="th" style="padding:0; font-size:120%; vertical-align:middle;">
-						Library Folders
+						Select a Folder:
 					</div>
 					<div>
 						<div class="sprlib-spinner"><div class="sprlib-bounce1"></div><div class="sprlib-bounce2"></div><div class="sprlib-bounce3"></div></div>
