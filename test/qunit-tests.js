@@ -11,6 +11,15 @@
  // QUnit.test("QUnit Base Test", function(assert){ assert.ok( true === true, "Passed!" ); });
  */
 
+// TODO:
+
+/* TODO: add this to QUnit!!!
+sprLib.folder('/sites/dev/Shared Documents/BreakPerms').perms().then(arr=>console.log(arr))
+// S/B only two groups (instead of usual 4) - "Dev Site Owners" and "Dev Site Members"
+*/
+
+
+
 const BASEURL   = _spPageContextInfo.siteServerRelativeUrl;
 const RESTROOT  = '/sites/dev';
 const RESTDEMO1 = '/sites/dev/sandbox';
