@@ -282,8 +282,7 @@ const FeatureCallout = props => (
 
 // 4:
 const FeatureCallCode = props => (
-	<Container id='FeatureCallCode' padding={['bottom']} background='light'>
-		<p></p>
+	<Container id='FeatureCallCode' padding={['bottom', 'top']} background='light'>
 		<h2>Say Goodbye to Callbacks and Writing Complicated Operations</h2>
 		<p>
 			Interacting with SharePoint web services does not have to be verbose or require lots of asynchronous
