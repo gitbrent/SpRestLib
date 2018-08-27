@@ -5,7 +5,7 @@
  * REQS: Node 4.x + `npm install sprestlib`
  * EXEC: `node nodejs-demo.js (sp-username) (sp-password) {sp-hostUrl}`
  * VER.: 1.8.0-beta
- * REL.: 20180815
+ * REL.: 20180826
  * REFS: HOWTO: Authenticate to SharePoint Online (*.sharepoint.com)
  * - https://allthatjs.com/2012/03/28/remote-authentication-in-sharepoint-online/
  * - http://paulryan.com.au/2014/spo-remote-authentication-rest/
@@ -43,7 +43,7 @@ if ( !sprLib || !sprLib.version ) {
 // SETUP: Set `nodeEnabled` flag so SpRestLib knows this is a Node app (tells library to use the `https` module)
 sprLib.nodeConfig({ nodeEnabled:true });
 
-// Lets go!
+// BEGIN DEMO:
 console.log('\nStarting demo...');
 console.log('================================================================================');
 console.log(`> SpRestLib version: ${sprLib.version}\n`);
@@ -57,6 +57,14 @@ var gBinarySecurityToken = "";
 var gAuthCookie1 = "";
 var gAuthCookie2 = "";
 var gStrReqDig = "";
+var gStrFilePath = "/sites/dev/Shared Documents/";	// text test
+var gStrFileLoca = "./";							// text test
+var gStrFileName = "sprestlib-demo.html";			// text test
+/* TODO: binary files dont upload correctly
+var gStrFilePath = "/sites/dev/Shared Documents/";	// binary test
+var gStrFileLoca = "./img/";						// binary test
+var gStrFileName = "setup01.png";					// binary test
+*/
 
 Promise.resolve()
 .then(() => {
@@ -207,35 +215,37 @@ Promise.resolve()
 	console.log('..\n..create done!');
 	console.log('New item ID...: '+ objCrud.ID);
 
-	console.log("\nTEST 4: sprLib.rest() - upload a local file to 'Documents' Library");
+	console.log("\nTEST 4: sprLib.rest() - upload a local file to 'Shared Documents' Library");
 	console.log("------------------------------------------------------------");
 
 	// IMPORTANT: path must be escaped or "TypeError: Request path contains unescaped characters"
-	var strFilePath = "/sites/dev/Shared%20Documents/upload";
-	var strFileName = "sprestlib-demo.html";
-	var strUrl = "_api/web/GetFolderByServerRelativeUrl('"+strFilePath+"')/Files/add(url='"+strFileName+"',overwrite=true)";
+	var strUrl = "_api/web/GetFolderByServerRelativeUrl('"+ encodeURIComponent(gStrFilePath) +"')/Files/add(url='"+gStrFileName+"',overwrite=true)";
 
+	// NOTE: Use `binary` encoding as it works for both text and binary files (TODO: binary file uploading not working as of 20180826)
 	return sprLib.rest({
 		url: strUrl,
 		type: "POST",
-		requestDigest: gStrReqDig,
-		data: new Buffer( fs.readFileSync('./'+strFileName, 'utf8') )
+		headers: { "Accept":"application/json;odata=verbose", "binaryStringResponseBody":true, "X-RequestDigest":gStrReqDig },
+		data: new Buffer( fs.readFileSync( gStrFileLoca+gStrFileName, 'binary') )
+	})
+	.catch(strErr => {
+		console.log('ERROR: '+strErr);
 	});
 })
-.then((arrResults) => {
-	console.log('SUCCESS: "'+ arrResults[0].Name +'" uploaded to: '+ arrResults[0].ServerRelativeUrl );
+.then((strResult) => {
+	var results = JSON.parse(strResult);
+	var file = results.d;
+	console.log('SUCCESS: `'+ file.Name +'` uploaded to: `'+ file.ServerRelativeUrl +'`' );
 
-	var strFilename = '/sites/dev/Shared Documents/sprestlib-demo.html';
-
-	console.log("\nTEST 5: sprLib.file().get() - get a file from 'Documents' Library");
+	console.log("\nTEST 5: sprLib.file().get() - get a file from 'Shared Documents' Library");
 	console.log("------------------------------------------------------------");
-	return sprLib.file(strFilename).get();
+	return sprLib.file(gStrFilePath+'/'+gStrFileName).get();
 })
 .then((fileBuffer) => {
 	if ( fileBuffer ) {
-		var strFileGet = 'file-get-dl-'+ new Date().toISOString() +'.html';
-		// TODO: FIXME: works for text only as of 1.8.0
-		fs.writeFileSync(strFileGet, Buffer.from(fileBuffer));
+		var strFileGet = 'node-file-get-'+ new Date().toISOString().replace(/\:|\.|\-/g,'') +'-'+ gStrFileName;
+		// NOTE: A binary buffer is returned by `file().get()` - save it using code below
+		fs.writeFileSync( strFileGet, Buffer.from(fileBuffer,'binary') );
 		console.log('SUCCESS: "'+ strFileGet +'" downloaded!');
 	}
 	else {
