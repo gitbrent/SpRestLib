@@ -19,6 +19,9 @@
 		"gulp-sourcemaps": "^2.6.0",
 		"gulp-uglify": "^3.0.0"
 	},
+	"browser": {
+		"https": false
+	},
 	"main": "dist/sprestlib.js",
 	"types": "dist/sprestlib.d.ts",
 	"directories": {
