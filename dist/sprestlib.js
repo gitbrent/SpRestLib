@@ -1787,7 +1787,7 @@
 						};
 						var request = https.request(options, function(res){
 							var rawData = '';
-							res.setEncoding('utf8');
+							res.setEncoding( inOpt.headers && inOpt.headers.binaryStringResponseBody ? 'binary' : 'utf8' );
 							res.on('data', function(chunk){ rawData += chunk; });
 							res.on('end', function(){
 								// NOTE: SP errors come here, not `res.on(error)`, so check for errors!
