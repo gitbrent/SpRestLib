@@ -267,35 +267,7 @@
 						resolve( new Blob([data], {type:"application/octet-stream"}) );
 					}
 					else {
-						// TODO: FIXME: only text files work with this buffer setup - binary files are corrupted
-						// @see: https://stackoverflow.com/questions/17836438/getting-binary-content-in-node-js-with-http-request
-						// @see: https://stackoverflow.com/questions/14653349/node-js-can%C2%B4t-create-blobs
-						// @see: https://nodejs.org/api/buffer.html#buffer_class_method_buffer_from_buffer
-
-						// Nodejs: Return ArrayBuffer
-						//resolve( Uint8Array.from(Buffer.from(data)).buffer );
-
-						//console.log( Buffer.from(data,'utf8').length );
-						//console.log( Buffer.from(data,'base64').length );
-						//console.log(data);
-						//console.log( data.toString('utf8') );
-						/*
-						console.log( Buffer.from(data,'ascii').length );
-						console.log( Buffer.from(data,'binary').byteLength );
-						console.log( Buffer.from(data,'utf16le').length );
-						console.log( Buffer.from(data).byteLength );
-						*/
-
-						//console.log( Uint8Array.from(Buffer.from(data,'binary')).length );
-						//console.log( Buffer.from(Uint8Array.from(data)).length );
-						//console.log( Buffer.from(data,'hex').length );
-						//resolve( Buffer.from(data,'binary') ); // works for text
-						//resolve( Buffer.from(data) );
-						//resolve( Buffer.from(data,'binary') ); // works for text
-						//resolve( Buffer.from(data) ); // works for text
-
-						// NOTE: FIXME: Below used for 1.8.0
-						resolve( Buffer.from(data,'binary') ); // works for text
+						resolve( Buffer.from(data,'binary') );
 					}
 				})
 				.catch(function(strErr){
