@@ -2,7 +2,7 @@
  * NAME: qunit-test.js
  * DESC: tests for qunit-test.html (coded against my personal O365 Dev Site - YMMV)
  * AUTH: https://github.com/gitbrent/
- * DATE: 20180815
+ * DATE: 20180827
  *
  * HOWTO: Generate text tables for README etc.:
  * sprLib.list('Employees').items(['Id', 'Name', 'Badge_x0020_Number']).then(function(arrData){ console.log(getAsciiTableStr(arrData)) });
@@ -10,15 +10,6 @@
  // REALITY-CHECK:
  // QUnit.test("QUnit Base Test", function(assert){ assert.ok( true === true, "Passed!" ); });
  */
-
-// TODO:
-
-/* TODO: add this to QUnit!!!
-sprLib.folder('/sites/dev/Shared Documents/BreakPerms').perms().then(arr=>console.log(arr))
-// S/B only two groups (instead of usual 4) - "Dev Site Owners" and "Dev Site Members"
-*/
-
-
 
 const BASEURL   = _spPageContextInfo.siteServerRelativeUrl;
 const RESTROOT  = '/sites/dev';
@@ -1189,7 +1180,7 @@ QUnit.module( "LIST - ITEM GET Methods", function(){
 // ================================================================================================
 
 QUnit.module( "FILE - Methods", function(){
-	// NOTE: `get` - done via test in `DEMO_SpRestLib`
+	// NOTE: `get` - test can be executed via `sprestlib-demo.html` (or `nodejs-demo.js`)
 
 	QUnit.test("sprLib.file('whatever').info()", function(assert){
 		var done = assert.async();
@@ -1256,6 +1247,12 @@ QUnit.module( "FOLDER - Methods", function(){
 			done();
 		});
 	});
+
+// TODO: add `perms()`
+/* TODO: add this to QUnit!!!
+sprLib.folder('/sites/dev/Shared Documents/BreakPerms').perms().then(arr=>console.log(arr))
+// S/B only two groups (instead of usual 4) - "Dev Site Owners" and "Dev Site Members"
+*/
 
 	QUnit.test("sprLib.folder('SiteAssets').files()", function(assert){
 		var done = assert.async();
