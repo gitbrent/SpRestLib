@@ -4,13 +4,14 @@
 [Full Changelog](https://github.com/gitbrent/sprestlib/compare/v1.7.0...v1.8.0)
 
 **Implemented Enhancements:**
-- Add Typescript Definitions [\#24](https://github.com/gitbrent/sprestlib/issues/24) ([Wireliner](https://github.com/Wireliner))
 - New File Methods: `get()`, `info()`, `perms()` [\#20](https://github.com/gitbrent/sprestlib/issues/20) ([ra6hi9](https://github.com/ra6hi9))([YakQin](https://github.com/YakQin))([gitbrent](https://github.com/gitbrent))
-- New Folder Methods: `info()`, `files()`, `folders()` [\#20](https://github.com/gitbrent/sprestlib/issues/20) ([ra6hi9](https://github.com/ra6hi9))([YakQin](https://github.com/YakQin))([gitbrent](https://github.com/gitbrent))
+- New Folder Methods: `files()`, `folders()`, `info()`, `perms()` [\#20](https://github.com/gitbrent/sprestlib/issues/20) ([ra6hi9](https://github.com/ra6hi9))([YakQin](https://github.com/YakQin))([gitbrent](https://github.com/gitbrent))
+- Add Typescript Definitions [\#24](https://github.com/gitbrent/sprestlib/issues/24) ([Wireliner](https://github.com/Wireliner))
 - Two new properties added to `list().cols()`: `choiceValues` and `allowFillInChoices`
+- Added "browser" field to `package.json` to improve library integration
 
 **Fixed Bugs:**
-- Defect: The list() `baseUrl` option is ignored by the underlying versions query. [\#27](https://github.com/gitbrent/sprestlib/issues/27) ([gitbrent](https://github.com/gitbrent))
+- The list() `baseUrl` option is ignored by the underlying versions query. [\#27](https://github.com/gitbrent/sprestlib/issues/27) ([gitbrent](https://github.com/gitbrent))
 - sprLib.user(options).profile() using "post"? [\#30](https://github.com/gitbrent/sprestlib/issues/30) ([YakQin](https://github.com/YakQin))
 - The `baseUrl` option no longer works in `user()` methods [\#31](https://github.com/gitbrent/sprestlib/issues/31) ([YakQin](https://github.com/YakQin))
 - Typescript fix: listCols should be optional [\#33](https://github.com/gitbrent/sprestlib/pull/33) ([csoren](https://github.com/csoren))
