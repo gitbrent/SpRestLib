@@ -6,7 +6,7 @@
 	<meta name="website"     content="https://github.com/gitbrent/SpRestLib/">
 	<meta name="keywords"    content="SpRestLib, JavaScript, js-sharepoint, SP2013 REST, SharePoint 2013, SP2013, SharePoint 2016, SharePoint Online">
 	<meta name="description" content="Content Editor Webpart: SpRestLib features and capabilities">
-	<meta name="revised"     content="20180823">
+	<meta name="revised"     content="20180827">
 
 	<!-- HOWTO / FAQ / SETUP -->
 	<!--
@@ -19,14 +19,315 @@
 		*) Check the img folder for screencaps of the SharePoint setup!
 	-->
 
-	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300">
-	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:700">
-	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto+Mono">
-	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:400">
-	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-fork-ribbon-css/0.2.0/gh-fork-ribbon.min.css">
-	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.15.0/themes/prism-okaidia.css">
-	<!-- <link rel="stylesheet" href="../SiteAssets/sprestlib/css/sprestlib-demo.css"> DEBUG -->
-	<link rel="stylesheet" href="https://cdn.rawgit.com/gitbrent/SpRestLib/9684a98e/example/css/sprestlib-demo.css">
+	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootswatch/4.1.2/yeti/bootstrap.min.css">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.15.0/themes/prism-okaidia.min.css">
+
+	<style>
+		.ms-webpartPage-root { border-spacing: 0px !important; /* FIX-O365 */ }
+
+		/* -- brentstrap.css ---------- */
+		.bde-arrow-cont {
+			cursor: pointer;
+			-webkit-user-select: none;
+		       -moz-user-select: none;
+		        -ms-user-select: none;
+		            user-select: none;
+		}
+		.bde-arrow-cont span.text-muted {
+			font-size: 50% !important;
+			color: #b9c9d9 !important;
+			text-transform: none !important;
+			margin-left: 4px;
+		}
+		.arrow {
+			display: inline-block;
+			height: 12px; width: 12px;
+			border-top: 3px solid #0085C3; border-right: 3px solid #0085C3;
+			margin-right: 10px;
+			cursor: pointer;
+			transition: all .25s ease;
+			transform: rotate(45deg);
+		}
+		.arrow.active {
+			transform: rotate(135deg);
+			margin-bottom: 3px;
+		}
+
+		.bde-info-box, .bde-filter-box {
+			background-color: #f9f9f9;
+			border: 1px solid #e6e6e6;
+		}
+		.bde-info-box label, .bde-filter-box label {
+			font-size: .7rem !important;
+			color: #a9a9a9 !important;
+			text-transform: uppercase;
+		}
+		.bde-info-box h5, .bde-filter-box h5 {
+			margin: 0;
+		}
+		.bde-info-box input, .bde-filter-box input {
+			padding: 3px !important;
+		}
+		.bde-info-box select, .bde-filter-box select {
+			padding: 3px !important;
+			height: auto !important;
+		}
+
+		.nowctr { white-space: nowrap !important; text-align: center !important; }
+		.text-nowrap { white-space: nowrap !important; }
+		/* -- brentstrap.css ---------- */
+		.text-muted { font-weight:normal; }
+		.code { font-family: 'Inconsolata','Roboto Mono',monospace !important; white-space: pre !important; }
+
+		/* ------------------------------------------------------------------------- */
+		.sprlib-spinner {
+			display: inline-block;
+			height: 32px;
+			text-align: center;
+			white-space: nowrap;
+		}
+		.sprlib-spinner > div {
+			display: inline-block;
+			width:32px; height:32px;
+			background-color: #40b0df;
+			border: 3px solid #f2f9fc;
+			border-radius: 100%;
+			animation: sprlib-sk-bouncedelay 1.4s infinite ease-in-out both;
+		}
+		.sprlib-spinner .sprlib-bounce1 { animation-delay: -0.32s; }
+		.sprlib-spinner .sprlib-bounce2 { animation-delay: -0.16s; }
+		@keyframes sprlib-sk-bouncedelay { 0%, 80%, 100% {  transform: scale(0); } 40% { transform: scale(1.0); } }
+
+		/* ------------------------------------------------------------------------- */
+		/* 2017-10 Brent SVG Images */
+		div.iconSvg {
+			display: inline-block;
+			background-size: contain;
+			max-width: 256px;
+			max-height: 256px;
+		}
+		div.iconSvg.size16 { width:16px; height:16px; }
+		div.iconSvg.size20 { width:20px; height:20px; }
+		div.iconSvg.size24 { width:24px; height:24px; }
+		div.iconSvg.size32 { width:32px; height:32px; }
+		div.iconSvg.size48 { width:48px; height:48px; }
+		div.iconSvg.circle.question, div.iconSvg.question {
+			background-image:
+				url(data:image/svg+xml;utf8;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iaXNvLTg4NTktMSI/Pgo8IS0tIEdlbmVyYXRvcjogQWRvYmUgSWxsdXN0cmF0b3IgMTkuMC4wLCBTVkcgRXhwb3J0IFBsdWctSW4gLiBTVkcgVmVyc2lvbjogNi4wMCBCdWlsZCAwKSAgLS0+CjxzdmcgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB4bWxuczp4bGluaz0iaHR0cDovL3d3dy53My5vcmcvMTk5OS94bGluayIgdmVyc2lvbj0iMS4xIiBpZD0iQ2FwYV8xIiB4PSIwcHgiIHk9IjBweCIgdmlld0JveD0iMCAwIDUwIDUwIiBzdHlsZT0iZW5hYmxlLWJhY2tncm91bmQ6bmV3IDAgMCA1MCA1MDsiIHhtbDpzcGFjZT0icHJlc2VydmUiIHdpZHRoPSI1MTJweCIgaGVpZ2h0PSI1MTJweCI+CjxjaXJjbGUgc3R5bGU9ImZpbGw6IzQ4QTBEQzsiIGN4PSIyNSIgY3k9IjI1IiByPSIyNSIvPgo8bGluZSBzdHlsZT0iZmlsbDpub25lO3N0cm9rZTojRkZGRkZGO3N0cm9rZS13aWR0aDoyO3N0cm9rZS1saW5lY2FwOnJvdW5kO3N0cm9rZS1taXRlcmxpbWl0OjEwOyIgeDE9IjI1IiB5MT0iMzciIHgyPSIyNSIgeTI9IjM5Ii8+CjxwYXRoIHN0eWxlPSJmaWxsOm5vbmU7c3Ryb2tlOiNGRkZGRkY7c3Ryb2tlLXdpZHRoOjI7c3Ryb2tlLWxpbmVjYXA6cm91bmQ7c3Ryb2tlLW1pdGVybGltaXQ6MTA7IiBkPSJNMTgsMTYgIGMwLTMuODk5LDMuMTg4LTcuMDU0LDcuMS02Ljk5OWMzLjcxNywwLjA1Miw2Ljg0OCwzLjE4Miw2LjksNi45YzAuMDM1LDIuNTExLTEuMjUyLDQuNzIzLTMuMjEsNS45ODYgIEMyNi4zNTUsMjMuNDU3LDI1LDI2LjI2MSwyNSwyOS4xNThWMzIiLz4KPGc+CjwvZz4KPGc+CjwvZz4KPGc+CjwvZz4KPGc+CjwvZz4KPGc+CjwvZz4KPGc+CjwvZz4KPGc+CjwvZz4KPGc+CjwvZz4KPGc+CjwvZz4KPGc+CjwvZz4KPGc+CjwvZz4KPGc+CjwvZz4KPGc+CjwvZz4KPGc+CjwvZz4KPGc+CjwvZz4KPC9zdmc+Cg==);
+		}
+		div.iconSvg.yes, div.iconSvg.check {
+			background-image:
+				url(data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiA/PjxzdmcgaWQ9IkxheWVyXzEiIHN0eWxlPSJlbmFibGUtYmFja2dyb3VuZDpuZXcgMCAwIDUxMiA1MTI7IiB2ZXJzaW9uPSIxLjEiIHZpZXdCb3g9IjAgMCA1MTIgNTEyIiB4bWw6c3BhY2U9InByZXNlcnZlIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hsaW5rIj48c3R5bGUgdHlwZT0idGV4dC9jc3MiPi5zdDB7ZmlsbDojMkJCNjczO30uc3Qxe2ZpbGw6bm9uZTtzdHJva2U6I0ZGRkZGRjtzdHJva2Utd2lkdGg6MzA7c3Ryb2tlLW1pdGVybGltaXQ6MTA7fTwvc3R5bGU+PHBhdGggY2xhc3M9InN0MCIgZD0iTTQ4OSwyNTUuOWMwLTAuMiwwLTAuNSwwLTAuN2MwLTEuNiwwLTMuMi0wLjEtNC43YzAtMC45LTAuMS0xLjgtMC4xLTIuOGMwLTAuOS0wLjEtMS44LTAuMS0yLjcgIGMtMC4xLTEuMS0wLjEtMi4yLTAuMi0zLjNjMC0wLjctMC4xLTEuNC0wLjEtMi4xYy0wLjEtMS4yLTAuMi0yLjQtMC4zLTMuNmMwLTAuNS0wLjEtMS4xLTAuMS0xLjZjLTAuMS0xLjMtMC4zLTIuNi0wLjQtNCAgYzAtMC4zLTAuMS0wLjctMC4xLTFDNDc0LjMsMTEzLjIsMzc1LjcsMjIuOSwyNTYsMjIuOVMzNy43LDExMy4yLDI0LjUsMjI5LjVjMCwwLjMtMC4xLDAuNy0wLjEsMWMtMC4xLDEuMy0wLjMsMi42LTAuNCw0ICBjLTAuMSwwLjUtMC4xLDEuMS0wLjEsMS42Yy0wLjEsMS4yLTAuMiwyLjQtMC4zLDMuNmMwLDAuNy0wLjEsMS40LTAuMSwyLjFjLTAuMSwxLjEtMC4xLDIuMi0wLjIsMy4zYzAsMC45LTAuMSwxLjgtMC4xLDIuNyAgYzAsMC45LTAuMSwxLjgtMC4xLDIuOGMwLDEuNi0wLjEsMy4yLTAuMSw0LjdjMCwwLjIsMCwwLjUsMCwwLjdjMCwwLDAsMCwwLDAuMXMwLDAsMCwwLjFjMCwwLjIsMCwwLjUsMCwwLjdjMCwxLjYsMCwzLjIsMC4xLDQuNyAgYzAsMC45LDAuMSwxLjgsMC4xLDIuOGMwLDAuOSwwLjEsMS44LDAuMSwyLjdjMC4xLDEuMSwwLjEsMi4yLDAuMiwzLjNjMCwwLjcsMC4xLDEuNCwwLjEsMi4xYzAuMSwxLjIsMC4yLDIuNCwwLjMsMy42ICBjMCwwLjUsMC4xLDEuMSwwLjEsMS42YzAuMSwxLjMsMC4zLDIuNiwwLjQsNGMwLDAuMywwLjEsMC43LDAuMSwxQzM3LjcsMzk4LjgsMTM2LjMsNDg5LjEsMjU2LDQ4OS4xczIxOC4zLTkwLjMsMjMxLjUtMjA2LjUgIGMwLTAuMywwLjEtMC43LDAuMS0xYzAuMS0xLjMsMC4zLTIuNiwwLjQtNGMwLjEtMC41LDAuMS0xLjEsMC4xLTEuNmMwLjEtMS4yLDAuMi0yLjQsMC4zLTMuNmMwLTAuNywwLjEtMS40LDAuMS0yLjEgIGMwLjEtMS4xLDAuMS0yLjIsMC4yLTMuM2MwLTAuOSwwLjEtMS44LDAuMS0yLjdjMC0wLjksMC4xLTEuOCwwLjEtMi44YzAtMS42LDAuMS0zLjIsMC4xLTQuN2MwLTAuMiwwLTAuNSwwLTAuNyAgQzQ4OSwyNTYsNDg5LDI1Niw0ODksMjU1LjlDNDg5LDI1Niw0ODksMjU2LDQ4OSwyNTUuOXoiIGlkPSJYTUxJRF8zXyIvPjxnIGlkPSJYTUxJRF8xXyI+PGxpbmUgY2xhc3M9InN0MSIgaWQ9IlhNTElEXzJfIiB4MT0iMjEzLjYiIHgyPSIzNjkuNyIgeTE9IjM0NC4yIiB5Mj0iMTg4LjIiLz48bGluZSBjbGFzcz0ic3QxIiBpZD0iWE1MSURfNF8iIHgxPSIyMzMuOCIgeDI9IjE1NC43IiB5MT0iMzQ1LjIiIHkyPSIyNjYuMSIvPjwvZz48L3N2Zz4=);
+		}
+		div.iconSvg.no,  div.iconSvg.fail {
+			background-image:
+				url(data:image/svg+xml;utf8;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iaXNvLTg4NTktMSI/Pgo8IS0tIEdlbmVyYXRvcjogQWRvYmUgSWxsdXN0cmF0b3IgMTkuMC4wLCBTVkcgRXhwb3J0IFBsdWctSW4gLiBTVkcgVmVyc2lvbjogNi4wMCBCdWlsZCAwKSAgLS0+CjxzdmcgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB4bWxuczp4bGluaz0iaHR0cDovL3d3dy53My5vcmcvMTk5OS94bGluayIgdmVyc2lvbj0iMS4xIiBpZD0iQ2FwYV8xIiB4PSIwcHgiIHk9IjBweCIgdmlld0JveD0iMCAwIDUwIDUwIiBzdHlsZT0iZW5hYmxlLWJhY2tncm91bmQ6bmV3IDAgMCA1MCA1MDsiIHhtbDpzcGFjZT0icHJlc2VydmUiIHdpZHRoPSI1MTJweCIgaGVpZ2h0PSI1MTJweCI+CjxjaXJjbGUgc3R5bGU9ImZpbGw6I0Q3NUE0QTsiIGN4PSIyNSIgY3k9IjI1IiByPSIyNSIvPgo8cG9seWxpbmUgc3R5bGU9ImZpbGw6bm9uZTtzdHJva2U6I0ZGRkZGRjtzdHJva2Utd2lkdGg6MjtzdHJva2UtbGluZWNhcDpyb3VuZDtzdHJva2UtbWl0ZXJsaW1pdDoxMDsiIHBvaW50cz0iMTYsMzQgMjUsMjUgMzQsMTYgICAiLz4KPHBvbHlsaW5lIHN0eWxlPSJmaWxsOm5vbmU7c3Ryb2tlOiNGRkZGRkY7c3Ryb2tlLXdpZHRoOjI7c3Ryb2tlLWxpbmVjYXA6cm91bmQ7c3Ryb2tlLW1pdGVybGltaXQ6MTA7IiBwb2ludHM9IjE2LDE2IDI1LDI1IDM0LDM0ICAgIi8+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+Cjwvc3ZnPgo=);
+		}
+		div.iconSvg.xmark {
+			background-image:
+				url(data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iaXNvLTg4NTktMSI/PjxzdmcgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB4bWxuczp4bGluaz0iaHR0cDovL3d3dy53My5vcmcvMTk5OS94bGluayIgdmVyc2lvbj0iMS4xIiBpZD0iQ2FwYV8xIiB4PSIwcHgiIHk9IjBweCIgdmlld0JveD0iMCAwIDQ0OS45OTggNDQ5Ljk5OCIgc3R5bGU9ImVuYWJsZS1iYWNrZ3JvdW5kOm5ldyAwIDAgNDQ5Ljk5OCA0NDkuOTk4OyIgeG1sOnNwYWNlPSJwcmVzZXJ2ZSIgd2lkdGg9IjUxMnB4IiBoZWlnaHQ9IjUxMnB4Ij48Zz48Zz48cG9seWdvbiBwb2ludHM9IjQ0OS45NzQsMzQuODU1IDQxNS4xOTEsMCAyMjUuMDA3LDE5MC4xODQgMzQuODM5LDAgMC4wMjQsMzQuODM5IDE5MC4xOTIsMjI0Ljk5OSAgICAgMC4wMjQsNDE1LjE1OSAzNC44MzksNDQ5Ljk5OCAyMjUuMDA3LDI1OS43OTcgNDE1LjE5MSw0NDkuOTk4IDQ0OS45NzQsNDE1LjE0MyAyNTkuODMsMjI0Ljk5OSAgICIgZmlsbD0iI0Q4MDAyNyIvPjwvZz48L2c+PGc+PC9nPjxnPjwvZz48Zz48L2c+PGc+PC9nPjxnPjwvZz48Zz48L2c+PGc+PC9nPjxnPjwvZz48Zz48L2c+PGc+PC9nPjxnPjwvZz48Zz48L2c+PGc+PC9nPjxnPjwvZz48Zz48L2c+PC9zdmc+);
+		}
+		div.iconSvg.circle.info {
+			background-image:
+				url(data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iaXNvLTg4NTktMSI/PjxzdmcgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB4bWxuczp4bGluaz0iaHR0cDovL3d3dy53My5vcmcvMTk5OS94bGluayIgdmVyc2lvbj0iMS4xIiB4PSIwcHgiIHk9IjBweCIgd2lkdGg9IjUxMnB4IiBoZWlnaHQ9IjUxMnB4IiB2aWV3Qm94PSIwIDAgMzQ3LjYxMiAzNDcuNjEyIiBzdHlsZT0iZW5hYmxlLWJhY2tncm91bmQ6bmV3IDAgMCAzNDcuNjEyIDM0Ny42MTI7IiB4bWw6c3BhY2U9InByZXNlcnZlIj48Zz48Zz48cGF0aCBmaWxsPSIjMDA4OENDIiBkPSJNMTczLjgwNywwQzc3Ljk3LDAsMCw3Ny45NywwLDE3My44MDZDMCwyNjkuNjQsNzcuOTcsMzQ3LjYxMiwxNzMuODA3LDM0Ny42MTJjOTUuODMzLDAsMTczLjgwNi03Ny45NzMsMTczLjgwNi0xNzMuODA3IEMzNDcuNjEyLDc3Ljk3LDI2OS42NCwwLDE3My44MDcsMHogTTE5Ni40ODksMjY5LjQ0N2MwLDkuOTMzLTguMDcsMTcuOTk3LTE3Ljk5LDE3Ljk5N2MtOS45MTQsMC0xNy45NjktOC4wNjQtMTcuOTY5LTE3Ljk5NyBWMTM3LjM0MmMwLTkuODk4LDguMDU2LTE3Ljk2NiwxNy45NjktMTcuOTY2YzkuOTIsMCwxNy45OSw4LjA2OCwxNy45OSwxNy45NjZWMjY5LjQ0N3ogTTE3OS4yMzQsMTAxLjE1NyBjLTExLjI5NCwwLTIwLjQ5NC05LjE5My0yMC40OTQtMjAuNDk1czkuMTkzLTIwLjQ5NSwyMC40OTQtMjAuNDk1YzExLjMwNSwwLDIwLjQ5OCw5LjE5MywyMC40OTgsMjAuNDk1IFMxOTAuNTM5LDEwMS4xNTcsMTc5LjIzNCwxMDEuMTU3eiIgLz48L2c+PC9nPjwvc3ZnPg==);
+		}
+		div.iconSvg.lock {
+			background-image:
+				url(data:image/svg+xml;utf8;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iaXNvLTg4NTktMSI/Pgo8IS0tIEdlbmVyYXRvcjogQWRvYmUgSWxsdXN0cmF0b3IgMTkuMC4wLCBTVkcgRXhwb3J0IFBsdWctSW4gLiBTVkcgVmVyc2lvbjogNi4wMCBCdWlsZCAwKSAgLS0+CjxzdmcgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB4bWxuczp4bGluaz0iaHR0cDovL3d3dy53My5vcmcvMTk5OS94bGluayIgdmVyc2lvbj0iMS4xIiBpZD0iQ2FwYV8xIiB4PSIwcHgiIHk9IjBweCIgdmlld0JveD0iMCAwIDU4IDU4IiBzdHlsZT0iZW5hYmxlLWJhY2tncm91bmQ6bmV3IDAgMCA1OCA1ODsiIHhtbDpzcGFjZT0icHJlc2VydmUiIHdpZHRoPSI1MTJweCIgaGVpZ2h0PSI1MTJweCI+CjxwYXRoIHN0eWxlPSJmaWxsOiNDN0NBQzc7c3Ryb2tlOiNDN0NBQzc7c3Ryb2tlLXdpZHRoOjI7c3Ryb2tlLW1pdGVybGltaXQ6MTA7IiBkPSJNNDIsMzJIMTVWMTMuNjAxQzE1LDYuNjUyLDIxLjA1NiwxLDI4LjUsMSAgUzQyLDYuNjUyLDQyLDEzLjYwMVYzMnogTTE5LDI4aDE5VjEzLjYwMUMzOCw4Ljg1OCwzMy43MzgsNSwyOC41LDVTMTksOC44NTgsMTksMTMuNjAxVjI4eiIvPgo8cmVjdCB4PSI4IiB5PSIyNiIgc3R5bGU9ImZpbGw6IzczODNCRjsiIHdpZHRoPSI0MiIgaGVpZ2h0PSIzMiIvPgo8cmVjdCB4PSIyOSIgeT0iMjYiIHN0eWxlPSJmaWxsOiM2ODc5QUY7IiB3aWR0aD0iMjEiIGhlaWdodD0iMzIiLz4KPHBvbHlnb24gc3R5bGU9ImZpbGw6I0VCQkExNjsiIHBvaW50cz0iNDIuNTg2LDU3IDQ5LDUwLjU4NiA0OSw0NyA0My40MTQsNDcgMzMuNDE0LDU3ICIvPgo8cG9seWdvbiBzdHlsZT0iZmlsbDojNEY1OTcwOyIgcG9pbnRzPSI5LDQ3IDksNTQuNTg2IDE2LjU4Niw0NyAiLz4KPHBvbHlnb24gc3R5bGU9ImZpbGw6IzQyNEE2MDsiIHBvaW50cz0iMzAuNTg2LDU3IDQwLjU4Niw0NyAzMS40MTQsNDcgMjEuNDE0LDU3ICIvPgo8cGF0aCBzdHlsZT0iZmlsbDojRUFDQzE4OyIgZD0iTTI4LjU4Niw0N2gtOS4xNzJsLTkuNzA3LDkuNzA3QzkuNTEyLDU2LjkwMiw5LjI1Niw1Nyw5LDU3aDkuNTg2TDI4LjU4Niw0N3oiLz4KPHBvbHlnb24gc3R5bGU9ImZpbGw6IzQyNEE2MDsiIHBvaW50cz0iNDksNTcgNDksNTMuNDE0IDQ1LjQxNCw1NyAiLz4KPHBvbHlnb24gc3R5bGU9ImZpbGw6IzRGNTk3MDsiIHBvaW50cz0iMjksNDkuNDE0IDIxLjQxNCw1NyAyOSw1NyAiLz4KPGc+CjwvZz4KPGc+CjwvZz4KPGc+CjwvZz4KPGc+CjwvZz4KPGc+CjwvZz4KPGc+CjwvZz4KPGc+CjwvZz4KPGc+CjwvZz4KPGc+CjwvZz4KPGc+CjwvZz4KPGc+CjwvZz4KPGc+CjwvZz4KPGc+CjwvZz4KPGc+CjwvZz4KPGc+CjwvZz4KPC9zdmc+Cg==);
+		}
+		div.iconSvg.reload, div.iconSvg.refresh {
+			background-image:
+				url(data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iaXNvLTg4NTktMSI/PjxzdmcgdmVyc2lvbj0iMS4xIiBpZD0iTGF5ZXJfMSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB4bWxuczp4bGluaz0iaHR0cDovL3d3dy53My5vcmcvMTk5OS94bGluayIgeD0iMHB4IiB5PSIwcHgiIHZpZXdCb3g9IjAgMCA1MTIuMDAyIDUxMi4wMDIiIHN0eWxlPSJlbmFibGUtYmFja2dyb3VuZDpuZXcgMCAwIDUxMi4wMDIgNTEyLjAwMjsiIHhtbDpzcGFjZT0icHJlc2VydmUiPjxwYXRoIHN0eWxlPSJmaWxsOiMwMDg4Y2M7IiB0cmFuc2Zvcm09InJvdGF0ZSg5MCAyNTYgMjU2KSIgZD0iTTQzNi44NjYsNDM2Ljg3MWM0OC4zMTItNDguMzExLDc0LjkyMS0xMTIuNTQ2LDc0LjkyMS0xODAuODcxIGMwLTE0MS4wMzktMTE0Ljc0NC0yNTUuNzg1LTI1NS43ODMtMjU1Ljc4NnY0OS41MDdjMTEzLjc0MSwwLjAwMiwyMDYuMjc2LDkyLjUzOSwyMDYuMjc2LDIwNi4yNzljMCw1NS4xMDEtMjEuNDU4LDEwNi45MDItNjAuNDIsMTQ1Ljg2NGwtNy41NzEsNy41NzFsLTY3LjU1Mi02Ny41NTJsMC4wMjEsMTcwLjA3NmwxNzAuMDk2LDAuMDQxbC02Ny41NTktNjcuNTU5TDQzNi44NjYsNDM2Ljg3MXoiLz48cGF0aCBzdHlsZT0iZmlsbDojMDA4OGNjOyIgdHJhbnNmb3JtPSJyb3RhdGUoOTAgMjU2IDI1NikiIGQ9Ik00OS43MjQsMjU2LjAwMWMwLTU1LjEwMSwyMS40NTgtMTA2LjkwMiw2MC40Mi0xNDUuODY0bDcuNTcxLTcuNTcxbDY3LjU1Miw2Ny41NTJMMTg1LjI0NSwwLjA0MUwxNS4xNDgsMGw2Ny41NTksNjcuNTU5bC03LjU3MSw3LjU3QzI2LjgyNCwxMjMuNDM5LDAuMjE1LDE4Ny42NzUsMC4yMTUsMjU1Ljk5OWMwLDE0MS4wMzksMTE0Ljc0NCwyNTUuNzg1LDI1NS43ODMsMjU1Ljc4NnYtNDkuNTA3QzE0Mi4yNTgsNDYyLjI3OCw0OS43MjQsMzY5Ljc0Miw0OS43MjQsMjU2LjAwMXoiLz48L3N2Zz4=);
+		}
+
+		/* Flex modernTabs (Fall-2017) */
+		.flexTabs {
+			width: 100%;
+			margin: 20px 0 10px 0;
+			font-family: Roboto, "Segoe UI", Helvetica, Arial, sans-serif;
+			border: 1px solid #d5d5d5;
+			box-shadow: 0px 4px 10px -5px rgba(0,0,0,0.5);
+			border-radius: 5px;
+		}
+		.flexTabs > ul {
+			display: flex;
+			background: #F6F6F6;
+		    list-style-type: none;
+		    margin: 0 !important; -webkit-margin-before: 0;  -moz-margin-before: 0;  -ms-margin-before: 0;
+		    padding: 0 !important;
+		    border-bottom: 1px solid #d5d5d5;
+		    border-radius: 5px 5px 0 0;
+		}
+		.flexTabs > ul > li {
+			flex: 1 0 auto;
+			box-sizing: border-box;
+		    cursor: pointer;
+		    text-shadow: 2px 2px #efefef;
+		    text-align: center;
+		    display: inline-block;
+			list-style-type: none;
+		    padding: 15px;
+		    font-size: 14px;
+		    color: #a7a7a7;
+		    text-transform: uppercase;
+		    border-bottom: 3px solid #F6F6F6;
+		    -webkit-user-select: none;
+		       -moz-user-select: none;
+		        -ms-user-select: none;
+		            user-select: none;
+		}
+		.flexTabs > ul > li.active {
+		    font-weight: bold;
+		    text-shadow: none;
+		    color: #0088CC;
+		    border-bottom: 3px solid #0088cc;
+		}
+		.flexTabs > div {
+		    display: none;
+		    margin: 0;
+		    padding: 1.5rem 2rem;
+		    background: white;
+		    border-radius: 0 0 5px 5px;
+		}
+		.flexTabs > div.active { display: block; }
+		.flexTabs > div > .toolBar { width: 100%; min-height: 44px; display: table; margin-top: -20px; }
+		.flexTabs > div > .toolBar > div:first-child { display:table-cell; width:75%; text-align: left; padding:10px 0; vertical-align:middle; color:#bcd; }
+		.flexTabs > div > .toolBar > div:last-child  { display:table-cell; width:25%; text-align:right; padding:10px 0; vertical-align:middle; white-space:nowrap; }
+		.flexTabs > div > .toolBar button { border-radius: 2px; text-transform: none; }
+		.flexTabs > div > .toolBar img { vertical-align:middle; margin:-3px 3px 0 0; }
+
+		/* ------------------------------------------------------------------------- */
+		.tabModern {
+			width: 100%;
+			border-collapse: collapse;
+			margin: 0px;
+		}
+		.tabModern > tbody > tr > th, .tabModern > tbody > tr > td { border: 1px #f1f1f1 solid; }
+		.tabModern th.icon {
+			width: 1%;
+			padding: 0 4px;
+		}
+		.tabModern td.icon {
+			width: 1%;
+			padding: 0 4px 0 0;
+			background: #f8fbff;
+		}
+		.tabModern > thead > tr > th {
+			background: #E5F2FA;
+			border-left: 1px white solid;
+			border-bottom: 1px white solid;
+			border-top: 1px #e7e7f3 solid;
+			text-align: left;
+			padding: 8px;
+			font-size: 11px;
+			font-weight: normal;
+			color: #0090C0;
+			text-transform: uppercase;
+			white-space: nowrap;
+			vertical-align: middle;
+		}
+		.tabModern > thead > tr > th.title {
+		    background: #0088cc;
+		    text-align: center;
+		    padding: 10px;
+		    color: white;
+		    font-size: 14px;
+		    font-weight: bold;
+		}
+		.tabModern > thead > tr > th:first-child {
+			border-left: 1px #e7e7f3 solid;
+		}
+		.tabModern > thead > tr > th:last-child {
+			border-right: 1px #e7e7f3 solid;
+		}
+		.tabModern > tbody > tr > th {
+			text-align: left;
+			padding: 6px 10px;
+			background: #f2f9fc;
+			color: #0088cc;
+			box-sizing: border-box;
+			border-bottom: 1px solid white !important;
+		}
+		.tabModern > tbody > tr > td {
+			text-align: left;
+			padding: 6px 10px;
+			background: white;
+			box-sizing: border-box;
+		}
+		.tabModern > tbody > tr > td > a:link {
+			text-decoration: underline;
+		}
+		.tabModern > tfoot > tr > td { padding: 15px; text-align: center; }
+		.tabModern td.gray { background: #f7f7f7; }
+		.tabModern td.blue { background: #E5F2FA; }
+		.tabModern th.tabModernSection, .tabModern td.tabModernSection {
+			background: #E5F2FA !important;
+			text-align: center !important;
+			padding: 8px !important;
+			color: #0F5199;
+		}
+		.tabModern.shadow { box-shadow:2px 2px 6px 2px #aaa; }
+
+		/* tablesorter.css */
+		.tablesorter thead th {
+			border-left: 1px white solid !important;
+			border-right: 1px white solid !important;
+			border-top: 1px #e7e7f3 solid !important;
+			border-bottom: 1px #e7e7f3 solid !important;
+		}
+		.tablesorter thead th:first-child { border-left:  1px #e7e7f3 solid !important; }
+		.tablesorter thead th:last-child  { border-right: 1px #e7e7f3 solid !important; }
+		.tablesorter thead .tablesorter-header {
+			background-repeat: no-repeat;
+			background-position: right 8px center;
+			cursor: pointer;
+		}
+		.tablesorter thead .tablesorter-headerAsc      { background-color:#a9d4ef !important; color:#ffffff !important; background-image:url('data:image/gif;base64,R0lGODlhBwAEAIAAAP///////yH5BAEAAAEALAAAAAAHAAQAAAIHjGEJq8sOCwA7') !important; }
+		.tablesorter thead .tablesorter-headerDesc     { background-color:#a9d4ef !important; color:#ffffff !important; background-image:url('data:image/gif;base64,R0lGODlhBwAEAIAAAP///////yH5BAEAAAEALAAAAAAHAAQAAAIIhA+BGWoNWSgAOw') !important; }
+		.tablesorter thead .tablesorter-headerUnSorted { background-color:#E5F2FA !important; color:#0090C0 !important; background-image:url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAcAAAAJCAYAAAD+WDajAAAAKElEQVR42mNgQAYTDvxnwApAEjCMUwJFATYJrCbgtYtoo4lzLQ5/AgB5EEnhsdUsjwAAAABJRU5ErkJggg==') !important; }
+		.tablesorter > tbody > tr > td { border: 1px #F1F1F1 solid !important; color:#696969 !important; }
+		/* tablesorter - Make room for sort icons */
+		.tablesorter > thead > tr > th { padding: 6px 20px 6px 8px !important; }
+		.tablesorter > thead > tr > th.sorter-false { padding: 6px 8px !important; cursor: default; }
+		.tabModern > thead > tr > th.sorter-false { background-image: url('data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7') !important; }
+		/* icon.checkbox cells in tbody */
+		.tablesorter > tbody > tr > td.icon {
+			width: 1%;
+			background: #f8fbff;
+			text-align: center;
+			white-space: nowrap;
+			border-top:1px solid #fff !important;
+			border-bottom:1px solid #fff !important;
+			padding: 0 4px;
+			vertical-align: middle;
+		}
+		.tablesorter > tbody > tr > td.icon:last-child { border-bottom: 1px solid #F1F1F1; }
+
+		/* ----- */
+		.contSwitch { display:inline-block; vertical-align:bottom; }
+		.switch { width: 28px; height: 16px; position: relative; display: inline-block; }
+		.switch input { display:none; }
+		.slider {
+		  position: absolute;
+		  cursor: pointer;
+		  top: 0; left: 0; right: 0; bottom: 0;
+		  background-color: #E45D4F; /* orig:#c7c7c7 */
+		  transition: .4s; -webkit-transition: .4s;
+		}
+		.slider:before {
+		  position: absolute;
+		  content: "";
+		  height: 14px; width: 14px;
+		  left: 1px; bottom: 1px;
+		  background-color: white;
+		  transition: .4s; -webkit-transition: .4s;
+		}
+		input:focus   + .slider { box-shadow: 0 0 1px #7fb0d2; }
+		input:checked + .slider { background-color: #77C25B; } /* orig:#7fb0d2 */
+		input:checked + .slider:before { -webkit-transform:translateX(12px); -ms-transform:translateX(12px); transform:translateX(12px); }
+		.slider.round { border-radius: 14px; }
+		.slider.round:before { border-radius: 50%; }
+	</style>
 
 	<script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
 	<!--<script src="https://cdn.rawgit.com/gitbrent/SpRestLib/9684a98e/dist/sprestlib.bundle.js"></script>-->
@@ -36,9 +337,9 @@
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.15.0/prism.min.js"></script>
 
 	<script>
-		var APP_BLD = 20180823;
+		var APP_BLD = 20180827;
 		var HTML_SPINNER = '<div class="sprlib-spinner"><div class="sprlib-bounce1"></div><div class="sprlib-bounce2"></div><div class="sprlib-bounce3"></div></div>';
-		var LAYOUTS_URL = _spPageContextInfo.layoutsUrl || '_layouts/15';
+		var LAYOUTS_URL = ( typeof _spPageContextInfo !== 'undefined' && _spPageContextInfo.layoutsUrl ? _spPageContextInfo.layoutsUrl : '_layouts/15' );
 
 		// ==================================================================================================================
 
@@ -138,17 +439,43 @@
 			});
 		}
 
-		function handleFileChange() {
+		function handleFileLibChange() {
+			// A: Empty select
+			$('#selFileFiles').empty();
+			$('#selFileFiles').append('<option value="">Select...</option>');
+
+			// B: Return if nothing selected
+			if ( !$('#selFileLibs').val() ) return;
+
+			// C: Show busy
+			$('#contFileFileSelect .sprlib-spinner').show();
+			$('#contFileFileSelect select').hide();
+
+			// D: Populate <select> with file names
+			sprLib.folder($('#selFileLibs').val()).files()
+			.then(function(arrResults){
+				arrResults
+				.sort(function(a,b){ return (a.Title > b.Title) ? 1 : ((b.Title > a.Title) ? -1 : 0); })
+				.forEach(function(obj,idx){
+					// NOTE: `/Forms` folder is special that `ListItemAllFields` will fail on!
+					if ( !obj.Hidden ) $('#selFileFiles').append('<option value="'+ obj.ServerRelativeUrl +'">'+ obj.Name +'</option>');
+				});
+				$('#contFileFileSelect .sprlib-spinner').hide();
+				$('#contFileFileSelect select').show();
+			});
+		}
+
+		function handleFileFileChange() {
 			// A: Clear results
 			$('#contFileInfo table, #contFileVer table').remove();
 			$('#tabFilePerms tbody').empty();
 			$('#tabList .text-danger').remove();
 			// B: Return if nothing selected
-			if ( !$('#selSiteFiles').val() ) return;
+			if ( !$('#selFileFiles').val() ) return;
 
 			// INFO:
-			$('#contFileInfo pre code').text( 'sprLib.file(\''+ $('#selSiteFiles').val() +'\').info()' );
-			sprLib.file($('#selSiteFiles').val()).info()
+			$('#contFileInfo pre code').text( 'sprLib.file(\''+ $('#selFileFiles').val() +'\').info()' );
+			sprLib.file($('#selFileFiles').val()).info()
 			.then(function(objInfo){
 				var $table = $('<table class="tabModern"><tbody></tbody></table>');
 				$table.append('<thead><tr><th>Prop Name</th><th>Prop Value</th></tr></thead>');
@@ -159,8 +486,8 @@
 			});
 
 			// INFO: (using `version`)
-			$('#contFileVer pre code').text( 'sprLib.file(\''+ $('#selSiteFiles').val() +'\').info({ version:1.0 })' );
-			sprLib.file($('#selSiteFiles').val()).info({ version:1 })
+			$('#contFileVer pre code').text( 'sprLib.file(\''+ $('#selFileFiles').val() +'\').info({ version:1.0 })' );
+			sprLib.file($('#selFileFiles').val()).info({ version:1 })
 			.catch(function(errMsg){
 				$('#contFileVer').append('<h5 class="text-danger">'+errMsg+'</h5>');
 				console.error(errMsg);
@@ -175,8 +502,8 @@
 			});
 
 			// PERMS:
-			$('#contFilePerms pre code').text( 'sprLib.file(\''+ $('#selSiteFiles').val() +'\').perms()' );
-			sprLib.file($('#selSiteFiles').val()).perms()
+			$('#contFilePerms pre code').text( 'sprLib.file(\''+ $('#selFileFiles').val() +'\').perms()' );
+			sprLib.file($('#selFileFiles').val()).perms()
 			.then(function(arrPerms){
 				arrPerms.forEach(function(perm){
 					// A-1: Create row
@@ -197,9 +524,9 @@
 			});
 
 			// GET:
-			$('#contFileGet pre code').text( 'sprLib.file(\''+ $('#selSiteFiles').val() +'\').get()' );
+			$('#contFileGet pre code').text( 'sprLib.file(\''+ $('#selFileFiles').val() +'\').get()' );
 			$('#codeGetFile').text(
-				"sprLib.file('"+ $('#selSiteFiles').val() +"').get()\n"+
+				"sprLib.file('"+ $('#selFileFiles').val() +"').get()\n"+
 				'.then(function(blob){\n'+
 				'    var url = (window.URL || window.webkitURL).createObjectURL(blob);\n'+
 				'    var link = document.createElement("a");\n'+
@@ -228,6 +555,7 @@
 
 			// C: Show busy
 			$('#contFoldFldSelect .sprlib-spinner').show();
+			$('#contFoldFldSelect select').hide();
 
 			// D: Populate <select> with List names
 			sprLib.folder($('#selFoldLibs').val()).folders()
@@ -239,6 +567,7 @@
 					if ( !obj.Hidden && obj.Name != 'Forms' ) $('#selFoldFlds').append('<option value="'+ obj.ServerRelativeUrl +'">'+ obj.Name +'</option>');
 				});
 				$('#contFoldFldSelect .sprlib-spinner').hide();
+				$('#contFoldFldSelect select').show();
 			});
 		}
 
@@ -361,6 +690,7 @@
 
 			// A:
 			$('#'+eleData).html( HTML_SPINNER );
+			// TODO: use addClass('spinner') instead!
 
 			// B:
 			Promise.resolve()
@@ -406,48 +736,113 @@
 
 			// TAB: Setup
 			{
-				// SP: User
-				sprLib.user().info().then(function(objUser){ $('#spUserPerm').text(objUser.Title) }).catch(function(strErr){ console.error(strErr) });
-
 				// SP: Datetime Stamp
 				$('#spDateTime').text( new Date().toLocaleString() );
 
 				// JS.A: jQuery
 				if ( typeof jQuery !== 'undefined' ) {
 					$('#libChkJquery .iconSvg').removeClass('question').addClass('yes');
-					$('#libChkJquery > div:last-child').text( jQuery.fn.jquery );
+					$('#libChkJquery .val').text( jQuery.fn.jquery );
 				}
 				else {
 					$('#libChkJquery .iconSvg').removeClass('question').addClass('fail');
-					$('#libChkJquery > div:last-child').text( '???' );
+					$('#libChkJquery .val').text( '???' );
 				}
 
 				// JS.B: jQuery-tablesorter
 				if ( typeof $.tablesorter !== 'undefined' ) {
 					$('#libChkTsorter .iconSvg').removeClass('question').addClass('yes');
-					$('#libChkTsorter > div:last-child').text( $.tablesorter.version );
+					$('#libChkTsorter .val').text( $.tablesorter.version );
 				}
 				else {
 					$('#libChkTsorter .iconSvg').removeClass('question').addClass('fail');
-					$('#libChkTsorter > div:last-child').text( '???' );
+					$('#libChkTsorter .val').text( '???' );
 				}
 
 				// JS.C: SpRestLib
 				if ( typeof sprLib !== 'undefined' ) {
 					$('#libChkSprLib .iconSvg').removeClass('question').addClass('yes');
-					$('#libChkSprLib > div:last-child').text( sprLib.version );
+					$('#libChkSprLib .val').text( sprLib.version );
+
+					// SP: User
+					sprLib.user().info()
+					.then(function(objUser){ $('#spUserPerm').text(objUser.Title) })
+					.catch(function(strErr){ $('#spUserPerm').html('<span class="text-danger">'+strErr+'</span>'); });
 
 					// Make human readable when relative directory returned
-					$('#spBaseUrl').text( (sprLib.baseUrl() == ".." ? _spPageContextInfo.siteAbsoluteUrl : sprLib.baseUrl()) );
+					try {
+						$('#spBaseUrl').text( (sprLib.baseUrl() == ".." ? _spPageContextInfo.siteAbsoluteUrl : sprLib.baseUrl()) );
+					}
+					catch(ex){
+						$('#spBaseUrl').html('<span class="text-danger">'+ex+'</span>');
+					}
 				}
 				else {
 					$('#libChkSprLib .iconSvg').removeClass('question').addClass('fail');
-					$('#libChkSprLib > div:last-child').text( '???' );
+					$('#libChkSprLib .val').text( '???' );
 					$('#spBaseUrl').text( '(n/a)' );
 
 					// Halt execution
 					return;
 				}
+			}
+
+			// TAB: List
+			{
+				$('#contListSelect select').hide();
+				// Populate <select> with List names
+				sprLib.rest({ restUrl:'_api/web/lists/' })
+				.then(function(arrayListObjs){
+					arrayListObjs
+					.sort(function(a,b){return (a.Title > b.Title) ? 1 : ((b.Title > a.Title) ? -1 : 0);} )
+					.forEach(function(obj,idx){
+						if ( !obj.Hidden ) $('#selSiteLists').append('<option value="'+ obj.Title +'">'+ obj.Title +'</option>');
+					});
+					$('#contListSelect .sprlib-spinner').remove();
+					$('#contListSelect select').show();
+				})
+				.catch(function(strErr){
+					$('#contListSelect .sprlib-spinner').remove();
+					$('#contListSelect select').after('<span class="text-danger">'+strErr+'</span>');
+				});
+			}
+
+			// TAB: File
+			{
+				$('#contFileLibsSelect select, #contFileFileSelect select').hide();
+				sprLib.site().lists()
+				.then(function(arrResults){
+					arrResults
+					.sort(function(a,b){ return (a.Title > b.Title) ? 1 : ((b.Title > a.Title) ? -1 : 0); })
+					.forEach(function(obj,idx){
+						if ( !obj.Hidden && obj.BaseType == "Library" ) $('#selFileLibs').append('<option value="'+ obj.ServerRelativeUrl +'">'+ obj.Title +'</option>');
+					});
+					$('#contFileLibsSelect, #contFileFileSelect').find('.sprlib-spinner').hide();
+					$('#contFileLibsSelect, #contFileFileSelect').find('select').show();
+				})
+				.catch(function(strErr){
+					$('#contFileLibsSelect, #contFileFileSelect').find('.sprlib-spinner').hide();
+					$('#contFileLibsSelect, #contFileFileSelect').find('select').after('<span class="text-danger">'+strErr+'</span>');
+				});
+			}
+
+			// TAB: Folder
+			{
+				$('#contFoldLibSelect select, #contFoldFldSelect select').hide();
+				sprLib.site().lists()
+				.then(function(arrResults){
+					arrResults
+					.sort(function(a,b){ return (a.Title > b.Title) ? 1 : ((b.Title > a.Title) ? -1 : 0); })
+					.forEach(function(obj,idx){
+						if ( !obj.Hidden && obj.BaseType == "Library" ) $('#selFoldLibs').append('<option value="'+ obj.ServerRelativeUrl +'">'+ obj.Title +'</option>');
+					});
+					$('#contFoldLibSelect, #contFoldFldSelect').find('.sprlib-spinner').hide();
+					$('#contFoldLibSelect, #contFoldFldSelect').find('select').show();
+				})
+				.catch(function(strErr){
+					$('#contFoldLibSelect, #contFoldFldSelect').find('.sprlib-spinner').hide();
+					$('#contFoldLibSelect, #contFoldFldSelect').find('select').after('<span class="text-danger">'+strErr+'</span>');
+				});
 			}
 
 			// TAB: Site
@@ -475,9 +870,9 @@
 					arrLists.forEach(function(list,idx){
 						if ( !list.Hidden ) {
 							var $row = $('<tr/>');
-							$row.append('<th><img class="imgIcon" src="'+ list.ImageUrl +'">'
+							$row.append('<th><img class="mr-2" src="'+ list.ImageUrl +'">'
 								+ '<a href="'+ list.ServerRelativeUrl +'" target="_blank">'+ list.Title +'</a>'
-								+ (list.Description ? '<div class="showDesc"><span style="display:none">: </span>'+ list.Description +'</div>' : '')
+								+ (list.Description ? '<div class="text-muted"><span style="display:none">: </span>'+ list.Description +'</div>' : '')
 								+ '</th>'
 							);
 							$row.append('<td>'+ list.BaseType +'</td>');
@@ -515,7 +910,7 @@
 							// A-1: Create row
 							var $row = $('<tr/>');
 							$row.append('<th>'
-								+ '<img class="imgIcon" src="/'+LAYOUTS_URL+'/images/ribbon_userprofile_16.png">'
+								+ '<img class="mr-2" src="/'+LAYOUTS_URL+'/images/ribbon_userprofile_16.png">'
 								+ '<a href="../'+LAYOUTS_URL+'/people.aspx?MembershipGroupId='+ group.Id +'" target="_blank">'+ group.Title +'</a>'
 								+ '</th>');
 							$row.append('<td>'+ group.OwnerTitle +'</td>');
@@ -594,48 +989,6 @@
 
 					// G-2: This will fire before all the AJAX above, then count sorting wont work, etc.
 					if ( $.tablesorter ) $('#tabSiteUsers').tablesorter({ sortList:[[0,0]] });
-				});
-			}
-
-			// TAB: List
-			{
-				// Populate <select> with List names
-				sprLib.rest({ restUrl:'_api/web/lists/' })
-				.then(function(arrayListObjs){
-					arrayListObjs
-					.sort(function(a,b){return (a.Title > b.Title) ? 1 : ((b.Title > a.Title) ? -1 : 0);} )
-					.forEach(function(obj,idx){
-						if ( !obj.Hidden ) $('#selSiteLists').append('<option value="'+ obj.Title +'">'+ obj.Title +'</option>');
-					});
-					$('#contListSelect .sprlib-spinner').remove();
-				});
-			}
-
-			// TAB: File
-			{
-				sprLib.folder('SiteAssets').files()
-				.then(function(arrResults){
-					arrResults
-					.sort(function(a,b){ return (a.Name > b.Name) ? 1 : ((b.Name > a.Name) ? -1 : 0); })
-					.forEach(function(obj,idx){
-						if ( !obj.Hidden ) $('#selSiteFiles').append('<option value="'+ obj.ServerRelativeUrl +'">'+ obj.Name +'</option>');
-					});
-					$('#contFileSelect .sprlib-spinner').remove();
-				});
-			}
-
-			// TAB: Folder
-			{
-				// A: Populate <select> with List names
-				sprLib.site().lists()
-				.then(function(arrResults){
-					arrResults
-					.sort(function(a,b){ return (a.Title > b.Title) ? 1 : ((b.Title > a.Title) ? -1 : 0); })
-					.forEach(function(obj,idx){
-						if ( !obj.Hidden && obj.BaseType == "Library" ) $('#selFoldLibs').append('<option value="'+ obj.ServerRelativeUrl +'">'+ obj.Title +'</option>');
-					});
-					$('#contFoldLibSelect .sprlib-spinner').remove();
-					$('#contFoldFldSelect .sprlib-spinner').hide();
 				});
 			}
 
@@ -723,387 +1076,439 @@
 	</script>
 </head>
 <body>
-	<a class="github-fork-ribbon" href="https://github.com/GitBrent/SpRestLib" title="Fork me on GitHub">Fork me on GitHub</a>
+	<h2><a href="https://github.com/GitBrent/SpRestLib" target="_blank">SpRestLib</a> Feature Demos</h2>
+	<h6>JavaScript Library for SharePoint Web Services</h6>
 
-	<div id="demoBody">
-		<div class="bigTitle"><a href="https://github.com/GitBrent/SpRestLib" target="_blank">SpRestLib</a> Feature Demos</div>
-		<div class="subTitle">JavaScript Library for SharePoint Web Services</div>
+	<div id="navTabs" class="flexTabs">
+		<ul>
+			<li class="active" onclick="$('#navTabs').find('> div, li').removeClass('active'); $(this).addClass('active'); $('#tabSetup').addClass('active');">Setup</li>
+			<li onclick="$('#navTabs').find('> div, li').removeClass('active'); $(this).addClass('active'); $('#tabList').addClass('active');">List/Library</li>
+			<li onclick="$('#navTabs').find('> div, li').removeClass('active'); $(this).addClass('active'); $('#tabFile').addClass('active');">File</li>
+			<li onclick="$('#navTabs').find('> div, li').removeClass('active'); $(this).addClass('active'); $('#tabFold').addClass('active');">Folder</li>
+			<li onclick="$('#navTabs').find('> div, li').removeClass('active'); $(this).addClass('active'); $('#tabSite').addClass('active');">Site</li>
+			<li onclick="$('#navTabs').find('> div, li').removeClass('active'); $(this).addClass('active'); $('#tabUser').addClass('active');">User</li>
+			<li onclick="$('#navTabs').find('> div, li').removeClass('active'); $(this).addClass('active'); $('#tabRest').addClass('active');">REST API</li>
+			<li onclick="$('#navTabs').find('> div, li').removeClass('active'); $(this).addClass('active'); $('#tabSand').addClass('active');">Sandbox</li>
+		</ul>
 
-		<div id="navTabs" class="flexTabs">
-			<ul>
-				<li class="active" onclick="$('#navTabs').find('> div, li').removeClass('active'); $(this).addClass('active'); $('#tabSetup').addClass('active');">Setup</li>
-				<li onclick="$('#navTabs').find('> div, li').removeClass('active'); $(this).addClass('active'); $('#tabList').addClass('active');">List/Library</li>
-				<li onclick="$('#navTabs').find('> div, li').removeClass('active'); $(this).addClass('active'); $('#tabFile').addClass('active');">File</li>
-				<li onclick="$('#navTabs').find('> div, li').removeClass('active'); $(this).addClass('active'); $('#tabFold').addClass('active');">Folder</li>
-				<li onclick="$('#navTabs').find('> div, li').removeClass('active'); $(this).addClass('active'); $('#tabSite').addClass('active');">Site</li>
-				<li onclick="$('#navTabs').find('> div, li').removeClass('active'); $(this).addClass('active'); $('#tabUser').addClass('active');">User</li>
-				<li onclick="$('#navTabs').find('> div, li').removeClass('active'); $(this).addClass('active'); $('#tabRest').addClass('active');">REST API</li>
-				<li onclick="$('#navTabs').find('> div, li').removeClass('active'); $(this).addClass('active'); $('#tabSand').addClass('active');">Sandbox</li>
-			</ul>
+		<div id="tabSetup" data-tab="Setup" class="active">
+			<h4 class="text-primary">Welcome!</h4>
+			<div class="container-fluid mb-4 text-muted">
+				Check your setup below to ensure SpRestLib is configured correctly.
+				<ul>
+					<li>If everything below looks okay, then all the functionality in the demo tabs are ready to explore.</li>
+					<li>Please check the <a href="https://github.com/gitbrent/SpRestLib">GitHub Project Site</a> for setup
+					and configuration FAQs and full documentation.</li>
+				</ul>
+			</div>
 
-			<div id="tabSetup" data-tab="Setup" class="active">
-				<div class="subTitle">Welcome!</div>
-				<p>
-					Check your setup below to ensure SpRestLib is configured correctly.
-					<ul>
-						<li>If everything below looks okay, then all the functionality in the demo tabs are ready to explore.</li>
-						<li>Please check the <a href="https://github.com/gitbrent/SpRestLib">GitHub Project Site</a> for setup
-						and configuration FAQs and full documentation.</li>
-					</ul>
-				</p>
-				<br>
-
-				<div class="flex">
-					<div data-name="col1" style="flex:1 1 auto; margin-right:50px;">
-						<div class="subTitle">JavaScript Library Check</div>
-						<div class="divTableRows">
-							<div id="libChkJquery">
-								<div><div class="iconSvg circle question size32"></div></div>
-								<div>jQuery</div>
-								<div></div>
+			<div class="container-fluid my-5">
+				<div class="row">
+					<div class="col-4 pr-4">
+						<h5 class="text-primary">JavaScript Library Check</h5>
+						<div class="container bg-light">
+							<div id="libChkJquery" class="row align-items-center">
+								<div class="col-2 p-3"><div class="iconSvg circle question size32"></div></div>
+								<div class="col-4 p-3">jQuery</div>
+								<div class="col-6 p-3 val"></div>
 							</div>
-							<div id="libChkSprLib">
-								<div><div class="iconSvg circle question size32"></div></div>
-								<div>SpRestLib</div>
-								<div></div>
+							<div id="libChkSprLib" class="row align-items-center">
+								<div class="col-2 p-3"><div class="iconSvg circle question size32"></div></div>
+								<div class="col-4 p-3">SpRestLib</div>
+								<div class="col-6 p-3 val"></div>
 							</div>
-							<div id="libChkTsorter">
-								<div><div class="iconSvg circle question size32"></div></div>
-								<div>TableSorter</div>
-								<div></div>
+							<div id="libChkTsorter" class="row align-items-center">
+								<div class="col-2 p-3"><div class="iconSvg circle question size32"></div></div>
+								<div class="col-4 p-3">TableSorter</div>
+								<div class="col-6 p-3 val"></div>
 							</div>
 						</div>
 					</div>
-					<div data-name="col2" style="flex:2 1 auto;">
-						<div class="subTitle">SharePoint Environment / Configuration</div>
-						<div class="divTableRows">
-							<div>
-								<div><div class="iconSvg circle info size32"></div></div><div>SpRestLib Base URL</div><div id="spBaseUrl"></div>
+					<div class="col-8">
+						<h5 class="text-primary">SharePoint Environment / Configuration</h5>
+						<div class="container bg-light">
+							<div class="row align-items-center">
+								<div class="col-1 p-3"><div class="iconSvg circle info size32"></div></div>
+								<div class="col-3 p-3">SpRestLib Base URL</div>
+								<div class="col-8 p-3" id="spBaseUrl"></div>
 							</div>
-							<div>
-								<div><div class="iconSvg circle info size32"></div></div><div>Current User</div><div id="spUserPerm">?</div>
+
+							<div class="row align-items-center">
+								<div class="col-1 p-3"><div class="iconSvg circle info size32"></div></div>
+								<div class="col-3 p-3">Current User</div>
+								<div class="col-8 p-3" id="spUserPerm"></div>
 							</div>
-							<div>
-								<div><div class="iconSvg circle info size32"></div></div><div>Current Date/Time</div><div id="spDateTime"></div>
+
+							<div class="row align-items-center">
+								<div class="col-1 p-3"><div class="iconSvg circle info size32"></div></div>
+								<div class="col-3 p-3">Current Date/Time</div>
+								<div class="col-8 p-3" id="spDateTime"></div>
 							</div>
 						</div>
 					</div>
 				</div>
 			</div>
+		</div>
 
-			<div id="tabList" data-tab="List Methods">
-				<div class="subTitle secTitle">List/Library Methods</div>
-				<p class="desc">
-					Select one of the Lists/Libraries found on this site to view its properties.<br>
-					Note: Only non-hidden Lists/Libraries are shown
-				</p>
+		<div id="tabList" data-tab="List Methods">
+			<h4 class="text-primary">List/Library Methods</h4>
+			<div class="container-fluid mb-3 text-muted">
+				Select one of the Lists/Libraries found on this site to view its properties.<br>
+				Note: Only non-hidden Lists/Libraries are shown
+			</div>
 
-				<div id="contListSelect" class="divTable" style="width:auto; margin-bottom:20px;">
-					<div class="th" style="padding:0; font-size:120%; vertical-align:middle;">
-						Site Lists/Libraries
+			<div id="contListSelect" class="container-fluid mb-4">
+				<div class="row align-items-center">
+					<div class="col-2 p-3 bg-light text-nowrap">
+						<h6 class="text-primary text-uppercase mb-0">Site Lists/Libraries</h6>
 					</div>
-					<div>
+					<div class="col-6 p-3">
 						<div class="sprlib-spinner"><div class="sprlib-bounce1"></div><div class="sprlib-bounce2"></div><div class="sprlib-bounce3"></div></div>
-						<select id="selSiteLists" onchange="handleListChange()">
+						<select id="selSiteLists" class="form-control" onchange="handleListChange()">
 							<option value="">Select...</option>
 						</select>
 					</div>
-				</div>
-
-				<div class="subTitle" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
-					<div class="arrow active"></div>List Information
-				</div>
-				<div id="tab1-ListInfo">
-					<pre><code class="language-javascript">sprLib.list('listName').info()</code></pre>
-				</div>
-
-				<div class="subTitle" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
-					<div class="arrow"></div>List Columns
-				</div>
-				<div id="tab1-ListCols" style="display:none">
-					<pre><code class="language-javascript">sprLib.list('listName').cols()</code></pre>
-				</div>
-
-				<div class="subTitle" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
-					<div class="arrow"></div>List Permissions
-				</div>
-				<div id="tab1-ListPerms" style="display:none">
-					<pre><code class="language-javascript">sprLib.list('listName').perms()</code></pre>
-
-					<table id="tabListPerms" class="tabModern">
-						<thead>
-							<tr>
-								<th>Name</th>
-								<th>Type</th>
-								<th class="sorter-false showGrpDesc">Permissions</th>
-							</tr>
-						</thead>
-						<tbody></tbody>
-					</table>
 				</div>
 			</div>
 
-			<div id="tabFile" data-tab="File Methods">
-				<div class="subTitle secTitle">File Methods</div>
-				<p class="desc">
-					Select a File below to view file properties.<br>
-				</p>
-
-				<div id="contFileSelect" class="divTable" style="width:auto; margin-bottom:20px;">
-					<div class="th" style="padding:0; font-size:120%; vertical-align:middle;">
-						"Site Assets" Files
-					</div>
-					<div>
-						<div class="sprlib-spinner"><div class="sprlib-bounce1"></div><div class="sprlib-bounce2"></div><div class="sprlib-bounce3"></div></div>
-						<select id="selSiteFiles" onchange="handleFileChange()">
-							<option value="">Select...</option>
-						</select>
-					</div>
-				</div>
-
-				<div class="subTitle" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
-					<div class="arrow active"></div>File Information
-				</div>
-				<div id="contFileInfo">
-					<pre><code class="language-javascript">sprLib.file('fileName').info()</code></pre>
-				</div>
-
-				<div class="subTitle" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
-					<div class="arrow"></div>File Information (version:1)
-				</div>
-				<div id="contFileVer" style="display:none">
-					<pre><code class="language-javascript">sprLib.file('fileName').info({ version:1 })</code></pre>
-				</div>
-
-				<div class="subTitle" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
-					<div class="arrow"></div>File Permissions
-				</div>
-				<div id="contFilePerms" style="display:none">
-					<pre><code class="language-javascript">sprLib.file('fileName').perms()</code></pre>
-					<table id="tabFilePerms" class="tabModern">
-						<thead>
-							<tr>
-								<th>Name</th>
-								<th>Type</th>
-								<th class="sorter-false showGrpDesc">Permissions</th>
-							</tr>
-						</thead>
-						<tbody></tbody>
-					</table>
-				</div>
-
-				<div class="subTitle" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
-					<div class="arrow"></div>Get File
-				</div>
-				<div id="contFileGet" style="display:none">
-					<pre><code class="language-javascript">sprLib.file('filename').get()</code></pre>
-					<div>
-						DEMO: Saving a SharePoint file (text or binary) using client web browser.
-						Promise returns a blob, which can be saved easily without FileSaver or other libraries.
-						<pre><code id="codeGetFile" class="language-javascript"></code></pre>
-						<button type="button" class="flatBtn flatBtn-green" onclick="eval($('#codeGetFile').text())">Get Selected File</button>
-					</div>
-				</div>
-
+			<h5 class="text-primary bde-arrow-cont" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
+				<div class="arrow active"></div>List Information
+			</h5>
+			<div id="tab1-ListInfo" class="mb-4">
+				<pre><code class="language-javascript">sprLib.list('listName').info()</code></pre>
 			</div>
 
-			<div id="tabFold" data-tab="Folder Methods">
-				<div class="subTitle secTitle">Folder Methods</div>
-				<p class="desc">
-					Select one of the Folders found on this site to view its properties.<br>
-				</p>
+			<h5 class="text-primary bde-arrow-cont" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
+				<div class="arrow"></div>List Columns
+			</h5>
+			<div id="tab1-ListCols" class="mb-4" style="display:none">
+				<pre><code class="language-javascript">sprLib.list('listName').cols()</code></pre>
+			</div>
 
-				<div id="contFoldLibSelect" class="divTable" style="width:auto; margin-bottom:10px;">
-					<div class="th" style="padding:0; font-size:120%; vertical-align:middle;">
-						Select a Library:
+			<h5 class="text-primary bde-arrow-cont" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
+				<div class="arrow"></div>List Permissions
+			</h5>
+			<div id="tab1-ListPerms" class="mb-4" style="display:none">
+				<pre><code class="language-javascript">sprLib.list('listName').perms()</code></pre>
+
+				<table id="tabListPerms" class="tabModern">
+					<thead>
+						<tr>
+							<th>Name</th>
+							<th>Type</th>
+							<th class="sorter-false showGrpDesc">Permissions</th>
+						</tr>
+					</thead>
+					<tbody></tbody>
+				</table>
+			</div>
+		</div>
+
+		<div id="tabFile" data-tab="File Methods">
+			<h4 class="text-primary">File Methods</h4>
+			<div class="container-fluid mb-3 text-muted">
+				Select one of the Files found on this site to view File method code/results.
+			</div>
+
+			<div class="container-fluid mb-4">
+				<div id="contFileLibsSelect" class="row align-items-center">
+					<div class="col-2 p-3 bg-light text-nowrap">
+						<h6 class="text-primary text-uppercase mb-0">Select a Library</h6>
 					</div>
-					<div>
+					<div class="col-6 p-2">
 						<div class="sprlib-spinner"><div class="sprlib-bounce1"></div><div class="sprlib-bounce2"></div><div class="sprlib-bounce3"></div></div>
-						<select id="selFoldLibs" onchange="handleFoldLibChange()">
+						<select id="selFileLibs" class="form-control" onchange="handleFileLibChange()">
 							<option value="">Select...</option>
 						</select>
 					</div>
 				</div>
-				<div id="contFoldFldSelect" class="divTable" style="width:auto; margin-bottom:20px;">
-					<div class="th" style="padding:0; font-size:120%; vertical-align:middle;">
-						Select a Folder:
+				<div id="contFileFileSelect" class="row align-items-center">
+					<div class="col-2 p-3 bg-light text-nowrap">
+						<h6 class="text-primary text-uppercase mb-0">Select a File</h6>
 					</div>
-					<div>
+					<div class="col-6 p-2">
 						<div class="sprlib-spinner"><div class="sprlib-bounce1"></div><div class="sprlib-bounce2"></div><div class="sprlib-bounce3"></div></div>
-						<select id="selFoldFlds" onchange="handleFoldFldChange()">
+						<select id="selFileFiles" class="form-control" onchange="handleFileFileChange()">
 							<option value="">Select...</option>
 						</select>
 					</div>
-				</div>
-
-				<div class="subTitle" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
-					<div class="arrow active"></div>Folder Information
-				</div>
-				<div id="contFoldInfo">
-					<pre><code class="language-javascript">sprLib.folder('folderName').info()</code></pre>
-				</div>
-
-				<div class="subTitle" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
-					<div class="arrow"></div>Folder Permissions
-				</div>
-				<div id="contFoldPerms" style="display:none">
-					<pre><code class="language-javascript">sprLib.folder('folderName').perms()</code></pre>
-					<table id="tabFoldPerms" class="tabModern">
-						<thead>
-							<tr>
-								<th>Name</th>
-								<th>Type</th>
-								<th class="sorter-false showGrpDesc">Permissions</th>
-							</tr>
-						</thead>
-						<tbody></tbody>
-					</table>
-				</div>
-
-				<div class="subTitle" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
-					<div class="arrow"></div>Folder Contents: Files
-				</div>
-				<div id="contFoldFiles" style="display:none">
-					<pre><code class="language-javascript">sprLib.folder('folderName').files()</code></pre>
-				</div>
-
-				<div class="subTitle" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
-					<div class="arrow"></div>Folder Contents: Folders
-				</div>
-				<div id="contFoldFolds" style="display:none">
-					<pre><code class="language-javascript">sprLib.folder('folderName').folders()</code></pre>
 				</div>
 			</div>
 
-			<div id="tabSite" data-tab="Site Methods">
-				<div class="subTitle secTitle">Local Website</div>
+			<h5 class="text-primary bde-arrow-cont" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
+				<div class="arrow active"></div>File Information
+			</h5>
+			<div id="contFileInfo" class="mb-4">
+				<pre><code class="language-javascript">sprLib.file('fileName').info()</code></pre>
+			</div>
 
-				<div class="subTitle" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
-					<div class="arrow active"></div>Site Info
-				</div>
+			<h5 class="text-primary bde-arrow-cont" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
+				<div class="arrow"></div>File Information (version:1)
+			</h5>
+			<div id="contFileVer" class="mb-4" style="display:none">
+				<pre><code class="language-javascript">sprLib.file('fileName').info({ version:1 })</code></pre>
+			</div>
+
+			<h5 class="text-primary bde-arrow-cont" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
+				<div class="arrow"></div>File Permissions
+			</h5>
+			<div id="contFilePerms" class="mb-4" style="display:none">
+				<pre><code class="language-javascript">sprLib.file('fileName').perms()</code></pre>
+				<table id="tabFilePerms" class="tabModern">
+					<thead>
+						<tr>
+							<th>Name</th>
+							<th>Type</th>
+							<th class="sorter-false showGrpDesc">Permissions</th>
+						</tr>
+					</thead>
+					<tbody></tbody>
+				</table>
+			</div>
+
+			<h5 class="text-primary bde-arrow-cont" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
+				<div class="arrow"></div>File Download
+			</h5>
+			<div id="contFileGet" class="mb-4" style="display:none">
+				<pre><code class="language-javascript">sprLib.file('filename').get()</code></pre>
 				<div>
-					<div><pre><code class="language-javascript">sprLib.site().info()</code></pre></div>
+					DEMO: Saving a SharePoint file (text or binary) using client web browser.
+					Promise returns a blob, which can be saved easily without FileSaver or other libraries.
+					<pre><code id="codeGetFile" class="language-javascript"></code></pre>
+					<button type="button" class="flatBtn flatBtn-green" onclick="eval($('#codeGetFile').text())">Get Selected File</button>
+				</div>
+			</div>
+		</div>
 
-					<table id="tabSiteInfo" class="tabModern">
+		<div id="tabFold" data-tab="Folder Methods">
+			<h4 class="text-primary">Folder Methods</h4>
+			<div class="container-fluid mb-3 text-muted">
+				Select one of the Folders found on this site to view Folder method code/results.
+			</div>
+
+			<div class="container-fluid mb-4">
+				<div id="contFoldLibSelect" class="row align-items-center">
+					<div class="col-2 p-3 bg-light text-nowrap">
+						<h6 class="text-primary text-uppercase mb-0">Select a Library</h6>
+					</div>
+					<div class="col-6 p-2">
+						<div class="sprlib-spinner"><div class="sprlib-bounce1"></div><div class="sprlib-bounce2"></div><div class="sprlib-bounce3"></div></div>
+						<select id="selFoldLibs" class="form-control" onchange="handleFoldLibChange()">
+							<option value="">Select...</option>
+						</select>
+					</div>
+				</div>
+				<div id="contFoldFldSelect" class="row align-items-center">
+					<div class="col-2 p-3 bg-light text-nowrap">
+						<h6 class="text-primary text-uppercase mb-0">Select a Folder</h6>
+					</div>
+					<div class="col-6 p-2">
+						<div class="sprlib-spinner"><div class="sprlib-bounce1"></div><div class="sprlib-bounce2"></div><div class="sprlib-bounce3"></div></div>
+						<select id="selFoldFlds" class="form-control" onchange="handleFoldFldChange()">
+							<option value="">Select...</option>
+						</select>
+					</div>
+				</div>
+			</div>
+
+			<h5 class="text-primary bde-arrow-cont" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
+				<div class="arrow active"></div>Folder Information
+			</h5>
+			<div id="contFoldInfo" class="mb-4">
+				<pre><code class="language-javascript">sprLib.folder('folderName').info()</code></pre>
+			</div>
+
+			<h5 class="text-primary bde-arrow-cont" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
+				<div class="arrow"></div>Folder Permissions
+			</h5>
+			<div id="contFoldPerms" class="mb-4" style="display:none">
+				<pre><code class="language-javascript">sprLib.folder('folderName').perms()</code></pre>
+				<table id="tabFoldPerms" class="tabModern">
+					<thead>
+						<tr>
+							<th>Name</th>
+							<th>Type</th>
+							<th class="sorter-false showGrpDesc">Permissions</th>
+						</tr>
+					</thead>
+					<tbody></tbody>
+				</table>
+			</div>
+
+			<h5 class="text-primary bde-arrow-cont" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
+				<div class="arrow"></div>Folder Contents: Files
+			</h5>
+			<div id="contFoldFiles" class="mb-4" style="display:none">
+				<pre><code class="language-javascript">sprLib.folder('folderName').files()</code></pre>
+			</div>
+
+			<h5 class="text-primary bde-arrow-cont" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
+				<div class="arrow"></div>Folder Contents: Folders
+			</h5>
+			<div id="contFoldFolds" class="mb-4" style="display:none">
+				<pre><code class="language-javascript">sprLib.folder('folderName').folders()</code></pre>
+			</div>
+		</div>
+
+		<div id="tabSite" data-tab="Site Methods">
+			<h4 class="text-primary">Local Site Methods</h4>
+			<div class="alert alert-light mb-3" role="alert">
+				<div class="text-muted">These methods are scoped to the local site and will return results for this particular site (eg: a subsite)</div>
+			</div>
+
+			<h5 class="text-primary bde-arrow-cont" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
+				<div class="arrow active"></div>Site Contents
+			</h5>
+			<div class="mb-4">
+				<div><pre><code class="language-javascript">sprLib.site().lists()</code></pre></div>
+
+				<table id="tabSiteLists" class="tabModern">
+					<thead>
+						<tr>
+							<th>List Name/Desc</th>
+							<th>Type</th>
+							<th>Items</th>
+						</tr>
+					</thead>
+					<tbody></tbody>
+				</table>
+			</div>
+
+			<h5 class="text-primary bde-arrow-cont" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
+				<div class="arrow"></div>Site Info
+			</h5>
+			<div class="mb-4" style="display:none">
+				<div><pre><code class="language-javascript">sprLib.site().info()</code></pre></div>
+
+				<table id="tabSiteInfo" class="tabModern">
+					<thead>
+						<tr>
+							<th>Prop Name</th>
+							<th>Prop Value</th>
+						</tr>
+					</thead>
+					<tbody></tbody>
+				</table>
+			</div>
+
+			<h5 class="text-primary bde-arrow-cont" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
+				<div class="arrow"></div>Site Permissions
+			</h5>
+			<div class="mb-4" style="display:none">
+				<div><pre><code class="language-javascript">sprLib.site().perms()</code></pre></div>
+
+				<table id="tabSitePerms" class="tabModern">
+					<thead>
+						<tr>
+							<th>Member</th>
+							<th class="sorter-false showGrpDesc">Roles/Levels</th>
+						</tr>
+					</thead>
+					<tbody></tbody>
+				</table>
+			</div>
+
+			<h5 class="text-primary bde-arrow-cont" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
+				<div class="arrow"></div>Site Subsites
+			</h5>
+			<div class="mb-4" style="display:none">
+				<div><pre><code class="language-javascript">sprLib.site().subsites()</code></pre></div>
+
+				<table id="tabSiteSubsites" class="tabModern">
+					<thead>
+						<tr>
+							<th>Name</th>
+							<th>Created</th>
+							<th>Modified</th>
+							<th>Relative URL</th>
+							<th>Site Logo URL</th>
+						</tr>
+					</thead>
+					<tbody></tbody>
+				</table>
+			</div>
+
+			<h4 class="text-primary mt-5">Site Collection Methods</h4>
+			<div class="alert alert-light mb-3" role="alert">
+				<div class="text-muted">These methods are scoped to the top level site - the Site Collection, not subsites - meaning, you'll get the same results whether you include a subsite</div>
+			</div>
+
+			<h5 class="text-primary bde-arrow-cont" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
+				<div class="arrow"></div>Site Permission Groups
+			</h5>
+			<div class="mb-4" style="display:none">
+				<div><pre><code class="language-javascript">sprLib.site().groups()</code></pre></div>
+
+				<table id="tabSiteGroups" class="tabModern">
+					<thead>
+						<tr>
+							<th>Title</th>
+							<th>Owner</th>
+							<th>Members</th>
+							<th class="sorter-false showGrpDesc">Description</th>
+							<th class="sorter-false showGrpMemb">Member Names</th>
+						</tr>
+					</thead>
+					<tbody></tbody>
+				</table>
+			</div>
+
+			<h5 class="text-primary bde-arrow-cont" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
+				<div class="arrow"></div>Site Permission Roles/Levels
+			</h5>
+			<div class="mb-4" style="display:none">
+				<div><pre><code class="language-javascript">sprLib.site().roles()</code></pre></div>
+
+				<table id="tabSiteRoles" class="tabModern">
+					<thead>
+						<tr>
+							<th>Name</th>
+							<th>Description</th>
+						</tr>
+					</thead>
+					<tbody></tbody>
+				</table>
+			</div>
+
+			<h5 class="text-primary bde-arrow-cont" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
+				<div class="arrow"></div>Site Users
+			</h5>
+			<div class="mb-4" style="display:none">
+				<div><pre><code class="language-javascript">sprLib.site().users()</code></pre></div>
+
+				<table id="tabSiteUsers" class="tabModern">
+					<thead>
+						<tr>
+							<th>Title</th>
+							<th>LoginName</th>
+							<th>Email</th>
+							<th>IsSiteAdmin</th>
+							<th>Groups</th>
+							<th class="sorter-false">Group Details</th>
+						</tr>
+					</thead>
+					<tbody></tbody>
+				</table>
+			</div>
+		</div>
+
+		<div id="tabUser" data-tab="Users">
+			<h4 class="text-primary">User Methods</h4>
+			<div class="alert alert-light mb-3" role="alert">
+				<div class="text-muted">Get User Information (Title, Email, etc.) and User Groups (which SP Groups they belong to)</div>
+			</div>
+
+			<h5 class="text-primary bde-arrow-cont" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
+				<div class="arrow"></div>User Information
+			</h5>
+			<div class="mb-4" style="display:none">
+				<div id="user1Code"><pre><code class="language-javascript"></code></pre></div>
+				<div id="user1Html" class="mb-2">
+					<table class="tabModern">
 						<thead>
 							<tr>
-								<th>Prop Name</th>
-								<th>Prop Value</th>
-							</tr>
-						</thead>
-						<tbody></tbody>
-					</table>
-				</div>
-
-				<div class="subTitle" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
-					<div class="arrow"></div>Site Contents
-				</div>
-				<div style="display:none">
-					<div><pre><code class="language-javascript">sprLib.site().lists()</code></pre></div>
-
-					<table id="tabSiteLists" class="tabModern">
-						<thead>
-							<tr>
-								<th>List Name/Desc</th>
-								<th>Type</th>
-								<th>Items</th>
-							</tr>
-						</thead>
-						<tbody></tbody>
-					</table>
-				</div>
-
-				<div class="subTitle" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
-					<div class="arrow"></div>Site Permissions
-				</div>
-				<div style="display:none">
-					<div><pre><code class="language-javascript">sprLib.site().perms()</code></pre></div>
-
-					<table id="tabSitePerms" class="tabModern">
-						<thead>
-							<tr>
-								<th>Member</th>
-								<th class="sorter-false showGrpDesc">Roles/Levels</th>
-							</tr>
-						</thead>
-						<tbody></tbody>
-					</table>
-				</div>
-
-				<div class="subTitle" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
-					<div class="arrow"></div>Site Subsites
-				</div>
-				<div style="display:none">
-					<div><pre><code class="language-javascript">sprLib.site().subsites()</code></pre></div>
-
-					<table id="tabSiteSubsites" class="tabModern">
-						<thead>
-							<tr>
-								<th>Name</th>
-								<th>Created</th>
-								<th>Modified</th>
-								<th>Relative URL</th>
-								<th>Site Logo URL</th>
-							</tr>
-						</thead>
-						<tbody></tbody>
-					</table>
-				</div>
-
-				<div class="subTitle secTitle">Site-Collection</div>
-
-				<div class="subTitle" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
-					<div class="arrow"></div>Permission Groups
-				</div>
-				<div style="display:none">
-					<div><pre><code class="language-javascript">sprLib.site().groups()</code></pre></div>
-
-					<table id="tabSiteGroups" class="tabModern">
-						<thead>
-							<tr>
-								<th>Title</th>
-								<th>Owner</th>
-								<th>Members</th>
-								<th class="sorter-false showGrpDesc">Description</th>
-								<th class="sorter-false showGrpMemb">Member Names</th>
-							</tr>
-						</thead>
-						<tbody></tbody>
-					</table>
-				</div>
-
-				<div class="subTitle" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
-					<div class="arrow"></div>Permission Roles/Levels
-				</div>
-				<div style="display:none">
-					<div><pre><code class="language-javascript">sprLib.site().roles()</code></pre></div>
-
-					<table id="tabSiteRoles" class="tabModern">
-						<thead>
-							<tr>
-								<th>Name</th>
-								<th>Description</th>
-							</tr>
-						</thead>
-						<tbody></tbody>
-					</table>
-				</div>
-
-				<div class="subTitle" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
-					<div class="arrow"></div>Site Users
-				</div>
-				<div style="display:none">
-					<div><pre><code class="language-javascript">sprLib.site().users()</code></pre></div>
-
-					<table id="tabSiteUsers" class="tabModern">
-						<thead>
-							<tr>
-								<th>Title</th>
-								<th>LoginName</th>
-								<th>Email</th>
-								<th>IsSiteAdmin</th>
-								<th>Groups</th>
-								<th class="sorter-false">Group Details</th>
+								<th style="width:10%">Prop Name</th>
+								<th style="width:90%">Prop Value</th>
 							</tr>
 						</thead>
 						<tbody></tbody>
@@ -1111,92 +1516,79 @@
 				</div>
 			</div>
 
-			<div id="tabUser" data-tab="Users">
-				<div class="subTitle secTitle">User Methods</div>
-				<p class="desc">
-					Get User Information (Title, Email, etc.) and User Groups (which SP Groups they belong to).
-				</p>
+			<h5 class="text-primary bde-arrow-cont" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
+				<div class="arrow"></div>User Groups
+			</h5>
+			<div class="mb-4" style="display:none">
+				<div id="user2Code"><pre><code class="language-javascript"></code></pre></div>
+				<div id="user2Html" class="mb-2">
+					<table class="tabModern">
+						<thead>
+							<tr>
+								<th style="width:10%">Group ID</th>
+								<th style="width:90%">Group Title</th>
+							</tr>
+						</thead>
+						<tbody></tbody>
+					</table>
+				</div>
+			</div>
 
-				<div class="subTitle" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
-					<div class="arrow active"></div>User Information
-				</div>
-				<div>
-					<div id="user1Code"><pre><code class="language-javascript"></code></pre></div>
-					<div id="user1Html" style="margin-bottom:20px">
-						<table class="tabModern">
-							<thead>
-								<tr>
-									<th style="width:10%">Prop Name</th>
-									<th style="width:90%">Prop Value</th>
-								</tr>
-							</thead>
-							<tbody></tbody>
-						</table>
-					</div>
-				</div>
-
-				<div class="subTitle" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
-					<div class="arrow"></div>User Groups
-				</div>
-				<div style="display:none">
-					<div id="user2Code"><pre><code class="language-javascript"></code></pre></div>
-					<div id="user2Html" style="margin-bottom:20px">
-						<table class="tabModern">
-							<thead>
-								<tr>
-									<th style="width:10%">Group ID</th>
-									<th style="width:90%">Group Title</th>
-								</tr>
-							</thead>
-							<tbody></tbody>
-						</table>
-					</div>
-				</div>
-
-				<div class="subTitle secTitle">User Profile Methods</div>
-				<p class="desc">
-					NOTE: The <span class="code">user().profile()</span> method utliizes the
-					<a href="https://technet.microsoft.com/en-us/library/ee662538.aspx" target="_blank">UserProfile Service API</a>,
+			<h4 class="text-primary mt-5">User Profile Methods</h4>
+			<div class="alert alert-light mb-3" role="alert">
+				<div class="text-muted">
+					The <span class="code">user().profile()</span> method utliizes the
+					<a class="alert-link" href="https://technet.microsoft.com/en-us/library/ee662538.aspx" target="_blank">UserProfile Service API</a>,
 					which requires either an enterprise license for on-prem installations, or a SharePoint Online subscription.
-				</p>
-				<div class="subTitle" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
-					<div class="arrow"></div>User Properties
-				</div>
-				<div style="display:none">
-					<div id="user3Code"><pre><code class="language-javascript"></code></pre></div>
-					<div id="user3Html" style="margin-bottom:20px">
-						<table class="tabModern">
-							<thead>
-								<tr>
-									<th style="width:10%">Prop Name</th>
-									<th style="width:90%">Prop Value</th>
-								</tr>
-							</thead>
-							<tbody></tbody>
-						</table>
-					</div>
 				</div>
 			</div>
 
-			<div id="tabRest" data-tab="REST API">
-				<div class="subTitle" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
-					<div class="arrow active"></div>REST API Calls
-				</div>
-
-				<div>
-					<div id="rest1Code"><pre><code class="language-javascript"></code></pre></div>
-					<div id="rest1Html" class="code" style="margin-bottom:20px"></div>
+			<h5 class="text-primary bde-arrow-cont" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
+				<div class="arrow"></div>User Properties
+			</h5>
+			<div class="mb-4" style="display:none">
+				<div id="user3Code"><pre><code class="language-javascript"></code></pre></div>
+				<div id="user3Html" style="margin-bottom:20px">
+					<table class="tabModern">
+						<thead>
+							<tr>
+								<th style="width:10%">Prop Name</th>
+								<th style="width:90%">Prop Value</th>
+							</tr>
+						</thead>
+						<tbody></tbody>
+					</table>
 				</div>
 			</div>
+		</div>
 
-			<div id="tabSand" data-tab="Code Sandbox">
-				<div id="sandboxMessage">Code below is editable</div>
-				<div id="sandboxCode" class="boxCode" contenteditable="true"></div>
-				<div style="text-align:center; padding:10px; margin:20px 0;">
-					<button type="button" class="flatBtn flatBtn-green" onclick="execCodeAndShowResults('sandboxCode','sandboxData')">Execute Sandbox Code</button>
-				</div>
-				<div id="sandboxData" class="boxData"></div>
+		<div id="tabRest" data-tab="REST API">
+			<h4 class="text-primary">REST API</h4>
+			<div class="container-fluid mb-4 text-muted">
+				SpRestLib also provides the ability to run an ad-hoc REST query.
 			</div>
+
+			<h5 class="text-primary mt-4">Sample Query</h5>
+			<div id="rest1Code" class="mb-4"><pre><code class="language-javascript"></code></pre></div>
+
+			<h5 class="text-primary mt-4">Query Results</h5>
+			<div id="rest1Html" class="code bg-light p-3"></div>
+		</div>
+
+		<div id="tabSand" data-tab="Code Sandbox">
+			<h4 class="text-primary">Code Sandbox</h4>
+			<div class="alert alert-warning mb-3" role="alert">
+				The code below is editable - use it try any sprLib API calls...
+			</div>
+
+			<pre><code id="sandboxCode" contenteditable="true" class="language-javascript"></code></pre>
+
+			<div class="p-3 mt-2 mb-4 text-center">
+				<button type="button" class="btn btn-success w-25" onclick="execCodeAndShowResults('sandboxCode','sandboxData')">Execute Sandbox Code</button>
+			</div>
+
+			<h5 class="text-primary mt-4">Results</h5>
+			<div id="sandboxData" class="code bg-light p-3"></div>
 		</div>
 	</div>
 </body>
