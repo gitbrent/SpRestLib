@@ -301,7 +301,7 @@
 				sprLib.rest({
 					url: "_api/web/GetFileByServerRelativeUrl('"+ _fullName +"')",
 					queryCols: ['Author/Id','CheckedOutByUser/Id','LockedByUser/Id','ModifiedBy/Id',
-						'CheckInComment','CheckOutType','ETag','Exists','Length','Level','MajorVersion','MinorVersion',
+						'CheckInComment','CheckOutType','ETag','Exists','Length','MajorVersion','MinorVersion',
 						'Name','ServerRelativeUrl','TimeCreated','TimeLastModified','UniqueId','UIVersionLabel'],
 					metadata: false
 				})
@@ -309,10 +309,13 @@
 					// A: Capture info
 					objData = ( arrData && arrData.length > 0 ? arrData[0] : {} ); // FYI: Empty object is correct return type when file-not-found
 
-					// B: Remove junk
+					// B: Remove junk for user fields, enure an object is returned
 					['Author', 'CheckedOutByUser', 'LockedByUser', 'ModifiedBy'].forEach(function(field){
+						// Remove "junk"
 						if ( objData[field] && objData[field].__deferred ) delete objData[field].__deferred;
 						if ( objData[field] && objData[field].__metadata ) delete objData[field].__metadata;
+						// Ensure an empty array isnt returned (eg: files not checked out wont have a CheckedOutByUser value)
+						if ( objData[field] && Array.isArray(objData[field]) && objData[field].length == 0 ) objData[field] = {};
 					});
 
 					// C: Handle version option
@@ -676,7 +679,7 @@
 					queryCols: [
 						'Author/Id','CheckedOutByUser/Id','LockedByUser/Id','ModifiedBy/Id',
 						'Author/Title','CheckedOutByUser/Title','LockedByUser/Title','ModifiedBy/Title',
-						'CheckInComment','CheckOutType','ETag','Exists','Length','Level','MajorVersion','MinorVersion',
+						'CheckInComment','CheckOutType','ETag','Exists','Length','MajorVersion','MinorVersion',
 						'Name','ServerRelativeUrl','TimeCreated','TimeLastModified','Title','UniqueId'
 					],
 					metadata: false
