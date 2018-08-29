@@ -1,13 +1,13 @@
 # Change Log
 
-## [v1.8.0](https://github.com/gitbrent/sprestlib/tree/v1.8.0) (2018-??-??)
+## [v1.8.0](https://github.com/gitbrent/sprestlib/tree/v1.8.0) (2018-08-28)
 [Full Changelog](https://github.com/gitbrent/sprestlib/compare/v1.7.0...v1.8.0)
 
 **Implemented Enhancements:**
 - New File Methods: `get()`, `info()`, `perms()` [\#20](https://github.com/gitbrent/sprestlib/issues/20) ([ra6hi9](https://github.com/ra6hi9))([YakQin](https://github.com/YakQin))([gitbrent](https://github.com/gitbrent))
 - New Folder Methods: `files()`, `folders()`, `info()`, `perms()` [\#20](https://github.com/gitbrent/sprestlib/issues/20) ([ra6hi9](https://github.com/ra6hi9))([YakQin](https://github.com/YakQin))([gitbrent](https://github.com/gitbrent))
-- Add Typescript Definitions [\#24](https://github.com/gitbrent/sprestlib/issues/24) ([Wireliner](https://github.com/Wireliner))
-- Two new properties added to `list().cols()`: `choiceValues` and `allowFillInChoices`
+- Added Typescript Definitions [\#24](https://github.com/gitbrent/sprestlib/issues/24) ([Wireliner](https://github.com/Wireliner))
+- Added two new properties to `list().cols()` method: `choiceValues` and `allowFillInChoices`
 - Added "browser" field to `package.json` to improve library integration
 
 **Fixed Bugs:**

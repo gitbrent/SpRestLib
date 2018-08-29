@@ -4,8 +4,8 @@
  * DESC: Demonstrate SpRestLib on Node.js
  * REQS: Node 4.x + `npm install sprestlib`
  * EXEC: `node nodejs-demo.js (sp-username) (sp-password) {sp-hostUrl}`
- * VER.: 1.8.0-beta
- * REL.: 20180826
+ * VER.: 1.8.0
+ * REL.: 20180828
  * REFS: HOWTO: Authenticate to SharePoint Online (*.sharepoint.com)
  * - https://allthatjs.com/2012/03/28/remote-authentication-in-sharepoint-online/
  * - http://paulryan.com.au/2014/spo-remote-authentication-rest/
