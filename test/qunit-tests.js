@@ -2,7 +2,7 @@
  * NAME: qunit-test.js
  * DESC: tests for qunit-test.html (coded against my personal O365 Dev Site - YMMV)
  * AUTH: https://github.com/gitbrent/
- * DATE: 20180827
+ * DATE: 20180828
  *
  * HOWTO: Generate text tables for README etc.:
  * sprLib.list('Employees').items(['Id', 'Name', 'Badge_x0020_Number']).then(function(arrData){ console.log(getAsciiTableStr(arrData)) });
@@ -18,6 +18,7 @@ const RESTDEMO2 = '/sites/dev/sandbox/';
 const SITEURL1  = '/sites/dev/sandbox/child1';
 const SITEURL2  = 'sandbox/child1';
 const SITEURL3  = '/sites/dev/sandbox/';
+const FOLDPERMUNQ = '/sites/dev/Shared Documents/BreakPerms';
 //
 const ARR_NAMES_FIRST = ['Jack','Mark','CutiePie','Steve','Barry','Clark','Diana','Star','Luke','Captain'];
 const ARR_NAMES_LAST  = ['Septiceye','Iplier','Martzia','Rodgers','Allen','Kent','Prince','Lord','Skywalker','Marvel'];
@@ -1220,7 +1221,7 @@ QUnit.module( "FILE - Methods", function(){
 });
 
 QUnit.module( "FOLDER - Methods", function(){
-	QUnit.test("sprLib.folder('"+BASEURL+"/SiteAssets').info()", function(assert){
+	QUnit.test("sprLib.folder('"+BASEURL+"/SiteAssets').info() - using full URL", function(assert){
 		var done = assert.async();
 		sprLib.folder(BASEURL+'/SiteAssets').info()
 		.then(function(objInfo){
@@ -1234,7 +1235,7 @@ QUnit.module( "FOLDER - Methods", function(){
 		});
 	});
 
-	QUnit.test("sprLib.folder('SiteAssets').info()", function(assert){
+	QUnit.test("sprLib.folder('SiteAssets').info() - using only folder name", function(assert){
 		var done = assert.async();
 		sprLib.folder('SiteAssets').info()
 		.then(function(objInfo){
@@ -1248,11 +1249,37 @@ QUnit.module( "FOLDER - Methods", function(){
 		});
 	});
 
-// TODO: add `perms()`
-/* TODO: add this to QUnit!!!
-sprLib.folder('/sites/dev/Shared Documents/BreakPerms').perms().then(arr=>console.log(arr))
-// S/B only two groups (instead of usual 4) - "Dev Site Owners" and "Dev Site Members"
-*/
+	QUnit.test("sprLib.folder('SiteAssets').perms()", function(assert){
+		var done = assert.async();
+		sprLib.folder('SiteAssets').perms()
+		.then(function(arrayResults){
+			assert.ok( arrayResults[0].hasOwnProperty('Member'), "arrayResults[0].hasOwnProperty('Member')"+ arrayResults[0].hasOwnProperty('Member') );
+			assert.ok( arrayResults[0].hasOwnProperty('Roles') , "arrayResults[0].hasOwnProperty('Roles')" + arrayResults[0].hasOwnProperty('Roles') );
+			assert.ok( Array.isArray(arrayResults[0].Roles)    , "Array.isArray(arrayResults[0].Roles)"    + Array.isArray(arrayResults[0].Roles) );
+			assert.ok( getAsciiTableStr(arrayResults)          , `RESULTS:\n${getAsciiTableStr(arrayResults)}`);
+			done();
+		})
+		.catch(function(errorMessage){
+			assert.ok( (false), errorMessage );
+			done();
+		});
+	});
+
+	QUnit.test("sprLib.folder('"+FOLDPERMUNQ+"').perms() - Unique Perms", function(assert){
+		var done = assert.async();
+		sprLib.folder(FOLDPERMUNQ).perms()
+		.then(function(arrayResults){
+			assert.ok( arrayResults[0].hasOwnProperty('Member'), "arrayResults[0].hasOwnProperty('Member')"+ arrayResults[0].hasOwnProperty('Member') );
+			assert.ok( arrayResults[0].hasOwnProperty('Roles') , "arrayResults[0].hasOwnProperty('Roles')" + arrayResults[0].hasOwnProperty('Roles') );
+			assert.ok( arrayResults.length == 2                , "arrayResults.length == 2 (perms are broken, and contain only 2 groups): " + arrayResults.length );
+			assert.ok( getAsciiTableStr(arrayResults)          , `RESULTS:\n${getAsciiTableStr(arrayResults)}`);
+			done();
+		})
+		.catch(function(errorMessage){
+			assert.ok( (false), errorMessage );
+			done();
+		});
+	});
 
 	QUnit.test("sprLib.folder('SiteAssets').files()", function(assert){
 		var done = assert.async();
