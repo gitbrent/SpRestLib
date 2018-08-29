@@ -344,8 +344,8 @@
 	</style>
 
 	<script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
-	<!--<script src="https://cdn.rawgit.com/gitbrent/SpRestLib/9684a98e/dist/sprestlib.bundle.js"></script>-->
-	<script src="https://gitcdn.link/repo/gitbrent/SpRestLib/master/dist/sprestlib.bundle.js"></script>
+	<script src="https://cdn.rawgit.com/gitbrent/SpRestLib/master/dist/sprestlib.bundle.js"></script>
+	<!--<script src="https://gitcdn.link/repo/gitbrent/SpRestLib/master/dist/sprestlib.bundle.js"></script>-->
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.29.0/js/jquery.tablesorter.min.js"></script>
 	<script src="https://cdn.rawgit.com/sorensen/ascii-table/v0.0.9/ascii-table.min.js"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.15.0/prism.min.js"></script>
@@ -1070,7 +1070,7 @@
 		// ==================================================================================================================
 		$(document).ready(function(){
 			// If you're me: Load newest/local copy for dev/test work :-)
-			if ( window.location.href.toLowerCase().indexOf('gitbrent') > -1 ) {
+			if ( window.location.href.toLowerCase().indexOf('gitbrent') > -1 && window.location.href.toLowerCase().indexOf('debug') > -1 ) {
 				// Dynamically load library as SharePoint Online is *BAD* about caching
 				$.getScript("../SiteAssets/sprestlib/js/sprestlib.js", function(){
 					$('#libChkSprLib > div:last-child').text( sprLib.version );
