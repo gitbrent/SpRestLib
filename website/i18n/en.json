@@ -4,6 +4,8 @@
     "next": "Next",
     "previous": "Previous",
     "tagline": "JavaScript Library for SharePoint Web Services",
+    "api-file": "File (SPFile) Methods",
+    "api-folder": "Folder (SPFolder) Methods",
     "api-list": "List/Library (SPList) Methods",
     "api-rest": "REST API Methods",
     "api-site": "Site (SPSite) Methods",
