@@ -1012,7 +1012,7 @@
 					+ ".then(function(objUser){\n"
 					+ "    Object.keys(objUser).forEach(function(key){\n"
 					+ "        var val = objUser[key];\n"
-					+ "        $('#user1Html table tbody').append('<tr><th>'+ key +'</th><td class=\"code\">'+ (typeof val === 'object' ? JSON.stringify(val,null,4) : val) +'</td></tr>');\n"
+					+ "        $('#user1Html table tbody').append('<tr><th>'+ key +'</th><td class=\"code text-monospace\">'+ (typeof val === 'object' ? JSON.stringify(val,null,4) : val) +'</td></tr>');\n"
 					+ "    });\n"
 					+ "});";
 				$('#user1Code pre code').text( user1Code );
@@ -1032,7 +1032,7 @@
 					+ "    Object.keys(objUser).forEach(function(key){\n"
 					+ "        var val = objUser[key];\n"
 					//+ "        if (typeof val !== 'object') $('#user3Html table tbody').append('<tr><th>'+ key +'</th><td>'+ val +'</td></tr>');\n"
-					+ "        $('#user3Html table tbody').append('<tr><th>'+ key +'</th><td class=\"code\">'+ (typeof val === 'object' ? JSON.stringify(val,null,4) : val) +'</td></tr>');\n"
+					+ "        $('#user3Html table tbody').append('<tr><th>'+ key +'</th><td class=\"code text-monospace\">'+ (typeof val === 'object' ? JSON.stringify(val,null,4) : val) +'</td></tr>');\n"
 					+ "    });\n"
 					+ "});";
 				$('#user3Code pre code').text( user3Code );
@@ -1587,7 +1587,7 @@
 			<div id="rest1Code" class="container-fluid mb-4"><pre><code class="language-javascript"></code></pre></div>
 
 			<h5 class="text-primary mt-4">Query Results</h5>
-			<div id="rest1Html" class="container-fluid mb-4 code bg-light p-3"></div>
+			<div id="rest1Html" class="container-fluid mb-4 code text-monospace bg-light p-3"></div>
 		</div>
 
 		<div id="tabSand" data-tab="Code Sandbox">
