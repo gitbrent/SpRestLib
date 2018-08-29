@@ -29,9 +29,10 @@ declare namespace sprLib {
   class folder {
     constructor(folderName: string);
 
+	files(): Promise<Object[]>;
+	folders(): Promise<Object[]>;
     info(): Promise<Object>;
-    files(): Promise<Object[]>;
-    folders(): Promise<Object[]>;
+	perms(): Promise<Object[]>;
   }
 
   /**
