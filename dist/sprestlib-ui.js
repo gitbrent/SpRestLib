@@ -6,7 +6,7 @@
 |*|
 |*|  This library is released under the MIT Public License (MIT)
 |*|
-|*|  SpRestLib (C) 2016-2018 Brent Ely -- https://github.com/gitbrent
+|*|  SpRestLib (C) 2016-present Brent Ely -- https://github.com/gitbrent
 |*|
 |*|  Permission is hereby granted, free of charge, to any person obtaining a copy
 |*|  of this software and associated documentation files (the "Software"), to deal
@@ -30,7 +30,7 @@
 (function(){
 	// APP VERSION/BUILD
 	var APP_VER = "1.0.0";
-	var APP_BLD = "20180216";
+	var APP_BLD = "20180828";
 	var SPRLIB_REQ = "1.4.0+";
 	var DEBUG = false; // (verbose mode/lots of logging)
 	// APP MESSAGE STRINGS (Internationalization)
@@ -367,7 +367,6 @@
 						}
 
 						$.each(objTagData.data, function(i,data){
-							console.log(data);
 							$(tag).append('<option value="'+ data[objTagData.value] +'">'+ data[objTagData.text] +'</option>');
 						});
 					}
