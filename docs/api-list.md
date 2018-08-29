@@ -313,7 +313,7 @@ sprLib.list('Announcements').cols()
 ## Get List Info
 Syntax: `sprLib.list(listName|listGUID).info()`
 
-Returns: Array of list properties
+Returns: Object containing list properties
 
 ### List Properties
 | Property Name               | Type     | Description                                                 |
