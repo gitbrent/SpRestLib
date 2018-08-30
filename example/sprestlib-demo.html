@@ -6,7 +6,7 @@
 	<meta name="website"     content="https://github.com/gitbrent/SpRestLib/">
 	<meta name="keywords"    content="SpRestLib, JavaScript, js-sharepoint, SP2013 REST, SharePoint 2013, SP2013, SharePoint 2016, SharePoint Online">
 	<meta name="description" content="Content Editor Webpart: SpRestLib features and capabilities">
-	<meta name="revised"     content="20180828">
+	<meta name="revised"     content="20180829">
 
 	<!-- HOWTO / FAQ / SETUP -->
 	<!--
@@ -351,7 +351,7 @@
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.15.0/prism.min.js"></script>
 
 	<script>
-		var APP_BLD = 20180828;
+		var APP_BLD = 20180829;
 		var HTML_SPINNER = '<div class="sprlib-spinner"><div class="sprlib-bounce1"></div><div class="sprlib-bounce2"></div><div class="sprlib-bounce3"></div></div>';
 		var LAYOUTS_URL = ( typeof _spPageContextInfo !== 'undefined' && _spPageContextInfo.layoutsUrl ? _spPageContextInfo.layoutsUrl : '_layouts/15' );
 
@@ -701,6 +701,8 @@
 
 		function execCodeAndShowResults(eleCode, eleData) {
 			var SKIP_META = true;
+			var arrResults = [];
+			var table = "";
 
 			// A:
 			$('#'+eleData).html( HTML_SPINNER );
@@ -708,26 +710,36 @@
 
 			// B:
 			Promise.resolve()
-			.then(function(){ return eval( $('#'+eleCode).text() ) })
+			.then(function(){
+				return eval( $('#'+eleCode).text() )
+			})
 			.then(function(arrItems){
-				if ( arrItems && !Array.isArray(arrItems) ) {
-					$('#'+eleData).html( arrItems );
-					return;
-				}
-				else if ( !arrItems || arrItems.length == 0 ) {
+				if ( !arrItems || arrItems.length == 0 ) {
 					$('#'+eleData).html( '(No results returned)' );
 					return;
 				}
 
-				var arrColHeadings = [];
-				Object.keys(arrItems[0]).forEach(function(key,idx){
-					if ( SKIP_META && key == '__metadata' ) return;
-					if ( typeof key === 'object' ) Object.keys(key).forEach(function(key,idx){ arrColHeadings.push(key) });
-					else arrColHeadings.push(key);
-				});
+				if ( arrItems && !Array.isArray(arrItems) && typeof arrItems === 'object' ) {
+					Object.keys(arrItems).forEach(key => {
+						var propVal = ( typeof arrItems[key] === 'object' ? JSON.stringify(arrItems[key]) : (typeof arrItems[key] !== 'undefined' ? arrItems[key] : '(null/undef)').toString() );
+						if ( isNaN(propVal) && propVal != 'true' && propVal != 'false' ) propVal = '"'+propVal+'"';
+						arrResults.push({ 'name':key,'value':propVal });
+					});
+					table = new AsciiTable().setHeading( ['Prop Name','Prop Value'] );
+				}
+				else if ( Array.isArray(arrItems) && arrItems.length > 0 ) {
+					arrResults = arrItems;
+					var arrColHeadings = [];
+					Object.keys(arrItems[0]).forEach(function(key,idx){
+						if ( SKIP_META && key == '__metadata' ) return;
+						if ( typeof key === 'object' ) Object.keys(key).forEach(function(key,idx){ arrColHeadings.push(key) });
+						else arrColHeadings.push(key);
+					});
 
-				var table = new AsciiTable().setHeading( arrColHeadings );
-				arrItems.forEach(function(obj,idx){
+					table = new AsciiTable().setHeading( arrColHeadings );
+				}
+
+				arrResults.forEach(function(obj,idx){
 					var vals = [];
 					$.each(obj, function(key,val){
 						if ( SKIP_META && key == '__metadata' ) return;
@@ -737,7 +749,7 @@
 				});
 
 				// Show
-				$('#'+eleData).html( (arrItems && arrItems.length > 0 ? table.toString() : '(No results)') );
+				$('#'+eleData).html( table.toString() );
 			})
 			.catch(function(strErr){
 				$('#'+eleData).html( '<h2 style="color:red">ERROR</h2>'+strErr );
@@ -1057,9 +1069,8 @@
 				$('#sandboxCode').text(
 					"sprLib.list('Site Assets')\n"
 					+ ".items({\n"
-					+ "  listCols: ['Id','FileLeafRef','Created','Modified']\n"
-					+ "})\n"
-					+ ".then(function(data){ return data; });"
+					+ "    listCols: ['Id','FileLeafRef','Created','Modified']\n"
+					+ "})"
 				);
 			}
 
@@ -1593,14 +1604,12 @@
 		<div id="tabSand" data-tab="Code Sandbox">
 			<h4 class="text-primary">Code Sandbox</h4>
 			<div class="alert alert-highlight text-muted mb-3" role="alert">
-				The code below is editable - use it try any sprLib API calls...
+				The code below is editable - use it try any sprLib features.<br>
+				The sandbox will handle the <code>then()</code> and <code>catch()</code> for you, so just use code as shown see below.<br>
+				Both array results (ex:`list().items()`) and object results (ex:`list().info()`) are supported.
 			</div>
-
 			<pre><code id="sandboxCode" contenteditable="true" class="language-javascript" spellcheck="false"></code></pre>
-
-			<div class="p-3 mt-2 mb-4 text-center">
-				<button type="button" class="btn btn-success w-25" onclick="execCodeAndShowResults('sandboxCode','sandboxData')">Execute Sandbox Code</button>
-			</div>
+			<button type="button" class="btn btn-success mt-2 mb-4 w-25" onclick="execCodeAndShowResults('sandboxCode','sandboxData')">Execute Sandbox Code</button>
 
 			<h5 class="text-primary mt-4">Results</h5>
 			<div id="sandboxData" class="code text-monospace bg-light p-3"></div>
