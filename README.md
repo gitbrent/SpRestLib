@@ -123,7 +123,7 @@ then run the following code snippet which will load the SpRestLib bundle script 
 ```javascript
 // 1: Load SpRestLib via CDN
 var script = document.createElement('script');
-script.src = "https://cdn.rawgit.com/gitbrent/SpRestLib/v1.5.0/dist/sprestlib.bundle.js";
+script.src = "https://cdn.rawgit.com/gitbrent/SpRestLib/master/dist/sprestlib.bundle.js";
 document.getElementsByTagName('head')[0].appendChild(script);
 
 // 2: Test drive some library methods
