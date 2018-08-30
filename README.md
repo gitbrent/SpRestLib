@@ -3,13 +3,12 @@
 # SpRestLib
 
 ## SharePoint REST Web Services JavaScript Library
-Provides a clean, concise API that greatly simplifies asynchronous REST interaction with SharePoint. Easily read/write List
-items (CRUD), execute REST calls, and gather site/user/group information. Enables rapid development of SharePoint Apps/Add-ins
-using the JavaScript SharePoint App Model.  
+Provides a concise, promise-based API that simplifies asynchronous REST interaction with SharePoint. Easily read/write List
+items, execute ad-hoc REST calls, interact with files and folders, gather site properties, and query user information. Enables rapid development of SharePoint Apps/Add-ins using the JavaScript SharePoint App Model.  
 
 ### Library Features:
-* Simple  - Most REST/Web Service interaction can be done in a few lines of code
-* Modern  - Lightweight, pure JavaScript solution with no dependencies
+* Simple  - Most SharePoint web service calls are a few lines of code
+* Modern  - Lightweight, pure JavaScript solution with zero dependencies
 * Elegant - Utilizes the new [ES6 Promise](http://www.datchley.name/es6-promises/) architecture for asynchronous operations
 * Robust  - Built for [SharePoint 2013 API](https://msdn.microsoft.com/en-us/library/office/jj860569.aspx) and [OData v3](http://www.odata.org/documentation/odata-version-3-0/)
 
@@ -17,7 +16,8 @@ using the JavaScript SharePoint App Model.
 * List Methods - Create, read, update, and delete (CRUD) List/Library items with a single line of code
 * User Methods - Get User information: Basic (ID, Email, LoginName, etc.) and UserProfile (Manager, 100+ Properties)
 * Site Methods - Get Site information (Lists, Groups, Users, Roles, Subsites and Permissions)
-* REST Methods - Call any available [SharePoint REST API](https://msdn.microsoft.com/en-us/library/office/dn268594.aspx) endpoint
+* File/Folder Methods - Get File/Folder properties, permissions. Download files and get a folder's items.
+* REST Methods - Run ad-hoc REST API calls against any available [SharePoint REST API](https://msdn.microsoft.com/en-us/library/office/dn268594.aspx) endpoint
 * Form Population - Populate form elements using data-bind declarative binding system like Knockout or AngluarJS
 
 ### Supported Environments:
@@ -37,8 +37,19 @@ using the JavaScript SharePoint App Model.
 * `sprLib.list(listName).delete(item)`   - Delete an existing item using JSON data (permanently delete)
 * `sprLib.list(listName).recycle(item)`  - Recycle an existing item using JSON data (move to Recycle Bin)
 * `sprLib.list(listName).cols()`         - Returns an array of column objects with useful info (name, datatype, etc.)
-* `sprLib.list(listName).info()`         - Returns information about the List/Library (GUID, numberOfItems, etc.)
+* `sprLib.list(listName).info()`         - Returns list/library properties (GUID, lastModified, numberOfItems, etc.)
 * `sprLib.list(listName).perms()`        - Returns an array of the list's Member/Roles objects
+
+## File
+* `sprLib.file(fileName).get()`         - Returns a file (binary/text) as a blob which can be saved
+* `sprLib.file(fileName).info()`        - Returns file properties (Created, GUID, HasUniquePerms, etc.)
+* `sprLib.file(fileName).perms()`       - Returns an array of the file's Member/Roles objects
+
+## Folder
+* `sprLib.folder(folderName).files()`   - Returns an array of file objects contained in the folder
+* `sprLib.folder(folderName).folders()` - Returns an array of folder objects contained in the folder
+* `sprLib.folder(folderName).info()`    - Returns folder properties (Created, GUID, HasUniqueRoleAssignments, etc.)
+* `sprLib.folder(folderName).perms()`   - Returns an array of the folder's Member/Roles objects
 
 ## Site Collection/Subsite
 * `sprLib.site(siteUrl).groups()`   - Returns an array of the site's Groups and Members
@@ -78,6 +89,8 @@ using the JavaScript SharePoint App Model.
 - [Method Reference](#method-reference)
   - [REST API Methods](#rest-api-methods)
   - [List/Library Methods (`SPList`)](#listlibrary-methods-splist)
+  - [File Methods (`SPFile`)](#file-methods-spfile)
+  - [Folder Methods (`SPFolder`)](#folder-methods-spfolder)
   - [Site Methods (`SPSite`)](#site-methods-spsite)
   - [User Methods](#user-methods)
   - [Utility Methods](#utility-methods)
@@ -163,6 +176,12 @@ var sprLib = require("sprestlib");
 
 ## List/Library Methods (`SPList`)
 [List/Library Methods](https://gitbrent.github.io/SpRestLib/docs/api-list.html)
+
+## File Methods (`SPFile`)
+[Site Methods](https://gitbrent.github.io/SpRestLib/docs/api-file.html)
+
+## Folder Methods (`SPFolder`)
+[Site Methods](https://gitbrent.github.io/SpRestLib/docs/api-folder.html)
 
 ## Site Methods (`SPSite`)
 [Site Methods](https://gitbrent.github.io/SpRestLib/docs/api-site.html)
