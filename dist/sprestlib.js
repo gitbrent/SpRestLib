@@ -30,7 +30,7 @@
 (function(){
 	// APP VERSION/BUILD
 	var APP_VER = "1.8.0";
-	var APP_BLD = "20180828";
+	var APP_BLD = "20180829";
 	var DEBUG = false; // (verbose mode/lots of logging)
 	// ENUMERATIONS
 	// REF: [`SP.BaseType`](https://msdn.microsoft.com/en-us/library/office/jj246925.aspx)
@@ -318,7 +318,11 @@
 						if ( objData[field] && Array.isArray(objData[field]) && objData[field].length == 0 ) objData[field] = {};
 					});
 
-					// C: Handle version option
+					// C: Remap some properties
+					if ( objData.TimeCreated )      { objData.Created  = objData.TimeCreated;      delete objData.TimeCreated; }
+					if ( objData.TimeLastModified ) { objData.Modified = objData.TimeLastModified; delete objData.TimeLastModified; }
+
+					// D: Handle version option
 					if ( inOpt && inOpt.version ) {
 						return sprLib.rest({
 							url: "_api/web/GetFileByServerRelativeUrl('"+ _fullName +"')/versions("+ (Number(inOpt.version)*512) +")",
@@ -540,11 +544,11 @@
 						objFolder.Created     = ( objFolder.Properties.vti_x005f_timecreated ? objFolder.Properties.vti_x005f_timecreated : null );
 						objFolder.FolderCount = ( objFolder.Properties.vti_x005f_foldersubfolderitemcount ? objFolder.Properties.vti_x005f_foldersubfolderitemcount : 0 );
 						objFolder.ItemCount   = ( objFolder.ItemCount ? objFolder.ItemCount : 0 );
-						objFolder.ParentGUID  = ( objFolder.Properties.vti_x005f_parentid ? objFolder.Properties.vti_x005f_parentid : null );
+						objFolder.ListGUID    = ( objFolder.Properties.vti_x005f_listname ? objFolder.Properties.vti_x005f_listname : null ); // NOTE: root Library [List]
 						objFolder.HasSubdirs  = ( objFolder.Properties.vti_x005f_hassubdirs ? objFolder.Properties.vti_x005f_hassubdirs == "true" : false );
 						objFolder.Hidden      = ( objFolder.Properties.vti_x005f_isbrowsable ? objFolder.Properties.vti_x005f_isbrowsable == "false" : false );
-						objFolder.ListGUID    = ( objFolder.Properties.vti_x005f_listname ? objFolder.Properties.vti_x005f_listname : null );
-						objFolder.ListTitle   = ( objFolder.Properties.vti_x005f_listtitle ? objFolder.Properties.vti_x005f_listtitle : null ); // NOTE: wont exist for subfolders
+						//objFolder.ParentGUID  = ( objFolder.Properties.vti_x005f_parentid ? objFolder.Properties.vti_x005f_parentid : null );
+						//objFolder.ListTitle   = ( objFolder.Properties.vti_x005f_listtitle ? objFolder.Properties.vti_x005f_listtitle : null ); // NOTE: wont exist for subfolders
 						objFolder.Modified    = ( objFolder.Properties.vti_x005f_timelastmodified ? objFolder.Properties.vti_x005f_timelastmodified : null );
 
 						delete objFolder.Properties;
