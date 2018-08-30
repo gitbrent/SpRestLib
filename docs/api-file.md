@@ -23,17 +23,17 @@ Returns: Object containing file properties
 | `CheckInComment`       | string   | the latest CheckIn comment                                       |
 | `CheckOutType`         | number   | the item's check-out type (`2`=none, `1`=offline, `0`=online)    |
 | `CheckedOutByUser`     | object   | object containing the `id` of the user who checked out the file (empty object if file is not checked out) |
+| `Created`              | string   | the Date (ISO format) a file was created                         |
 | `ETag`                 | string   | the ETag value - ex: "{8921212D-7E83-5AF1-CB51-5431BAD43233},12" |
 | `Exists`               | boolean  | whether the file exists                                          |
 | `Length`               | integer  | the size of the file in bytes - ex: 55100                        |
 | `LockedByUser`         | object   | object containing the `id` of the locking user - ex: {"Id":9}    |
 | `MajorVersion`         | integer  | major version number - ex: 30                                    |
 | `MinorVersion`         | integer  | minor version number - ex: 1                                     |
+| `Modified`             | string   | the Date (ISO format) an item was last modified                  |
 | `ModifiedBy`           | object   | object containing the `id` of the author - ex: {"Id":9}          |
 | `Name`                 | string   | the name of the file - ex: "Sample.pptx"                         |
 | `ServerRelativeUrl`    | string   | the server relative URL - ex: "/sites/dev/Documents/Demo.xlsx"   |
-| `TimeCreated`          | string   | the Date (ISO format) a file was created                         |
-| `TimeLastModified`     | string   | the Date (ISO format) an item was last modified                  |
 | `UIVersionLabel`       | string   | major.minor version - ex: "30.0"                                 |
 | `UniqueId`             | GUID     | GUID for the file - ex: 8921212D-7E83-5AF1-CB51-5431BAD43233     |
 

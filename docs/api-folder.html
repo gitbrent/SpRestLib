@@ -1,0 +1,145 @@
+<!DOCTYPE html><html lang="en"><head><meta charSet="utf-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><title>Folder (SPFolder) Methods · SpRestLib</title><meta name="viewport" content="width=device-width"/><meta name="generator" content="Docusaurus"/><meta name="description" content="## Syntax"/><meta name="docsearch:language" content="en"/><meta property="og:title" content="Folder (SPFolder) Methods · SpRestLib"/><meta property="og:type" content="website"/><meta property="og:url" content="https://gitbrent.github.io/SpRestLib/index.html"/><meta property="og:description" content="## Syntax"/><meta name="twitter:card" content="summary"/><meta name="twitter:image" content="https://gitbrent.github.io/SpRestLib/img/sprestlib.png"/><link rel="shortcut icon" href="/SpRestLib/img/favicon.png"/><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/hybrid.min.css"/><link rel="alternate" type="application/atom+xml" href="https://gitbrent.github.io/SpRestLib/blog/atom.xml" title="SpRestLib Blog ATOM Feed"/><link rel="alternate" type="application/rss+xml" href="https://gitbrent.github.io/SpRestLib/blog/feed.xml" title="SpRestLib Blog RSS Feed"/><script>
+              (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+              (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+              m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+              })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+              ga('create', 'UA-75147115-3', 'auto');
+              ga('send', 'pageview');
+            </script><script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script><link rel="stylesheet" href="/SpRestLib/css/main.css"/></head><body class="sideNavVisible separateOnPageNav"><div class="fixedHeaderContainer"><div class="headerWrapper wrapper"><header><a href="/SpRestLib/"><img class="logo" src="/SpRestLib/img/sprestlib.svg" alt="SpRestLib"/><h2 class="headerTitleWithLogo">SpRestLib</h2></a><div class="navigationWrapper navigationSlider"><nav class="slidingNav"><ul class="nav-site nav-site-internal"><li class=""><a href="https://github.com/gitbrent/SpRestLib/releases" target="_self">Download</a></li><li class="siteNavGroupActive"><a href="/SpRestLib/docs/installation.html" target="_self">Get Started</a></li><li class="siteNavGroupActive"><a href="/SpRestLib/docs/api-list.html" target="_self">API Documentation</a></li><li class=""><a href="/SpRestLib/blog" target="_self">SharePoint Guides</a></li><li class=""><a href="https://github.com/gitbrent/SpRestLib/" target="_self">GitHub</a></li></ul></nav></div></header></div></div><div class="navPusher"><div class="docMainWrapper wrapper"><div class="container docsNavContainer" id="docsNav"><nav class="toc"><div class="toggleNav"><section class="navWrapper wrapper"><div class="navBreadcrumb wrapper"><div class="navToggle" id="navToggler"><i></i></div><h2><i>›</i><span>API Reference</span></h2><div class="tocToggler" id="tocToggler"><i class="icon-toc"></i></div></div><div class="navGroups"><div class="navGroup"><h3 class="navGroupCategoryTitle">Get Started</h3><ul><li class="navListItem"><a class="navItem" href="/SpRestLib/docs/installation.html">Installation</a></li><li class="navListItem"><a class="navItem" href="/SpRestLib/docs/promises.html">Promise You Will Love It</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Features</h3><ul><li class="navListItem"><a class="navItem" href="/SpRestLib/docs/feat-integration.html">Library Integration</a></li><li class="navListItem"><a class="navItem" href="/SpRestLib/docs/feat-promises.html">Promise-based Operations</a></li><li class="navListItem"><a class="navItem" href="/SpRestLib/docs/feat-node.html">SharePoint via Node.js</a></li><li class="navListItem"><a class="navItem" href="/SpRestLib/docs/feat-utilities.html">Utility Methods</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">API Reference</h3><ul><li class="navListItem"><a class="navItem" href="/SpRestLib/docs/api-list.html">List/Library (SPList) Methods</a></li><li class="navListItem"><a class="navItem" href="/SpRestLib/docs/api-file.html">File (SPFile) Methods</a></li><li class="navListItem navListItemActive"><a class="navItem" href="/SpRestLib/docs/api-folder.html">Folder (SPFolder) Methods</a></li><li class="navListItem"><a class="navItem" href="/SpRestLib/docs/api-site.html">Site (SPSite) Methods</a></li><li class="navListItem"><a class="navItem" href="/SpRestLib/docs/api-user.html">User Methods</a></li><li class="navListItem"><a class="navItem" href="/SpRestLib/docs/api-rest.html">REST API Methods</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">SpRestLib UI</h3><ul><li class="navListItem"><a class="navItem" href="/SpRestLib/docs/ui-form-binding.html">Form Binding</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Help / Support</h3><ul><li class="navListItem"><a class="navItem" href="/SpRestLib/docs/sp-auth-notes.html">SharePoint Authentication</a></li></ul></div></div></section></div><script>
+            document.addEventListener('DOMContentLoaded', function() {
+              createToggler('#navToggler', '#docsNav', 'docsSliderActive');
+              createToggler('#tocToggler', 'body', 'tocActive');
+
+              const headings = document.querySelector('.toc-headings');
+              headings && headings.addEventListener('click', function(event) {
+                if (event.target.tagName === 'A') {
+                  document.body.classList.remove('tocActive');
+                }
+              }, false);
+
+              function createToggler(togglerSelector, targetSelector, className) {
+                var toggler = document.querySelector(togglerSelector);
+                var target = document.querySelector(targetSelector);
+
+                if (!toggler) {
+                  return;
+                }
+
+                toggler.onclick = function(event) {
+                  event.preventDefault();
+
+                  target.classList.toggle(className);
+                };
+              }
+            });
+        </script></nav></div><div class="container mainContainer"><div class="wrapper"><div class="post"><header class="postHeader"><h1 class="postHeaderTitle">Folder (SPFolder) Methods</h1></header><article><div><span><h2><a class="anchor" aria-hidden="true" id="syntax"></a><a href="#syntax" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Syntax</h2>
+<p>Folders can be accessed by either their full or relative path:</p>
+<p><code>sprLib.folder('sample.pptx')</code>  <br>
+<code>sprLib.folder('/sites/dev/Shared Documents/sample.pptx')</code></p>
+<h2><a class="anchor" aria-hidden="true" id="folder-information"></a><a href="#folder-information" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Folder Information</h2>
+<p><code>sprLib.folder(&quot;FolderName&quot;).info()</code></p>
+<p>Returns: Array of folder properties</p>
+<h3><a class="anchor" aria-hidden="true" id="folder-properties"></a><a href="#folder-properties" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Folder Properties</h3>
+<table>
+<thead>
+<tr><th style="text-align:left">Property Name</th><th style="text-align:left">Type</th><th style="text-align:left">Description</th></tr>
+</thead>
+<tbody>
+<tr><td style="text-align:left"><code>Created</code></td><td style="text-align:left">string</td><td style="text-align:left">the Date (ISO format) a file was created</td></tr>
+<tr><td style="text-align:left"><code>FolderCount</code></td><td style="text-align:left">integer</td><td style="text-align:left">the number of child folders under this folder</td></tr>
+<tr><td style="text-align:left"><code>HasSubdirs</code></td><td style="text-align:left">boolean</td><td style="text-align:left">whether the folder has any child folders</td></tr>
+<tr><td style="text-align:left"><code>HasUniqueRoleAssignments</code></td><td style="text-align:left">boolean</td><td style="text-align:left">whether the folder has any child folders</td></tr>
+<tr><td style="text-align:left"><code>Hidden</code></td><td style="text-align:left">boolean</td><td style="text-align:left">whether the folder is hidden</td></tr>
+<tr><td style="text-align:left"><code>ItemCount</code></td><td style="text-align:left">integer</td><td style="text-align:left">the number of files within this folder</td></tr>
+<tr><td style="text-align:left"><code>ListGUID</code></td><td style="text-align:left">GUID</td><td style="text-align:left">root library GUID</td></tr>
+<tr><td style="text-align:left"><code>Modified</code></td><td style="text-align:left">string</td><td style="text-align:left">the Date (ISO format) an item was last modified</td></tr>
+<tr><td style="text-align:left"><code>ServerRelativeUrl</code></td><td style="text-align:left">string</td><td style="text-align:left">the server relative URL - ex: &quot;/sites/dev/SiteAssets&quot;</td></tr>
+<tr><td style="text-align:left"><code>TotalSize</code></td><td style="text-align:left">integer</td><td style="text-align:left">the size of the folder's contents in bytes - ex: 55100</td></tr>
+</tbody>
+</table>
+<h3><a class="anchor" aria-hidden="true" id="sample-code"></a><a href="#sample-code" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Sample Code</h3>
+<pre><code class="hljs css language-javascript">sprLib.folder(<span class="hljs-string">'/sites/dev/Shared Documents/'</span>).info()
+.then(<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">objInfo</span>)</span>{ <span class="hljs-built_in">console</span>.table([objInfo]) });
+
+<span class="hljs-comment">// Result:</span>
+<span class="hljs-comment">/*
+.---------------------------------------------------------------------.
+|        Prop Name         |                Prop Value                |
+|--------------------------|------------------------------------------|
+| Name                     | "Shared Documents"                       |
+| ItemCount                | 135                                      |
+| ServerRelativeUrl        | "/sites/dev/Shared Documents"            |
+| Created                  | "2016-07-29T02:48:26"                    |
+| FolderCount              | 2                                        |
+| ListGUID                 | "{01DFF502-A0FC-49D0-A819-6C7BC5486D89}" |
+| HasSubdirs               | true                                     |
+| Hidden                   | false                                    |
+| Modified                 | "2018-08-29T03:08:02"                    |
+| TotalSize                | 555374475                                |
+| HasUniqueRoleAssignments | true                                     |
+'---------------------------------------------------------------------'
+*/</span>
+</code></pre>
+<h2><a class="anchor" aria-hidden="true" id="folder-permissions"></a><a href="#folder-permissions" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Folder Permissions</h2>
+<p><code>sprLib.folder(&quot;FolderName&quot;).perms()</code></p>
+<p>Returns: Array of file permissions</p>
+<h3><a class="anchor" aria-hidden="true" id="perm-properties"></a><a href="#perm-properties" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Perm Properties</h3>
+<table>
+<thead>
+<tr><th style="text-align:left">Property Name</th><th style="text-align:left">Type</th><th style="text-align:left">Description</th></tr>
+</thead>
+<tbody>
+<tr><td style="text-align:left"><code>Member</code></td><td style="text-align:left">object</td><td style="text-align:left">object with Member properties (<code>Title</code>,<code>PrincipalId</code>,<code>PrincipalType</code>)</td></tr>
+<tr><td style="text-align:left"><code>Roles</code></td><td style="text-align:left">object</td><td style="text-align:left">array of Role objects with properties: (<code>Name</code>,<code>Hidden</code>)</td></tr>
+</tbody>
+</table>
+<h3><a class="anchor" aria-hidden="true" id="sample-code-1"></a><a href="#sample-code-1" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Sample Code</h3>
+<pre><code class="hljs css language-javascript">sprLib.folder(<span class="hljs-string">'/sites/dev/Shared Documents/'</span>).perms()
+.then(<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">arrayResults</span>)</span>{ <span class="hljs-built_in">console</span>.table(arrayResults) });
+
+<span class="hljs-comment">/*
+.-----------------------------------------------------------------------------------------------------------------------------------------------------------.
+|                                        Member                                         |                               Roles                               |
+|---------------------------------------------------------------------------------------|-------------------------------------------------------------------|
+| {"Title":"Dev Site Members","PrincipalType":"SharePoint Group","PrincipalId":8}       | [{"Hidden":false,"Name":"Design"},{"Hidden":false,"Name":"Edit"}] |
+| {"Title":"Dev Site Owners","PrincipalType":"SharePoint Group","PrincipalId":6}        | [{"Hidden":false,"Name":"Full Control"}]                          |
+| {"Title":"Dev Site Visitors","PrincipalType":"SharePoint Group","PrincipalId":7}      | [{"Hidden":false,"Name":"Read"}]                                  |
+| {"Title":"Excel Services Viewers","PrincipalType":"SharePoint Group","PrincipalId":5} | [{"Hidden":false,"Name":"View Only"}]                             |
+'-----------------------------------------------------------------------------------------------------------------------------------------------------------'
+*/</span>
+</code></pre>
+<h2><a class="anchor" aria-hidden="true" id="folder-contents-files"></a><a href="#folder-contents-files" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Folder Contents: Files</h2>
+<p><code>sprLib.folder(&quot;FolderName&quot;).files()</code></p>
+<p>Returns: Array of <code>SP.File</code> objects in this Folder (see <a href="/SpRestLib/docs/api-file.html#file-properties">File Properties</a>)</p>
+<h3><a class="anchor" aria-hidden="true" id="sample-code-2"></a><a href="#sample-code-2" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Sample Code</h3>
+<pre><code class="hljs css language-javascript">sprLib.folder(<span class="hljs-string">'/sites/dev/Shared Documents/'</span>).files()
+.then(<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">arrayResults</span>)</span>{ <span class="hljs-built_in">console</span>.table(arrayResults) });
+
+<span class="hljs-comment">/*
+.-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------.
+|            Author            | CheckedOutByUser | LockedByUser |          ModifiedBy          | CheckInComment | CheckOutType |                    ETag                     | Exists | Length | MajorVersion | MinorVersion |        Name         |                ServerRelativeUrl                |         Title          |               UniqueId               |       Created        |       Modified       |
+|------------------------------|------------------|--------------|------------------------------|----------------|--------------|---------------------------------------------|--------|--------|--------------|--------------|---------------------|-------------------------------------------------|------------------------|--------------------------------------|----------------------|----------------------|
+| {"Id":9,"Title":"Brent Ely"} | null             | null         | {"Id":9,"Title":"Brent Ely"} |                |            2 | "{3C721739-23E2-4B4D-69FD-16E7693ABE5A},16" | true   |  39172 |            5 |            0 | sprestlib-demo.pptx | /sites/dev/Shared Documents/sprestlib-demo.pptx | PptxGenJS Presentation | 3c721739-23f2-4b4d-84fd-16e7693abe5a | 2018-01-01T21:55:33Z | 2018-08-26T23:23:57Z |
+'-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------'
+*/</span>
+</code></pre>
+<h2><a class="anchor" aria-hidden="true" id="folder-contents-folders"></a><a href="#folder-contents-folders" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Folder Contents: Folders</h2>
+<p><code>sprLib.folder(&quot;FolderName&quot;).folders()</code></p>
+<p>Returns: Array of <code>SP.Folder</code> objects in this Folder (see <a href="#folder-properties">Folder Properties</a>)</p>
+<h3><a class="anchor" aria-hidden="true" id="sample-code-3"></a><a href="#sample-code-3" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Sample Code</h3>
+<pre><code class="hljs css language-javascript">sprLib.folder(<span class="hljs-string">'/sites/dev/Shared Documents/'</span>).folders()
+.then(<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">arrayResults</span>)</span>{ <span class="hljs-built_in">console</span>.table(arrayResults) });
+
+<span class="hljs-comment">/*
+.--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------.
+|    Name     | ItemCount |         ServerRelativeUrl         |       Created       | FolderCount |                  GUID                  | HasSubdirs | Hidden |      Modified       |
+|-------------|-----------|-----------------------------------|---------------------|-------------|----------------------------------------|------------|--------|---------------------|
+| js          |        16 | /sites/dev/SiteAssets/js          | 2016-08-16T14:56:47 |           0 | {ADA19FF5-BA9F-4D05-89FF-7656F4D7325E} | true       | false  | 2018-08-29T02:43:23 |
+| BACKUPS     |         9 | /sites/dev/SiteAssets/BACKUPS     | 2017-10-28T23:12:41 |           0 | {ADA19FF5-BA9F-4D05-89FF-7656F4D7325E} | true       | false  | 2018-08-22T03:21:42 |
+| images      |         5 | /sites/dev/SiteAssets/images      | 2016-08-17T00:10:57 |           0 | {ADA19FF5-BA9F-4D05-89FF-7656F4D7325E} | true       | false  | 2017-10-09T23:43:19 |
+| stylesheets |        11 | /sites/dev/SiteAssets/stylesheets | 2016-08-17T00:02:49 |           0 | {ADA19FF5-BA9F-4D05-89FF-7656F4D7325E} | true       | false  | 2017-10-25T03:42:32 |
+'--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------'
+*/</span>
+</code></pre>
+</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/SpRestLib/docs/api-file.html">← File (SPFile) Methods</a><a class="docs-next button" href="/SpRestLib/docs/api-site.html">Site (SPSite) Methods →</a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#syntax">Syntax</a></li><li><a href="#folder-information">Folder Information</a><ul class="toc-headings"><li><a href="#folder-properties">Folder Properties</a></li><li><a href="#sample-code">Sample Code</a></li></ul></li><li><a href="#folder-permissions">Folder Permissions</a><ul class="toc-headings"><li><a href="#perm-properties">Perm Properties</a></li><li><a href="#sample-code-1">Sample Code</a></li></ul></li><li><a href="#folder-contents-files">Folder Contents: Files</a><ul class="toc-headings"><li><a href="#sample-code-2">Sample Code</a></li></ul></li><li><a href="#folder-contents-folders">Folder Contents: Folders</a><ul class="toc-headings"><li><a href="#sample-code-3">Sample Code</a></li></ul></li></ul></nav></div><footer class="nav-footer" id="footer"><section class="sitemap"><a href="/SpRestLib/" class="nav-home"><img src="/SpRestLib/img/sprestlib.svg" alt="SpRestLib" width="66" height="58"/></a><div><h5>Docs</h5><a href="/SpRestLib/docs/installation.html">Getting Started with SpRestLib</a><a href="/SpRestLib/docs/api-rest.html">SharePoint API Reference</a><a href="/SpRestLib/blog">SharePoint Development Guides</a><a href="/SpRestLib/docs/feat-promises.html">About JavaScript Promises</a></div><div><h5>Community</h5><a href="https://twitter.com/SpRestLib" target="_blank">Twitter</a><a href="https://plus.google.com/u/1/113247436909611337609" target="_blank">Google Plus</a><a href="http://stackoverflow.com/questions/tagged/sprestlib" target="_blank">Stack Overflow</a><a href="https://www.youtube.com/channel/UCxZcCampOHn-47kvtcK_oVQ" target="_blank">YouTube Channel</a></div><div><h5>More</h5><a href="https://github.com/gitbrent/sprestlib/issues">GitHub Issues</a><a href="https://github.com/gitbrent/sprestlib">GitHub Project</a><a href="https://www.flaticon.com/packs/creativity">Site Icons</a></div></section><section class="copyright">Copyright © 2018 Brent Ely</section></footer></div><script>window.twttr=(function(d,s, id){var js,fjs=d.getElementsByTagName(s)[0],t=window.twttr||{};if(d.getElementById(id))return t;js=d.createElement(s);js.id=id;js.src='https://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js, fjs);t._e = [];t.ready = function(f) {t._e.push(f);};return t;}(document, 'script', 'twitter-wjs'));</script></body></html>

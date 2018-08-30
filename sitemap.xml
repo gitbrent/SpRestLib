@@ -5,6 +5,8 @@
 <url> <loc>https://gitbrent.github.io/SpRestLib/blog/2018/06/26/create-sharepoint-jquery-people-picker.html</loc> <changefreq>weekly</changefreq> <priority>0.3</priority> </url>
 <url> <loc>https://gitbrent.github.io/SpRestLib/blog/2018/04/20/create-sharepoint-list-columns-using-rest.html</loc> <changefreq>weekly</changefreq> <priority>0.3</priority> </url>
 <url> <loc>https://gitbrent.github.io/SpRestLib/blog/2018/03/19/upload-file-to-sharepoint-library-using-rest.html</loc> <changefreq>weekly</changefreq> <priority>0.3</priority> </url>
+<url> <loc>https://gitbrent.github.io/SpRestLib/docs/api-file.html</loc> <changefreq>hourly</changefreq> <priority>1.0</priority> <xhtml:link rel="alternate" hreflang="en" href="https://gitbrent.github.io/SpRestLib/docs/api-file.html" /> </url>
+<url> <loc>https://gitbrent.github.io/SpRestLib/docs/api-folder.html</loc> <changefreq>hourly</changefreq> <priority>1.0</priority> <xhtml:link rel="alternate" hreflang="en" href="https://gitbrent.github.io/SpRestLib/docs/api-folder.html" /> </url>
 <url> <loc>https://gitbrent.github.io/SpRestLib/docs/api-list.html</loc> <changefreq>hourly</changefreq> <priority>1.0</priority> <xhtml:link rel="alternate" hreflang="en" href="https://gitbrent.github.io/SpRestLib/docs/api-list.html" /> </url>
 <url> <loc>https://gitbrent.github.io/SpRestLib/docs/api-rest.html</loc> <changefreq>hourly</changefreq> <priority>1.0</priority> <xhtml:link rel="alternate" hreflang="en" href="https://gitbrent.github.io/SpRestLib/docs/api-rest.html" /> </url>
 <url> <loc>https://gitbrent.github.io/SpRestLib/docs/api-site.html</loc> <changefreq>hourly</changefreq> <priority>1.0</priority> <xhtml:link rel="alternate" hreflang="en" href="https://gitbrent.github.io/SpRestLib/docs/api-site.html" /> </url>
