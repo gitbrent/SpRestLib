@@ -1,6 +1,6 @@
 ---
 id: api-file
-title: File (SPFile) Methods
+title: File Methods (SP.File)
 ---
 
 ## Syntax

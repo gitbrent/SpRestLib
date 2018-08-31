@@ -1,6 +1,6 @@
 ---
 id: api-user
-title: User Methods
+title: User Methods (SP.User)
 ---
 
 ## Syntax
@@ -18,7 +18,7 @@ Usage: Omitting options will return information about the current user, otherwis
 | `login`   | string |           | user login name       | user loginName to query. Ex: `{login:'AMERICAS\Brent_Ely'}` |
 | `title`   | string |           | user title            | user title to query. Ex: `{title:'Brent Ely'}`              |
 
-## Get User Information (`SPUser`)
+## Get User Information (`SP.User`)
 Syntax:  
 `sprLib.user().info()`  
 `sprLib.user(options).info()`
@@ -47,7 +47,7 @@ sprLib.user({ email:'brent@microsoft.com' }).info()
 */
 ```
 
-## Get User Groups (`SPGroup`)
+## Get User Groups (`SP.Group`)
 Syntax:  
 `sprLib.user().groups()`  
 `sprLib.user(options).groups()`
@@ -70,7 +70,7 @@ sprLib.user().groups()
 */
 ```
 
-## Get User Profile Properties (`SP.UserProfile.PersonProperties`)
+## Get User Profile Properties (`SP.UserProfile`)
 Syntax:  
 `sprLib.user().profile()`  
 `sprLib.user(options).profile()`  
@@ -112,6 +112,7 @@ sprLib.user().profile()
 
 // RESULT:
 /*
+
 .-------------------------------------------------------------------------------------.
 |       Prop Name       |                         Prop Value                          |
 |-----------------------|-------------------------------------------------------------|

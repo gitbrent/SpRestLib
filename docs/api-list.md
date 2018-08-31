@@ -1,6 +1,6 @@
 ---
 id: api-list
-title: List/Library (SPList) Methods
+title: List/Library Methods (SP.List)
 ---
 
 ## Syntax

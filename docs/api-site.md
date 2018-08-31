@@ -1,6 +1,6 @@
 ---
 id: api-site
-title: Site (SPSite) Methods
+title: Site Methods (SP.Web)
 ---
 
 ## Syntax

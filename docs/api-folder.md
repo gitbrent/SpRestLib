@@ -1,6 +1,6 @@
 ---
 id: api-folder
-title: Folder (SPFolder) Methods
+title: Folder Methods (SP.Folder)
 ---
 
 ## Syntax
