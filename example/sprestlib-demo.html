@@ -6,7 +6,7 @@
 	<meta name="website"     content="https://github.com/gitbrent/SpRestLib/">
 	<meta name="keywords"    content="SpRestLib, JavaScript, js-sharepoint, SP2013 REST, SharePoint 2013, SP2013, SharePoint 2016, SharePoint Online">
 	<meta name="description" content="Content Editor Webpart: SpRestLib features and capabilities">
-	<meta name="revised"     content="20180829">
+	<meta name="revised"     content="20180830">
 
 	<!-- HOWTO / FAQ / SETUP -->
 	<!--
@@ -721,8 +721,11 @@
 
 				if ( arrItems && !Array.isArray(arrItems) && typeof arrItems === 'object' ) {
 					Object.keys(arrItems).forEach(key => {
-						var propVal = ( typeof arrItems[key] === 'object' ? JSON.stringify(arrItems[key]) : (typeof arrItems[key] !== 'undefined' ? arrItems[key] : '(null/undef)').toString() );
-						if ( isNaN(propVal) && propVal != 'true' && propVal != 'false' ) propVal = '"'+propVal+'"';
+						var propVal = arrItems[key];
+						if ( typeof propVal === 'object' ) propVal = JSON.stringify(propVal); // works for actual objects and `null`
+						else if ( typeof propVal === 'number' || typeof propVal === 'boolean' ) propVal = propVal.toString(); // so AsciiTable will left-align
+						else if ( typeof propVal === 'string' && propVal.indexOf('"') == -1 ) propVal = '"'+propVal+'"';
+						//
 						arrResults.push({ 'name':key,'value':propVal });
 					});
 					table = new AsciiTable().setHeading( ['Prop Name','Prop Value'] );
