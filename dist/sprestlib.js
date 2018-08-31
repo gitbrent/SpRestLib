@@ -743,7 +743,7 @@
 							objFolder.Hidden      = ( objFolder.Properties.vti_x005f_isbrowsable ? objFolder.Properties.vti_x005f_isbrowsable == "false" : false );
 							objFolder.Modified    = ( objFolder.Properties.vti_x005f_timelastmodified ? objFolder.Properties.vti_x005f_timelastmodified : null );
 
-							delete folder.Properties;
+							delete objFolder.Properties;
 						}
 					});
 
