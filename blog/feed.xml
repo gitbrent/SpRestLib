@@ -4,7 +4,7 @@
         <title>SpRestLib Blog</title>
         <link>https://gitbrent.github.io/SpRestLib/blog</link>
         <description>The best place to stay up-to-date with the latest SpRestLib news and events.</description>
-        <lastBuildDate>Tue, 26 Jun 2018 06:00:00 GMT</lastBuildDate>
+        <lastBuildDate>Mon, 03 Sep 2018 06:00:00 GMT</lastBuildDate>
         <docs>http://blogs.law.harvard.edu/tech/rss</docs>
         <generator>Feed for Node.js</generator>
         <image>
@@ -13,6 +13,15 @@
             <link>https://gitbrent.github.io/SpRestLib/blog</link>
         </image>
         <copyright>Copyright © 2018 Brent Ely</copyright>
+        <item>
+            <title><![CDATA[Adding a User to SharePoint Group Using REST with SpRestLib]]></title>
+            <link>https://gitbrent.github.io/SpRestLib/blog/2018/09/03/add-user-to-sharepoint-group-using-rest.html</link>
+            <guid>https://gitbrent.github.io/SpRestLib/blog/2018/09/03/add-user-to-sharepoint-group-using-rest.html</guid>
+            <pubDate>Mon, 03 Sep 2018 06:00:00 GMT</pubDate>
+            <description><![CDATA[<p>Adding a User to an existing SharePoint Group can be done using a SpRestLib REST call in
+just a few lines of code.</p>
+]]></description>
+        </item>
         <item>
             <title><![CDATA[Creating SharePoint jQuery People-Picker with SpRestLib]]></title>
             <link>https://gitbrent.github.io/SpRestLib/blog/2018/06/26/create-sharepoint-jquery-people-picker.html</link>
