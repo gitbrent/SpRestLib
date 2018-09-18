@@ -30,7 +30,7 @@
 (function(){
 	// APP VERSION/BUILD
 	var APP_VER = "1.9.0-beta";
-	var APP_BLD = "20180830";
+	var APP_BLD = "20180917";
 	var DEBUG = false; // (verbose mode/lots of logging)
 	// ENUMERATIONS
 	// REF: [`SP.BaseType`](https://msdn.microsoft.com/en-us/library/office/jj246925.aspx)
@@ -783,7 +783,7 @@
 
 		// B: Param check
 		if ( inOpt && typeof inOpt === 'string' ) {
-			// DESIGN: Accept either [ListName] or [ListGUID]
+			// DESIGN: Accept either `name` or `guid`
 			_urlBase += ( gRegexGUID.test(inOpt) ? "(guid'"+ inOpt +"')" : "/getbytitle('"+ inOpt.replace(/\s/gi,'%20') +"')" );
 		}
 		else if ( inOpt && typeof inOpt === 'object' && inOpt.hasOwnProperty('name') ) {
@@ -791,7 +791,7 @@
 			_urlBase += ( gRegexGUID.test(inOpt.name) ? "(guid'"+ inOpt.name +"')" : "/getbytitle('"+ inOpt.name.replace(/\s/gi,'%20') +"')" );
 		}
 		else {
-			console.error("ERROR: A 'listName' or 'listGUID' is required! EX: `sprLib.list('Employees')` or `sprLib.list({ 'name':'Employees' })`");
+			console.error("ERROR: A List/Library 'name' or 'GUID' is required! EX: `sprLib.list('Employees')` or `sprLib.list({ 'name':'Employees' })`");
 			console.error('ARGS:');
 			console.error(inOpt);
 			return null;
