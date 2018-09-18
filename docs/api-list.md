@@ -44,7 +44,8 @@ Returns:
 * Array of objects containing column name/value pairs
 
 Notes:  
-* Omitting the `listCols` option will result in all List columns being returned (mimic SharePoint default behavior)
+* Omitting the `listCols` option will result in all List columns being returned (mimics SharePoint default behavior)
+* Only the first 100 items are returned by default (mimics SharePoint default behavior) - use `queryLimit` to get more (5,000 is typically the max, use `queryNext` [paging] for unlimited items)
 
 ### items Options
 | Option        | Type     | Default   | Description                         | Possible Values / Returns                  |
