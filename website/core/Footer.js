@@ -66,26 +66,27 @@ class Footer extends React.Component {
 							Twitter
 						</a>
 						<a
-							href="https://plus.google.com/u/1/113247436909611337609"
+							href="https://www.pinterest.com/sprestlib/"
 							target="_blank">
-							Google Plus
-						</a>
-						<a
-							href="http://stackoverflow.com/questions/tagged/sprestlib"
-							target="_blank">
-							Stack Overflow
+							Pinterest
 						</a>
 						<a
 							href="https://www.youtube.com/channel/UCxZcCampOHn-47kvtcK_oVQ"
 							target="_blank">
 							YouTube Channel
 						</a>
+						<a
+							href="https://plus.google.com/u/1/113247436909611337609"
+							target="_blank">
+							Google Plus
+						</a>
 					</div>
 					<div>
 						<h5>More</h5>
-						<a href="https://github.com/gitbrent/sprestlib/issues">GitHub Issues</a>
-						<a href="https://github.com/gitbrent/sprestlib">GitHub Project</a>
-						<a href="https://www.flaticon.com/packs/creativity">Site Icons</a>
+						<a href="https://github.com/gitbrent/sprestlib/issues" target="_blank">GitHub Issues</a>
+						<a href="https://github.com/gitbrent/sprestlib" target="_blank">GitHub Project</a>
+						<a href="https://stackoverflow.com/questions/tagged/sprestlib" target="_blank">SpRestLib on Stack Overflow</a>
+						<a href="https://www.flaticon.com/packs/creativity" target="_blank">Site Icons</a>
 					</div>
 				</section>
 
