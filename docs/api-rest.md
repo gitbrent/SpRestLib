@@ -23,6 +23,7 @@ Returns: Array of objects containing name/value pairs
 | `data`        | string  |             | data to be sent       | Ex:`data: {'type': 'SP.FieldDateTime'}` |
 | `cache`       | boolean | `false`     | cache settings        | Ex:`cache: true` |
 | `contentType` | string  | `application/json` | request header content-type | Only used with `type:'POST'` |
+| `headers`     | string  |             | query headers         | Pass any headers. Ex:`{Accept:'application/json'}` |
 | `metadata`    | boolean | `false`     | whether to return `__metadata` | Ex:`metadata: true` |
 | `queryCols`   | string  |             | fields/columns to get | any available field from the SP REST API |
 | `queryFilter` | string  |             | query filter          | utilizes OData style [Query Operators](https://msdn.microsoft.com/en-us/library/office/fp142385.aspx#Anchor_7) Ex:`queryFilter: 'Salary lt 99000'` |
