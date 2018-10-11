@@ -61,6 +61,11 @@ class Footer extends React.Component {
 					<div>
 						<h5>Community</h5>
 						<a
+							href="https://fb.me/sprestlib"
+							target="_blank">
+							Facebook
+						</a>
+						<a
 							href="https://twitter.com/SpRestLib"
 							target="_blank">
 							Twitter
@@ -74,11 +79,6 @@ class Footer extends React.Component {
 							href="https://www.youtube.com/channel/UCxZcCampOHn-47kvtcK_oVQ"
 							target="_blank">
 							YouTube Channel
-						</a>
-						<a
-							href="https://plus.google.com/u/1/113247436909611337609"
-							target="_blank">
-							Google Plus
 						</a>
 					</div>
 					<div>
