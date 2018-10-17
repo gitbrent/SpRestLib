@@ -19,14 +19,14 @@ function MakeLeftBulletText(strText) {
 }
 
 // NOTE: Code is only recognized if lines have leading tabs (?)
-const tryCodeBlock = `// 1: Load SpRestLib via CDN
+const tryCodeBlock = `// 1: Load/Demo SpRestLib via CDN
 var script = document.createElement('script');
-script.src = "https://cdn.rawgit.com/gitbrent/SpRestLib/v1.6.0/dist/sprestlib.bundle.js";
+script.src = "https://cdn.jsdelivr.net/gh/gitbrent/sprestlib@1.8.0/dist/sprestlib.bundle.js";
+script.onload = function(){
+    console.log('Current SharePoint User: ');
+    sprLib.user().info().then( objUser => console.log(objUser) );
+}
 document.getElementsByTagName('head')[0].appendChild(script);
-//
-// 2: Try some library methods
-sprLib.user().info().then( objUser => console.log(objUser) );
-sprLib.site().lists().then( arrLists => console.log(arrLists) );
 `;
 const exCodeCSOM = `function queryListItems() {
     var context = new SP.ClientContext();
