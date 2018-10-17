@@ -82,16 +82,16 @@ const res1 = `.---------------------------------------------------.
 '---------------------------------------------------'
 `;
 const txt2 = `sprLib.user().info().then(function(objSpUser){
-    console.log( "User Id....... " + objSpUser.Id );
-    console.log( "User Title.... " + objSpUser.Title );
-    console.log( "User Email.... " + objSpUser.Email );
-    console.log( "User LoginName " + objSpUser.LoginName );
+    console.log("Id....... " + objSpUser.Id );
+    console.log("Title.... " + objSpUser.Title );
+    console.log("Email.... " + objSpUser.Email );
+    console.log("LoginName " + objSpUser.LoginName );
 });
 `;
-const res2 = `User Id....... 901
-User Title.... Brent Ely
-User Email.... brent@testco.onmicrosoft.com
-User LoginName i:0#.f|membership|brent@testco.onmicrosoft.com
+const res2 = `Id....... 901
+Title.... Brent Ely
+Email.... brent@testco.onmicrosoft.com
+LoginName i:0#.f|membership|brent@testco.onmicrosoft.com
 `;
 const txt3 = `sprLib.rest({
     url:          '/sites/dev/_api/web/sitegroups',
@@ -216,7 +216,7 @@ class HomeSplash extends React.Component {
 				<div className="inner">
 					<ProjectTitle />
 					<PromoSection>
-						<Button href="#try">Try It Out</Button>
+						<Button href="#Try">Try It Out</Button>
 						<Button href={docUrl('installation.html', language)}>Get Started</Button>
 					</PromoSection>
 				</div>
@@ -405,9 +405,9 @@ class Index extends React.Component {
 				<div className="mainContainer">
 					<FeatureBullets />
 					<FeatureCallout />
-					<FeatureCallCode />
-					<TryOutLiveDemo />
 					<MethodExamples />
+					<TryOutLiveDemo />
+					<FeatureCallCode />
 				</div>
 				<script>hljs.initHighlightingOnLoad();</script>
 			</div>
