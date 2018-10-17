@@ -24,7 +24,7 @@ sidebar_label: Installation
 
 ### Use CDN
 ```html
-<script src="https://rawgit.com/gitbrent/SpRestLib/master/dist/sprestlib.min.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/gitbrent/sprestlib@1.8.0/dist/sprestlib.min.js"></script>
 ```
 
 ### Install With Bower
