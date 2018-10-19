@@ -121,16 +121,15 @@ Just open your browser's Developer Tools window anywhere on your SharePoint site
 then run the following code snippet which will load the SpRestLib bundle script dynamically:
 
 ```javascript
-// 1: Load SpRestLib via CDN
+// Load/Demo SpRestLib via CDN
 var script = document.createElement('script');
-script.src = "https://cdn.rawgit.com/gitbrent/SpRestLib/master/dist/sprestlib.bundle.js";
+script.src = "https://cdn.jsdelivr.net/gh/gitbrent/sprestlib@1.8.0/dist/sprestlib.bundle.js";
+script.onload = function(){
+	// Demo library method - show current user info
+    console.log('Current SharePoint User: ');
+    sprLib.user().info().then( objUser => console.log(objUser) );
+}
 document.getElementsByTagName('head')[0].appendChild(script);
-
-// 2: Test drive some library methods
-// Show current user info
-sprLib.user().info().then( objUser => (console.table ? console.table([objUser]) : console.log(objUser)) );
-// Show all Lists/Libraries on the current Site
-sprLib.site().lists().then( arrLists => (console.table ? console.table(arrLists) : console.log(arrLists)) );
 ```
 
 
