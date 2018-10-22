@@ -89,6 +89,7 @@ declare namespace sprLib {
   function site(siteUrl?: string): ISite;
   
   interface UserOptions {
+    baseUrl?: string;
     id?: string;
     email?: string;
     login?: string;
@@ -98,7 +99,7 @@ declare namespace sprLib {
   interface IUser {
     info(): Promise<Object>;
     groups(): Promise<Object[]>;
-    profile(arrProfileKeys: Object): Object;
+    profile(arrProfileKeys?: Object): Promise<Object>;
   }
   function user(options?: UserOptions): IUser;
 }
