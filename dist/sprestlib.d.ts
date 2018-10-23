@@ -18,22 +18,20 @@ declare namespace sprLib {
   interface FileInfoOptions {
     version?: number;
   }
-  class file {
-    constructor(fileName: string);
-
+  interface IFile {
     get(): Promise<Blob>;
     info(options: FileInfoOptions): Promise<Object>;
     perms(): Promise<Object[]>;
   }
+  function file(fileName: string): IFile;
 
-  class folder {
-    constructor(folderName: string);
-
-	files(): Promise<Object[]>;
-	folders(): Promise<Object[]>;
+  interface IFolder {
+	  files(): Promise<Object[]>;
+	  folders(): Promise<Object[]>;
     info(): Promise<Object>;
-	perms(): Promise<Object[]>;
+	  perms(): Promise<Object[]>;
   }
+  function folder(folderName: string): IFolder;
 
   /**
    * SharePoint List/Library API.
@@ -42,7 +40,8 @@ declare namespace sprLib {
    * @since 1.0
    */
   interface ListOptions {
-    name: string;
+    name?: string;
+    guid?: string;
     baseUrl?: string;
     requestDigest?: string;
   }
@@ -54,11 +53,7 @@ declare namespace sprLib {
     queryNext?: Object;
     queryOrderBy?: string;
   }
-  class list {
-    constructor(listName: string);
-    constructor(listGuid: string);
-    constructor(options: ListOptions);
-
+  interface IList {
     cols(): Promise<Object[]>;
     info(): Promise<Object>;
     perms(): Promise<Object[]>;
@@ -69,6 +64,9 @@ declare namespace sprLib {
     delete(options: Object): Promise<number>;
     recycle(options: Object): Promise<number>;
   }
+  function list(listName: string): IList;
+  function list(listGuid: string): IList;
+  function list(options: ListOptions): IList;
 
   interface RestOptions {
     url: string;
@@ -79,9 +77,7 @@ declare namespace sprLib {
   }
   function rest(options: RestOptions): Promise<Object[]>;
 
-  class site {
-    constructor(siteUrl?: string);
-
+  interface ISite {
     info(): Promise<Object>;
     lists(): Promise<Object[]>;
     subsites(): Promise<Object[]>;
@@ -90,19 +86,20 @@ declare namespace sprLib {
     groups(): Promise<Object[]>;
     users(): Promise<Object[]>;
   }
-
+  function site(siteUrl?: string): ISite;
+  
   interface UserOptions {
+    baseUrl?: string;
     id?: string;
     email?: string;
     login?: string;
     title?: string;
   }
 
-  class user {
-    constructor(options?: UserOptions);
-
+  interface IUser {
     info(): Promise<Object>;
     groups(): Promise<Object[]>;
-    profile(arrProfileKeys: Object): Object;
+    profile(arrProfileKeys?: Object): Promise<Object>;
   }
+  function user(options?: UserOptions): IUser;
 }
