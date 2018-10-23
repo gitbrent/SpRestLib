@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.9.0] - 2018-??-??
 ### Added
 ### Changed
+- Typescript: Modified declaration file [\#37](https://github.com/gitbrent/sprestlib/pull/37) ([kelvinbell](https://github.com/kelvinbell))
 ### Removed
 
 
