@@ -2,6 +2,7 @@
 // Project: https://gitbrent.github.io/SpRestLib/
 // Definitions by: Brent Ely <https://github.com/gitbrent/>
 //                 Jandos <https://github.com/Wireliner>
+//                 Kelvin Bell <https://github.com/kelvinbell>
 // Definitions: https://github.com/DefinitelyTyped/DefinitelyTyped
 // TypeScript Version: 2.3
 
@@ -26,10 +27,10 @@ declare namespace sprLib {
   function file(fileName: string): IFile;
 
   interface IFolder {
-	  files(): Promise<Object[]>;
-	  folders(): Promise<Object[]>;
+    files(): Promise<Object[]>;
+    folders(): Promise<Object[]>;
     info(): Promise<Object>;
-	  perms(): Promise<Object[]>;
+    perms(): Promise<Object[]>;
   }
   function folder(folderName: string): IFolder;
 
@@ -87,7 +88,7 @@ declare namespace sprLib {
     users(): Promise<Object[]>;
   }
   function site(siteUrl?: string): ISite;
-  
+
   interface UserOptions {
     baseUrl?: string;
     id?: string;
