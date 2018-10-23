@@ -1,4 +1,4 @@
-[![Open Source Love](https://badges.frapsoft.com/os/v1/open-source.svg?v=103)](https://github.com/ellerbrock/open-source-badge/) [![MIT License](https://badges.frapsoft.com/os/mit/mit.svg?v=103)](https://opensource.org/licenses/mit-license.php) [![npm version](https://img.shields.io/npm/v/sprestlib.svg)](https://www.npmjs.com/package/sprestlib)  [![Package Quality](http://npm.packagequality.com/badge/sprestlib.png)](http://packagequality.com/#?package=sprestlib)
+[![Open Source Love](https://badges.frapsoft.com/os/v1/open-source.svg?v=103)](https://github.com/ellerbrock/open-source-badge/) [![MIT License](https://badges.frapsoft.com/os/mit/mit.svg?v=103)](https://opensource.org/licenses/mit-license.php) [![npm version](https://img.shields.io/npm/v/sprestlib.svg)](https://www.npmjs.com/package/sprestlib)  [![Package Quality](http://npm.packagequality.com/shield/sprestlib.png?style=flat-square)](https://github.com/gitbrent/sprestlib)
 
 # SpRestLib
 
@@ -156,7 +156,7 @@ document.getElementsByTagName('head')[0].appendChild(script);
 
 ### Use CDN
 ```javascript
-<script src="https://cdn.rawgit.com/gitbrent/SpRestLib/master/dist/sprestlib.bundle.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/gitbrent/SpRestLib@1.8.0/dist/sprestlib.bundle.js"></script>
 ```
 
 ### Install With Bower
