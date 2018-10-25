@@ -4,30 +4,65 @@
     "next": "Next",
     "previous": "Previous",
     "tagline": "JavaScript Library for SharePoint Web Services",
-    "api-file": "File Methods (SP.File)",
-    "api-folder": "Folder Methods (SP.Folder)",
-    "api-list": "List/Library Methods (SP.List)",
-    "api-rest": "REST API Methods",
-    "api-site": "Site Methods (SP.Web)",
-    "api-user": "User Methods (SP.User)",
-    "feat-integration": "Library Integration",
-    "feat-node": "SharePoint via Node.js",
-    "feat-promises": "Promise-based Operations",
-    "feat-utilities": "Utility Methods",
-    "installation": "Installation",
-    "Installation": "Installation",
-    "promises": "Promise You Will Love It",
-    "sp-auth-notes": "SharePoint Authentication",
-    "ui-form-binding": "Form Binding",
-    "Download": "Download",
-    "Get Started": "Get Started",
-    "API Documentation": "API Documentation",
-    "SharePoint Guides": "SharePoint Guides",
-    "GitHub": "GitHub",
-    "Features": "Features",
-    "API Reference": "API Reference",
-    "SpRestLib UI": "SpRestLib UI",
-    "Help / Support": "Help / Support"
+    "docs": {
+      "api-file": {
+        "title": "File Methods (SP.File)"
+      },
+      "api-folder": {
+        "title": "Folder Methods (SP.Folder)"
+      },
+      "api-list": {
+        "title": "List/Library Methods (SP.List)"
+      },
+      "api-rest": {
+        "title": "REST API Methods"
+      },
+      "api-site": {
+        "title": "Site Methods (SP.Web)"
+      },
+      "api-user": {
+        "title": "User Methods (SP.User)"
+      },
+      "feat-integration": {
+        "title": "Library Integration"
+      },
+      "feat-node": {
+        "title": "SharePoint via Node.js"
+      },
+      "feat-promises": {
+        "title": "Promise-based Operations"
+      },
+      "feat-utilities": {
+        "title": "Utility Methods"
+      },
+      "installation": {
+        "title": "Installation",
+        "sidebar_label": "Installation"
+      },
+      "promises": {
+        "title": "Promise You Will Love It"
+      },
+      "sp-auth-notes": {
+        "title": "SharePoint Authentication"
+      },
+      "ui-form-binding": {
+        "title": "Form Binding"
+      }
+    },
+    "links": {
+      "Download": "Download",
+      "Get Started": "Get Started",
+      "API Documentation": "API Documentation",
+      "SharePoint Guides": "SharePoint Guides",
+      "GitHub": "GitHub"
+    },
+    "categories": {
+      "Get Started": "Get Started",
+      "Features": "Features",
+      "API Reference": "API Reference",
+      "SpRestLib UI": "SpRestLib UI",
+      "Help / Support": "Help / Support"
+    }
   },
   "pages-strings": {
     "Help Translate|recruit community translators for your project": "Help Translate",
