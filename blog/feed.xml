@@ -4,7 +4,7 @@
         <title>SpRestLib Blog</title>
         <link>https://gitbrent.github.io/SpRestLib/blog</link>
         <description>The best place to stay up-to-date with the latest SpRestLib news and events.</description>
-        <lastBuildDate>Mon, 03 Sep 2018 06:00:00 GMT</lastBuildDate>
+        <lastBuildDate>Sun, 28 Oct 2018 06:00:00 GMT</lastBuildDate>
         <docs>http://blogs.law.harvard.edu/tech/rss</docs>
         <generator>Feed for Node.js</generator>
         <image>
@@ -13,6 +13,14 @@
             <link>https://gitbrent.github.io/SpRestLib/blog</link>
         </image>
         <copyright>Copyright © 2018 Brent Ely</copyright>
+        <item>
+            <title><![CDATA[SharePoint List Unique Permissions REST Query]]></title>
+            <link>https://gitbrent.github.io/SpRestLib/blog/2018/10/28/sharepoint-list-unique-perms-rest-query.html</link>
+            <guid>https://gitbrent.github.io/SpRestLib/blog/2018/10/28/sharepoint-list-unique-perms-rest-query.html</guid>
+            <pubDate>Sun, 28 Oct 2018 06:00:00 GMT</pubDate>
+            <description><![CDATA[<p>How to determine if a SharePoint List/Library has unique, non-inherited permissions (role assignments).</p>
+]]></description>
+        </item>
         <item>
             <title><![CDATA[Adding a User to SharePoint Group Using REST with SpRestLib]]></title>
             <link>https://gitbrent.github.io/SpRestLib/blog/2018/09/03/add-user-to-sharepoint-group-using-rest.html</link>
