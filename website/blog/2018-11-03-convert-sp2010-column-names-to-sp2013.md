@@ -20,6 +20,9 @@ For example, the "Due Date" column is used in ListData.svc REST calls as:
 * SP2013: `_api/web/lists/getbytitle('Tasks')/Items/?$select=Due_x0020_Date`
 
 ## Example
+Provide a list name or GUID to get a mapping for column names.
+
+### Mapping Script
 ```javascript
 var arrMap = [];
 sprLib.list('Employees').cols()
@@ -32,7 +35,6 @@ sprLib.list('Employees').cols()
 		});
 	});
 	// B:
-	//arrMap.forEach(item => console.log(item));
 	var objMap = {};
 	arrMap.forEach(item => {
 		objMap[item.sp2010] = item.sp2013;
@@ -41,7 +43,7 @@ sprLib.list('Employees').cols()
 });
 ```
 
-## Results
+### Script Results
 ```
 .---------------------------------------------------------.
 | SharePoint 2010 Name |      SharePoint 2013+ Name       |
@@ -77,6 +79,5 @@ sprLib.list('Employees').cols()
 '---------------------------------------------------------'
 ```
 
-## Notes
-Point: This script will probably not be correct 100% of the time
-Counter-Point: It's free (or a good start) :-)
+### Script Notes
+* This may not be correct 100% of the time :-)
