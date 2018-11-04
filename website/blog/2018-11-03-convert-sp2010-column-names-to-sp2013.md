@@ -10,16 +10,16 @@ Converting SharePoint 2010 API (`ListData.svc`) column names to SharePoint 2013 
 
 *****************************
 ## Summary
-The SP2010 ListData.svc REST API looks for column names in a different style than the new SP2013 API. This
+The SP2010 `ListData.svc` REST API looks for column names in a different style than the new SP2013 `_api` REST API. This
 script will provide a mapping of old to new names, which helps a lot when converting old code!
 
 Common column remaps are performed automatically, so `ModifiedBy` now becomes `Editor`.  
 
-For example, the "Due Date" column is used in ListData.svc REST calls as:
-* SP2010: `_vti_bin/listdata.svc/Tasks?$select=DueDate`
-* SP2013: `_api/web/lists/getbytitle('Tasks')/Items/?$select=Due_x0020_Date`
+For example, the "Due Date" column used in 2010 versus 2013 REST calls:
+* SP2010 API: `_vti_bin/listdata.svc/Tasks?$select=DueDate`
+* SP2013 API: `_api/web/lists/getbytitle('Tasks')/Items/?$select=Due_x0020_Date`
 
-## Example
+## How To Map Column Names
 Provide a list name or GUID to get a mapping for column names.
 
 ### Mapping Script
