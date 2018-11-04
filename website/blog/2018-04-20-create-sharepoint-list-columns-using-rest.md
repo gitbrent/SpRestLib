@@ -1,6 +1,6 @@
 ---
 author: Brent Ely
-authorURL: https://github.com/gitbrent/
+authorURL: https://gitbrent.github.io/SpRestLib/
 title: Creating SharePoint List Columns Using REST
 ---
 

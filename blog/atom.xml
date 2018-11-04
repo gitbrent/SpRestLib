@@ -2,12 +2,25 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://gitbrent.github.io/SpRestLib/blog</id>
     <title>SpRestLib Blog</title>
-    <updated>2018-10-28T06:00:00Z</updated>
+    <updated>2018-11-03T06:00:00Z</updated>
     <generator>Feed for Node.js</generator>
     <link rel="alternate" href="https://gitbrent.github.io/SpRestLib/blog"/>
     <subtitle>The best place to stay up-to-date with the latest SpRestLib news and events.</subtitle>
     <logo>https://gitbrent.github.io/SpRestLib/img/sprestlib.svg</logo>
     <rights>Copyright © 2018 Brent Ely</rights>
+    <entry>
+        <title type="html"><![CDATA[Converting SharePoint 2010 API column names to SharePoint 2013 API column names]]></title>
+        <id>https://gitbrent.github.io/SpRestLib/blog/2018/11/03/convert-sp2010-column-names-to-sp2013.html</id>
+        <link href="https://gitbrent.github.io/SpRestLib/blog/2018/11/03/convert-sp2010-column-names-to-sp2013.html">
+        </link>
+        <updated>2018-11-03T06:00:00Z</updated>
+        <summary type="html"><![CDATA[<p>Converting SharePoint 2010 API (<code>ListData.svc</code>) column names to SharePoint 2013 API (<code>_api</code>).</p>
+]]></summary>
+        <author>
+            <name>Brent Ely</name>
+            <uri>https://gitbrent.github.io/SpRestLib/</uri>
+        </author>
+    </entry>
     <entry>
         <title type="html"><![CDATA[SharePoint List Unique Permissions REST Query]]></title>
         <id>https://gitbrent.github.io/SpRestLib/blog/2018/10/28/sharepoint-list-unique-perms-rest-query.html</id>
@@ -18,7 +31,7 @@
 ]]></summary>
         <author>
             <name>Brent Ely</name>
-            <uri>https://github.com/gitbrent/</uri>
+            <uri>https://gitbrent.github.io/SpRestLib/</uri>
         </author>
     </entry>
     <entry>
@@ -32,7 +45,7 @@ just a few lines of code.</p>
 ]]></summary>
         <author>
             <name>Brent Ely</name>
-            <uri>https://github.com/gitbrent/</uri>
+            <uri>https://gitbrent.github.io/SpRestLib/</uri>
         </author>
     </entry>
     <entry>
@@ -46,7 +59,7 @@ jQuery-UI <code>autocomplete</code> and SpRestLib.</p>
 ]]></summary>
         <author>
             <name>Brent Ely</name>
-            <uri>https://github.com/gitbrent/</uri>
+            <uri>https://gitbrent.github.io/SpRestLib/</uri>
         </author>
     </entry>
     <entry>
@@ -61,7 +74,7 @@ doing migration work, etc.</p>
 ]]></summary>
         <author>
             <name>Brent Ely</name>
-            <uri>https://github.com/gitbrent/</uri>
+            <uri>https://gitbrent.github.io/SpRestLib/</uri>
         </author>
     </entry>
     <entry>
@@ -75,7 +88,7 @@ client browsers can encode and upload files easily.</p>
 ]]></summary>
         <author>
             <name>Brent Ely</name>
-            <uri>https://github.com/gitbrent/</uri>
+            <uri>https://gitbrent.github.io/SpRestLib/</uri>
         </author>
     </entry>
 </feed>

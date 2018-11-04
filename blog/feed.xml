@@ -4,7 +4,7 @@
         <title>SpRestLib Blog</title>
         <link>https://gitbrent.github.io/SpRestLib/blog</link>
         <description>The best place to stay up-to-date with the latest SpRestLib news and events.</description>
-        <lastBuildDate>Sun, 28 Oct 2018 06:00:00 GMT</lastBuildDate>
+        <lastBuildDate>Sat, 03 Nov 2018 06:00:00 GMT</lastBuildDate>
         <docs>http://blogs.law.harvard.edu/tech/rss</docs>
         <generator>Feed for Node.js</generator>
         <image>
@@ -13,6 +13,14 @@
             <link>https://gitbrent.github.io/SpRestLib/blog</link>
         </image>
         <copyright>Copyright © 2018 Brent Ely</copyright>
+        <item>
+            <title><![CDATA[Converting SharePoint 2010 API column names to SharePoint 2013 API column names]]></title>
+            <link>https://gitbrent.github.io/SpRestLib/blog/2018/11/03/convert-sp2010-column-names-to-sp2013.html</link>
+            <guid>https://gitbrent.github.io/SpRestLib/blog/2018/11/03/convert-sp2010-column-names-to-sp2013.html</guid>
+            <pubDate>Sat, 03 Nov 2018 06:00:00 GMT</pubDate>
+            <description><![CDATA[<p>Converting SharePoint 2010 API (<code>ListData.svc</code>) column names to SharePoint 2013 API (<code>_api</code>).</p>
+]]></description>
+        </item>
         <item>
             <title><![CDATA[SharePoint List Unique Permissions REST Query]]></title>
             <link>https://gitbrent.github.io/SpRestLib/blog/2018/10/28/sharepoint-list-unique-perms-rest-query.html</link>
