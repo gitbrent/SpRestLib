@@ -30,7 +30,7 @@
 (function(){
 	// APP VERSION/BUILD
 	var APP_VER = "1.9.0-beta";
-	var APP_BLD = "20181103";
+	var APP_BLD = "20181104";
 	var DEBUG = false; // (verbose mode/lots of logging)
 	// ENUMERATIONS
 	// REF: [`SP.BaseType`](https://msdn.microsoft.com/en-us/library/office/jj246925.aspx)
@@ -243,17 +243,41 @@
 		// Add Public Methods
 		// .checkin/checkout -- @see: https://msdn.microsoft.com/en-us/library/office/dn450841.aspx#bk_FileCheckOut
 		// https://msdn.microsoft.com/en-us/library/office/dn450841.aspx#bk_FileCheckIn
-		// .delete() // headers: { "X-HTTP-Method":"DELETE" },
-		// .recycle()
-		// .get() (?) // _api/web/GetFolderByServerRelativeUrl('')/Files/get(url='')
-		// @see: https://msdn.microsoft.com/en-us/library/office/dn450841.aspx#bk_FileCollection
-		// "The GetFileByServerRelativeUrl endpoint is recommended way to get a file. See SP.File request examples."
+
+
+		/**
+		* Delete a File (**permanent** - skips recycle bin!)
+		* @see: https://msdn.microsoft.com/en-us/library/office/dn450841.aspx
+		*
+		* @returns: boolean `true` on success
+		*/
+		_newFile.delete = function() {
+			return new Promise(function(resolve, reject) {
+				sprLib.rest({
+					url: "_api/web/GetFileByServerRelativeUrl('"+ _fullName +"')",
+					headers: { "X-HTTP-Method":"DELETE" },
+					metadata: false
+				})
+				.then(function(arrData){
+					/* NOTE: SharePoint fall 2018 returns
+					* `{ location: null }`
+					*/
+
+					// Done
+					resolve( true );
+				})
+				.catch(function(strErr){
+					reject( strErr );
+				});
+			});
+		}
 
 		/**
 		* Get a File (binary or text)
+		* "The GetFileByServerRelativeUrl endpoint is recommended way to get a file. See SP.File request examples."
+		* @see: https://msdn.microsoft.com/en-us/library/office/dn450841.aspx#bk_FileRequestExamples
 		*
 		* @returns: a File as a Blob
-		* @see: https://msdn.microsoft.com/en-us/library/office/dn450841.aspx#bk_FileRequestExamples
 		*/
 		_newFile.get = function() {
 			return new Promise(function(resolve, reject) {
@@ -403,6 +427,34 @@
 				});
 			});
 		}
+
+		/**
+		* Recycle a File (moves item to site recycle bin)
+		* @see: https://msdn.microsoft.com/en-us/library/office/dn450841.aspx
+		*
+		* @returns: boolean `true` on success
+		*/
+		_newFile.recycle = function() {
+			return new Promise(function(resolve, reject) {
+				sprLib.rest({
+					type: "POST",
+					url: "_api/web/GetFileByServerRelativeUrl('"+ _fullName +"')/recycle()",
+					metadata: false
+				})
+				.then(function(arrData){
+					/* NOTE: SharePoint fall 2018 returns
+					* `{ Recycle: "ebced81f-4bac-4e94-a316-781e89e5a83e" }`
+					*/
+
+					// Done
+					resolve( true );
+				})
+				.catch(function(strErr){
+					reject( strErr );
+				});
+			});
+		}
+
 
 		// WIP BELOW:
 
