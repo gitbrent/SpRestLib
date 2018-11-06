@@ -1183,6 +1183,7 @@ QUnit.module( "LIST - ITEM GET Methods", function(){
 QUnit.module( "FILE - Methods", function(){
 	// NOTE: `get` - test can be executed via `sprestlib-demo.html` (or `nodejs-demo.js`)
 
+	// `info()`
 	QUnit.test("sprLib.file('whatever').info()", function(assert){
 		var done = assert.async();
 		sprLib.folder('SiteAssets').files()
@@ -1200,6 +1201,7 @@ QUnit.module( "FILE - Methods", function(){
 		});
 	});
 
+	// `perms()`
 	QUnit.test("sprLib.file('whatever').perms()", function(assert){
 		var done = assert.async();
 		sprLib.folder('SiteAssets').files()
@@ -1216,6 +1218,57 @@ QUnit.module( "FILE - Methods", function(){
 				assert.ok( (false), errorMessage );
 				done();
 			});
+		});
+	});
+
+	// `delete()`
+	QUnit.test("sprLib.file('whatever').delete()", function(assert){
+		var done = assert.async();
+		// PREP:
+		var objFile = {};
+		sprLib.folder('/sites/dev/Shared Documents/deleteable').files()
+		.then(function(arrResults){
+			if ( !arrResults || arrResults.length == 0 ) throw 'NO_FILES_FOUND';
+			objFile = arrResults.sort((a,b) => { return new Date(a.Modified) > new Date(b.Modified) ? true : false })[0];
+			assert.ok( (true), "FYI: objFile: "+JSON.stringify(objFile,null,4) );
+		})
+		.then(function(){
+			// TEST:
+			sprLib.file(objFile.ServerRelativeUrl).delete()
+			.then(function(boolResult){
+				assert.ok( boolResult, "`boolResult`: "+boolResult.toString() );
+				done();
+			});
+		})
+		.catch(function(err){
+			assert.ok( (false), err );
+			done();
+		});
+	});
+
+	// `recycle()`
+	QUnit.test("sprLib.file('whatever').recycle()", function(assert){
+		var done = assert.async();
+		// PREP:
+		var objFile = {};
+		sprLib.folder('/sites/dev/Shared Documents/deleteable').files()
+		.then(function(arrResults){
+			// NOTE: use `<=1` and `[1]` below, otherwise, the same file will be chosen for both delete/recycle!!!
+			if ( !arrResults || arrResults.length <= 1 ) throw 'NO_FILES_FOUND';
+			objFile = arrResults.sort((a,b) => { return new Date(a.Modified) > new Date(b.Modified) ? true : false })[1];
+			assert.ok( (true), "FYI: objFile: "+JSON.stringify(objFile,null,4) );
+		})
+		.then(function(){
+			// TEST:
+			sprLib.file(objFile.ServerRelativeUrl).recycle()
+			.then(function(boolResult){
+				assert.ok( boolResult, "`boolResult`: "+boolResult.toString() );
+				done();
+			});
+		})
+		.catch(function(err){
+			assert.ok( (false), err );
+			done();
 		});
 	});
 });
