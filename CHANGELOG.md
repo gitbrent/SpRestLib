@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.9.0] - 2018-??-??
 ### Added
+- New `file` API method: `checkin()` ([gitbrent](https://github.com/gitbrent))
+- New `file` API method: `checkout()` ([gitbrent](https://github.com/gitbrent))
 - New `file` API method: `delete()` ([gitbrent](https://github.com/gitbrent))
 - New `file` API method: `recycle()` ([gitbrent](https://github.com/gitbrent))
 ### Changed
