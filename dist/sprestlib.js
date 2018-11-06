@@ -30,7 +30,7 @@
 (function(){
 	// APP VERSION/BUILD
 	var APP_VER = "1.9.0-beta";
-	var APP_BLD = "20181104";
+	var APP_BLD = "20181105";
 	var DEBUG = false; // (verbose mode/lots of logging)
 	// ENUMERATIONS
 	// REF: [`SP.BaseType`](https://msdn.microsoft.com/en-us/library/office/jj246925.aspx)
@@ -240,16 +240,73 @@
 			_fullName = _spPageContextInfo.webServerRelativeUrl + _fullName;
 		}
 
-		// Add Public Methods
-		// .checkin/checkout -- @see: https://msdn.microsoft.com/en-us/library/office/dn450841.aspx#bk_FileCheckOut
-		// https://msdn.microsoft.com/en-us/library/office/dn450841.aspx#bk_FileCheckIn
+		/**
+		* CheckIn a File
+		* @see: https://msdn.microsoft.com/en-us/library/office/dn450841.aspx#bk_FileCheckIn
+		*
+		* @param `inOpt` (object) - can contain `comment` and `type` options
+		* @returns: (boolean) - `true` on success
+		* @example: sprLib.file('/site/Documents/MyDoc.docx').checkin("All done!")
+		*/
+		_newFile.checkin = function(inOpt) {
+			return new Promise(function(resolve, reject) {
+				// A: Options setup
+				inOpt = inOpt || {};
+				inOpt.comment = inOpt.comment || "";
+				// DOCS: "The SP.CheckinType for the file: MinorCheckIn = 0; MajorCheckIn = 1; OverwriteCheckIn = 2."
+				if ( inOpt.type && ['major','minor','overwrite'].indexOf(inOpt.type.toLowerCase()) == -1 ) {
+					console.warn("Check your options! Available checkin() `type` options are: `major`,`minor`,`overwrite`");
+					inOpt.type = "1"; // Default to "Major"
+				}
+				else {
+					inOpt.type = (inOpt.type || 'major').toLowerCase().replace('major',1).replace('minor',0).replace('overwrite',2);
+				}
 
+				// B:
+				sprLib.rest({
+					type: "POST",
+					url: "_api/web/GetFileByServerRelativeUrl('"+ _fullName +"')"
+					+ "/CheckIn(comment='"+ inOpt.comment +"',checkintype="+ inOpt.type +")"
+				})
+				.then(function(arrData){
+					// NOTE: SharePoint fall 2018 returns: `{ CheckIn: null }`
+					resolve( true );
+				})
+				.catch(function(strErr){
+					// EX: "(423) The file "Shared Documents/check-me-out.pptx" is not checked out."
+					reject( strErr );
+				});
+			});
+		}
+
+		/**
+		* CheckOut a File
+		* @see: https://msdn.microsoft.com/en-us/library/office/dn450841.aspx#bk_FileCheckOut
+		*
+		* @returns: (boolean) - `true` on success
+		*/
+		_newFile.checkout = function() {
+			return new Promise(function(resolve, reject) {
+				sprLib.rest({
+					type: "POST",
+					url: "_api/web/GetFileByServerRelativeUrl('"+ _fullName +"')/CheckOut"
+				})
+				.then(function(arrData){
+					// NOTE: SharePoint fall 2018 returns: `{ CheckOut: null }`
+					resolve( true );
+				})
+				.catch(function(strErr){
+					// EX: "(423) The file "/sites/dev/Shared Documents/checkinout/check-me-out.pptx" is checked out for editing by i:0#.f|membership|admin@h[...]"
+					reject( strErr );
+				});
+			});
+		}
 
 		/**
 		* Delete a File (**permanent** - skips recycle bin!)
 		* @see: https://msdn.microsoft.com/en-us/library/office/dn450841.aspx
 		*
-		* @returns: boolean `true` on success
+		* @returns: (boolean) - `true` on success
 		*/
 		_newFile.delete = function() {
 			return new Promise(function(resolve, reject) {
@@ -432,7 +489,7 @@
 		* Recycle a File (moves item to site recycle bin)
 		* @see: https://msdn.microsoft.com/en-us/library/office/dn450841.aspx
 		*
-		* @returns: boolean `true` on success
+		* @returns: (boolean) - `true` on success
 		*/
 		_newFile.recycle = function() {
 			return new Promise(function(resolve, reject) {
