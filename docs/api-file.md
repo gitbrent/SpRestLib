@@ -10,13 +10,52 @@ Files can be accessed by either their full or relative path:
 `sprLib.file('/sites/dev/Shared Documents/sample.pptx')`  
 
 
+## File CheckIn
+`sprLib.file("filename").checkin()`  
+`sprLib.file("filename").checkin({ comment:"All done!" })`  
+`sprLib.file("filename").checkin({ comment:"All done!", type:"Major" })`  
+
+Returns: True on success
+
+### File CheckIn Options
+| Option        | Type     | Default   | Description                                                  |
+| :------------ | :------- | :-------- | :----------------------------------------------------------- |
+| `comment`     | string   |           | CheckIn comment. Ex: `{ 'comment':"updated due date" }`      |
+| `type`        | string   | `Major`   | CheckIn type. Possible values: `Major`, `Minor`, `Overwrite` |
+
+
+
+## File CheckOut
+`sprLib.file("filename").checkout()`  
+
+Returns: True on success
+
+
+
+## File Delete
+`sprLib.file("filename").delete()`  
+
+Bypasses Recycle Bin (permanently deletes the file)
+
+Returns: True on success
+
+
+
+## File Recycle
+`sprLib.file("filename").delete()`  
+
+Sends file to the site Recycle Bin
+
+Returns: True on success
+
+
 
 ## File Information
 `sprLib.file("filename").info()`
 
 Returns: Object containing file properties
 
-### File Properties
+### File Properties Enumeration
 | Property Name          | Type     | Description                                                      |
 | :--------------------- | :------- | :--------------------------------------------------------------- |
 | `Author`               | object   | object containing the `id` of the author - ex: {"Id":9}          |
