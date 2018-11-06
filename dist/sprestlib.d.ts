@@ -1,4 +1,4 @@
-// Type definitions for sprestlib 1.8.0
+// Type definitions for sprestlib 1.9.0
 // Project: https://gitbrent.github.io/SpRestLib/
 // Definitions by: Brent Ely <https://github.com/gitbrent/>
 //                 Jandos <https://github.com/Wireliner>
@@ -16,13 +16,21 @@ declare namespace sprLib {
 
   function renewSecurityToken(): void;
 
+  interface FileCheckInOptions {
+    comment?: string;
+	type?: 'major' | 'minor' | 'overwrite';
+  }
   interface FileInfoOptions {
     version?: number;
   }
   interface IFile {
+    checkin(options: FileCheckInOptions): Promise<boolean>;
+    checkout(): Promise<boolean>;
+    delete(): Promise<boolean>;
     get(): Promise<Blob>;
     info(options: FileInfoOptions): Promise<Object>;
     perms(): Promise<Object[]>;
+    recycle(): Promise<boolean>;
   }
   function file(fileName: string): IFile;
 
