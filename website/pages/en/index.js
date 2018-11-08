@@ -271,11 +271,11 @@ const FeatureCallout = props => (
 		</div>
 		<div>
 			<img src="/SpRestLib/img/checkmark.svg" />
-			Works with Node, Angular, Electron, and other popular application libraries
+			Supports Angular, Electron and Node application libraries, also works with Webpack
 		</div>
 		<div>
 			<img src="/SpRestLib/img/checkmark.svg" />
-			Direct SharePoint access via the REST/OData endpoints (no CSOM/JSOM or external libraries are utilized)
+			Direct SharePoint access via REST using OData endpoints (no CSOM/JSOM or any external libraries are required)
 		</div>
 	</Container>
 );
@@ -318,8 +318,8 @@ const TryOutLiveDemo = props => (
 			<h2>Try It Out: Library Test Drive</h2>
 			<h4>You should try using SpRestLib!</h4>
 			<p>
-				Just open your browser "Developer Tools" window on your SharePoint site somewhere,
-				then run the following code snippet which will load the SpRestLib bundle script dynamically:
+				Open your browser "Developer Tools" (F12) window on your "Home.aspx" (or other) page,
+				then run the following code snippet which will load the SpRestLib library dynamically:
 			</p>
 
 			<GridBlock
