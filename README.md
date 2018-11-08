@@ -41,9 +41,13 @@ items, execute REST calls, interact with files and folders, gather site properti
 * `sprLib.list(listName).perms()`        - Returns an array of the list's Member Role assignments
 
 ## File
-* `sprLib.file(fileName).get()`         - Returns a file (binary/text) as a blob which can be saved
-* `sprLib.file(fileName).info()`        - Returns `SP.File` properties (Created, GUID, HasUniquePerms, etc.)
-* `sprLib.file(fileName).perms()`       - Returns an array of the file's Member Role assignments
+* `sprLib.file(fileName).get()`       - Returns a file (binary/text) as a blob which can be saved
+* `sprLib.file(fileName).info()`      - Returns `SP.File` properties (Created, GUID, HasUniquePerms, etc.)
+* `sprLib.file(fileName).perms()`     - Returns an array of the file's Member Role assignments
+* `sprLib.file(fileName).checkin()`   - Check in a file (supports optional comments/checkin types)
+* `sprLib.file(fileName).checkout()`  - Check out a file
+* `sprLib.file(fileName).delete()`    - Permanently deletes a file (bypasses recycle bin)
+* `sprLib.file(fileName).recycle()`   - Moves file to the site Recycle Bin
 
 ## Folder
 * `sprLib.folder(folderName).files()`   - Returns an array of file objects contained in the folder
