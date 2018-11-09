@@ -30,7 +30,7 @@
 (function(){
 	// APP VERSION/BUILD
 	var APP_VER = "1.9.0-beta";
-	var APP_BLD = "20181105";
+	var APP_BLD = "20181108";
 	var DEBUG = false; // (verbose mode/lots of logging)
 	// ENUMERATIONS
 	// REF: [`SP.BaseType`](https://msdn.microsoft.com/en-us/library/office/jj246925.aspx)
@@ -311,8 +311,9 @@
 		_newFile.delete = function() {
 			return new Promise(function(resolve, reject) {
 				sprLib.rest({
-					url: "_api/web/GetFileByServerRelativeUrl('"+ _fullName +"')",
+					type: "POST",
 					headers: { "X-HTTP-Method":"DELETE" },
+					url: "_api/web/GetFileByServerRelativeUrl('"+ _fullName +"')",
 					metadata: false
 				})
 				.then(function(arrData){
@@ -614,15 +615,127 @@
 
 		// D: Public Methods ----------------------------------------------
 		// TODO: implement these Methods:
-		// .perms()
 		// .create() // .add()?
-		// .delete() // headers: { "X-HTTP-Method":"DELETE" },
-		// .recycle() // POST to: /recycle
 		//
 		// FYI: /_api/web/GetFolderByServerRelativeUrl(‘{folder url}’)/ListItemAllFields/breakroleinheritance(true)
 		//
 		// FYI: a unique folder:
 		// /sites/dev/_api/web/GetFolderByServerRelativeUrl('/sites/dev/SiteAssets/js')
+
+		/**
+		* Delete a Folder (**permanent** - skips recycle bin!)
+		* @see: https://msdn.microsoft.com/en-us/library/office/dn450841.aspx
+		*
+		* @returns: (boolean) - `true` on success
+		*/
+		_newFolder.delete = function() {
+			return new Promise(function(resolve, reject) {
+				sprLib.rest({
+					type: "POST",
+					headers: { "X-HTTP-Method":"DELETE" },
+					url: "_api/web/GetFolderByServerRelativeUrl('"+ _fullName +"')",
+					metadata: false
+				})
+				.then(function(arrData){
+					/* NOTE: SharePoint fall 2018 returns
+					* `{ location: null }`
+					*/
+
+					// Done
+					resolve( true );
+				})
+				.catch(function(strErr){
+					reject( strErr );
+				});
+			});
+		}
+
+		/**
+		* Get Files and their properties
+		*
+		* @example - relative URL: `sprLib.folder('Shared Documents').files()`
+		* @example - absolute URL: `sprLib.folder('/sites/dev/Shared Documents').files()`
+		* @returns: Promise<Object[]> with Files and their properties
+		*/
+		_newFolder.files = function() {
+			return new Promise(function(resolve, reject) {
+				sprLib.rest({
+					url: "_api/web/GetFolderByServerRelativeUrl('"+ _fullName +"')/Files",
+					queryCols: [
+						'Author/Id','CheckedOutByUser/Id','LockedByUser/Id','ModifiedBy/Id',
+						'Author/Title','CheckedOutByUser/Title','LockedByUser/Title','ModifiedBy/Title',
+						'CheckInComment','CheckOutType','ETag','Exists','Length','MajorVersion','MinorVersion',
+						'Name','ServerRelativeUrl','TimeCreated','TimeLastModified','Title','UniqueId'
+					],
+					metadata: false
+				})
+				.then(function(arrData){
+					// STEP 1: Transform results
+					arrData.forEach(function(file){
+						// A: Rename some cols
+						file.Created  = file.TimeCreated;      delete file.TimeCreated;
+						file.Modified = file.TimeLastModified; delete file.TimeLastModified;
+
+						// B: Convert numbers
+						if ( file.Length && !isNaN(Number(file.Length)) ) file.Length = Number(file.Length);
+
+						// C: These 2 values come back as `[]` when there's no value, and that sucks, so fix them
+						if ( file.CheckedOutByUser && Array.isArray(file.CheckedOutByUser) && file.CheckedOutByUser.length == 0 ) file.CheckedOutByUser = null;
+						if ( file.LockedByUser && Array.isArray(file.LockedByUser) && file.LockedByUser.length == 0 ) file.LockedByUser = null;
+					})
+
+					// STEP 2: Resolve results (NOTE: empty array is the correct default result)
+					resolve( arrData || [] );
+				})
+				.catch(function(strErr){
+					reject( strErr );
+				});
+			});
+		}
+
+		/**
+		* Get Folders and their properties
+		*
+		* @example - relative URL: `sprLib.folder('Shared Documents').folders()`
+		* @example - absolute URL: `sprLib.folder('/sites/dev/Shared Documents').folders()`
+		* @returns: Promise<Object[]> with Folders and their properties
+		*/
+		_newFolder.folders = function() {
+			return new Promise(function(resolve, reject) {
+				sprLib.rest({
+					url: "_api/web/GetFolderByServerRelativeUrl('"+ _fullName +"')/Folders",
+					queryCols: [
+						'Name','ItemCount','ServerRelativeUrl',
+						'Properties/vti_x005f_timecreated','Properties/vti_x005f_timelastmodified','Properties/vti_x005f_hassubdirs',
+						'Properties/vti_x005f_isbrowsable','Properties/vti_x005f_foldersubfolderitemcount','Properties/vti_x005f_listname'
+					],
+					metadata: false
+				})
+				.then(function(arrData){
+					// STEP 1: Transform results
+					arrData.forEach(function(objFolder){
+						// A: Remap properties
+						if ( objFolder.Properties ) {
+							objFolder.Created     = ( objFolder.Properties.vti_x005f_timecreated ? objFolder.Properties.vti_x005f_timecreated : null );
+							objFolder.FolderCount = ( objFolder.Properties.vti_x005f_foldersubfolderitemcount ? objFolder.Properties.vti_x005f_foldersubfolderitemcount : 0 );
+							objFolder.ItemCount   = ( objFolder.ItemCount ? objFolder.ItemCount : 0 );
+							objFolder.GUID        = ( objFolder.Properties.vti_x005f_listname ? objFolder.Properties.vti_x005f_listname : null );
+							objFolder.HasSubdirs  = ( objFolder.Properties.vti_x005f_hassubdirs ? objFolder.Properties.vti_x005f_hassubdirs == "true" : false );
+							objFolder.Hidden      = ( objFolder.Properties.vti_x005f_isbrowsable ? objFolder.Properties.vti_x005f_isbrowsable == "false" : false );
+							objFolder.Modified    = ( objFolder.Properties.vti_x005f_timelastmodified ? objFolder.Properties.vti_x005f_timelastmodified : null );
+
+							delete objFolder.Properties;
+						}
+					});
+
+					// STEP 2: Resolve results (NOTE: empty array is the correct default result)
+					resolve( arrData || [] );
+				})
+				.catch(function(strErr){
+					reject( strErr );
+				});
+			});
+		}
 
 		/**
 		* Get information (properties) for a Folder
@@ -779,85 +892,25 @@
 		}
 
 		/**
-		* Get Files and their properties
+		* Recycle a Folder (moves item to site recycle bin)
+		* @see: https://msdn.microsoft.com/en-us/library/office/dn450841.aspx
 		*
-		* @example - relative URL: `sprLib.folder('Shared Documents').files()`
-		* @example - absolute URL: `sprLib.folder('/sites/dev/Shared Documents').files()`
-		* @returns: Promise<Object[]> with Files and their properties
+		* @returns: (boolean) - `true` on success
 		*/
-		_newFolder.files = function() {
+		_newFolder.recycle = function() {
 			return new Promise(function(resolve, reject) {
 				sprLib.rest({
-					url: "_api/web/GetFolderByServerRelativeUrl('"+ _fullName +"')/Files",
-					queryCols: [
-						'Author/Id','CheckedOutByUser/Id','LockedByUser/Id','ModifiedBy/Id',
-						'Author/Title','CheckedOutByUser/Title','LockedByUser/Title','ModifiedBy/Title',
-						'CheckInComment','CheckOutType','ETag','Exists','Length','MajorVersion','MinorVersion',
-						'Name','ServerRelativeUrl','TimeCreated','TimeLastModified','Title','UniqueId'
-					],
+					type: "POST",
+					url: "_api/web/GetFolderByServerRelativeUrl('"+ _fullName +"')/recycle()",
 					metadata: false
 				})
 				.then(function(arrData){
-					// STEP 1: Transform results
-					arrData.forEach(function(file){
-						// A: Rename some cols
-						file.Created  = file.TimeCreated;      delete file.TimeCreated;
-						file.Modified = file.TimeLastModified; delete file.TimeLastModified;
+					/* NOTE: SharePoint fall 2018 returns
+					* `{ Recycle: "ebced81f-4bac-4e94-a316-781e89e5a83e" }`
+					*/
 
-						// B: Convert numbers
-						if ( file.Length && !isNaN(Number(file.Length)) ) file.Length = Number(file.Length);
-
-						// C: These 2 values come back as `[]` when there's no value, and that sucks, so fix them
-						if ( file.CheckedOutByUser && Array.isArray(file.CheckedOutByUser) && file.CheckedOutByUser.length == 0 ) file.CheckedOutByUser = null;
-						if ( file.LockedByUser && Array.isArray(file.LockedByUser) && file.LockedByUser.length == 0 ) file.LockedByUser = null;
-					})
-
-					// STEP 2: Resolve results (NOTE: empty array is the correct default result)
-					resolve( arrData || [] );
-				})
-				.catch(function(strErr){
-					reject( strErr );
-				});
-			});
-		}
-
-		/**
-		* Get Folders and their properties
-		*
-		* @example - relative URL: `sprLib.folder('Shared Documents').folders()`
-		* @example - absolute URL: `sprLib.folder('/sites/dev/Shared Documents').folders()`
-		* @returns: Promise<Object[]> with Folders and their properties
-		*/
-		_newFolder.folders = function() {
-			return new Promise(function(resolve, reject) {
-				sprLib.rest({
-					url: "_api/web/GetFolderByServerRelativeUrl('"+ _fullName +"')/Folders",
-					queryCols: [
-						'Name','ItemCount','ServerRelativeUrl',
-						'Properties/vti_x005f_timecreated','Properties/vti_x005f_timelastmodified','Properties/vti_x005f_hassubdirs',
-						'Properties/vti_x005f_isbrowsable','Properties/vti_x005f_foldersubfolderitemcount','Properties/vti_x005f_listname'
-					],
-					metadata: false
-				})
-				.then(function(arrData){
-					// STEP 1: Transform results
-					arrData.forEach(function(objFolder){
-						// A: Remap properties
-						if ( objFolder.Properties ) {
-							objFolder.Created     = ( objFolder.Properties.vti_x005f_timecreated ? objFolder.Properties.vti_x005f_timecreated : null );
-							objFolder.FolderCount = ( objFolder.Properties.vti_x005f_foldersubfolderitemcount ? objFolder.Properties.vti_x005f_foldersubfolderitemcount : 0 );
-							objFolder.ItemCount   = ( objFolder.ItemCount ? objFolder.ItemCount : 0 );
-							objFolder.GUID        = ( objFolder.Properties.vti_x005f_listname ? objFolder.Properties.vti_x005f_listname : null );
-							objFolder.HasSubdirs  = ( objFolder.Properties.vti_x005f_hassubdirs ? objFolder.Properties.vti_x005f_hassubdirs == "true" : false );
-							objFolder.Hidden      = ( objFolder.Properties.vti_x005f_isbrowsable ? objFolder.Properties.vti_x005f_isbrowsable == "false" : false );
-							objFolder.Modified    = ( objFolder.Properties.vti_x005f_timelastmodified ? objFolder.Properties.vti_x005f_timelastmodified : null );
-
-							delete objFolder.Properties;
-						}
-					});
-
-					// STEP 2: Resolve results (NOTE: empty array is the correct default result)
-					resolve( arrData || [] );
+					// Done
+					resolve( true );
 				})
 				.catch(function(strErr){
 					reject( strErr );
@@ -1772,8 +1825,14 @@
 			};
 			// Add `data` if included
 			if ( inOpt.data ) objAjaxQuery.data = inOpt.data;
-			// Add default `context-type` for POST if none was specified
-			if ( objAjaxQuery.type == 'POST' && !objAjaxQuery.headers.contentType ) objAjaxQuery.headers['content-type'] = 'application/json;odata=verbose';
+			// Add headers for `POST` types if omitted by user
+			if ( objAjaxQuery.type == 'POST' ) {
+				// Add default `context-type` for POST if none was specified
+				if ( !objAjaxQuery.headers.contentType ) objAjaxQuery.headers['content-type'] = 'application/json;odata=verbose';
+				// POST's to SharePoint will be *REJECTED* without a digest
+				// Add the `__REQUESTDIGEST` page variable if we can, otherwise, the user HAS to provide one (Node users, Graph users, etc.)
+				if ( !objAjaxQuery.headers['X-RequestDigest'] ) objAjaxQuery.headers['X-RequestDigest'] = inOpt.digest;
+			}
 
 			// STEP 3: Construct Base URL: `url` can be presented in many different forms...
 			objAjaxQuery.url = (inOpt.url.toLowerCase().indexOf('http') == 0 || inOpt.url.indexOf('/') == 0 ? '' : APP_OPTS.baseUrl);
