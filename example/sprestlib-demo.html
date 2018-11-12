@@ -8,7 +8,7 @@
 	<meta name="website"     content="https://github.com/gitbrent/SpRestLib/">
 	<meta name="keywords"    content="SpRestLib, JavaScript, js-sharepoint, SP2013 REST, SharePoint 2013, SharePoint 2016, SharePoint Online">
 	<meta name="description" content="Content Editor Webpart: SpRestLib features and capabilities">
-	<meta name="revised"     content="20181104">
+	<meta name="revised"     content="20181111">
 
 	<!-- HOWTO / FAQ / SETUP -->
 	<!--
@@ -315,7 +315,7 @@
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.15.0/prism.min.js"></script>
 
 	<script>
-		var APP_BLD = 20181104;
+		var APP_BLD = 20181111;
 		var HTML_SPINNER = '<div class="sprlib-spinner"><div class="sprlib-bounce1"></div><div class="sprlib-bounce2"></div><div class="sprlib-bounce3"></div></div>';
 		var LAYOUTS_URL = ( typeof _spPageContextInfo !== 'undefined' && _spPageContextInfo.layoutsUrl ? _spPageContextInfo.layoutsUrl : '_layouts/15' );
 
@@ -417,13 +417,17 @@
 			});
 		}
 
+		// FILES:
+
 		function handleFileLibChange() {
 			// A: Empty select
 			$('#selFileFiles').empty();
 			$('#selFileFiles').append('<option value="">Select...</option>');
+			$('#selFileFiles').prop('disabled',false);
+			$('#tabFile .alert.alert-success').remove();
 
 			// B: Return if nothing selected
-			if ( !$('#selFileLibs').val() ) return;
+			if ( !$('#selFileLibs').val() ) { $('#selFileFiles').prop('disabled',true); return; }
 
 			// C: Show busy
 			$('#contFileFileSelect .sprlib-spinner').show();
@@ -453,7 +457,7 @@
 			// B: Return if nothing selected
 			if ( !$('#selFileFiles').val() ) return;
 
-			// FILE INFO
+			// FILE Props
 			{
 				// INFO:
 				$('#contFileInfo pre code').text( 'sprLib.file(\''+ $('#selFileFiles').val() +'\').info()' );
@@ -506,7 +510,7 @@
 				});
 			}
 
-			// FILE Manipulation:
+			// FILE Manip
 			{
 				// GET/DOWNLOAD:
 				$('#contFileGet pre code').text( 'sprLib.file(\''+ $('#selFileFiles').val() +'\').get()' );
@@ -543,7 +547,7 @@
 			sprLib.file($('#selFileFiles').val()).delete()
 			.then(function(){
 				$('#contFileDel').append(
-					'<div class="alert alert-success" style="font-size:1.6rem"><i class="fas fa-check-circle text-white mr-3"></i>File deleted!</div>'
+					'<div class="alert alert-success mt-2" style="font-size:2rem"><i class="fas fa-check-circle text-white mr-3"></i>File deleted!</div>'
 				);
 			})
 			.catch(function(errMsg){
@@ -558,7 +562,7 @@
 			sprLib.file($('#selFileFiles').val()).recycle()
 			.then(function(){
 				$('#contFileRec').append(
-					'<div class="alert alert-success" style="font-size:1.6rem"><i class="fas fa-check-circle text-white mr-3"></i>File recycled!</div>'
+					'<div class="alert alert-success mt-2" style="font-size:2rem"><i class="fas fa-check-circle text-white mr-3"></i>File recycled!</div>'
 				);
 			})
 			.catch(function(errMsg){
@@ -567,13 +571,17 @@
 			});
 		}
 
+		// FOLDERS:
+
 		function handleFoldLibChange() {
 			// A: Empty select
 			$('#selFoldFlds').empty();
 			$('#selFoldFlds').append('<option value="">Select...</option>');
+			$('#selFoldFlds').prop('disabled',false);
+			$('#tabFold .alert.alert-success').remove();
 
 			// B: Return if nothing selected
-			if ( !$('#selFoldLibs').val() ) return;
+			if ( !$('#selFoldLibs').val() ) { $('#selFoldFlds').prop('disabled',true); return; }
 
 			// C: Show busy
 			$('#contFoldFldSelect .sprlib-spinner').show();
@@ -599,109 +607,155 @@
 			$('#contFoldInfo table').remove();
 			$('#contFoldFiles table, #contFoldFolds table').remove();
 			$('#tabFoldPerms tbody').empty();
+			$('#tabFold .alert.alert-success').remove();
 
 			// B: Return if nothing selected
 			if ( !$('#selFoldFlds').val() ) return;
 
-			// INFO:
-			$('#contFoldInfo pre code').text( 'sprLib.folder(\''+ $('#selFoldFlds').val() +'\').info()' );
-			sprLib.folder($('#selFoldFlds').val()).info()
-			.then(function(objInfo){
-				var $table = $('<table class="tabModern"><tbody></tbody></table>');
-				$table.append('<thead><tr><th>Prop Name</th><th>Prop Value</th></tr></thead>');
-				Object.keys(objInfo).sort().forEach(function(key,idx){
-					$table.find('tbody').append('<tr><th>'+ key +'</th>'+'<td class="code text-monospace">'+ objInfo[key] +'</td></tr>');
-				});
-				$('#contFoldInfo').append( $table );
-			})
-
-			// PERMS:
-			$('#contFoldPerms pre code').text( 'sprLib.file(\''+ $('#selFoldFlds').val() +'\').perms()' );
-			sprLib.folder($('#selFoldFlds').val()).perms()
-			.then(function(arrPerms){
-				arrPerms.forEach(function(perm){
-					// A-1: Create row
-					var $row = $('<tr/>');
-					$row.append('<th><a href="../'+LAYOUTS_URL+'/people.aspx?MembershipGroupId='+ perm.Member.PrincipalId +'" target="_blank">'+ perm.Member.Title +'</a></th>');
-					$row.append('<td>'+ perm.Member.PrincipalType +'</td>');
-					$row.append('<td/>');
-					perm.Roles.forEach(function(role){
-						if ( !role.Hidden && role.Name ) $row.find('td:last-child').append('<div class="itemBox">'+ role.Name +'<span style="display:none">; </span></div>');
+			// FOLDER INFO
+			{
+				// INFO:
+				$('#contFoldInfo pre code').text( 'sprLib.folder(\''+ $('#selFoldFlds').val() +'\').info()' );
+				sprLib.folder($('#selFoldFlds').val()).info()
+				.then(function(objInfo){
+					var $table = $('<table class="tabModern"><tbody></tbody></table>');
+					$table.append('<thead><tr><th>Prop Name</th><th>Prop Value</th></tr></thead>');
+					Object.keys(objInfo).sort().forEach(function(key,idx){
+						$table.find('tbody').append('<tr><th>'+ key +'</th>'+'<td class="code text-monospace">'+ objInfo[key] +'</td></tr>');
 					});
-					$('#tabFoldPerms tbody').append( $row );
-				});
-				if ( $.tablesorter ) $('#contFoldPerms table').tablesorter({ sortList:[[0,0]] });
-			})
-			.catch(function(errMsg){
-				$('#contFoldPerms table').after('<h6 class="error text-danger">'+errMsg+'</h6>');
-				console.error(errMsg);
-			});
+					$('#contFoldInfo').append( $table );
+				})
 
-			// FILES:
-			$('#contFoldFiles pre code').text( 'sprLib.folder(\''+ $('#selFoldFlds').val() +'\').files()' );
-			sprLib.folder($('#selFoldFlds').val()).files()
-			.then(function(arrObjs){
-				var arrShowCols = ['Name', 'Created', 'Modified', 'ModifiedBy', 'Length', 'MajorVersion'];
-				var $table = $('<table class="tabModern"><thead><tr></tr></thead><tbody></tbody></table>');
-				// thead
-				arrShowCols.forEach(function(col){ $table.find('thead tr').append('<th>'+col+'</th>'); });
-				// tbody
-				arrObjs.forEach(function(obj){
-					var $row = $('<tr/>');
-					arrShowCols.forEach(function(col){
-						var strCell = obj[col];
-
-						if ( col == "ModifiedBy" ) strCell = obj.ModifiedBy.Title;
-						else if ( col == "Created" ) strCell = new Date(obj.Created).toLocaleString();
-						else if ( col == "Modified" ) strCell = new Date(obj.Modified).toLocaleString();
-
-						$row.append('<td>'+ strCell +'</td>');
+				// PERMS:
+				$('#contFoldPerms pre code').text( 'sprLib.file(\''+ $('#selFoldFlds').val() +'\').perms()' );
+				sprLib.folder($('#selFoldFlds').val()).perms()
+				.then(function(arrPerms){
+					arrPerms.forEach(function(perm){
+						// A-1: Create row
+						var $row = $('<tr/>');
+						$row.append('<th><a href="../'+LAYOUTS_URL+'/people.aspx?MembershipGroupId='+ perm.Member.PrincipalId +'" target="_blank">'+ perm.Member.Title +'</a></th>');
+						$row.append('<td>'+ perm.Member.PrincipalType +'</td>');
+						$row.append('<td/>');
+						perm.Roles.forEach(function(role){
+							if ( !role.Hidden && role.Name ) $row.find('td:last-child').append('<div class="itemBox">'+ role.Name +'<span style="display:none">; </span></div>');
+						});
+						$('#tabFoldPerms tbody').append( $row );
 					});
-					$table.find('tbody').append( $row );
+					if ( $.tablesorter ) $('#contFoldPerms table').tablesorter({ sortList:[[0,0]] });
+				})
+				.catch(function(errMsg){
+					$('#contFoldPerms table').after('<h6 class="error text-danger">'+errMsg+'</h6>');
+					console.error(errMsg);
 				});
+			}
 
-				$('#contFoldFiles').append( $table );
-				if ( $.tablesorter ) $('#contFoldFiles table').tablesorter({ sortList:[[0,0]] });
-			})
-			.catch(function(errMsg){
-				$('#contFoldFiles').append('<table><tbody><tr><td>'+errMsg+'</td></tr></tbody></table>');
-				console.error(errMsg);
-			});
+			// FOLDER CONTENTS
+			{
+				// FILES:
+				$('#contFoldFiles pre code').text( 'sprLib.folder(\''+ $('#selFoldFlds').val() +'\').files()' );
+				sprLib.folder($('#selFoldFlds').val()).files()
+				.then(function(arrObjs){
+					var arrShowCols = ['Name', 'Created', 'Modified', 'ModifiedBy', 'Length', 'MajorVersion'];
+					var $table = $('<table class="tabModern"><thead><tr></tr></thead><tbody></tbody></table>');
+					// thead
+					arrShowCols.forEach(function(col){ $table.find('thead tr').append('<th>'+col+'</th>'); });
+					// tbody
+					arrObjs.forEach(function(obj){
+						var $row = $('<tr/>');
+						arrShowCols.forEach(function(col){
+							var strCell = obj[col];
 
-			// FOLDERS:
-			$('#contFoldFolds pre code').text( 'sprLib.folder(\''+ $('#selFoldFlds').val() +'\').folders()' );
-			sprLib.folder($('#selFoldFlds').val()).folders()
-			.then(function(arrObjs){
-				var arrShowCols = ['Name', 'Created', 'Modified', 'FolderCount', 'ItemCount'];
-				var $table = $('<table class="tabModern"><thead><tr></tr></thead><tbody></tbody></table>');
-				// thead
-				arrShowCols.forEach(function(col){ $table.find('thead tr').append('<th>'+col+'</th>'); });
-				// tbody
-				arrObjs.forEach(function(obj){
-					var $row = $('<tr/>');
-					arrShowCols.forEach(function(col){
-						var strCell = obj[col];
+							if ( col == "ModifiedBy" ) strCell = obj.ModifiedBy.Title;
+							else if ( col == "Created" ) strCell = new Date(obj.Created).toLocaleString();
+							else if ( col == "Modified" ) strCell = new Date(obj.Modified).toLocaleString();
 
-						if ( col == "ModifiedBy" && obj.ModifiedBy ) strCell = obj.ModifiedBy.Title;
-						else if ( col == "Created" ) strCell = new Date(obj.Created).toLocaleString();
-						else if ( col == "Modified" ) strCell = new Date(obj.Modified).toLocaleString();
-
-						$row.append('<td>'+ strCell +'</td>');
+							$row.append('<td>'+ strCell +'</td>');
+						});
+						$table.find('tbody').append( $row );
 					});
-					$table.find('tbody').append( $row );
+
+					$('#contFoldFiles').append( $table );
+					if ( $.tablesorter ) $('#contFoldFiles table').tablesorter({ sortList:[[0,0]] });
+				})
+				.catch(function(errMsg){
+					$('#contFoldFiles').append('<table><tbody><tr><td>'+errMsg+'</td></tr></tbody></table>');
+					console.error(errMsg);
 				});
 
-				$('#contFoldFolds').append( $table );
-				if ( $.tablesorter ) $('#contFoldFolds table').tablesorter({ sortList:[[0,0]] });
-			})
-			.catch(function(errMsg){
-				$('#contFoldFolds').append('<table><tbody><tr><td>'+errMsg+'</td></tr></tbody></table>');
-				console.error(errMsg);
-			});
+				// FOLDERS:
+				$('#contFoldFolds pre code').text( 'sprLib.folder(\''+ $('#selFoldFlds').val() +'\').folders()' );
+				sprLib.folder($('#selFoldFlds').val()).folders()
+				.then(function(arrObjs){
+					var arrShowCols = ['Name', 'Created', 'Modified', 'FolderCount', 'ItemCount'];
+					var $table = $('<table class="tabModern"><thead><tr></tr></thead><tbody></tbody></table>');
+					// thead
+					arrShowCols.forEach(function(col){ $table.find('thead tr').append('<th>'+col+'</th>'); });
+					// tbody
+					arrObjs.forEach(function(obj){
+						var $row = $('<tr/>');
+						arrShowCols.forEach(function(col){
+							var strCell = obj[col];
+
+							if ( col == "ModifiedBy" && obj.ModifiedBy ) strCell = obj.ModifiedBy.Title;
+							else if ( col == "Created" ) strCell = new Date(obj.Created).toLocaleString();
+							else if ( col == "Modified" ) strCell = new Date(obj.Modified).toLocaleString();
+
+							$row.append('<td>'+ strCell +'</td>');
+						});
+						$table.find('tbody').append( $row );
+					});
+
+					$('#contFoldFolds').append( $table );
+					if ( $.tablesorter ) $('#contFoldFolds table').tablesorter({ sortList:[[0,0]] });
+				})
+				.catch(function(errMsg){
+					$('#contFoldFolds').append('<table><tbody><tr><td>'+errMsg+'</td></tr></tbody></table>');
+					console.error(errMsg);
+				});
+			}
+
+			// FOLDER DELETE/RECYCLE
+			{
+				// DELETE:
+				$('#contFoldDel pre code').text( 'sprLib.folder(\''+ $('#selFoldFlds').val() +'\').delete()' );
+
+				// RECYCLE:
+				$('#contFoldRec pre code').text( 'sprLib.folder(\''+ $('#selFoldFlds').val() +'\').recycle()' );
+			}
 
 			// LAST: Re-highlight code
 			$('#tabFold code').each(function(idx,ele){
 				Prism.highlightElement( $(ele)[0] );
+			});
+		}
+
+		function doFoldDelete() {
+			$('#tabFold .alert.alert-success').remove();
+
+			sprLib.folder($('#selFoldFlds').val()).delete()
+			.then(function(){
+				$('#contFoldDel').append(
+					'<div class="alert alert-success mt-2" style="font-size:2rem"><i class="fas fa-check-circle text-white mr-3"></i>Folder deleted!</div>'
+				);
+			})
+			.catch(function(errMsg){
+				$('#contFoldDel').append('<div class="alert alert-danger mt-3"><h3>ERROR</h3>'+errMsg+'</div>');
+				console.error(errMsg);
+			});
+		}
+
+		function doFoldRecycle() {
+			$('#tabFold .alert.alert-success').remove();
+
+			sprLib.folder($('#selFoldFlds').val()).recycle()
+			.then(function(){
+				$('#contFoldRec').append(
+					'<div class="alert alert-success mt-2" style="font-size:2rem"><i class="fas fa-check-circle text-white mr-3"></i>Folder recycled!</div>'
+				);
+			})
+			.catch(function(errMsg){
+				$('#contFoldRec').append('<div class="alert alert-danger mt-3"><h3>ERROR</h3>'+errMsg+'</div>');
+				console.error(errMsg);
 			});
 		}
 
@@ -773,51 +827,43 @@
 
 			// TAB: Setup
 			{
-				// SP: Datetime Stamp
-				$('#spDateTime').text( new Date().toLocaleString() );
-
-				// JS.A: jQuery
+				// JS: jQuery
 				if ( typeof jQuery !== 'undefined' ) {
-					$('#libChkJquery .iconSvg').removeClass('question').addClass('yes');
-					$('#libChkJquery .val').text( jQuery.fn.jquery );
+					$('#libChkJquery').parent().find('label').after('<div class="iconSvg check size20 float-right"></div>');
+					$('#libChkJquery').val( jQuery.fn.jquery );
 				}
 				else {
-					$('#libChkJquery .iconSvg').removeClass('question').addClass('fail');
-					$('#libChkJquery .val').text( '???' );
+					$('#libChkJquery').parent().find('label').after('<div class="iconSvg no size20 float-right"></div>');
+					$('#libChkJquery').val( '???' ).addClass('bg-danger text-white');
 				}
 
-				// JS.B: jQuery-tablesorter
+				// JS: jQuery-tablesorter
 				if ( typeof $.tablesorter !== 'undefined' ) {
-					$('#libChkTsorter .iconSvg').removeClass('question').addClass('yes');
-					$('#libChkTsorter .val').text( $.tablesorter.version );
+					$('#libChkTsorter').parent().find('label').after('<div class="iconSvg check size20 float-right"></div>');
+					$('#libChkTsorter').val( $.tablesorter.version );
 				}
 				else {
-					$('#libChkTsorter .iconSvg').removeClass('question').addClass('fail');
-					$('#libChkTsorter .val').text( '???' );
+					$('#libChkTsorter').parent().find('label').after('<div class="iconSvg no size20 float-right"></div>');
+					$('#libChkTsorter').val( '???' ).addClass('bg-danger text-white');
 				}
 
-				// JS.C: SpRestLib
+				// JS: SpRestLib
 				if ( typeof sprLib !== 'undefined' ) {
-					$('#libChkSprLib .iconSvg').removeClass('question').addClass('yes');
-					$('#libChkSprLib .val').text( sprLib.version );
-
-					// SP: User
-					sprLib.user().info()
-					.then(function(objUser){ $('#spUserPerm').text(objUser.Title) })
-					.catch(function(strErr){ $('#spUserPerm').html('<span class="text-danger">'+strErr+'</span>'); });
+					$('#libChkSprLib').parent().find('label').after('<div class="iconSvg check size20 float-right"></div>');
+					$('#libChkSprLib').val( sprLib.version );
 
 					// Make human readable when relative directory returned
 					try {
-						$('#spBaseUrl').text( (sprLib.baseUrl() == ".." ? _spPageContextInfo.siteAbsoluteUrl : sprLib.baseUrl()) );
+						$('#spBaseUrl').val( (sprLib.baseUrl() == ".." ? _spPageContextInfo.siteAbsoluteUrl : sprLib.baseUrl()) );
 					}
 					catch(ex){
-						$('#spBaseUrl').html('<span class="text-danger">'+ex+'</span>');
+						$('#spBaseUrl').addClass('bg-danger').after('<div class="alert alert-danger"><h3>ERROR</h3>'+ex+'</div>');
 					}
 				}
 				else {
-					$('#libChkSprLib .iconSvg').removeClass('question').addClass('fail');
-					$('#libChkSprLib .val').text( '???' );
-					$('#spBaseUrl').text( '(n/a)' );
+					$('#libChkSprLib').parent().find('label').after('<div class="iconSvg no size20 float-right"></div>');
+					$('#libChkSprLib').text( '???' ).addClass('bg-danger text-white');
+					$('#spBaseUrl').text( '(n/a)' ).addClass('bg-danger text-white');
 
 					// Halt execution
 					return;
@@ -1095,7 +1141,7 @@
 			if ( window.location.href.toLowerCase().indexOf('gitbrent') > -1 && window.location.href.toLowerCase().indexOf('debug') > -1 ) {
 				// Dynamically load library as SharePoint Online is *BAD* about caching
 				$.getScript("../SiteAssets/sprestlib/js/sprestlib.js", function(){
-					$('#libChkSprLib > div:last-child').text( sprLib.version ).addClass('text-success');
+					$('#libChkSprLib input').val( sprLib.version ).addClass('bg-warning text-white');
 					console.log('FYI: Local copy of `sprestlib.js` loaded successfully...');
 					console.log( sprLib.version );
 					doPageLoad();
@@ -1140,58 +1186,35 @@
 				</ul>
 			</div>
 
-			<div class="container-fluid my-5">
-				<div class="row">
-					<div class="col-4 pr-4">
-						<h5 class="text-primary">JavaScript Library Check</h5>
-						<div class="container bg-light">
-							<div id="libChkJquery" class="row align-items-center">
-								<div class="col-2 p-3"><div class="iconSvg circle question size32"></div></div>
-								<div class="col-4 p-3">jQuery</div>
-								<div class="col-6 p-3 val"></div>
-							</div>
-							<div id="libChkSprLib" class="row align-items-center">
-								<div class="col-2 p-3"><div class="iconSvg circle question size32"></div></div>
-								<div class="col-4 p-3">SpRestLib</div>
-								<div class="col-6 p-3 val"></div>
-							</div>
-							<div id="libChkTsorter" class="row align-items-center">
-								<div class="col-2 p-3"><div class="iconSvg circle question size32"></div></div>
-								<div class="col-4 p-3">TableSorter</div>
-								<div class="col-6 p-3 val"></div>
-							</div>
-						</div>
+			<h5 class="text-primary mt-4">JavaScript Library Check</h5>
+			<div class="container-fluid bde-callout-info bg-light p-4">
+				<div class="row mb-4">
+					<div class="col-4">
+						<label class="text-muted">SpRestLib</label>
+						<input id="libChkSprLib" class="form-control w-100" disabled>
 					</div>
-					<div class="col-8">
-						<h5 class="text-primary">SharePoint Environment / Configuration</h5>
-						<div class="container bg-light">
-							<div class="row align-items-center">
-								<div class="col-1 p-3"><div class="iconSvg circle info size32"></div></div>
-								<div class="col-3 p-3">SpRestLib Base URL</div>
-								<div class="col-8 p-3" id="spBaseUrl"></div>
-							</div>
-
-							<div class="row align-items-center">
-								<div class="col-1 p-3"><div class="iconSvg circle info size32"></div></div>
-								<div class="col-3 p-3">Current User</div>
-								<div class="col-8 p-3" id="spUserPerm"></div>
-							</div>
-
-							<div class="row align-items-center">
-								<div class="col-1 p-3"><div class="iconSvg circle info size32"></div></div>
-								<div class="col-3 p-3">Current Date/Time</div>
-								<div class="col-8 p-3" id="spDateTime"></div>
-							</div>
-						</div>
+					<div class="col-4">
+						<label class="text-muted">jQuery</label>
+						<input id="libChkJquery" class="form-control w-100" disabled>
+					</div>
+					<div class="col-4">
+						<label class="text-muted">TableSorter</label>
+						<input id="libChkTsorter" class="form-control w-100" disabled>
+					</div>
+				</div>
+				<div class="row">
+					<div class="col-12">
+						<label class="text-muted">SpRestLib Base URL</label>
+						<input id="spBaseUrl" class="form-control w-100" disabled>
 					</div>
 				</div>
 			</div>
 		</div>
 
 		<div id="tabList" data-tab="List Methods">
-			<h4 class="text-primary">List/Library Methods</h4>
-			<div class="container-fluid text-muted">
-				<ul>
+			<div class="container-fluid bde-callout-info bg-light text-muted mx-0 w-75">
+				<h4 class="text-primary">List/Library Methods</h4>
+				<ul class="mb-3">
 					<li>
 						See <a href="https://gitbrent.github.io/SpRestLib/docs/api-list.html" target="_blank">API documentation</a>
 						for examples of <code>items()</code>, <code>create()</code>,
@@ -1199,14 +1222,9 @@
 					</li>
 					<li>Select one of the Lists/Libraries found on this site to view its properties (only non-hidden Lists/Libraries are shown)</li>
 				</ul>
-			</div>
-
-			<div id="contListSelect" class="container-fluid mb-4">
-				<div class="row align-items-center">
-					<div class="col-2 p-3 bg-light text-nowrap">
-						<h6 class="text-primary text-uppercase mb-0">Site Lists/Libraries</h6>
-					</div>
-					<div class="col-6 p-3">
+				<div class="row">
+					<div id="contFileLibsSelect" class="col-6">
+						<label for="selSiteLists" class="text-muted text-uppercase d-block">Select List/Library</label>
 						<div class="sprlib-spinner"><div class="sprlib-bounce1"></div><div class="sprlib-bounce2"></div><div class="sprlib-bounce3"></div></div>
 						<select id="selSiteLists" class="form-control" onchange="handleListChange()">
 							<option value="">Select...</option>
@@ -1215,24 +1233,24 @@
 				</div>
 			</div>
 
-			<h5 class="text-primary bde-arrow-cont" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
+			<h5 class="text-primary bde-arrow-cont mt-4" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
 				<div class="arrow active"></div>List Information
 			</h5>
-			<div id="tab1-ListInfo" class="container-fluid mb-4">
+			<div id="tab1-ListInfo" class="container-fluid">
 				<pre><code class="language-javascript">sprLib.list('listName').info()</code></pre>
 			</div>
 
-			<h5 class="text-primary bde-arrow-cont" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
+			<h5 class="text-primary bde-arrow-cont mt-4" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
 				<div class="arrow"></div>List Columns
 			</h5>
-			<div id="tab1-ListCols" class="container-fluid mb-4" style="display:none">
+			<div id="tab1-ListCols" class="container-fluid" style="display:none">
 				<pre><code class="language-javascript">sprLib.list('listName').cols()</code></pre>
 			</div>
 
-			<h5 class="text-primary bde-arrow-cont" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
+			<h5 class="text-primary bde-arrow-cont mt-4" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
 				<div class="arrow"></div>List Permissions
 			</h5>
-			<div id="tab1-ListPerms" class="container-fluid mb-4" style="display:none">
+			<div id="tab1-ListPerms" class="container-fluid" style="display:none">
 				<pre><code class="language-javascript">sprLib.list('listName').perms()</code></pre>
 
 				<table id="tabListPerms" class="tabModern">
@@ -1249,30 +1267,21 @@
 		</div>
 
 		<div id="tabFile" data-tab="File Methods">
-			<h4 class="text-primary">File Methods</h4>
-			<div class="container-fluid bde-callout-info bg-light text-muted mt-3 mx-0 w-75">
-				Select one of the Files found on this site to view File method code/results.
-			</div>
-
-			<div id="fileSelectors" class="container-fluid mt-3 mx-0 w-75">
-				<div id="contFileLibsSelect" class="row align-items-center">
-					<div class="col-2 p-3 bg-light text-nowrap">
-						<h6 class="text-primary text-uppercase mb-0">Select a Library</h6>
-					</div>
-					<div class="col p-2">
+			<div class="container-fluid bde-callout-info bg-light text-muted mx-0 w-75">
+				<h4 class="text-primary">File Methods</h4>
+				<p class="mb-3">Select one of the Files found on this site to view File method code/results.</p>
+				<div class="row">
+					<div id="contFileLibsSelect" class="col-6">
+						<label for="selFoldLibs" class="text-muted text-uppercase d-block">Select Library</label>
 						<div class="sprlib-spinner"><div class="sprlib-bounce1"></div><div class="sprlib-bounce2"></div><div class="sprlib-bounce3"></div></div>
 						<select id="selFileLibs" class="form-control" onchange="handleFileLibChange()">
 							<option value="">Select...</option>
 						</select>
 					</div>
-				</div>
-				<div id="contFileFileSelect" class="row align-items-center">
-					<div class="col-2 p-3 bg-light text-nowrap">
-						<h6 class="text-primary text-uppercase mb-0">Select a File</h6>
-					</div>
-					<div class="col p-2">
+					<div id="contFileFileSelect" class="col-6">
+						<label for="selFileFiles" class="text-muted text-uppercase d-block">Select Library File</label>
 						<div class="sprlib-spinner"><div class="sprlib-bounce1"></div><div class="sprlib-bounce2"></div><div class="sprlib-bounce3"></div></div>
-						<select id="selFileFiles" class="form-control" onchange="handleFileFileChange()">
+						<select id="selFileFiles" class="form-control" onchange="handleFileFileChange()" disabled>
 							<option value="">Select...</option>
 						</select>
 					</div>
@@ -1349,85 +1358,104 @@
 		</div>
 
 		<div id="tabFold" data-tab="Folder Methods">
-			<h4 class="text-primary">Folder Methods</h4>
-			<div class="container-fluid bde-callout-info bg-light text-muted mt-3 mx-0 w-75">
-				Select one of the Folders found on this site to view Folder method code/results.
-			</div>
-
-			<div class="container-fluid mt-4">
-				<div id="contFoldLibSelect" class="row align-items-center">
-					<div class="col-2 p-3 bg-light text-nowrap">
-						<h6 class="text-primary text-uppercase mb-0">Select a Library</h6>
-					</div>
-					<div class="col-6 p-2">
+			<div class="container-fluid bde-callout-info bg-light text-muted mx-0 w-75">
+				<h4 class="text-primary">Folder Methods</h4>
+				<p class="mb-3">Select a site library/folder to autopopulate the code samples/results below.</p>
+				<div class="row">
+					<div id="contFoldLibSelect" class="col-6">
+						<label for="selFoldLibs" class="text-muted text-uppercase d-block">Select Library</label>
 						<div class="sprlib-spinner"><div class="sprlib-bounce1"></div><div class="sprlib-bounce2"></div><div class="sprlib-bounce3"></div></div>
 						<select id="selFoldLibs" class="form-control" onchange="handleFoldLibChange()">
 							<option value="">Select...</option>
 						</select>
 					</div>
-				</div>
-				<div id="contFoldFldSelect" class="row align-items-center">
-					<div class="col-2 p-3 bg-light text-nowrap">
-						<h6 class="text-primary text-uppercase mb-0">Select a Folder</h6>
-					</div>
-					<div class="col-6 p-2">
+					<div id="contFoldFldSelect" class="col-6">
+						<label for="selFoldFlds" class="text-muted text-uppercase d-block">Select Library Folder</label>
 						<div class="sprlib-spinner"><div class="sprlib-bounce1"></div><div class="sprlib-bounce2"></div><div class="sprlib-bounce3"></div></div>
-						<select id="selFoldFlds" class="form-control" onchange="handleFoldFldChange()">
+						<select id="selFoldFlds" class="form-control" onchange="handleFoldFldChange()" disabled>
 							<option value="">Select...</option>
 						</select>
 					</div>
 				</div>
 			</div>
 
-			<h5 class="text-primary bde-arrow-cont mt-4" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
-				<div class="arrow active"></div>Folder Information
-			</h5>
-			<div id="contFoldInfo" class="container-fluid">
-				<pre><code class="language-javascript">sprLib.folder('folderName').info()</code></pre>
+			<h4 class="text-dark mt-5">Folder Info: (Permissions, Properties)</h4>
+			<hr>
+			<div>
+				<h5 class="text-primary bde-arrow-cont mt-4" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
+					<div class="arrow"></div>Folder Properties
+				</h5>
+				<div id="contFoldInfo" class="container-fluid" style="display:none">
+					<pre><code class="language-javascript">sprLib.folder('folderName').info()</code></pre>
+				</div>
+
+				<h5 class="text-primary bde-arrow-cont mt-4" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
+					<div class="arrow"></div>Folder Permissions
+				</h5>
+				<div id="contFoldPerms" class="container-fluid" style="display:none">
+					<pre><code class="language-javascript">sprLib.folder('folderName').perms()</code></pre>
+					<table id="tabFoldPerms" class="tabModern">
+						<thead>
+							<tr>
+								<th>Name</th>
+								<th>Type</th>
+								<th class="sorter-false showGrpDesc">Permissions</th>
+							</tr>
+						</thead>
+						<tbody></tbody>
+					</table>
+				</div>
 			</div>
 
-			<h5 class="text-primary bde-arrow-cont mt-4" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
-				<div class="arrow"></div>Folder Permissions
-			</h5>
-			<div id="contFoldPerms" class="container-fluid" style="display:none">
-				<pre><code class="language-javascript">sprLib.folder('folderName').perms()</code></pre>
-				<table id="tabFoldPerms" class="tabModern">
-					<thead>
-						<tr>
-							<th>Name</th>
-							<th>Type</th>
-							<th class="sorter-false showGrpDesc">Permissions</th>
-						</tr>
-					</thead>
-					<tbody></tbody>
-				</table>
+			<h4 class="text-dark mt-5">Folder Contents: (Files, Folders)</h4>
+			<hr>
+			<div>
+				<h5 class="text-primary bde-arrow-cont mt-4" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
+					<div class="arrow"></div>Folder Contents: Files
+				</h5>
+				<div id="contFoldFiles" class="container-fluid" style="display:none">
+					<pre><code class="language-javascript">sprLib.folder('folderName').files()</code></pre>
+				</div>
+
+				<h5 class="text-primary bde-arrow-cont mt-4" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
+					<div class="arrow"></div>Folder Contents: Folders
+				</h5>
+				<div id="contFoldFolds" class="container-fluid" style="display:none">
+					<pre><code class="language-javascript">sprLib.folder('folderName').folders()</code></pre>
+				</div>
 			</div>
 
-			<h5 class="text-primary bde-arrow-cont mt-4" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
-				<div class="arrow"></div>Folder Contents: Files
-			</h5>
-			<div id="contFoldFiles" class="container-fluid" style="display:none">
-				<pre><code class="language-javascript">sprLib.folder('folderName').files()</code></pre>
-			</div>
+			<h4 class="text-dark mt-5">Folder Manipulation: (Delete, Recycle)</h4>
+			<hr>
+			<div>
+				<h5 class="text-primary bde-arrow-cont mt-4" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
+					<div class="arrow"></div>Delete Folder (<strong>PERMANENT</strong> - bypasses Recycle Bin)
+				</h5>
+				<div id="contFoldDel" class="container-fluid" style="display:none">
+					<pre><code id="codeDelFold" class="language-javascript">sprLib.folder('FolderName').delete()</code></pre>
+					<button type="button" class="btn btn-primary w-25 mt-2" onclick="doFoldDelete()">Delete Selected Folder</button>
+				</div>
 
-			<h5 class="text-primary bde-arrow-cont mt-4" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
-				<div class="arrow"></div>Folder Contents: Folders
-			</h5>
-			<div id="contFoldFolds" class="container-fluid" style="display:none">
-				<pre><code class="language-javascript">sprLib.folder('folderName').folders()</code></pre>
+				<h5 class="text-primary bde-arrow-cont mt-4" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
+					<div class="arrow"></div>Recycle Folder (sends item to the site Recycle Bin)
+				</h5>
+				<div id="contFoldRec" class="container-fluid" style="display:none">
+					<pre><code id="codeRecFold" class="language-javascript">sprLib.folder('FolderName').recycle()</code></pre>
+					<button type="button" class="btn btn-primary w-25 mt-2" onclick="doFoldRecycle()">Recycle Selected Folder</button>
+				</div>
 			</div>
 		</div>
 
 		<div id="tabSite" data-tab="Site Methods">
-			<h4 class="text-primary">Local Site Methods</h4>
-			<div class="alert alert-light mb-3" role="alert">
+			<div class="container-fluid bde-callout-info bg-light text-muted mx-0 w-75">
+				<h4 class="text-primary">Local Site Methods</h4>
 				<div class="text-muted">These methods are scoped to the local site and will return results for this particular site (eg: a subsite)</div>
 			</div>
 
-			<h5 class="text-primary bde-arrow-cont" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
+			<h5 class="text-primary bde-arrow-cont mt-4" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
 				<div class="arrow active"></div>Site Contents
 			</h5>
-			<div class="container-fluid mb-4">
+			<div class="container-fluid">
 				<div><pre><code class="language-javascript">sprLib.site().lists()</code></pre></div>
 
 				<table id="tabSiteLists" class="tabModern">
@@ -1442,10 +1470,10 @@
 				</table>
 			</div>
 
-			<h5 class="text-primary bde-arrow-cont" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
+			<h5 class="text-primary bde-arrow-cont mt-4" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
 				<div class="arrow"></div>Site Info
 			</h5>
-			<div class="container-fluid mb-4" style="display:none">
+			<div class="container-fluid" style="display:none">
 				<div><pre><code class="language-javascript">sprLib.site().info()</code></pre></div>
 
 				<table id="tabSiteInfo" class="tabModern">
@@ -1459,10 +1487,10 @@
 				</table>
 			</div>
 
-			<h5 class="text-primary bde-arrow-cont" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
+			<h5 class="text-primary bde-arrow-cont mt-4" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
 				<div class="arrow"></div>Site Permissions
 			</h5>
-			<div class="container-fluid mb-4" style="display:none">
+			<div class="container-fluid" style="display:none">
 				<div><pre><code class="language-javascript">sprLib.site().perms()</code></pre></div>
 
 				<table id="tabSitePerms" class="tabModern">
@@ -1476,10 +1504,10 @@
 				</table>
 			</div>
 
-			<h5 class="text-primary bde-arrow-cont" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
+			<h5 class="text-primary bde-arrow-cont mt-4" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
 				<div class="arrow"></div>Site Subsites
 			</h5>
-			<div class="container-fluid mb-4" style="display:none">
+			<div class="container-fluid" style="display:none">
 				<div><pre><code class="language-javascript">sprLib.site().subsites()</code></pre></div>
 
 				<table id="tabSiteSubsites" class="tabModern">
@@ -1496,15 +1524,15 @@
 				</table>
 			</div>
 
-			<h4 class="text-primary mt-5">Site Collection Methods</h4>
-			<div class="alert alert-light mb-3" role="alert">
+			<div class="container-fluid bde-callout-info bg-light text-muted mx-0 w-75 mt-5">
+				<h4 class="text-primary">Site Collection Methods</h4>
 				<div class="text-muted">These methods are scoped to the top level site - the Site Collection, not subsites - meaning, you'll get the same results whether you include a subsite</div>
 			</div>
 
-			<h5 class="text-primary bde-arrow-cont" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
+			<h5 class="text-primary bde-arrow-cont mt-4" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
 				<div class="arrow"></div>Site Permission Groups
 			</h5>
-			<div class="container-fluid mb-4" style="display:none">
+			<div class="container-fluid" style="display:none">
 				<div><pre><code class="language-javascript">sprLib.site().groups()</code></pre></div>
 
 				<table id="tabSiteGroups" class="tabModern">
@@ -1521,10 +1549,10 @@
 				</table>
 			</div>
 
-			<h5 class="text-primary bde-arrow-cont" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
+			<h5 class="text-primary bde-arrow-cont mt-4" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
 				<div class="arrow"></div>Site Permission Roles/Levels
 			</h5>
-			<div class="container-fluid mb-4" style="display:none">
+			<div class="container-fluid" style="display:none">
 				<div><pre><code class="language-javascript">sprLib.site().roles()</code></pre></div>
 
 				<table id="tabSiteRoles" class="tabModern">
@@ -1538,10 +1566,10 @@
 				</table>
 			</div>
 
-			<h5 class="text-primary bde-arrow-cont" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
+			<h5 class="text-primary bde-arrow-cont mt-4" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
 				<div class="arrow"></div>Site Users
 			</h5>
-			<div class="container-fluid mb-4" style="display:none">
+			<div class="container-fluid" style="display:none">
 				<div><pre><code class="language-javascript">sprLib.site().users()</code></pre></div>
 
 				<table id="tabSiteUsers" class="tabModern">
@@ -1561,15 +1589,15 @@
 		</div>
 
 		<div id="tabUser" data-tab="Users">
-			<h4 class="text-primary">User Methods</h4>
-			<div class="alert alert-light mb-3" role="alert">
+			<div class="container-fluid bde-callout-info bg-light text-muted mx-0 w-75">
+				<h4 class="text-primary">User Methods</h4>
 				<div class="text-muted">Get User Information (Title, Email, etc.) and User Groups (which SP Groups they belong to)</div>
 			</div>
 
-			<h5 class="text-primary bde-arrow-cont" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
+			<h5 class="text-primary bde-arrow-cont mt-4" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
 				<div class="arrow"></div>User Information
 			</h5>
-			<div class="container-fluid mb-4" style="display:none">
+			<div class="container-fluid" style="display:none">
 				<div id="user1Code"><pre><code class="language-javascript"></code></pre></div>
 				<div id="user1Html" class="mb-2">
 					<table class="tabModern">
@@ -1584,10 +1612,10 @@
 				</div>
 			</div>
 
-			<h5 class="text-primary bde-arrow-cont" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
+			<h5 class="text-primary bde-arrow-cont mt-4" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
 				<div class="arrow"></div>User Groups
 			</h5>
-			<div class="container-fluid mb-4" style="display:none">
+			<div class="container-fluid" style="display:none">
 				<div id="user2Code"><pre><code class="language-javascript"></code></pre></div>
 				<div id="user2Html" class="mb-2">
 					<table class="tabModern">
@@ -1602,19 +1630,19 @@
 				</div>
 			</div>
 
-			<h4 class="text-primary mt-5">User Profile Methods</h4>
-			<div class="alert alert-light mb-3" role="alert">
+			<div class="container-fluid bde-callout-info bg-light text-muted mx-0 mt-5 w-75">
+				<h4 class="text-primary">User Profile Methods</h4>
 				<div class="text-muted">
-					The <span class="code text-monospace">user().profile()</span> method utliizes the
+					The <code>user().profile()</code> method utliizes the
 					<a class="alert-link" href="https://technet.microsoft.com/en-us/library/ee662538.aspx" target="_blank">UserProfile Service API</a>,
 					which requires either an enterprise license for on-prem installations, or a SharePoint Online subscription.
 				</div>
 			</div>
 
-			<h5 class="text-primary bde-arrow-cont" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
-				<div class="arrow"></div>User Properties
+			<h5 class="text-primary bde-arrow-cont mt-4" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
+				<div class="arrow"></div>User Profile Properties
 			</h5>
-			<div class="container-fluid mb-4" style="display:none">
+			<div class="container-fluid" style="display:none">
 				<div id="user3Code"><pre><code class="language-javascript"></code></pre></div>
 				<div id="user3Html" style="margin-bottom:20px">
 					<table class="tabModern">
@@ -1631,9 +1659,9 @@
 		</div>
 
 		<div id="tabRest" data-tab="REST API">
-			<h4 class="text-primary">REST API</h4>
-			<div class="container-fluid mb-4 text-muted">
-				SpRestLib also provides the ability to run an ad-hoc REST query.
+			<div class="container-fluid bde-callout-info bg-light text-muted mx-0 w-75">
+				<h4 class="text-primary">REST API</h4>
+				<div class="text-muted">SpRestLib also provides the ability to run an ad-hoc REST query.</div>
 			</div>
 
 			<h5 class="text-primary mt-4">Sample Query</h5>
@@ -1644,12 +1672,15 @@
 		</div>
 
 		<div id="tabSand" data-tab="Code Sandbox">
-			<h4 class="text-primary">Code Sandbox</h4>
-			<div class="alert alert-highlight text-muted mb-3" role="alert">
-				The code below is editable - use it try any sprLib features.<br>
-				The sandbox will handle the <code>then()</code> and <code>catch()</code> for you, so just use code as shown see below.<br>
-				Both array results (ex:`list().items()`) and object results (ex:`list().info()`) are supported.
+			<div class="container-fluid bde-callout-info bg-light text-muted mx-0 mb-4 w-75">
+				<h4 class="text-primary">Code Sandbox</h4>
+				<div>
+					The code below is editable - use it try any sprLib features.<br>
+					The sandbox will handle the <code>then()</code> and <code>catch()</code> for you, so just use code as shown see below.<br>
+					Both array results (ex:`<code>list().items()</code>`) and object results (ex:`<code>list().info()</code>`) are supported.
+				</div>
 			</div>
+
 			<pre><code id="sandboxCode" contenteditable="true" class="language-javascript" spellcheck="false"></code></pre>
 			<button type="button" class="btn btn-success mt-2 mb-4 w-25" style="max-width:500px" onclick="execCodeAndShowResults('sandboxCode','sandboxData')">Execute Sandbox Code</button>
 
