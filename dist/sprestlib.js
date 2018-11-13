@@ -30,7 +30,7 @@
 (function(){
 	// APP VERSION/BUILD
 	var APP_VER = "1.9.0-beta";
-	var APP_BLD = "20181108";
+	var APP_BLD = "20181112";
 	var DEBUG = false; // (verbose mode/lots of logging)
 	// ENUMERATIONS
 	// REF: [`SP.BaseType`](https://msdn.microsoft.com/en-us/library/office/jj246925.aspx)
@@ -243,10 +243,11 @@
 		/**
 		* CheckIn a File
 		* @see: https://msdn.microsoft.com/en-us/library/office/dn450841.aspx#bk_FileCheckIn
+		* @since 1.9.0
 		*
 		* @param `inOpt` (object) - can contain `comment` and `type` options
-		* @returns: (boolean) - `true` on success
 		* @example: sprLib.file('/site/Documents/MyDoc.docx').checkin("All done!")
+		* @returns: (boolean) - `true` on success
 		*/
 		_newFile.checkin = function(inOpt) {
 			return new Promise(function(resolve, reject) {
@@ -282,6 +283,7 @@
 		/**
 		* CheckOut a File
 		* @see: https://msdn.microsoft.com/en-us/library/office/dn450841.aspx#bk_FileCheckOut
+		* @since 1.9.0
 		*
 		* @returns: (boolean) - `true` on success
 		*/
@@ -304,6 +306,7 @@
 
 		/**
 		* Delete a File (**permanent** - skips recycle bin!)
+		* @since 1.9.0
 		* @see: https://msdn.microsoft.com/en-us/library/office/dn450841.aspx
 		*
 		* @returns: (boolean) - `true` on success
@@ -332,8 +335,8 @@
 
 		/**
 		* Get a File (binary or text)
-		* "The GetFileByServerRelativeUrl endpoint is recommended way to get a file. See SP.File request examples."
-		* @see: https://msdn.microsoft.com/en-us/library/office/dn450841.aspx#bk_FileRequestExamples
+		* @since 1.8.0
+		* @see: [https://msdn.microsoft.com/en-us/library/office/dn450841.aspx#bk_FileRequestExamples](The GetFileByServerRelativeUrl endpoint is recommended way to get a file. See SP.File request examples)
 		*
 		* @returns: a File as a Blob
 		*/
@@ -361,6 +364,7 @@
 		/**
 		* Get information about a File
 		* Optionally include a version tag to get info about a certain file version
+		* @since 1.8.0
 		*
 		* @param `inOpt` (object) - (`version` prop optional)
 		* @returns: an object containing information about the current File
@@ -444,6 +448,7 @@
 
 		/**
 		* Get File permissions
+		* @since 1.8.0
 		*
 		* @returns: array of objects with `Member` and `Roles` properties
 		* @example: sprLib.file('/site/Documents/MyDoc.docx').perms().then( arr => console.log(arr) );
@@ -488,6 +493,7 @@
 
 		/**
 		* Recycle a File (moves item to site recycle bin)
+		* @since 1.9.0
 		* @see: https://msdn.microsoft.com/en-us/library/office/dn450841.aspx
 		*
 		* @returns: (boolean) - `true` on success
@@ -583,8 +589,11 @@
 	// API: FOLDER
 	/**
 	* @param `inOpt` (object)/(string) - required - (`name` prop reqd)
+	*
+	* @example - `sprLib.folder('SiteAssets');`
 	* @example - `sprLib.folder('/sites/dev/SiteAssets/');`
 	* @example - `sprLib.folder({ 'name':'/sites/dev/SiteAssets/' });`
+	*
 	* @since 1.8.0
 	* @see: [File API](https://gitbrent.github.io/SpRestLib/docs/api-folder.html)
 	* @see: [Files and folders REST API reference](https://msdn.microsoft.com/en-us/library/office/dn450841.aspx#bk_Folder)
@@ -615,17 +624,75 @@
 
 		// D: Public Methods ----------------------------------------------
 		// TODO: implement these Methods:
-		// .create() // .add()?
-		//
 		// FYI: /_api/web/GetFolderByServerRelativeUrl(‘{folder url}’)/ListItemAllFields/breakroleinheritance(true)
-		//
-		// FYI: a unique folder:
-		// /sites/dev/_api/web/GetFolderByServerRelativeUrl('/sites/dev/SiteAssets/js')
+
+		/**
+		* Add/Create a new Folder
+		*
+		* @since 1.9.0
+		* @see: https://msdn.microsoft.com/en-us/library/office/dn450841.aspx#bk_FolderCollectionAdd
+		* @returns: (object) - folder object returned by SharePoint
+		*/
+		_newFolder.add = function(inOpt) {
+			return new Promise(function(resolve, reject) {
+				// A: Options setup
+				var strFullName = "";
+				var urlBase = ( APP_OPTS.baseUrl.indexOf('http') == 0 || APP_OPTS.baseUrl.indexOf('/') == 0 ? APP_OPTS.baseUrl : ( _spPageContextInfo && _spPageContextInfo.webServerRelativeUrl ? _spPageContextInfo.webServerRelativeUrl : APP_OPTS.baseUrl ) );
+				inOpt = (inOpt ? inOpt : null);
+				if ( !inOpt || typeof inOpt !== 'string' ) {
+					console.error("Error: `folder().add()` requires a string folder name!");
+					return null;
+				}
+
+				// B: Ensure there is a fully-qualified URL
+				strFullName = ( inOpt.indexOf('http') == 0 || inOpt.indexOf('/') == 0 ? inOpt : encodeURI(_fullName +'/'+ inOpt) );
+
+				// C: Create folder
+				// NOTE: Both the `url` and the string passed to `add()` must be fully-qualified URLs (ex: not "../..")
+				sprLib.rest({
+					type: "POST",
+					url: urlBase+"/_api/web/folders/add('"+ strFullName +"')",
+					metadata: false
+				})
+				.then(function(arrData){
+					var objNewFolder = (arrData && arrData[0] ? arrData[0] : null);
+					/* EX:
+						.-----------------------------------------------------------------------------------------------------------------------------------------------------------.
+						|     Prop Name     |                                                                                        Prop Value                                     |
+						|-------------------|---------------------------------------------------------------------------------------------------------------------------------------|
+						| Files             | {"__deferred":{"uri":"https://a.sharepoint.com/sites/dev/_api/Web/GetFolderByServerRelativePath(decodedurl='/a/Files"}}               |
+						| ListItemAllFields | {"__deferred":{"uri":"https://a.sharepoint.com/sites/dev/_api/Web/GetFolderByServerRelativePath(decodedurl='/a')/ListItemAllFields"}} |
+						| ParentFolder      | {"__deferred":{"uri":"https://a.sharepoint.com/sites/dev/_api/Web/GetFolderByServerRelativePath(decodedurl='/a')/ParentFolder"}}      |
+						| Properties        | {"__deferred":{"uri":"https://a.sharepoint.com/sites/dev/_api/Web/GetFolderByServerRelativePath(decodedurl='/a')/Properties"}}        |
+						| StorageMetrics    | {"__deferred":{"uri":"https://a.sharepoint.com/sites/dev/_api/Web/GetFolderByServerRelativePath(decodedurl='/a')/StorageMetrics"}}    |
+						| Folders           | {"__deferred":{"uri":"https://a.sharepoint.com/sites/dev/_api/Web/GetFolderByServerRelativePath(decodedurl='/a')/Folders"}}           |
+						| Exists            | true                                                                                                                                  |
+						| IsWOPIEnabled     | false                                                                                                                                 |
+						| ItemCount         | 0                                                                                                                                     |
+						| Name              | "DEMO"                                                                                                                                |
+						| ProgID            | null                                                                                                                                  |
+						| ServerRelativeUrl | "/sites/dev/Shared Documents/folder/"                                                                                                 |
+						| TimeCreated       | "2018-11-13T03:34:48Z"                                                                                                                |
+						| TimeLastModified  | "2018-11-13T03:34:48Z"                                                                                                                |
+						| UniqueId          | "2ce2a781-a96a-4b50-aa9f-affe8f404fe4"                                                                                                |
+						| WelcomePage       | ""                                                                                                                                    |
+						'-----------------------------------------------------------------------------------------------------------------------------------------------------------.
+					*/
+
+					// Done
+					resolve( objNewFolder );
+				})
+				.catch(function(strErr){
+					reject( strErr );
+				});
+			});
+		}
 
 		/**
 		* Delete a Folder (**permanent** - skips recycle bin!)
-		* @see: https://msdn.microsoft.com/en-us/library/office/dn450841.aspx
+		* @since 1.9.0
 		*
+		* @see: https://msdn.microsoft.com/en-us/library/office/dn450841.aspx
 		* @returns: (boolean) - `true` on success
 		*/
 		_newFolder.delete = function() {
@@ -652,6 +719,7 @@
 
 		/**
 		* Get Files and their properties
+		* @since 1.8.0
 		*
 		* @example - relative URL: `sprLib.folder('Shared Documents').files()`
 		* @example - absolute URL: `sprLib.folder('/sites/dev/Shared Documents').files()`
@@ -695,6 +763,7 @@
 
 		/**
 		* Get Folders and their properties
+		* @since 1.8.0
 		*
 		* @example - relative URL: `sprLib.folder('Shared Documents').folders()`
 		* @example - absolute URL: `sprLib.folder('/sites/dev/Shared Documents').folders()`
@@ -739,6 +808,7 @@
 
 		/**
 		* Get information (properties) for a Folder
+		* @since 1.8.0
 		*
 		* @example: sprLib.folder('/site/Documents/Finance').info()
 		* @returns: Object with Folder properties
@@ -820,6 +890,7 @@
 
 		/**
 		* Get Folder permissions
+		* @since 1.8.0
 		*
 		* @returns: array of objects with `Member` and `Roles` properties
 		* @example: sprLib.folder('/site/SiteAssets/BACKUPS').perms().then( arr => console.log(arr) );
@@ -893,8 +964,9 @@
 
 		/**
 		* Recycle a Folder (moves item to site recycle bin)
-		* @see: https://msdn.microsoft.com/en-us/library/office/dn450841.aspx
+		* @since 1.9.0
 		*
+		* @see: https://msdn.microsoft.com/en-us/library/office/dn450841.aspx
 		* @returns: (boolean) - `true` on success
 		*/
 		_newFolder.recycle = function() {
