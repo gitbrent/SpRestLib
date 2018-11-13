@@ -54,6 +54,9 @@ items, execute REST calls, interact with files and folders, gather site properti
 * `sprLib.folder(folderName).folders()` - Returns an array of folder objects contained in the folder
 * `sprLib.folder(folderName).info()`    - Returns `SP.Folder` properties (Created, GUID, HasUniquePerms, etc.)
 * `sprLib.folder(folderName).perms()`   - Returns an array of the folder's Member Role assignments
+* `sprLib.folder(folderName).add()`     - Creates a new folder under the parent folder
+* `sprLib.folder(folderName).delete()`  - Permanently deletes a folder (bypasses recycle bin)
+* `sprLib.folder(folderName).recycle()` - Moves folder to the site Recycle Bin
 
 ## Site Collection/Subsite
 * `sprLib.site(siteUrl).groups()`   - Returns an array of the site's Groups and Members
