@@ -8,7 +8,7 @@
 	<meta name="website"     content="https://github.com/gitbrent/SpRestLib/">
 	<meta name="keywords"    content="SpRestLib, JavaScript, js-sharepoint, SP2013 REST, SharePoint 2013, SharePoint 2016, SharePoint Online">
 	<meta name="description" content="Content Editor Webpart: SpRestLib features and capabilities">
-	<meta name="revised"     content="20181111">
+	<meta name="revised"     content="20181113">
 
 	<!-- HOWTO / FAQ / SETUP -->
 	<!--
@@ -315,7 +315,7 @@
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.15.0/prism.min.js"></script>
 
 	<script>
-		var APP_BLD = 20181111;
+		var APP_BLD = 20181113;
 		var HTML_SPINNER = '<div class="sprlib-spinner"><div class="sprlib-bounce1"></div><div class="sprlib-bounce2"></div><div class="sprlib-bounce3"></div></div>';
 		var LAYOUTS_URL = ( typeof _spPageContextInfo !== 'undefined' && _spPageContextInfo.layoutsUrl ? _spPageContextInfo.layoutsUrl : '_layouts/15' );
 
@@ -714,8 +714,11 @@
 				});
 			}
 
-			// FOLDER DELETE/RECYCLE
+			// FOLDER MANIP
 			{
+				// ADD:
+				$('#codeAddFold pre code').text( 'sprLib.folder(\''+ $('#selFoldFlds').val() +'\').add()' );
+
 				// DELETE:
 				$('#contFoldDel pre code').text( 'sprLib.folder(\''+ $('#selFoldFlds').val() +'\').delete()' );
 
@@ -726,6 +729,40 @@
 			// LAST: Re-highlight code
 			$('#tabFold code').each(function(idx,ele){
 				Prism.highlightElement( $(ele)[0] );
+			});
+		}
+
+		function doAddFolder() {
+			$('#tabFold .alert.alert-success').remove();
+			$('#tabFold .alert.alert-warning').remove();
+			$('#tabFold .alert.alert-danger').remove();
+
+			// A:
+			$('#addFolderName').removeClass('is-invalid');
+
+			// B:
+			if ( !$('#addFolderName').val().trim() ) {
+				$('#addFolderName').addClass('is-invalid');
+				return;
+			}
+			else if ( !$('#selFoldFlds').val() ) {
+				$('#contFoldAdd').append('<div class="alert alert-warning mt-3"><h3 class="m-0">Select a Library/Folder above!</h3></div>');
+				return;
+			}
+
+			// C:
+			sprLib.folder($('#selFoldFlds').val()).add($('#addFolderName').val())
+			.then(function(){
+				// A: Refresh tab
+				handleFoldFldChange();
+				// B: Show success msg
+				$('#contFoldAdd').append(
+					'<div class="alert alert-success mt-2" style="font-size:2rem"><i class="fas fa-check-circle text-white mr-3"></i>Folder created!</div>'
+				);
+			})
+			.catch(function(errMsg){
+				$('#contFoldAdd').append('<div class="alert alert-danger mt-3"><h3>ERROR</h3>'+errMsg+'</div>');
+				console.error(errMsg);
 			});
 		}
 
@@ -1141,7 +1178,7 @@
 			if ( window.location.href.toLowerCase().indexOf('gitbrent') > -1 && window.location.href.toLowerCase().indexOf('debug') > -1 ) {
 				// Dynamically load library as SharePoint Online is *BAD* about caching
 				$.getScript("../SiteAssets/sprestlib/js/sprestlib.js", function(){
-					$('#libChkSprLib input').val( sprLib.version ).addClass('bg-warning text-white');
+					$('#libChkSprLib').val( sprLib.version ).addClass('bg-success text-white');
 					console.log('FYI: Local copy of `sprestlib.js` loaded successfully...');
 					console.log( sprLib.version );
 					doPageLoad();
@@ -1158,7 +1195,7 @@
 	</script>
 </head>
 <body>
-	<h2><a href="https://github.com/GitBrent/SpRestLib" target="_blank">SpRestLib</a> API Demos</h2>
+	<h2><a href="https://github.com/GitBrent/SpRestLib" target="_blank">SpRestLib API Demos</a></h2>
 	<h6>SharePoint REST JavaScript Library</h6>
 
 	<div id="navTabs" class="flexTabs">
@@ -1237,22 +1274,21 @@
 				<div class="arrow active"></div>List Information
 			</h5>
 			<div id="tab1-ListInfo" class="container-fluid">
-				<pre><code class="language-javascript">sprLib.list('listName').info()</code></pre>
+				<pre class="my-3"><code class="language-javascript">sprLib.list('listName').info()</code></pre>
 			</div>
 
 			<h5 class="text-primary bde-arrow-cont mt-4" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
 				<div class="arrow"></div>List Columns
 			</h5>
 			<div id="tab1-ListCols" class="container-fluid" style="display:none">
-				<pre><code class="language-javascript">sprLib.list('listName').cols()</code></pre>
+				<pre class="my-3"><code class="language-javascript">sprLib.list('listName').cols()</code></pre>
 			</div>
 
 			<h5 class="text-primary bde-arrow-cont mt-4" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
 				<div class="arrow"></div>List Permissions
 			</h5>
 			<div id="tab1-ListPerms" class="container-fluid" style="display:none">
-				<pre><code class="language-javascript">sprLib.list('listName').perms()</code></pre>
-
+				<pre class="my-3"><code class="language-javascript">sprLib.list('listName').perms()</code></pre>
 				<table id="tabListPerms" class="tabModern">
 					<thead>
 						<tr>
@@ -1288,28 +1324,28 @@
 				</div>
 			</div>
 
-			<h4 class="text-primary mt-4">File Info: (Permissions, Properties, Versions)</h4>
+			<h4 class="text-dark mt-4">File Info: (Permissions, Properties, Versions)</h4>
 			<hr>
 			<div>
 				<h5 class="text-primary bde-arrow-cont mt-3" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
 					<div class="arrow"></div>File Properties
 				</h5>
 				<div id="contFileInfo" class="container-fluid" style="display:none">
-					<pre><code class="language-javascript">sprLib.file('fileName').info()</code></pre>
+					<pre class="my-3"><code class="language-javascript">sprLib.file('fileName').info()</code></pre>
 				</div>
 
 				<h5 class="text-primary bde-arrow-cont mt-3" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
 					<div class="arrow"></div>File Properties by Version
 				</h5>
 				<div id="contFileVer" class="container-fluid" style="display:none">
-					<pre><code class="language-javascript">sprLib.file('fileName').info({ version:1 })</code></pre>
+					<pre class="my-3"><code class="language-javascript">sprLib.file('fileName').info({ version:1 })</code></pre>
 				</div>
 
 				<h5 class="text-primary bde-arrow-cont mt-3" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
 					<div class="arrow"></div>File Permissions
 				</h5>
 				<div id="contFilePerms" class="container-fluid" style="display:none">
-					<pre><code class="language-javascript">sprLib.file('fileName').perms()</code></pre>
+					<pre class="my-3"><code class="language-javascript">sprLib.file('fileName').perms()</code></pre>
 					<table id="tabFilePerms" class="tabModern">
 						<thead>
 							<tr>
@@ -1323,7 +1359,7 @@
 				</div>
 			</div>
 
-			<h4 class="text-primary mt-4">File Manipulation: (Delete/Recycle, Download)</h4>
+			<h4 class="text-dark mt-4">File Manipulation: (Delete/Recycle, Download)</h4>
 			<hr>
 			<div>
 				<h5 class="text-primary bde-arrow-cont mt-4" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
@@ -1335,7 +1371,7 @@
 						The `sprLib` Promise returns a blob which can be saved easily - without FileSaver or other libraries.
 					</div>
 
-					<pre><code id="codeGetFile" class="language-javascript">sprLib.file('fileName').get()</code></pre>
+					<pre class="my-3"><code id="codeGetFile" class="language-javascript">sprLib.file('fileName').get()</code></pre>
 					<button type="button" class="btn btn-primary w-25 mt-2" onclick="eval($('#codeGetFile').text())">Download Selected File</button>
 				</div>
 
@@ -1343,7 +1379,7 @@
 					<div class="arrow"></div>Delete File (<strong>PERMANENT</strong> - bypasses Recycle Bin)
 				</h5>
 				<div id="contFileDel" class="container-fluid" style="display:none">
-					<pre><code id="codeDelFile" class="language-javascript">sprLib.file('fileName').delete()</code></pre>
+					<pre class="my-3"><code id="codeDelFile" class="language-javascript">sprLib.file('fileName').delete()</code></pre>
 					<button type="button" class="btn btn-primary w-25 mt-2" onclick="doFileDelete()">Delete Selected File</button>
 				</div>
 
@@ -1351,7 +1387,7 @@
 					<div class="arrow"></div>Recycle File (sends item to the site Recycle Bin)
 				</h5>
 				<div id="contFileRec" class="container-fluid" style="display:none">
-					<pre><code id="codeRecFile" class="language-javascript">sprLib.file('fileName').recycle()</code></pre>
+					<pre class="my-3"><code id="codeRecFile" class="language-javascript">sprLib.file('fileName').recycle()</code></pre>
 					<button type="button" class="btn btn-primary w-25 mt-2" onclick="doFileRecycle()">Recycle Selected File</button>
 				</div>
 			</div>
@@ -1425,9 +1461,26 @@
 				</div>
 			</div>
 
-			<h4 class="text-dark mt-5">Folder Manipulation: (Delete, Recycle)</h4>
+			<h4 class="text-dark mt-5">Folder Manipulation: (Add, Delete, Recycle)</h4>
 			<hr>
 			<div>
+				<h5 class="text-primary bde-arrow-cont mt-4" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
+					<div class="arrow"></div>Add Folder
+				</h5>
+				<div id="contFoldAdd" class="container-fluid" style="display:none">
+					<pre><code id="codeAddFold" class="language-javascript">sprLib.folder('FolderName').add('NewFolder')</code></pre>
+					<div class="row align-items-end bg-light w-50 p-3 ml-1 mt-2">
+						<div class="col-8">
+							<label for="addFolderName" class="text-muted">New Folder Name</label>
+							<input id="addFolderName" type="text" class="form-control w-100">
+							<div class="invalid-feedback">Please enter a new folder name</div>
+						</div>
+						<div class="col-4 text-center">
+							<button type="button" class="btn btn-primary mt-2" onclick="doAddFolder()">Add New Folder</button>
+						</div>
+					</div>
+				</div>
+
 				<h5 class="text-primary bde-arrow-cont mt-4" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
 					<div class="arrow"></div>Delete Folder (<strong>PERMANENT</strong> - bypasses Recycle Bin)
 				</h5>
