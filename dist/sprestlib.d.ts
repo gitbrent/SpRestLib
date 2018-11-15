@@ -35,10 +35,13 @@ declare namespace sprLib {
   function file(fileName: string): IFile;
 
   interface IFolder {
+    add(folderName: string): Promise<boolean>;
+    delete(): Promise<boolean>;
     files(): Promise<Object[]>;
     folders(): Promise<Object[]>;
     info(): Promise<Object>;
     perms(): Promise<Object[]>;
+    recycle(): Promise<boolean>;
   }
   function folder(folderName: string): IFolder;
 
