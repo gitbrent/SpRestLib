@@ -35,7 +35,7 @@ declare namespace sprLib {
   function file(fileName: string): IFile;
 
   interface IFolder {
-    add(folderName: string): Promise<boolean>;
+    add(folderName: string): Promise<Object>;
     delete(): Promise<boolean>;
     files(): Promise<Object[]>;
     folders(): Promise<Object[]>;
