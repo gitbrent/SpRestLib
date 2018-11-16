@@ -148,6 +148,8 @@ sprLib.folder('/sites/dev/Shared Documents/').add('New Folder')
 ### Delete Folder
 `sprLib.folder("SiteAssets/img/junk").delete()`
 
+Bypasses Recycle Bin (permanently deletes the folder)
+
 Returns: Boolean result
 
 #### Delete Folder Sample Code
@@ -158,6 +160,8 @@ sprLib.folder('SiteAssets/img/junk').delete()
 
 ### Recycle Folder
 `sprLib.folder("SiteAssets/img/junk").recycle()`
+
+Sends folder to the site Recycle Bin
 
 Returns: Boolean result
 
