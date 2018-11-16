@@ -6,17 +6,20 @@ title: Folder Methods (SP.Folder)
 ## Syntax
 Folders can be accessed by either their full or relative path:  
 
-`sprLib.folder('sample.pptx')`  
-`sprLib.folder('/sites/dev/Shared Documents/sample.pptx')`  
+`sprLib.folder('SiteAssets')`  
+`sprLib.folder('SiteAssets/img')`  
+`sprLib.folder('/sites/dev/Shared Documents')`  
 
 
 
 ## Folder Information
+
+### Folder Properties
 `sprLib.folder("FolderName").info()`
 
 Returns: Array of folder properties
 
-### Folder Properties
+#### Folder Properties
 | Property Name             | Type     | Description                                                      |
 | :------------------------ | :------- | :--------------------------------------------------------------- |
 | `Created`                 | string   | the Date (ISO format) a file was created                         |
@@ -30,7 +33,7 @@ Returns: Array of folder properties
 | `ServerRelativeUrl`       | string   | the server relative URL - ex: "/sites/dev/SiteAssets"            |
 | `TotalSize`               | integer  | the size of the folder's contents in bytes - ex: 55100           |
 
-### Sample Code
+#### Sample Code
 ```javascript
 sprLib.folder('/sites/dev/Shared Documents/').info()
 .then(function(objInfo){ console.table([objInfo]) });
@@ -55,18 +58,18 @@ sprLib.folder('/sites/dev/Shared Documents/').info()
 */
 ```
 
-## Folder Permissions
+### Folder Permissions
 `sprLib.folder("FolderName").perms()`
 
 Returns: Array of file permissions
 
-### Perm Properties
+#### Folder Permission Properties
 | Property Name    | Type     | Description                                                           |
 | :--------------- | :------- | :-------------------------------------------------------------------- |
 | `Member`         | object   | object with Member properties (`Title`,`PrincipalId`,`PrincipalType`) |
 | `Roles`          | object   | array of Role objects with properties: (`Name`,`Hidden`)              |
 
-### Sample Code
+#### Folder Permissions Sample Code
 ```javascript
 sprLib.folder('/sites/dev/Shared Documents/').perms()
 .then(function(arrayResults){ console.table(arrayResults) });
@@ -83,14 +86,14 @@ sprLib.folder('/sites/dev/Shared Documents/').perms()
 */
 ```
 
+## Folder Contents
 
-
-## Folder Contents: Files
+### Child Files
 `sprLib.folder("FolderName").files()`
 
 Returns: Array of `SP.File` objects in this Folder (see [File Properties](/SpRestLib/docs/api-file.html#file-properties))
 
-### Sample Code
+#### Child Files Sample Code
 ```javascript
 sprLib.folder('/sites/dev/Shared Documents/').files()
 .then(function(arrayResults){ console.table(arrayResults) });
@@ -106,12 +109,12 @@ sprLib.folder('/sites/dev/Shared Documents/').files()
 
 
 
-## Folder Contents: Folders
+### Child Folders
 `sprLib.folder("FolderName").folders()`
 
 Returns: Array of `SP.Folder` objects in this Folder (see [Folder Properties](#folder-properties))
 
-### Sample Code
+#### Child Folders Sample Code
 ```javascript
 sprLib.folder('/sites/dev/Shared Documents/').folders()
 .then(function(arrayResults){ console.table(arrayResults) });
@@ -126,3 +129,40 @@ sprLib.folder('/sites/dev/Shared Documents/').folders()
 | stylesheets |        11 | /sites/dev/SiteAssets/stylesheets | 2016-08-17T00:02:49 |           0 | {ADA19FF5-BA9F-4D05-89FF-7656F4D7325E} | true       | false  | 2017-10-25T03:42:32 |
 '--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------'
 */
+```
+
+
+## Folder Manipulation
+
+### Add Folder
+`sprLib.folder("FolderName").add("NewFolder")`
+
+Returns: The new folder as an `SP.Folder` object
+
+#### Add Folder Sample Code
+```javascript
+sprLib.folder('/sites/dev/Shared Documents/').add('New Folder')
+.then(objFolder => console.log('new folder created!') );
+```
+
+### Delete Folder
+`sprLib.folder("SiteAssets/img/junk").delete()`
+
+Returns: Boolean result
+
+#### Delete Folder Sample Code
+```javascript
+sprLib.folder('SiteAssets/img/junk').delete()
+.then(boolResult => console.log('folder deleted!') );
+```
+
+### Recycle Folder
+`sprLib.folder("SiteAssets/img/junk").recycle()`
+
+Returns: Boolean result
+
+#### Recycle Folder Sample Code
+```javascript
+sprLib.folder('SiteAssets/img/junk').recycle()
+.then(boolResult => console.log('folder recycled!') );
+```
