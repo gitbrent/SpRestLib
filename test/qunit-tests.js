@@ -2,7 +2,7 @@
  * NAME: qunit-test.js
  * DESC: tests for qunit-test.html (coded against my personal O365 Dev Site - YMMV)
  * AUTH: https://github.com/gitbrent/
- * DATE: 20180828
+ * DATE: 20181115
  *
  * HOWTO: Generate text tables for README etc.:
  * sprLib.list('Employees').items(['Id', 'Name', 'Badge_x0020_Number']).then(function(arrData){ console.log(getAsciiTableStr(arrData)) });
@@ -1184,7 +1184,7 @@ QUnit.module( "FILE - Methods", function(){
 	// NOTE: `get` - test can be executed via `sprestlib-demo.html` (or `nodejs-demo.js`)
 
 	// `info()`
-	QUnit.test("sprLib.file('whatever').info()", function(assert){
+	QUnit.test("sprLib.file('SiteAssets/whatever').info()", function(assert){
 		var done = assert.async();
 		sprLib.folder('SiteAssets').files()
 		.then(arrFiles => {
@@ -1202,7 +1202,7 @@ QUnit.module( "FILE - Methods", function(){
 	});
 
 	// `perms()`
-	QUnit.test("sprLib.file('whatever').perms()", function(assert){
+	QUnit.test("sprLib.file('SiteAssets/whatever').perms()", function(assert){
 		var done = assert.async();
 		sprLib.folder('SiteAssets').files()
 		.then(arrFiles => {
@@ -1222,7 +1222,7 @@ QUnit.module( "FILE - Methods", function(){
 	});
 
 	// `delete()`
-	QUnit.test("sprLib.file('whatever').delete()", function(assert){
+	QUnit.test("sprLib.file('/sites/dev/Shared Documents/deleteable/whatever').delete()", function(assert){
 		var done = assert.async();
 		// PREP:
 		var objFile = {};
@@ -1247,7 +1247,7 @@ QUnit.module( "FILE - Methods", function(){
 	});
 
 	// `recycle()`
-	QUnit.test("sprLib.file('whatever').recycle()", function(assert){
+	QUnit.test("sprLib.file('/sites/dev/Shared Documents/deleteable/whatever').recycle()", function(assert){
 		var done = assert.async();
 		// PREP:
 		var objFile = {};
@@ -1274,6 +1274,7 @@ QUnit.module( "FILE - Methods", function(){
 });
 
 QUnit.module( "FOLDER - Methods", function(){
+	// INFO: PROPS/PERMS
 	QUnit.test("sprLib.folder('"+BASEURL+"/SiteAssets').info() - using full URL", function(assert){
 		var done = assert.async();
 		sprLib.folder(BASEURL+'/SiteAssets').info()
@@ -1334,6 +1335,7 @@ QUnit.module( "FOLDER - Methods", function(){
 		});
 	});
 
+	// CONTENTS: FILES/FOLDERS
 	QUnit.test("sprLib.folder('SiteAssets').files()", function(assert){
 		var done = assert.async();
 		sprLib.folder('SiteAssets').files()
@@ -1362,6 +1364,77 @@ QUnit.module( "FOLDER - Methods", function(){
 		})
 		.catch(function(errorMessage){
 			assert.ok( (false), errorMessage );
+			done();
+		});
+	});
+
+	// MANIPULATION: Add, Delete, Recycle
+	// `add()`
+	QUnit.test("sprLib.folder('Shared Documents/deleteable').add('newFolder')", function(assert){
+		var done = assert.async();
+		var strNewFolder = 'AddFolder-'+new Date().toISOString().replace(/[-:.]/gi,'');
+		sprLib.folder('Shared Documents/deleteable').add(strNewFolder)
+		.then(objFolder => {
+			sprLib.folder( objFolder.ServerRelativeUrl ).info()
+			.then(function(objInfo){
+				assert.ok( Object.keys(objInfo).length > 0, "Object.keys(objInfo).length > 0: "+ Object.keys(objInfo).length );
+				assert.ok( objInfo.Name == strNewFolder, "(objInfo.Name == strNewFolder) ? "+ (objInfo.Name == strNewFolder ? 'TRUE' : 'FALSE!!!') );
+				assert.ok( getAsciiTableStr([objInfo]) , `RESULTS:\n${getAsciiTableStr([objInfo])}`);
+				done();
+			})
+			.catch(function(errorMessage){
+				assert.ok( (false), errorMessage );
+				done();
+			});
+		});
+	});
+
+	// `delete()`
+	QUnit.test("sprLib.folder('folderToDelete').delete()", function(assert){
+		var done = assert.async();
+		// PREP:
+		var objFile = {};
+		sprLib.folder('/sites/dev/Shared Documents/deleteable').folders()
+		.then(function(arrResults){
+			if ( !arrResults || arrResults.length == 0 ) throw 'NO_FOLDERS_FOUND';
+			objFile = arrResults.sort((a,b) => { return new Date(a.Modified) > new Date(b.Modified) ? true : false })[0];
+			assert.ok( (true), "FYI: objFolder: "+JSON.stringify(objFile,null,4) );
+		})
+		.then(function(){
+			// TEST:
+			sprLib.folder(objFile.ServerRelativeUrl).delete()
+			.then(function(boolResult){
+				assert.ok( boolResult, "`boolResult`: "+boolResult.toString() );
+				done();
+			});
+		})
+		.catch(function(err){
+			assert.ok( (false), err );
+			done();
+		});
+	});
+
+	// `recycle()`
+	QUnit.test("sprLib.folder('folderToDelete').recycle()", function(assert){
+		var done = assert.async();
+		// PREP:
+		var objFile = {};
+		sprLib.folder('/sites/dev/Shared Documents/deleteable').folders()
+		.then(function(arrResults){
+			if ( !arrResults || arrResults.length == 0 ) throw 'NO_FOLDERS_FOUND';
+			objFile = arrResults.sort((a,b) => { return new Date(a.Modified) > new Date(b.Modified) ? true : false })[0];
+			assert.ok( (true), "FYI: objFolder: "+JSON.stringify(objFile,null,4) );
+		})
+		.then(function(){
+			// TEST:
+			sprLib.folder(objFile.ServerRelativeUrl).recycle()
+			.then(function(boolResult){
+				assert.ok( boolResult, "`boolResult`: "+boolResult.toString() );
+				done();
+			});
+		})
+		.catch(function(err){
+			assert.ok( (false), err );
 			done();
 		});
 	});
