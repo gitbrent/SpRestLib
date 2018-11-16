@@ -10,52 +10,89 @@ Files can be accessed by either their full or relative path:
 `sprLib.file('/sites/dev/Shared Documents/sample.pptx')`  
 
 
-## File CheckIn
+## File CheckIn/Checkout
+
+### File CheckIn
 `sprLib.file("filename").checkin()`  
 `sprLib.file("filename").checkin({ comment:"All done!" })`  
 `sprLib.file("filename").checkin({ comment:"All done!", type:"Major" })`  
 
 Returns: True on success
 
-### File CheckIn Options
+#### File CheckIn Options
 | Option        | Type     | Default   | Description                                                  |
 | :------------ | :------- | :-------- | :----------------------------------------------------------- |
 | `comment`     | string   |           | CheckIn comment. Ex: `{ 'comment':"updated due date" }`      |
 | `type`        | string   | `Major`   | CheckIn type. Possible values: `Major`, `Minor`, `Overwrite` |
 
 
-
-## File CheckOut
+### File CheckOut
 `sprLib.file("filename").checkout()`  
 
 Returns: True on success
 
 
 
-## File Delete
+## File Manipulation
+
+### Download File
+`sprLib.file("filename").get()`  
+
+Returns: Blob containing the file (either text or binary).
+
+#### Download File Sample Code
+```javascript
+// Example: Client-browser code to download file from SharePoint using JavaScript and REST
+sprLib.file('SiteAssets/img/sprestlib.png').get()
+.then(function(blob){
+    var url = (window.URL || window.webkitURL).createObjectURL(blob);
+    var link = document.createElement("a");
+    link.setAttribute("href", url);
+    link.setAttribute("download", _fileName);
+    link.style = "visibility:hidden";
+    document.body.appendChild(link);
+    link.click();
+    setTimeout(function(){ document.body.removeChild(link); }, 500);
+});
+```
+![Example](/SpRestLib/docs/assets/file-download-example.png)
+
+### Delete File
 `sprLib.file("filename").delete()`  
 
 Bypasses Recycle Bin (permanently deletes the file)
 
-Returns: True on success
+Returns: Boolean result
+
+#### Delete File Sample Code
+```javascript
+sprLib.file('SiteAssets/img/junk.png').delete()
+.then(boolResult => console.log('file deleted!') );
+```
 
 
-
-## File Recycle
+### Recycle File
 `sprLib.file("filename").delete()`  
 
 Sends file to the site Recycle Bin
 
 Returns: True on success
 
+#### Recycle File Sample Code
+```javascript
+sprLib.file('SiteAssets/img/junk.png').recycle()
+.then(boolResult => console.log('file recycled!') );
+```
 
 
 ## File Information
+
+### File Properties
 `sprLib.file("filename").info()`
 
 Returns: Object containing file properties
 
-### File Properties Enumeration
+#### File Properties Enumeration
 | Property Name          | Type     | Description                                                      |
 | :--------------------- | :------- | :--------------------------------------------------------------- |
 | `Author`               | object   | object containing the `id` of the author - ex: {"Id":9}          |
@@ -76,7 +113,7 @@ Returns: Object containing file properties
 | `UIVersionLabel`       | string   | major.minor version - ex: "30.0"                                 |
 | `UniqueId`             | GUID     | GUID for the file - ex: 8921212D-7E83-5AF1-CB51-5431BAD43233     |
 
-### Sample Code
+#### File Properties Sample Code
 ```javascript
 sprLib.file('/sites/dev/Shared Documents/sample.xlsx').info()
 .then(function(objInfo){ console.table([objInfo]) });
@@ -107,20 +144,18 @@ sprLib.file('/sites/dev/Shared Documents/sample.xlsx').info()
 */
 ```
 
-
-
-## File Permissions
+### File Permissions
 `sprLib.file("filename").perms()`
 
 Returns: Array of file permissions
 
-### Perm Properties
+#### Permissions Properties
 | Property Name    | Type     | Description                                                           |
 | :--------------- | :------- | :-------------------------------------------------------------------- |
 | `Member`         | object   | object with Member properties (`Title`,`PrincipalId`,`PrincipalType`) |
 | `Roles`          | object   | array of Role objects with properties: (`Name`,`Hidden`)              |
 
-### Sample Code
+#### File Permissions Sample Code
 ```javascript
 sprLib.file('/sites/dev/Shared Documents/sample.xlsx').perms()
 .then(function(arrayResults){ console.table(arrayResults) });
@@ -136,13 +171,3 @@ sprLib.file('/sites/dev/Shared Documents/sample.xlsx').perms()
 '-----------------------------------------------------------------------------------------------------------------------------------------------------------'
 */
 ```
-
-
-
-## File Download
-`sprLib.file("filename").get()`
-
-Returns a blob containing the file (either text or binary).
-
-### Sample Code
-See either `example/sprestlib-demo.html` or `example/nodejs-demo.js` for working examples of downloading a file using a web browser or Node.
