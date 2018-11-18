@@ -4,7 +4,7 @@
         <title>SpRestLib Blog</title>
         <link>https://gitbrent.github.io/SpRestLib/blog</link>
         <description>The best place to stay up-to-date with the latest SpRestLib news and events.</description>
-        <lastBuildDate>Sat, 03 Nov 2018 06:00:00 GMT</lastBuildDate>
+        <lastBuildDate>Sat, 17 Nov 2018 06:00:00 GMT</lastBuildDate>
         <docs>http://blogs.law.harvard.edu/tech/rss</docs>
         <generator>Feed for Node.js</generator>
         <image>
@@ -13,6 +13,16 @@
             <link>https://gitbrent.github.io/SpRestLib/blog</link>
         </image>
         <copyright>Copyright © 2018 Brent Ely</copyright>
+        <item>
+            <title><![CDATA[Downloading a file from SharePoint library using JavaScript and REST API]]></title>
+            <link>https://gitbrent.github.io/SpRestLib/blog/2018/11/17/download-sharepoint-file-using-javascript.html</link>
+            <guid>https://gitbrent.github.io/SpRestLib/blog/2018/11/17/download-sharepoint-file-using-javascript.html</guid>
+            <pubDate>Sat, 17 Nov 2018 06:00:00 GMT</pubDate>
+            <description><![CDATA[<p>Howto download a file from SharePoint Library using REST. This technique produces
+a BLOB that can be streamed/saved directly from a web browser and works with both
+text and binary files.</p>
+]]></description>
+        </item>
         <item>
             <title><![CDATA[Converting SharePoint 2010 API column names to SharePoint 2013 API column names]]></title>
             <link>https://gitbrent.github.io/SpRestLib/blog/2018/11/03/convert-sp2010-column-names-to-sp2013.html</link>
