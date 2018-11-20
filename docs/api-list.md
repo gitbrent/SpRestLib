@@ -6,26 +6,26 @@ title: List/Library Methods (SP.List)
 ## Syntax
 Lists can be accessed by either their name or their GUID:  
 
-`sprLib.list(listName)`  
-`sprLib.list(listGUID)`  
-`sprLib.list({ name:name })`  
-`sprLib.list({ guid:GUID })`  
-`sprLib.list({ name:name, baseUrl:path, requestDigest:formDigestValue })`  
+`sprLib.list( 'name' )`  
+`sprLib.list( 'GUID' )`  
+`sprLib.list({ name:'name' })`  
+`sprLib.list({ guid:'GUID' })`  
+`sprLib.list({ name:'name', baseUrl:'/path/to/list', requestDigest:'formDigestValue' })`  
 
 ## Options
 | Prop            | Type   | Required? | Description                              | Possible Values                  |
 | :-------------- | :----- | :-------- | :--------------------------------------- | :------------------------------- |
 | `name`          | string |     Y     | list name or list GUID                   | Ex:`{'name': 'Employees'}`       |
-| `guid`          | string |           | list GUID (convenience alias for name)   | Ex:`{'guid': '8675309-ab3d-ef87b08e09e1'}` |
-| `baseUrl`       | string |           | the base url                             | Ex:`{'baseUrl': '/sites/dev'}`   |
+| `guid`          | string |           | list GUID (alias for `name`)             | Ex:`{'guid': '8675309-ab3d-ef87b08e09e1'}` |
+| `baseUrl`       | string |           | location of list                         | Relative or full path. Ex:`{'baseUrl': '/sites/dev'}`   |
 | `requestDigest` | string |           | the request form digest security token   | Ex:`{'requestDigest': 'ABC123'}` |
 
-### Options: baseUrl
+### `baseUrl`
 By default, the base URL is set to where the host webpart is located (`_spPageContextInfo.webServerRelativeUrl`).
 However, there are occasions when reading from other locations - like a subsite - is desired. Use the `baseUrl`
 parameter to specify the desired location.
 
-### Options: requestDigest
+### `requestDigest`
 By default, the request digest is set to the `<input id="__REQUESTDIGEST">` form element value if one exists (e.g.: WebPart in an .aspx page).
 Security tokens are required for certain SharePoint operations like creating or updating List items. If your application is not inside
 a SharePoint .aspx page, you will need to obtain the digest value and pass it when it's needed.
@@ -36,7 +36,9 @@ sprLib.rest({ url:'_api/contextinfo', type:'POST' })
 .then(arr => console.log(arr[0].GetContextWebInformation.FormDigestValue) );
 ```
 
-## Get Items
+## Get/Manipulate Items
+
+### Get Item
 Syntax:  
 `sprLib.list(listName|listGUID).items(options)`
 
@@ -47,7 +49,7 @@ Notes:
 * Omitting the `listCols` option will result in all List columns being returned (mimics SharePoint default behavior)
 * Only the first 100 items are returned by default (mimics SharePoint default behavior) - use `queryLimit` to get more (5,000 is typically the max, use `queryNext` [paging] for unlimited items)
 
-### items Options
+#### Options
 | Option        | Type     | Default   | Description                         | Possible Values / Returns                  |
 | :------------ | :------- | :-------- | :---------------------------------- | :----------------------------------------- |
 | `listCols`    | array    |           | array of column names (OData style) | `listCols: ['Name', 'Badge_x0020_Number']` |
@@ -59,7 +61,7 @@ Notes:
 | `queryOrderby`| string   |           | column(s) to order by                  | Ex:`queryOrderby:Name` |
 | `metadata`    | boolean  | `false`   | whether to return `__metadata`      | The `__metadata` property can be included in the results array (to enable further operations, use of Etag, etc.) by using `metadata:true` |
 
-### listCols Object
+#### `listCols` Object
 | Option        | Type     | Default   | Description           | Possible Values / Return Values     |
 | :------------ | :------- | :-------- | :-------------------- | :---------------------------------- |
 | `dataName`    | string   |           | the column name       | the fixed, back-end REST column name (use [Get List Column Properties](#get-list-column-properties)) |
@@ -68,14 +70,14 @@ Notes:
 | `dataFunc`    | function |           | function to use for returning a result | use a custom function to transform the query result (see below) |
 | `getVersions` | boolean  | `false`   | return append text versions in array | `true` or `false` |
 
-### listCols dataFunc Option
+#### `listCols` dataFunc Option
 There are many times where you'll need more than a simple column value.  For example, providing a link to the InfoPath
 form so users can edit the item directly.
 
 The `dataFunc` option allows you access to the entire result set, then return any type of value.  See the sample below where
 an "editLink" is created.
 
-### Sample Code
+#### Get Item Sample Code
 ```javascript
 // EX: Simple array of column names
 sprLib.list('Employees').items( ['Id','Name','Badge_x0020_Number'] )
@@ -169,14 +171,14 @@ sprLib.list('Departments').items({
 ```
 
 
-## Create Item
+### Create Item
 Syntax: `sprLib.list(listName|listGUID).create(itemObject)`
 
 Options: An object with internal name/value pairs to be inserted
 
 Returns: Object with column name/value pairs
 
-Example:
+#### Create Item Sample Code
 ```javascript
 sprLib.list('Employees')
 .create({
@@ -193,7 +195,7 @@ sprLib.list('Employees')
 ```
 
 
-## Update Item
+### Update Item
 Syntax:
 `sprLib.list(listName|listGUID).update(itemObject)`
 
@@ -204,7 +206,7 @@ Options:
 Returns:
 The object provided
 
-Example:
+#### Update Item Sample Code
 ```javascript
 sprLib.list('Employees')
 .update({
@@ -220,7 +222,7 @@ sprLib.list('Employees')
 ```
 
 
-## Delete Item
+### Delete Item
 Syntax:
 `sprLib.list(listName|listGUID).delete(itemObject)`
 
@@ -230,7 +232,7 @@ ID of the item just deleted
 Notes:
 Permanently deletes the item (bypasses Recycle Bin - not recoverable)
 
-Example:
+#### Delete Item Sample Code
 ```javascript
 sprLib.list('Employees').delete({ "ID":123 })
 .then(function(intId){ console.log('Deleted Item #'+intId); })
@@ -238,7 +240,7 @@ sprLib.list('Employees').delete({ "ID":123 })
 ```
 
 
-## Recycle Item
+### Recycle Item
 Syntax:
 `sprLib.list(listName|listGUID).recycle(itemObject)`
 
@@ -248,7 +250,7 @@ ID of the item just recycled
 Notes:
 Moves the item into the Site Recycle Bin
 
-Example:
+#### Recycle Item Sample Code
 ```javascript
 sprLib.list('Employees').recycle({ "ID":123 })
 .then(function(intId){ console.log('Recycled Item #'+intId); })
@@ -256,14 +258,15 @@ sprLib.list('Employees').recycle({ "ID":123 })
 ```
 
 
+## List Information
 
-## Get List Column Properties
+### Column Types and Options
 Syntax:
 `sprLib.list(listName|listGUID).cols()`
 
 Returns: Array of columns with name value pairs of property values
 
-### Column Properties
+#### Column Properties
 | Property       | Type     | Description                                |
 | :------------- | :------- | :----------------------------------------- |
 | `dispName`     | string   | display name                               |
@@ -279,7 +282,7 @@ Returns: Array of columns with name value pairs of property values
 | `choiceValues` | array    | allowed choice values                      |
 | `allowFillInChoices` | boolean | are fill-in (custom) choices allowed? |
 
-### Sample Code
+#### Sample Code
 ```javascript
 sprLib.list('Announcements').cols()
 .then(function(arrayResults){ console.table(arrayResults) });
@@ -311,12 +314,12 @@ sprLib.list('Announcements').cols()
 */
 ```
 
-## Get List Info
+### List Properties
 Syntax: `sprLib.list(listName|listGUID).info()`
 
-Returns: Object containing list properties
+Returns: Object containing list properties - e.g. Title, Item Count, Created Date, etc.
 
-### List Properties
+#### Properties
 | Property Name               | Type     | Description                                                 |
 | :-------------------------- | :------- | :---------------------------------------------------------- |
 | `AllowContentTypes`         | boolean  | Whether `Allow management of content types?` is enabled     |
@@ -339,7 +342,7 @@ Returns: Object containing list properties
 | `ListItemEntityTypeFullName`| string   | `SP.List.listItemEntityTypeFullName` property               |
 | `Title`                     | string   | The Title of the List/Library                               |
 
-### Sample Code
+#### Sample Code
 ```javascript
 sprLib.list('Employees').info()
 .then(function(object){ console.table([object]) });
@@ -353,7 +356,7 @@ sprLib.list('Employees').info()
 | BaseTemplate               | 100                                    |
 | BaseType                   | 0                                      |
 | Created                    | "2017-08-21T20:48:43Z"                 |
-| Description                |                                        |
+| Description                | ""                                     |
 | DraftVersionVisibility     | 0                                      |
 | EnableAttachments          | true                                   |
 | EnableFolderCreation       | false                                  |
@@ -374,18 +377,18 @@ sprLib.list('Employees').info()
 
 
 
-## Get List Permissions
+### List Permissions
 Syntax: `sprLib.list(listName|listGUID).perms()`
 
 Returns: Array of list permissions
 
-### Perm Properties
+#### Permission Properties
 | Property Name    | Type     | Description                                                           |
 | :--------------- | :------- | :-------------------------------------------------------------------- |
 | `Member`         | object   | object with Member properties (`Title`,`PrincipalId`,`PrincipalType`) |
 | `Roles`          | object   | array of Role objects with properties: (`Name`,`Hidden`)              |
 
-### Sample Code
+#### Sample Code
 ```javascript
 sprLib.list('Employees').perms()
 .then(function(arrayResults){ console.table(arrayResults) });
@@ -402,8 +405,10 @@ sprLib.list('Employees').perms()
 */
 ```
 
-### List Permissions page (user.aspx)
-Easily reproduce the "List Permissions" page ('/\_layouts/15/user.aspx')
+### HowTo: List Permissions Report
+Easily reproduce the "List Permissions" page ('/\_layouts/15/user.aspx') with a few lines of code.
+
+#### Sample Code
 ```javascript
 sprLib.list('Employees').perms()
 .then(function(arrPerms){
