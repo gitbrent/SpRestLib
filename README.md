@@ -6,22 +6,23 @@
 Provides a concise, promise-based API that simplifies asynchronous REST interaction with SharePoint. Easily read/write List
 items, execute REST calls, interact with files and folders, gather site properties, and query user information. Enables rapid development of SharePoint Apps/Add-ins using the JavaScript SharePoint App Model.  
 
-### Library Features:
+### Library Features
 * Simple  - Most SharePoint web service calls are a few lines of code
 * Modern  - Lightweight, pure JavaScript solution with no other dependencies
 * Elegant - Utilizes the new [ES6 Promise](http://www.datchley.name/es6-promises/) architecture for asynchronous operations
 * Robust  - Built for [SharePoint 2013 API](https://msdn.microsoft.com/en-us/library/office/jj860569.aspx) and [OData v3](http://www.odata.org/documentation/odata-version-3-0/)
 
-### SharePoint Interfaces:
+### SharePoint Interfaces
 * List Methods - Create, read, update, and delete (CRUD) List/Library items, including support for paging/next
 * User Methods - Get User information: Basic (ID, Email, LoginName, etc.) and UserProfile (Manager, 100+ Properties)
 * Site Methods - Get Site information (Lists, Groups, Users, Roles, Subsites and Permissions)
-* File/Folder Methods - Get File/Folder properties and permissions. Download files and get a folder's items.
-* REST Methods - Run REST API calls against any available [SharePoint REST API](https://msdn.microsoft.com/en-us/library/office/dn268594.aspx) endpoint
+* File Methods - Get files, File properties/permissions, delete/recycle files
+* Folder Methods - Get folder contents, Folder properties/permissions, create/delete/recycle folders
+* REST Methods - Execute REST API calls against any available [SharePoint REST API](https://msdn.microsoft.com/en-us/library/office/dn268594.aspx) endpoint
 * Form Population - Populate form elements using data-bind declarative binding system like Knockout or AngluarJS
 
-### Supported Environments:
-* SharePoint 2013 (SP2013), SharePoint 2016 (SP2016), SharePoint Online (Office 365)
+### Supported Environments
+* SharePoint 2013 (SP2013), SharePoint 2016 (SP2016), Office 365 SharePoint Online (SPO)
 
 
 **************************************************************************************************
@@ -91,9 +92,9 @@ items, execute REST calls, interact with files and folders, gather site properti
   - [Client-Side](#client-side)
     - [Include Local Scripts](#include-local-scripts)
     - [Include Bundle Script](#include-bundle-script)
-    - [Use CDN](#use-cdn)
-    - [Install With Bower](#install-with-bower)
-  - [Node.js](#nodejs)
+    - [CDN](#cdn)
+    - [NPM](#npm)
+    - [yarn](#yarn)
 - [Method Reference](#method-reference)
   - [REST API Methods](#rest-api-methods)
   - [List/Library Methods (`SP.List`)](#listlibrary-methods-splist)
@@ -161,23 +162,22 @@ document.getElementsByTagName('head')[0].appendChild(script);
 ```
 * *`sprestlib-ui.bundle.js` includes all required libraries plus UI (SpRestLib and SpRestLib-UI + jQuery and Promises)*
 
-### Use CDN
+### CDN
 ```javascript
 <script src="https://cdn.jsdelivr.net/gh/gitbrent/SpRestLib@1.8.0/dist/sprestlib.bundle.js"></script>
 ```
 
-### Install With Bower
-```javascript
-bower install sprestlib
-```
-
-## Node.js
+### NPM
 ```javascript
 npm install sprestlib
 
 var sprLib = require("sprestlib");
 ```
-* Desktop: Compatible with Electron applications.
+
+### yarn
+```javascript
+yarn install sprestlib
+```
 
 
 **************************************************************************************************
