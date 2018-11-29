@@ -30,7 +30,7 @@
 (function(){
 	// APP VERSION/BUILD
 	var APP_VER = "1.9.0-beta";
-	var APP_BLD = "20181112";
+	var APP_BLD = "20181128";
 	var DEBUG = false; // (verbose mode/lots of logging)
 	// ENUMERATIONS
 	// REF: [`SP.BaseType`](https://msdn.microsoft.com/en-us/library/office/jj246925.aspx)
@@ -68,11 +68,12 @@
 		currencyChar:    '$',
 		language:        'en',
 		maxRetries:      2,
-		maxRows:         5000,
+		maxRows:         5000, /* Max rows queried - internal app limit (used when getting Lists, Users, etc) */
 		metadata:        false,
-		isNodeEnabled:   false,
+		nodeEnabled:     false,
 		nodeCookie:      '',
 		nodeServer:      '',
+		queryLimit:      null, /* default queryLimit - allows global override of default SP "100 rows" limit */
 		retryAfter:      1000
 	};
 	// LIBRARY DEPS
@@ -172,13 +173,60 @@
 	sprLib.version = APP_VER+'-'+APP_BLD;
 
 	// API: OPTIONS
+	// TODO: move to new .options() instead of one-offs
+	// TODO: DEPRECATE `sprLib.baseUrl`
+	sprLib.options = function options(inOpt) {
+		// CASE 1: Act as a GETTER when no value passed
+		if ( !inOpt || typeof inOpt !== 'object' ||
+			( !inOpt.hasOwnProperty('baseUrl') && !inOpt.hasOwnProperty('queryLimit')
+				&& !inOpt.hasOwnProperty('nodeEnabled') && !inOpt.hasOwnProperty('nodeCookie')
+				&& !inOpt.hasOwnProperty('nodeServer')
+			)
+		) {
+			return {
+				baseUrl: APP_OPTS.baseUrl,
+				nodeCookie: APP_OPTS.nodeCookie,
+				nodeEnabled: APP_OPTS.nodeEnabled,
+				nodeServer: APP_OPTS.nodeServer,
+				queryLimit: APP_OPTS.queryLimit
+			};
+		}
+
+		// CASE 2: Act as a SETTER
+
+		// A: Check options
+		if ( inOpt.baseUrl     && typeof inOpt.baseUrl     !== 'string'  ) { console.warn('Warning: `baseUrl` should be a string'); return; }
+		if ( inOpt.nodeCookie  && typeof inOpt.nodeCookie  !== 'string'  ) { console.warn('Warning: `nodeCookie` should be a string'); return; }
+		if ( inOpt.nodeEnabled && typeof inOpt.nodeEnabled !== 'boolean' ) { console.warn('Warning: `nodeEnabled` should be a boolean'); return; }
+		if ( inOpt.nodeServer  && typeof inOpt.nodeServer  !== 'string'  ) { console.warn('Warning: `nodeServer` should be a string'); return; }
+		if ( inOpt.queryLimit  && typeof inOpt.queryLimit  !== 'number'  ) { console.warn('Warning: `queryLimit` should be a number'); return; }
+
+		// B: Set options
+		if ( inOpt.baseUrl     ) APP_OPTS.baseUrl     = inOpt.baseUrl.replace(/\/+$/,'');
+		if ( inOpt.nodeCookie  ) APP_OPTS.nodeCookie  = inOpt.nodeCookie;
+		if ( inOpt.nodeEnabled ) APP_OPTS.nodeEnabled = inOpt.nodeEnabled;
+		if ( inOpt.nodeServer  ) APP_OPTS.nodeServer  = inOpt.nodeServer;
+		if ( inOpt.queryLimit  ) APP_OPTS.queryLimit  = inOpt.queryLimit;
+
+		// C: Return current option values
+		return {
+			baseUrl: APP_OPTS.baseUrl,
+			nodeCookie: APP_OPTS.nodeCookie,
+			nodeEnabled: APP_OPTS.nodeEnabled,
+			nodeServer: APP_OPTS.nodeServer,
+			queryLimit: APP_OPTS.queryLimit
+		};
+	}
+
+	// DEPRECATED: Will be removed in v2.0.0 - use `options()` instead
 	/**
-	* Getter/Setter for the app option APP_OPTS.baseUrl (our _api call base)
+	* Getter/Setter for the app option APP_OPTS.baseUrl
 	*
-	* @param {string} `inStr` - URL to use as the root of API calls
+	* @public
+	* @param {string} inStr - URL to use as the root of API calls
+	* @returns {string} Return value of APP_OPTS.baseUrl
 	* @example - set baseUrl - `sprLib.baseUrl('/sites/devtest');`
 	* @example - get baseUrl - `sprLib.baseUrl();`
-	* @return {string} Return value of APP_OPTS.baseUrl
 	*/
 	sprLib.baseUrl = function baseUrl(inStr) {
 		// CASE 1: Act as a GETTER when no value passed
@@ -186,7 +234,17 @@
 
 		// CASE 2: Act as a SETTER
 		APP_OPTS.baseUrl = inStr.replace(/\/+$/,'');
+
 		if (DEBUG) console.log('APP_OPTS.baseUrl = '+APP_OPTS.baseUrl);
+	}
+
+	// DEPRECATED: Will be removed in v2.0.0 - use `options()` instead
+	// API: NODEJS: Setup
+	sprLib.nodeConfig = function nodeConfig(inOpt) {
+		inOpt = (inOpt && typeof inOpt === 'object' ? inOpt : {});
+		APP_OPTS.nodeEnabled = (typeof inOpt.nodeEnabled !== 'undefined' ? inOpt.nodeEnabled : true);
+		APP_OPTS.nodeCookie = inOpt.cookie || '';
+		APP_OPTS.nodeServer = inOpt.server || '';
 	}
 
 	// API: FILE
@@ -628,8 +686,8 @@
 
 		/**
 		* Add/Create a new Folder
-		*
 		* @since 1.9.0
+		*
 		* @see: https://msdn.microsoft.com/en-us/library/office/dn450841.aspx#bk_FolderCollectionAdd
 		* @returns: (object) - folder object returned by SharePoint
 		*/
@@ -1373,7 +1431,7 @@
 							// D: Add orderby (if any)
 							if ( inObj.queryOrderby ) objAjaxQuery.url += (objAjaxQuery.url.indexOf('?') > -1 ? '&':'?') + '$orderby=' + inObj.queryOrderby;
 
-							// E: Add maxrows / Next support
+							// E: Add queryLimit / Next support
 							if ( inObj.queryNext ) {
 								objAjaxQuery.url += '&p_ID='+ inObj.queryNext.prevId +'&$top='+ inObj.queryNext.maxItems;
 							}
@@ -1880,12 +1938,13 @@
 		return new Promise(function(resolve, reject) {
 			// STEP 1: Options setup
 			inOpt = inOpt || {};
-			inOpt.spArrData = [];
-			inOpt.cache    = (typeof inOpt.cache === 'boolean' ? inOpt.cache : APP_OPTS.cache);
-			inOpt.digest   = (inOpt.requestDigest || (typeof document !== 'undefined' && document.getElementById('__REQUESTDIGEST') ? document.getElementById('__REQUESTDIGEST').value : null));
-			inOpt.metadata = (typeof inOpt.metadata === 'boolean' ? inOpt.metadata : APP_OPTS.metadata);
-			inOpt.type     = inOpt.restType || inOpt.type || "GET";
-			inOpt.url      = (inOpt.restUrl || inOpt.url || APP_OPTS.baseUrl).replace(/\"/g, "'");
+			inOpt.spArrData  = [];
+			inOpt.cache      = (typeof inOpt.cache === 'boolean' ? inOpt.cache : APP_OPTS.cache);
+			inOpt.digest     = (inOpt.requestDigest || (typeof document !== 'undefined' && document.getElementById('__REQUESTDIGEST') ? document.getElementById('__REQUESTDIGEST').value : null));
+			inOpt.metadata   = (typeof inOpt.metadata === 'boolean' ? inOpt.metadata : APP_OPTS.metadata);
+			inOpt.queryLimit = inOpt.queryLimit || APP_OPTS.queryLimit || null;
+			inOpt.type       = inOpt.restType || inOpt.type || "GET";
+			inOpt.url        = (inOpt.restUrl || inOpt.url || APP_OPTS.baseUrl).replace(/\"/g, "'");
 
 			// STEP 2: Setup vars
 			var arrExpands = [], strExpands = "";
@@ -1957,7 +2016,7 @@
 					}
 				}
 
-				// NOTE: Only applies to GET [select] queries (POST with this param are obv. invalid!)
+				// NOTE: Only applies to GET [select] queries (POST with this params are invalid!)
 				if (
 					(inOpt.queryFilter || objAjaxQuery.url.toLowerCase().indexOf('$select') > -1)
 					&& inOpt.type == "GET"
@@ -1988,7 +2047,7 @@
 			Promise.resolve()
 			.then(function(){
 				return new Promise(function(resolve, reject) {
-					if ( APP_OPTS.isNodeEnabled ) {
+					if ( APP_OPTS.nodeEnabled ) {
 						if ( !https ) {
 							// Declare https on-demand so APP_OPTS applies (if we init `https` with the library Angular/React/etc will fail on load as users have not had a chance to select any options)
 							try { https = require("https"); } catch(ex){ console.error("Unable to load `https`"); throw 'LIB-MISSING-HTTPS'; }
@@ -2272,7 +2331,7 @@
 				// var strErrCode = jqXHR.status.toString();
 				// var strSpeCode = JSON.parse(jqXHR.responseText).error['code'].split(',')[0];
 				// INFO: ( strErrCode == '403' && strSpeCode == '-2130575252' )
-				if ( !APP_OPTS.isNodeEnabled && typeof strErr == 'string' && strErr.indexOf('(403)') > -1 && gRetryCounter <= APP_OPTS.maxRetries ) {
+				if ( !APP_OPTS.nodeEnabled && typeof strErr == 'string' && strErr.indexOf('(403)') > -1 && gRetryCounter <= APP_OPTS.maxRetries ) {
 					Promise.resolve()
 					.then(function(){
 						return sprLib.renewSecurityToken();
@@ -3001,14 +3060,6 @@
 	// API: UTILITY: Token
 	sprLib.renewSecurityToken = function renewSecurityToken() {
 		return doRenewDigestToken();
-	}
-
-	// API: NODEJS: Setup
-	sprLib.nodeConfig = function nodeConfig(inOpt) {
-		inOpt = (inOpt && typeof inOpt === 'object' ? inOpt : {});
-		APP_OPTS.isNodeEnabled = (typeof inOpt.nodeEnabled !== 'undefined' ? inOpt.nodeEnabled : true);
-		APP_OPTS.nodeCookie = inOpt.cookie || '';
-		APP_OPTS.nodeServer = inOpt.server || '';
 	}
 })();
 
