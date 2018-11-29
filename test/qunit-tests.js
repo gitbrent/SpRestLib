@@ -2,7 +2,7 @@
  * NAME: qunit-test.js
  * DESC: tests for qunit-test.html (coded against my personal O365 Dev Site - YMMV)
  * AUTH: https://github.com/gitbrent/
- * DATE: 20181115
+ * DATE: 20181128
  *
  * HOWTO: Generate text tables for README etc.:
  * sprLib.list('Employees').items(['Id', 'Name', 'Badge_x0020_Number']).then(function(arrData){ console.log(getAsciiTableStr(arrData)) });
@@ -2244,7 +2244,19 @@ QUnit.module( "QA -- Result Parsing", function(){
 });
 
 QUnit.module( "MISC -- Library Options", function(){
-	QUnit.test(`sprLib.baseUrl('${RESTROOT}')`, function(assert){
+	QUnit.test(`sprLib.options({ baseUrl:'${RESTROOT}' })`, function(assert){
+		// A: Set
+		sprLib.options({ baseUrl:RESTROOT });
+		// B: Get
+		var objOpts = sprLib.options();
+		var strBaseUrl = objOpts.baseUrl;
+		// C: Test
+		assert.ok( strBaseUrl == RESTROOT, "Pass: `sprLib.options().baseUrl == RESTROOT` Str: " + strBaseUrl );
+		assert.ok( getAsciiTableStr([objOpts]), `RESULTS:\n${getAsciiTableStr([objOpts])}` );
+	});
+
+	// DEPRECATED (w/b removed in 2.0)
+	QUnit.test(`sprLib.baseUrl('${RESTROOT}') **DEPRECATED**`, function(assert){
 		// TEST:
 		// A: Set
 		sprLib.baseUrl(RESTROOT);
@@ -2252,7 +2264,6 @@ QUnit.module( "MISC -- Library Options", function(){
 		var strBaseUrl = sprLib.baseUrl();
 		// C: Test
 		assert.ok( strBaseUrl == RESTROOT, "Pass: `strBaseUrl == RESTROOT` Str: " + strBaseUrl );
-		//
 	});
 });
 
@@ -2273,8 +2284,8 @@ QUnit.module( "MISC -- requestDigest Tests", function(){
 			_digest = arrAllArrays[0][0].GetContextWebInformation.FormDigestValue;
 			_testId = arrAllArrays[1][0].Id;
 
-			assert.ok( _digest, "_digest: "+ _digest );
-			assert.ok( _digest != $('#__REQUESTDIGEST').val(), "_digest != $('#__REQUESTDIGEST').val(): "+ $('#__REQUESTDIGEST').val() );
+			assert.ok( _digest, "(old) $('#__REQUESTDIGEST').val():\n"+ $('#__REQUESTDIGEST').val() );
+			assert.ok( _digest, "(new) _api/contextinfo.FormDigestValue:\n"+ _digest );
 
 			sprLib.list({ name:'Employees', requestDigest:_digest }).update({ ID:_testId, Title:'FDV Test' })
 			.then(function(objData){
