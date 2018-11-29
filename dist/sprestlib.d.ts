@@ -9,6 +9,23 @@
 declare namespace sprLib {
   const version: string;
 
+  interface optionsOptions {
+    baseUrl?: string;
+    nodeCookie?: string;
+    nodeEnabled?: boolean;
+    nodeServer?: string;
+    queryLimit?: number;
+  }
+  interface IOptions {
+    baseUrl: string;
+    nodeCookie?: string;
+    nodeEnabled?: boolean;
+    nodeServer?: string;
+    queryLimit: number;
+  }
+  function options(): IOptions;
+  function options(options: optionsOptions): IOptions;
+
   function baseUrl(): string;
   function baseUrl(baseUrl: string): void;
 
