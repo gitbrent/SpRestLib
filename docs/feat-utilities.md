@@ -2,27 +2,37 @@
 id: feat-utilities
 title: Utility Methods
 ---
-## Base Url
+## Options
+Get/Set global defaults and library properties using the options method.
 
 ### Syntax: Get
-`sprLib.baseUrl()`
+`sprLib.options()`
 
 ### Syntax: Set
-`sprLib.baseUrl(url)`
+`sprLib.options({ baseUrl:'/sites/dev' })`  
 
-### Description
-Sets the root/base URL for SharePoint operations.
+### Options Properties
+| Prop          | Type    | Description           | Possible Values                    |
+| :------------ | :------ | :-------------------- | :--------------------------------- |
+| `baseUrl`     | string  | the base url          | Ex: `{'baseUrl':'/sites/dev'}`     |
+| `nodeCookie`  | string  | user email address    | Ex: `{email:'brent@github.com'}`   |
+| `nodeEnabled` | boolean | user id               | Ex: `{id:99}`                      |
+| `nodeServer`  | string  | user login name       | Ex: `{login:'AMERICAS\Brent_Ely'}` |
+| `queryLimit`  | number  | user title            | Ex: `{title:'Brent Ely'}`          |
 
-This way the library can be run against any location.  Useful when querying subsites or when you don't want to have to
-include the `baseUrl` with every sprLib call.
+### Options Descriptions
+`baseUrl`
+* Sets the root/base URL for SharePoint operations.
+* This way the library can be run against any location.
+* Useful when querying subsites or when you don't want to have to include the `baseUrl` with every sprLib call.
 
-### Example
+### Options Example
 ```javascript
-// Get baseUrl
-var strBaseUrl = sprLib.baseUrl();
+// Get options
+var objOptions = sprLib.options();
 
-// Set baseUrl
-sprLib.baseUrl('/sites/devtest');
+// Set option: baseUrl
+sprLib.options({ baseUrl:'/sites/devtest' });
 ```
 
 
@@ -46,7 +56,7 @@ NOTE: SpRestLib will refresh the token automatically as needed during CRUD opera
 
 
 
-## Get Library Version
+## Library Version
 
 ### Syntax
 `sprLib.version`  
@@ -58,7 +68,7 @@ Returns the version and build for the library currently loaded.
 ### Example
 ```javascript
 sprLib.version
-"1.4.0-20180101"
+"1.8.0-20181101"
 
 sprLib.ui.version
 "1.0.0-20180202"
