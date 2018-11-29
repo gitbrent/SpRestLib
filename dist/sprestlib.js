@@ -204,9 +204,9 @@
 		// B: Set options
 		if ( inOpt.baseUrl     ) APP_OPTS.baseUrl     = inOpt.baseUrl.replace(/\/+$/,'');
 		if ( inOpt.nodeCookie  ) APP_OPTS.nodeCookie  = inOpt.nodeCookie;
-		if ( inOpt.nodeEnabled ) APP_OPTS.nodeEnabled = inOpt.nodeEnabled;
 		if ( inOpt.nodeServer  ) APP_OPTS.nodeServer  = inOpt.nodeServer;
-		if ( inOpt.queryLimit  ) APP_OPTS.queryLimit  = inOpt.queryLimit;
+		if ( typeof inOpt.nodeEnabled === 'boolean'   ) APP_OPTS.nodeEnabled = inOpt.nodeEnabled;
+		if ( typeof inOpt.queryLimit  !== 'undefined' ) APP_OPTS.queryLimit  = inOpt.queryLimit; // allow `null` so value can be un-set
 
 		// C: Return current option values
 		return {
