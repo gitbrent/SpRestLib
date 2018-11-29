@@ -4,21 +4,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
-
-## [1.9.0] - 2018-??-??
+## [1.9.0] - 2018-12-??
 ### Added
 - New `file` API method: `checkin()` ([gitbrent](https://github.com/gitbrent))
 - New `file` API method: `checkout()` ([gitbrent](https://github.com/gitbrent))
 - New `file` API method: `delete()` ([gitbrent](https://github.com/gitbrent))
 - New `file` API method: `recycle()` ([gitbrent](https://github.com/gitbrent))
+- New `folder` API method: `add()` ([gitbrent](https://github.com/gitbrent))
 - New `folder` API method: `delete()` ([gitbrent](https://github.com/gitbrent))
 - New `folder` API method: `recycle()` ([gitbrent](https://github.com/gitbrent))
 ### Changed
 - Typescript: Modified declaration file [\#37](https://github.com/gitbrent/sprestlib/pull/37) ([kelvinbell](https://github.com/kelvinbell))
 - The `rest()` method now includes the page's `__REQUESTDIGEST` value for POST types with custom headers that did not already include a value for `X-RequestDigest`
-### Removed
-
 
 
 ## [v1.8.0](https://github.com/gitbrent/sprestlib/tree/v1.8.0) (2018-08-29)
@@ -38,8 +35,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Typescript fix: listCols should be optional [\#33](https://github.com/gitbrent/sprestlib/pull/33) ([csoren](https://github.com/csoren))
 
 
-
-
 ## [v1.7.0](https://github.com/gitbrent/sprestlib/tree/v1.7.0) (2018-05-14)
 [Full Changelog](https://github.com/gitbrent/sprestlib/compare/v1.6.0...v1.7.0)
 
@@ -51,8 +46,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 **Fixed Bugs:**
 - Added `catch()` to core REST method call to properly handle failed queries
 - Updated Node detection to be more accurate and work with Angular, etc. (aka:"ERROR in ./node_modules/sprestlib/dist/sprestlib.js") [\#23](https://github.com/gitbrent/sprestlib/issues/23) ([azmatzuberi](https://github.com/azmatzuberi))
-
-
 
 
 ## [v1.6.0](https://github.com/gitbrent/sprestlib/tree/v1.6.0) (2018-03-05)
@@ -70,8 +63,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fixed a few minor issues with parsing no results in certain scenarios, etc.
 
 
-
-
 ## [v1.5.0](https://github.com/gitbrent/sprestlib/tree/v1.5.0) (2018-02-16)
 [Full Changelog](https://github.com/gitbrent/sprestlib/compare/v1.4.0...v1.5.0)
 
@@ -83,8 +74,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 **Fixed Bugs:**
 - Selecting the same field name twice results in undefined [\#15](https://github.com/gitbrent/sprestlib/issues/15) ([gitbrent](https://github.com/gitbrent))
 - Fixed a null-check defect in REST result parsing
-
-
 
 
 ## [v1.4.0](https://github.com/gitbrent/sprestlib/tree/v1.4.0) (2018-01-08)
@@ -99,8 +88,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add new 'nodeEnabled' option for Angular/etc [\#9](https://github.com/gitbrent/sprestlib/issues/9) ([ra6hi9](https://github.com/ra6hi9))
 
 
-
-
 ## [v1.3.0](https://github.com/gitbrent/sprestlib/tree/v1.3.0) (2017-11-27)
 [Full Changelog](https://github.com/gitbrent/sprestlib/compare/v1.2.1...v1.3.0)
 
@@ -112,16 +99,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added new Site methods: `site()` - returns info, perms, users, groups, subsites, etc.
 
 
-
-
 ## [v1.2.1](https://github.com/gitbrent/sprestlib/tree/v1.2.1) (2017-10-12)
 [Full Changelog](https://github.com/gitbrent/sprestlib/compare/v1.2.0...v1.2.1)
 
 **Fixed Bugs:**
 - Url param passing .rest() with 'http'/'https' is not being parsed correctly [\#2](https://github.com/gitbrent/sprestlib/issues/2) ([gitbrent](https://github.com/gitbrent))
 - Query options passed to .rest() are only parsed when 'queryCols' exists [\#3](https://github.com/gitbrent/sprestlib/issues/3) ([gitbrent](https://github.com/gitbrent))
-
-
 
 
 ## [v1.2.0](https://github.com/gitbrent/sprestlib/tree/v1.2.0) (2017-10-05)
@@ -135,8 +118,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The sprLib.rest() method is not parsing queryCols correctly [\#1](https://github.com/gitbrent/sprestlib/issues/1) ([gitbrent](https://github.com/gitbrent))
 
 
-
-
 ## [v1.1.0](https://github.com/gitbrent/sprestlib/tree/v1.1.0) (2017-09-07)
 [Full Changelog](https://github.com/gitbrent/sprestlib/compare/v1.0.0...v1.1.0)
 
@@ -144,8 +125,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fixed bug in error messages introduced in last release
 - Fixed error handling in Node.js
 - Fixed return of empty array for null Person/lookup fields
-
-
 
 
 ## [v1.0.0](https://github.com/gitbrent/sprestlib/tree/v1.0.0) (2017-08-08)
@@ -157,15 +136,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Last bit of cleanup work to arrive at v1.0.0
 
 
-
-
 ## [v0.12.0](https://github.com/gitbrent/sprestlib/tree/v0.12.0) (2017-07-05)
 [Full Changelog](https://github.com/gitbrent/sprestlib/compare/v0.11.0...v0.12.0)
 
 **Fixed Bugs:**
 - Lots of code cleanup and bug fixes
-
-
 
 
 ## [v0.11.0](https://github.com/gitbrent/sprestlib/tree/v0.11.0) (2017-06-25)
@@ -183,16 +158,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added bower support
 
 
-
-
 ## [v0.10.0](https://github.com/gitbrent/sprestlib/tree/v1.0.0) (2017-05-11)
-
 **Code Cleanup**
 **New Features**
 
 
-
-
 ## [v0.9.0](https://github.com/gitbrent/sprestlib/tree/v1.0.0) (2017-01-31)
-
 **Initial Release**
+
+[Unreleased]: https://github.com/gitbrent/sprestlib/compare/v1.8.0...HEAD
+[1.8.0]: https://github.com/gitbrent/sprestlib/compare/v1.7.0...v1.8.0
+[1.7.0]: https://github.com/gitbrent/sprestlib/compare/v1.6.0...v1.7.0
+[1.6.0]: https://github.com/gitbrent/sprestlib/compare/v1.5.0...v1.6.0
+[1.5.0]: https://github.com/gitbrent/sprestlib/compare/v1.4.0...v1.5.0
+[1.4.0]: https://github.com/gitbrent/sprestlib/compare/v1.3.0...v1.4.0
+[1.3.0]: https://github.com/gitbrent/sprestlib/compare/v1.2.0...v1.3.0
+[1.2.1]: https://github.com/gitbrent/sprestlib/compare/v1.2.0...v1.2.1
+[1.2.0]: https://github.com/gitbrent/sprestlib/compare/v1.1.0...v1.2.0
+[1.1.0]: https://github.com/gitbrent/sprestlib/compare/v1.0.0...v1.1.0
+[1.0.0]: https://github.com/gitbrent/sprestlib/compare/v0.12.0...v1.0.0
+[0.12.0]: https://github.com/gitbrent/sprestlib/compare/v0.11.0...v0.12.0
+[0.11.0]: https://github.com/gitbrent/sprestlib/compare/v0.10.0...v0.11.0
+[0.10.0]: https://github.com/gitbrent/sprestlib/compare/v0.9.0...v0.10.0
