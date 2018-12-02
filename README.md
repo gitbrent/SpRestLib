@@ -16,8 +16,8 @@ items, execute REST calls, interact with files and folders, gather site properti
 * List Methods - Create, read, update, and delete (CRUD) List/Library items, including support for paging/next
 * User Methods - Get User information: Basic (ID, Email, LoginName, etc.) and UserProfile (Manager, 100+ Properties)
 * Site Methods - Get Site information (Lists, Groups, Users, Roles, Subsites and Permissions)
-* File Methods - Get files, File properties/permissions, delete/recycle files
-* Folder Methods - Get folder contents, Folder properties/permissions, create/delete/recycle folders
+* File Methods - Get files, file properties/permissions, delete/recycle files
+* Folder Methods - Get folder contents, folder properties/permissions, create/delete/recycle folders
 * REST Methods - Execute REST API calls against any available [SharePoint REST API](https://msdn.microsoft.com/en-us/library/office/dn268594.aspx) endpoint
 * Form Population - Populate form elements using data-bind declarative binding system like Knockout or AngluarJS
 
@@ -74,7 +74,7 @@ items, execute REST calls, interact with files and folders, gather site properti
 * `sprLib.user(options).profile()` - Returns `SP.UserProfile.PersonProperties` (DirectReports, PictureUrl, etc.)
 
 ## Utility Methods
-* `sprLib.renewSecurityToken()` - Refreshes the SharePoint page security digest token
+* `sprLib.renewSecurityToken()` - Refreshes the SharePoint page security digest token (`__REQUESTDIGEST`)
 
 ## SpRestLib-UI :: Form Population
 * `data-sprlib{options}` - Populates the parent tag using the options provided
