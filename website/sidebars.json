@@ -1,7 +1,7 @@
 {
 	"docs": {
-		"Get Started": ["installation", "promises"],
-		"Features": ["feat-integration", "feat-promises", "feat-node", "feat-utilities"],
+		"Get Started": ["installation", "promises", "feat-promises"],
+		"Features": ["feat-integration", "feat-options", "feat-node", "feat-utilities"],
 		"API Reference": ["api-list", "api-file", "api-folder", "api-site", "api-user", "api-rest"],
 		"SpRestLib UI": ["ui-form-binding"],
 		"Help / Support": ["sp-auth-notes"]

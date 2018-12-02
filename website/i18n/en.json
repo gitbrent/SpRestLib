@@ -29,6 +29,9 @@
       "feat-node": {
         "title": "SharePoint via Node.js"
       },
+      "feat-options": {
+        "title": "Library Options"
+      },
       "feat-promises": {
         "title": "Promise-based Operations"
       },
