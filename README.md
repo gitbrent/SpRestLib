@@ -133,7 +133,7 @@ then run the following code snippet which will load the SpRestLib bundle script 
 var script = document.createElement('script');
 script.src = "https://cdn.jsdelivr.net/gh/gitbrent/sprestlib@1.8.0/dist/sprestlib.bundle.js";
 script.onload = function(){
-	// Demo library method - show current user info
+    // Demo library method - show current user info
     console.log('Current SharePoint User: ');
     sprLib.user().info().then( objUser => console.log(objUser) );
 }
