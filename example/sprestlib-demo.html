@@ -8,7 +8,7 @@
 	<meta name="website"     content="https://github.com/gitbrent/SpRestLib/">
 	<meta name="keywords"    content="SpRestLib, JavaScript, js-sharepoint, SP2013 REST, SharePoint 2013, SharePoint 2016, SharePoint Online">
 	<meta name="description" content="Content Editor Webpart: SpRestLib features and capabilities">
-	<meta name="revised"     content="20181115">
+	<meta name="revised"     content="20181203">
 
 	<!-- HOWTO / FAQ / SETUP -->
 	<!--
@@ -315,7 +315,7 @@
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.15.0/prism.min.js"></script>
 
 	<script>
-		var APP_BLD = 20181113;
+		var APP_BLD = 20181203;
 		var HTML_SPINNER = '<div class="sprlib-spinner"><div class="sprlib-bounce1"></div><div class="sprlib-bounce2"></div><div class="sprlib-bounce3"></div></div>';
 		var LAYOUTS_URL = ( typeof _spPageContextInfo !== 'undefined' && _spPageContextInfo.layoutsUrl ? _spPageContextInfo.layoutsUrl : '_layouts/15' );
 
@@ -1125,7 +1125,7 @@
 				eval(user1Code);
 
 				var user2Code = "sprLib.user().groups()\n"
-					+ '.then(function(arrGroups){\n'
+					+ ".then(function(objUser){\n"
 					+ "    arrGroups.forEach(function(objGroup,idx){\n"
 					+ "        $('#user2Html table tbody').append('<tr><td>'+ objGroup.Id +'</td><td>'+ objGroup.Title +'</td></tr>');\n"
 					+ "    });\n"
@@ -1133,16 +1133,26 @@
 				$('#user2Code pre code').text( user2Code );
 				eval(user2Code);
 
-				var user3Code = "sprLib.user().profile()\n"
+				var user3Code = "sprLib.user().profile(['PersonalSpace'])\n"
 					+ ".then(function(objUser){\n"
 					+ "    Object.keys(objUser).forEach(function(key){\n"
 					+ "        var val = objUser[key];\n"
-					//+ "        if (typeof val !== 'object') $('#user3Html table tbody').append('<tr><th>'+ key +'</th><td>'+ val +'</td></tr>');\n"
 					+ "        $('#user3Html table tbody').append('<tr><th>'+ key +'</th><td class=\"code text-monospace\">'+ (typeof val === 'object' ? JSON.stringify(val,null,4) : val) +'</td></tr>');\n"
 					+ "    });\n"
-					+ "});";
+					+ '});';
 				$('#user3Code pre code').text( user3Code );
 				eval(user3Code);
+
+				var user4Code = "sprLib.user().profile()\n"
+					+ ".then(function(objUser){\n"
+					+ "    Object.keys(objUser).forEach(function(key){\n"
+					+ "        var val = objUser[key];\n"
+					//+ "        if (typeof val !== 'object') $('#user4Html table tbody').append('<tr><th>'+ key +'</th><td>'+ val +'</td></tr>');\n"
+					+ "        $('#user4Html table tbody').append('<tr><th>'+ key +'</th><td class=\"code text-monospace\">'+ (typeof val === 'object' ? JSON.stringify(val,null,4) : val) +'</td></tr>');\n"
+					+ "    });\n"
+					+ "});";
+				$('#user4Code pre code').text( user4Code );
+				eval(user4Code);
 			}
 
 			// TAB: REST API
@@ -1651,7 +1661,7 @@
 				<div class="arrow"></div>User Information
 			</h5>
 			<div class="container-fluid" style="display:none">
-				<div id="user1Code"><pre><code class="language-javascript"></code></pre></div>
+				<div id="user1Code"><pre class="my-3"><code class="language-javascript"></code></pre></div>
 				<div id="user1Html" class="mb-2">
 					<table class="tabModern">
 						<thead>
@@ -1669,7 +1679,7 @@
 				<div class="arrow"></div>User Groups
 			</h5>
 			<div class="container-fluid" style="display:none">
-				<div id="user2Code"><pre><code class="language-javascript"></code></pre></div>
+				<div id="user2Code"><pre class="my-3"><code class="language-javascript"></code></pre></div>
 				<div id="user2Html" class="mb-2">
 					<table class="tabModern">
 						<thead>
@@ -1693,11 +1703,29 @@
 			</div>
 
 			<h5 class="text-primary bde-arrow-cont mt-4" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
-				<div class="arrow"></div>User Profile Properties
+				<div class="arrow"></div>Individual User Profile Properties
 			</h5>
 			<div class="container-fluid" style="display:none">
-				<div id="user3Code"><pre><code class="language-javascript"></code></pre></div>
-				<div id="user3Html" style="margin-bottom:20px">
+				<div id="user3Code"><pre class="my-3"><code class="language-javascript"></code></pre></div>
+				<div id="user3Html" class="mb-2">
+					<table class="tabModern">
+						<thead>
+							<tr>
+								<th style="width:10%">Prop Name</th>
+								<th style="width:90%">Prop Value</th>
+							</tr>
+						</thead>
+						<tbody></tbody>
+					</table>
+				</div>
+			</div>
+
+			<h5 class="text-primary bde-arrow-cont mt-4" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
+				<div class="arrow"></div>All User Profile Properties
+			</h5>
+			<div class="container-fluid" style="display:none">
+				<div id="user4Code"><pre class="my-3"><code class="language-javascript"></code></pre></div>
+				<div id="user4Html" style="margin-bottom:20px">
 					<table class="tabModern">
 						<thead>
 							<tr>
