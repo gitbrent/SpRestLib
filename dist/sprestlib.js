@@ -2970,6 +2970,7 @@
 		*     queryCols: ['PictureUrl','AccountName']
 		* })
 		*/
+		// FIXME: FUTURE: refactor to return itself and allo queries to prof-props, eg: `.profile().UserProfileProperties('PictureUrl')`
 		_newUser.profile = function(arrProfileKeys) {
 			return new Promise(function(resolve, reject) {
 				var arrQueryKeys = (Array.isArray(arrProfileKeys) ? arrProfileKeys : (typeof arrProfileKeys === 'string' ? [arrProfileKeys] : null));
@@ -3003,6 +3004,13 @@
 						// NOTE: "The GetUserProfilePropertiesFor method is not implemented in the REST API" - meaning we can onyl two things via REST: Return all, or return 1 property...
 						return sprLib.rest({
 							url: _urlProf+"/SP.UserProfiles.PeopleManager/GetUserProfilePropertyFor(accountName=@v,propertyname='"+ arrQueryKeys[0] +"')?@v='"+userAcctName+"'",
+							metadata: false
+						});
+					}
+					else if ( Array.isArray(arrQueryKeys) && arrQueryKeys.length > 1 ) {
+						// PERF: Only query "UserProfileProperties" (this avoids pulling back `DirectReports` etc. which are data-heavy)
+						return sprLib.rest({
+							url: _urlProf+"/SP.UserProfiles.PeopleManager/GetPropertiesFor(accountName=@v)/UserProfileProperties?@v='"+userAcctName+"'",
 							metadata: false
 						});
 					}
