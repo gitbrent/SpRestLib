@@ -27,6 +27,11 @@
 |*|  SOFTWARE.
 \*/
 
+/*
+* TODO-2.0:
+* refactor to enable use of strict mode
+*/
+
 (function(){
 	// APP VERSION/BUILD
 	var APP_VER = "1.9.0-beta";
@@ -98,6 +103,7 @@
 	/**
 	* Parse XHR Response Headers for SharePoint codes/error messages and return them as a string.
 	*
+	* @private
 	* @return {string} "(404) List not found."
 	*/
 	function parseErrorMessage(jqXHR) {
@@ -125,6 +131,7 @@
 	* Query SharePoint for a current `__REQUESTDIGEST`/contextinfo token used in `X-RequestDigest` headers
 	* Sets the form value for `__REQUESTDIGEST` if it exists
 	*
+	* @private
 	* @return {string} "0x1925741C8C2A5DA6BA9338[...C8ED,18 Apr 2018 03:19:26 -0000"
 	*/
 	function doRenewDigestToken() {
@@ -172,9 +179,20 @@
 	this.sprLib = {};
 	sprLib.version = APP_VER+'-'+APP_BLD;
 
+	// API: AUTH
+	// TODO: sprLib.auth = function auth(){}
+
 	// API: OPTIONS
-	// TODO: move to new .options() instead of one-offs
-	// TODO: DEPRECATE `sprLib.baseUrl`
+	/**
+	* Getter/Setter for a few app options in `APP_OPTS`
+	*
+	* @public
+	* @param {object} inOpt - one or more options to set
+	* @returns {object} Return value of a few APP_OPTS
+	* @example - get options - `sprLib.options();`
+	* @example - set baseUrl - `sprLib.options({ baseUrl:'/sites/devtest' });`
+	* @since 1.9.0
+	*/
 	sprLib.options = function options(inOpt) {
 		// CASE 1: Act as a GETTER when no value passed
 		if ( !inOpt || typeof inOpt !== 'object' ||
@@ -218,7 +236,7 @@
 		};
 	}
 
-	// DEPRECATED: Will be removed in v2.0.0 - use `options()` instead
+	// DEPRECATED: TODO-2.0: Will be removed in v2.0.0 - use `options()` instead
 	/**
 	* Getter/Setter for the app option APP_OPTS.baseUrl
 	*
@@ -238,13 +256,19 @@
 		if (DEBUG) console.log('APP_OPTS.baseUrl = '+APP_OPTS.baseUrl);
 	}
 
-	// DEPRECATED: Will be removed in v2.0.0 - use `options()` instead
+	// DEPRECATED: TODO-2.0: Will be removed in v2.0.0 - use `options()` instead
 	// API: NODEJS: Setup
 	sprLib.nodeConfig = function nodeConfig(inOpt) {
 		inOpt = (inOpt && typeof inOpt === 'object' ? inOpt : {});
 		APP_OPTS.nodeEnabled = (typeof inOpt.nodeEnabled !== 'undefined' ? inOpt.nodeEnabled : true);
 		APP_OPTS.nodeCookie = inOpt.cookie || '';
 		APP_OPTS.nodeServer = inOpt.server || '';
+	}
+
+	// API: UTILITY: Token
+	// TODO-2.0: will become DEPRECATED: move under a new parent: `sprLib.auth().token().renew()`
+	sprLib.renewSecurityToken = function renewSecurityToken() {
+		return doRenewDigestToken();
 	}
 
 	// API: FILE
@@ -2879,6 +2903,7 @@
 		* sprLib.user({ id:1234 }).info().then( function(objUser){ console.table(objUser) } );
 		*
 		* @return {Promise} - return `Promise` containing User info object
+		* @since 0.11.0
 		*/
 		_newUser.info = function() {
 			return new Promise(function(resolve, reject) {
@@ -2914,6 +2939,7 @@
 		* sprLib.user(1234).groups().then( function(objUser){ console.table(objUser) } );
 		*
 		* @return {Promise} - Return `Promise` containing Group(s) info (`Id`, `Title`)
+		* @since 0.11.0
 		*/
 		_newUser.groups = function() {
 			return new Promise(function(resolve, reject) {
@@ -2950,6 +2976,7 @@
 		/**
 		* Get User Profile properties (SP.UserProfiles.PersonProperties)
 		*
+		* @since 1.6.0
 		* @example sprLib.user().profile()
 		* @example sprLib.user({ id:9 }).profile()
 		* @example sprLib.user().profile('AccountName')
@@ -2970,7 +2997,7 @@
 		*     queryCols: ['PictureUrl','AccountName']
 		* })
 		*/
-		// FIXME: FUTURE: refactor to return itself and allo queries to prof-props, eg: `.profile().UserProfileProperties('PictureUrl')`
+		// TODO-2.0: BREAKING CHANGE: refactor to return itself and allow queries to prof-props, eg: `sprLib.user().profile().props('PictureUrl')`
 		_newUser.profile = function(arrProfileKeys) {
 			return new Promise(function(resolve, reject) {
 				var arrQueryKeys = (Array.isArray(arrProfileKeys) ? arrProfileKeys : (typeof arrProfileKeys === 'string' ? [arrProfileKeys] : null));
@@ -3091,11 +3118,6 @@
 
 		// LAST: Return this User to enable chaining
 		return _newUser;
-	}
-
-	// API: UTILITY: Token
-	sprLib.renewSecurityToken = function renewSecurityToken() {
-		return doRenewDigestToken();
 	}
 })();
 
