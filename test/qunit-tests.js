@@ -2,7 +2,7 @@
  * NAME: qunit-test.js
  * DESC: tests for qunit-test.html (coded against my personal O365 Dev Site - YMMV)
  * AUTH: https://github.com/gitbrent/
- * DATE: 20181128
+ * DATE: 20181203
  *
  * HOWTO: Generate text tables for README etc.:
  * sprLib.list('Employees').items(['Id', 'Name', 'Badge_x0020_Number']).then(function(arrData){ console.log(getAsciiTableStr(arrData)) });
@@ -27,6 +27,7 @@ const LIST_GUID2 = '23846527-218a-43a2-b5c1-7b55b6feb1a3';
 //
 const gRegexGUID = /^[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}$/i;
 var gTestUserId = 9;
+var gObjCurrUser = {};
 
 function getAsciiTableStr(inResult) {
 	var arrResults = [];
@@ -1965,105 +1966,194 @@ QUnit.module( "SITE - Methods", function(){
 // ================================================================================================
 
 QUnit.module( "USER - Methods", function(){
-	var gObjCurrUser = {};
 
-	// TODO: FIXME: these tests wont run - we need QUnit.test - top level!
-	sprLib.user().info()
-	.then(function(objUser){ gObjCurrUser = objUser })
-	.then(function(){
-		[ {id:gObjCurrUser.Id}, {email:gObjCurrUser.Email}, {login:gObjCurrUser.LoginName}, {title:gObjCurrUser.Title} ]
-		.forEach(function(param,idx){
-			QUnit.test('sprLib.user('+ JSON.stringify(param) +').info()', function(assert){
-				var done = assert.async();
-				// TEST:
-				sprLib.user(param).info()
-				.then(function(objUser){
-					assert.ok( objUser.Id		,"Pass: Id....... - " + objUser.Id );
-					assert.ok( objUser.Title	,"Pass: Title.... - " + objUser.Title );
-					assert.ok( objUser.Email	,"Pass: Email.... - " + objUser.Email );
-					assert.ok( objUser.LoginName,"Pass: LoginName - " + objUser.LoginName );
-					done();
-				});
-			});
+	[ {id:gObjCurrUser.Id}, {email:gObjCurrUser.Email}, {login:gObjCurrUser.LoginName}, {title:gObjCurrUser.Title} ]
+	.forEach(function(param){
+		QUnit.test("sprLib.user() => groups(), info(), profile()", function(assert){
+			var done = assert.async();
 
-			QUnit.test('sprLib.user('+ JSON.stringify(param) +').groups()', function(assert){
-				var done = assert.async();
-				// TEST:
-				sprLib.user(param).groups()
-				.then(function(arrGroups){
-					assert.ok( arrGroups.length > 0, "arrGroups is an Array, and length > 0: "+ arrGroups.length );
-					//
-					let table = new AsciiTable();
-					if (arrGroups.length > 0) table.setHeading( Object.keys(arrGroups[0]) );
-					$.each(arrGroups,function(idx,obj){ let vals = []; $.each(obj, function(key,val){ vals.push(val) }); table.addRow(vals); });
-					assert.ok( table.toString(), `RESULTS:\n${table.toString()}`);
-					//
-					done();
-				});
-			});
+			sprLib.user().info()
+			.then(objUser => {
+				gObjCurrUser = objUser;
 
-			QUnit.test('sprLib.user('+ JSON.stringify(param) +').profile()', function(assert){
-				var done = assert.async();
-				// TEST:
-				Promise.all([
+				return sprLib.user(param).info();
+			})
+			.then(objUser => {
+				assert.ok( objUser.Id		,"Pass: Id....... - " + objUser.Id );
+				assert.ok( objUser.Title	,"Pass: Title.... - " + objUser.Title );
+				assert.ok( objUser.Email	,"Pass: Email.... - " + objUser.Email );
+				assert.ok( objUser.LoginName,"Pass: LoginName - " + objUser.LoginName );
+
+				return sprLib.user(param).groups();
+			})
+			.then(function(arrGroups){
+				assert.ok( arrGroups.length > 0, "arrGroups is an Array, and length > 0: "+ arrGroups.length );
+				//
+				let table = new AsciiTable();
+				if (arrGroups.length > 0) table.setHeading( Object.keys(arrGroups[0]) );
+				$.each(arrGroups,function(idx,obj){ let vals = []; $.each(obj, function(key,val){ vals.push(val) }); table.addRow(vals); });
+				assert.ok( table.toString(), `RESULTS:\n${table.toString()}`);
+
+				return Promise.all([
 					sprLib.user(param).profile(),
-					sprLib.user(param).profile('Email')
+					sprLib.user(param).profile('PersonalSpace'),
+					sprLib.user(param).profile(['FirstName','PersonalSpace']),
 				])
-				.then(function(arrArrays){
-					var prof1 = arrArrays[0];
-					var prof2 = arrArrays[1];
-					assert.ok( prof1.hasOwnProperty('Email'), "Pass: prof1.hasOwnProperty('Email'): " + prof1.hasOwnProperty('Email') );
-					assert.ok( Object.keys(prof1).length > 0, "Pass: Object.keys(prof1).length > 0: "+ Object.keys(prof1).length );
-					assert.ok( prof2.Email == gObjCurrUser.Email, "prof2.Email == gObjCurrUser.Email ? "+ `${prof2.Email} == ${gObjCurrUser.Email}` );
-					assert.ok( getAsciiTableStr(prof1), `RESULTS:\n${getAsciiTableStr(prof1)}` );
-					assert.ok( getAsciiTableStr(prof2), `RESULTS:\n${getAsciiTableStr(prof2)}` );
-					done();
-				});
+			})
+			.then(function(arrArrays){
+				var prof1 = arrArrays[0];
+				var prof2 = arrArrays[1];
+				var prof3 = arrArrays[2];
+
+				// CASE 1: Full result set: all properties/UserProfile object
+				assert.ok( true, "CASE 1: --------------------------------------------------------------------" );
+				assert.ok( prof1.hasOwnProperty('ExtendedReports'), "Pass: prof1.hasOwnProperty('ExtendedReports'): " + prof1.hasOwnProperty('ExtendedReports') );
+				assert.ok( prof1.UserProfileProperties.hasOwnProperty('PersonalSpace'), "Pass: prof1.UserProfileProperties.hasOwnProperty('PersonalSpace'): " + prof1.UserProfileProperties.hasOwnProperty('PersonalSpace') );
+				assert.ok( Object.keys(prof1).length > 0, "Pass: Object.keys(prof1).length > 0: "+ Object.keys(prof1).length );
+				assert.ok( Object.keys(prof1.UserProfileProperties).length > 0, "Pass: Object.keys(prof1.UserProfileProperties).length > 0: "+ Object.keys(prof1.UserProfileProperties).length );
+				assert.ok( getAsciiTableStr(prof1), `RESULTS:\n${getAsciiTableStr(prof1)}` );
+
+				// CASE 2: Single UserProfile property
+				/*
+				.-----------------------------------------------------------.
+				|   Prop Name   |                Prop Value                 |
+				|---------------|-------------------------------------------|
+				| PersonalSpace | /personal/admin_somedude_onmicrosoft_com/ |
+				'-----------------------------------------------------------'
+				*/
+				assert.ok( true, "CASE 2: --------------------------------------------------------------------" );
+				assert.ok( prof2.PersonalSpace, "`prof2.PersonalSpace` ? "+ `${prof2.PersonalSpace}` );
+				assert.ok( !prof2.UserProfileProperties, "`!prof2.UserProfileProperties` ? "+ `${!prof2.UserProfileProperties}` );
+				assert.ok( Object.keys(prof2).length == 1, "Pass: Object.keys(prof2).length == 1: "+ Object.keys(prof2).length );
+				assert.ok( getAsciiTableStr(prof2), `RESULTS:\n${getAsciiTableStr(prof2)}` );
+
+				// CASE 3: Multiple properties
+				/*
+				.-----------------------------------------------------------.
+				|   Prop Name   |                Prop Value                 |
+				|---------------|-------------------------------------------|
+				| FirstName     | Brent                                     |
+				| PersonalSpace | /personal/admin_somedude_onmicrosoft_com/ |
+				'-----------------------------------------------------------'
+				*/
+				assert.ok( true, "CASE 3: --------------------------------------------------------------------" );
+				assert.ok( prof3.FirstName, "`prof3.FirstName` ? "+ `${prof3.FirstName}` );
+				assert.ok( prof3.PersonalSpace, "`prof3.PersonalSpace` ? "+ `${prof3.PersonalSpace}` );
+				assert.ok( Object.keys(prof3).length == 2, "Pass: Object.keys(prof3).length == 2: "+ Object.keys(prof3).length );
+				assert.ok( getAsciiTableStr(prof3), `RESULTS:\n${getAsciiTableStr(prof3)}` );
+
+				// DONE!
+				done();
+			})
+			.catch(function(strErr){
+				assert.ok( typeof strErr === 'string', `(typeof strErr === 'string') => ${typeof strErr}` );
+				assert.ok( strErr, `catch strErr: ${strErr}` );
+				done();
 			});
 		});
+	});
 
-		// TODO: separate test for `[ '', {} ]` as those will return current user
+	// PROFILE TEST: Current User
+	QUnit.test('sprLib.user().profile()', function(assert){
+		var done = assert.async();
+		// TEST:
+		Promise.all([
+			sprLib.user().profile(),
+			sprLib.user().profile('PersonalSpace'),
+			sprLib.user().profile(['FirstName','PersonalSpace']),
+		])
+		.then(function(arrArrays){
+			var prof1 = arrArrays[0];
+			var prof2 = arrArrays[1];
+			var prof3 = arrArrays[2];
 
-		[ {id:999}, {email:'junk@email.com'}, {login:'totally not a real login'}, {title:'totally not a real name'} ]
-		.forEach(function(param,idx){
-			QUnit.test('sprLib.user('+ JSON.stringify(param) +').info()', function(assert){
-				var done = assert.async();
-				// TEST:
-				sprLib.user(param).info()
-				.then(function(objUser){
-					assert.ok( typeof objUser === 'object', "Pass: objUser is object type: " + typeof objUser );
-					assert.ok( Object.keys(objUser).length == 0, "Pass: `keys(objUser).length == 0` -> " + Object.keys(objUser).length );
-					done();
-				});
-			});
+			// CASE 1: Full result set: all properties/UserProfile object
+			assert.ok( true, "CASE 1: --------------------------------------------------------------------" );
+			assert.ok( prof1.hasOwnProperty('ExtendedReports'), "Pass: prof1.hasOwnProperty('ExtendedReports'): " + prof1.hasOwnProperty('ExtendedReports') );
+			assert.ok( prof1.UserProfileProperties.hasOwnProperty('PersonalSpace'), "Pass: prof1.UserProfileProperties.hasOwnProperty('PersonalSpace'): " + prof1.UserProfileProperties.hasOwnProperty('PersonalSpace') );
+			assert.ok( Object.keys(prof1).length > 0, "Pass: Object.keys(prof1).length > 0: "+ Object.keys(prof1).length );
+			assert.ok( Object.keys(prof1.UserProfileProperties).length > 0, "Pass: Object.keys(prof1.UserProfileProperties).length > 0: "+ Object.keys(prof1.UserProfileProperties).length );
+			assert.ok( getAsciiTableStr(prof1), `RESULTS:\n${getAsciiTableStr(prof1)}` );
 
-			QUnit.test('sprLib.user('+ JSON.stringify(param) +').groups()', function(assert){
-				var done = assert.async();
-				// TEST:
-				sprLib.user(param).groups()
-				.then(function(arrGroups){
-					assert.ok( Array.isArray(arrGroups), "Pass: Array.isArray(arrGroups): " + Array.isArray(arrGroups) );
-					assert.ok( arrGroups.length == 0, "Pass: `arrGroups.length == 0` -> "+ arrGroups.length );
-					done();
-				});
-			});
+			// CASE 2: Single UserProfile property
+			/*
+			.-----------------------------------------------------------.
+			|   Prop Name   |                Prop Value                 |
+			|---------------|-------------------------------------------|
+			| PersonalSpace | /personal/admin_somedude_onmicrosoft_com/ |
+			'-----------------------------------------------------------'
+			*/
+			assert.ok( true, "CASE 2: --------------------------------------------------------------------" );
+			assert.ok( prof2.PersonalSpace, "`prof2.PersonalSpace` ? "+ `${prof2.PersonalSpace}` );
+			assert.ok( !prof2.UserProfileProperties, "`!prof2.UserProfileProperties` ? "+ `${!prof2.UserProfileProperties}` );
+			assert.ok( Object.keys(prof2).length == 1, "Pass: Object.keys(prof2).length == 1: "+ Object.keys(prof2).length );
+			assert.ok( getAsciiTableStr(prof2), `RESULTS:\n${getAsciiTableStr(prof2)}` );
 
-			QUnit.test('sprLib.user('+ JSON.stringify(param) +').profile()', function(assert){
-				var done = assert.async();
-				// TEST:
-				Promise.all([
+			// CASE 3: Multiple properties
+			/*
+			.-----------------------------------------------------------.
+			|   Prop Name   |                Prop Value                 |
+			|---------------|-------------------------------------------|
+			| FirstName     | Brent                                     |
+			| PersonalSpace | /personal/admin_somedude_onmicrosoft_com/ |
+			'-----------------------------------------------------------'
+			*/
+			assert.ok( true, "CASE 3: --------------------------------------------------------------------" );
+			assert.ok( prof3.FirstName, "`prof3.FirstName` ? "+ `${prof3.FirstName}` );
+			assert.ok( prof3.PersonalSpace, "`prof3.PersonalSpace` ? "+ `${prof3.PersonalSpace}` );
+			assert.ok( Object.keys(prof3).length == 2, "Pass: Object.keys(prof3).length == 2: "+ Object.keys(prof3).length );
+			assert.ok( getAsciiTableStr(prof3), `RESULTS:\n${getAsciiTableStr(prof3)}` );
+
+			// DONE!
+			done();
+		})
+		.catch(function(strErr){
+			assert.ok( typeof strErr === 'string', `(typeof strErr === 'string') => ${typeof strErr}` );
+			assert.ok( strErr, `catch strErr: ${strErr}` );
+			done();
+		});
+	});
+
+	[ {id:999}, {email:'junk@email.com'}, {login:'totally not a real login'}, {title:'totally not a real name'} ]
+	.forEach(function(param){
+		QUnit.test("sprLib.user() [JUNK TEST] => groups(), info(), profile()", function(assert){
+			var done = assert.async();
+
+			sprLib.user(param).info()
+			.then(objUser => {
+				assert.ok( typeof objUser === 'object', "Pass: objUser is object type: " + typeof objUser );
+				assert.ok( Object.keys(objUser).length == 0, "Pass: `keys(objUser).length == 0` -> " + Object.keys(objUser).length );
+
+				return sprLib.user(param).groups();
+			})
+			.then(function(arrGroups){
+				assert.ok( Array.isArray(arrGroups), "Pass: Array.isArray(arrGroups): " + Array.isArray(arrGroups) );
+				assert.ok( arrGroups.length == 0, "Pass: `arrGroups.length == 0` -> "+ arrGroups.length );
+
+				return Promise.all([
 					sprLib.user(param).profile(),
-					sprLib.user(param).profile('Email')
+					sprLib.user(param).profile('PersonalSpace'),
+					sprLib.user(param).profile(['FirstName','PersonalSpace']),
 				])
-				.then(function(arrArrays){
-					var prof1 = arrArrays[0];
-					var prof2 = arrArrays[1];
-					assert.ok( prof1 && Object.keys(prof1).length == 0, "Object.keys(prof1).length == 0: " + Object.keys(prof1).length );
-					assert.ok( prof2 && Object.keys(prof2).length == 0, "Object.keys(prof2).length == 0: " + Object.keys(prof2).length );
-					assert.ok( !prof1.Email , "prof1.Email doesnt exist: "+ prof1.Email );
-					assert.ok( !prof2.Email , "prof2.Email doesnt exist: "+ prof2.Email );
-					done();
-				});
+			})
+			.then(function(arrArrays){
+				var prof1 = arrArrays[0];
+				var prof2 = arrArrays[1];
+				var prof3 = arrArrays[2];
+				assert.ok( prof1 && Object.keys(prof1).length == 0, "Object.keys(prof1).length == 0: " + Object.keys(prof1).length );
+				assert.ok( prof2 && Object.keys(prof2).length == 0, "Object.keys(prof2).length == 0: " + Object.keys(prof2).length );
+				assert.ok( prof3 && Object.keys(prof3).length == 0, "Object.keys(prof3).length == 0: " + Object.keys(prof3).length );
+				assert.ok( !prof1.FirstName , "prof1.FirstName doesnt exist: "+ prof1.FirstName );
+				assert.ok( !prof2.FirstName , "prof2.FirstName doesnt exist: "+ prof2.FirstName );
+				assert.ok( !prof3.FirstName , "prof3.FirstName doesnt exist: "+ prof3.FirstName );
+
+				// DONE!
+				done();
+			})
+			.catch(function(strErr){
+				assert.ok( typeof strErr === 'string', `(typeof strErr === 'string') => ${typeof strErr}` );
+				assert.ok( strErr, `catch strErr: ${strErr}` );
+				done();
 			});
 		});
 	});
