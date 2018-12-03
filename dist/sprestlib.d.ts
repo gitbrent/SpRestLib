@@ -29,7 +29,7 @@ declare namespace sprLib {
   function baseUrl(): string;
   function baseUrl(baseUrl: string): void;
 
-  function nodeConfig(options: Object): void;
+  function nodeConfig(options: object): void;
 
   function renewSecurityToken(): void;
 
@@ -45,19 +45,19 @@ declare namespace sprLib {
     checkout(): Promise<boolean>;
     delete(): Promise<boolean>;
     get(): Promise<Blob>;
-    info(options: FileInfoOptions): Promise<Object>;
-    perms(): Promise<Object[]>;
+    info(options: FileInfoOptions): Promise<object>;
+    perms(): Promise<object[]>;
     recycle(): Promise<boolean>;
   }
   function file(fileName: string): IFile;
 
   interface IFolder {
-    add(folderName: string): Promise<Object>;
+    add(folderName: string): Promise<object>;
     delete(): Promise<boolean>;
-    files(): Promise<Object[]>;
-    folders(): Promise<Object[]>;
-    info(): Promise<Object>;
-    perms(): Promise<Object[]>;
+    files(): Promise<object[]>;
+    folders(): Promise<object[]>;
+    info(): Promise<object>;
+    perms(): Promise<object[]>;
     recycle(): Promise<boolean>;
   }
   function folder(folderName: string): IFolder;
@@ -75,23 +75,23 @@ declare namespace sprLib {
     requestDigest?: string;
   }
   interface ListItemsOptions {
-    listCols?: Array<string> | Object;
+    listCols?: Array<string> | object;
     metadata?: boolean;
     queryFilter?: string;
     queryLimit?: number;
-    queryNext?: Object;
+    queryNext?: object;
     queryOrderBy?: string;
   }
   interface IList {
-    cols(): Promise<Object[]>;
-    info(): Promise<Object>;
-    perms(): Promise<Object[]>;
+    cols(): Promise<object[]>;
+    info(): Promise<object>;
+    perms(): Promise<object[]>;
 
-    items(options: ListItemsOptions): Promise<Object[]>;
-    create(options: Object): Promise<Object[]>;
-    update(options: Object): Promise<Object[]>;
-    delete(options: Object): Promise<number>;
-    recycle(options: Object): Promise<number>;
+    items(options: ListItemsOptions): Promise<object[]>;
+    create(options: object): Promise<object[]>;
+    update(options: object): Promise<object[]>;
+    delete(options: object): Promise<number>;
+    recycle(options: object): Promise<number>;
   }
   function list(listName: string): IList;
   function list(listGuid: string): IList;
@@ -100,20 +100,20 @@ declare namespace sprLib {
   interface RestOptions {
     url: string;
     type?: 'GET' | 'POST' | 'DELETE';
-    data?: Object;
+    data?: object;
     headers?: any;
     requestDigest?: string;
   }
-  function rest(options: RestOptions): Promise<Object[]>;
+  function rest(options: RestOptions): Promise<object[]>;
 
   interface ISite {
-    info(): Promise<Object>;
-    lists(): Promise<Object[]>;
-    subsites(): Promise<Object[]>;
-    perms(): Promise<Object[]>;
-    roles(): Promise<Object[]>;
-    groups(): Promise<Object[]>;
-    users(): Promise<Object[]>;
+    info(): Promise<object>;
+    lists(): Promise<object[]>;
+    subsites(): Promise<object[]>;
+    perms(): Promise<object[]>;
+    roles(): Promise<object[]>;
+    groups(): Promise<object[]>;
+    users(): Promise<object[]>;
   }
   function site(siteUrl?: string): ISite;
 
@@ -126,9 +126,9 @@ declare namespace sprLib {
   }
 
   interface IUser {
-    info(): Promise<Object>;
-    groups(): Promise<Object[]>;
-    profile(arrProfileKeys?: Object): Promise<Object>;
+    info(): Promise<object>;
+    groups(): Promise<object[]>;
+    profile(arrProfileKeys?: object): Promise<object>;
   }
   function user(options?: UserOptions): IUser;
 }
