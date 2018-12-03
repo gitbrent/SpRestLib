@@ -30,7 +30,7 @@
 (function(){
 	// APP VERSION/BUILD
 	var APP_VER = "1.9.0-beta";
-	var APP_BLD = "20181128";
+	var APP_BLD = "20181202";
 	var DEBUG = false; // (verbose mode/lots of logging)
 	// ENUMERATIONS
 	// REF: [`SP.BaseType`](https://msdn.microsoft.com/en-us/library/office/jj246925.aspx)
@@ -2988,10 +2988,21 @@
 
 					// B: Fetch props
 					// NOTE: Just fetch all props (no filter below) as `GetMyProperties?select=SID` returns nothing, but it's present when querying all props
-					// NOTE: Both of these queries returns an object of [PersonProperties](https://msdn.microsoft.com/en-us/library/office/dn790354.aspx#bk_PersonProperties)
+					// NOTE: Both of these queries return an object of [PersonProperties](https://msdn.microsoft.com/en-us/library/office/dn790354.aspx#bk_PersonProperties)
 					if ( !userAcctName ) {
 						return sprLib.rest({
 							url: _urlProf+"/SP.UserProfiles.PeopleManager/GetMyProperties",
+							metadata: false
+						});
+					}
+					else if ( Array.isArray(arrQueryKeys) && arrQueryKeys.length == 1 ) {
+						// NOTE: PERF: Return only a fraction of UserProfiles when we can
+						// @see: https://msdn.microsoft.com/en-us/library/office/dn790354.aspx#bk_PeopleManagerGetUserProfilePropertyFor
+						// "To get all user profile properties, call the GetPropertiesFor method and then get the user profile properties from the UserProfileProperties property of the returned PersonProperties object."
+						// Use: `getuserprofilepropertyfor()` to retrieve a single property (very efficient: only queries this one prop, does not return mass amount of data like 'DirectReports', etc.)
+						// NOTE: "The GetUserProfilePropertiesFor method is not implemented in the REST API" - meaning we can onyl two things via REST: Return all, or return 1 property...
+						return sprLib.rest({
+							url: _urlProf+"/SP.UserProfiles.PeopleManager/GetUserProfilePropertyFor(accountName=@v,propertyname='"+ arrQueryKeys[0] +"')?@v='"+userAcctName+"'",
 							metadata: false
 						});
 					}
@@ -3007,13 +3018,30 @@
 				.then(function(arrProfileProps){
 					var objProfile = {};
 
-					// A: Cases where this fails (bad user, maybe no license?) REST returns {'GetPropertiesFor':null}
+					// A: Cases where this fails (bad user, maybe no license?) REST returns `{'GetPropertiesFor':null}`
 					if ( arrProfileProps && arrProfileProps[0] && arrProfileProps[0].hasOwnProperty('GetPropertiesFor') ) resolve( {} );
 
 					// B: Capture all cols or just the ones specified
-					if ( arrProfileProps[0] && Array.isArray(arrQueryKeys) && arrQueryKeys.length > 0 ) {
+					if ( arrProfileProps && arrProfileProps[0] && arrQueryKeys && arrQueryKeys.length == 1 && arrProfileProps[0].hasOwnProperty('GetUserProfilePropertyFor') ) {
+						// NOTE: When using `GetUserProfilePropertyFor` result is: `{GetUserProfilePropertyFor: "Brent Ely"}` (key val being the result)
+						objProfile[arrQueryKeys[0]] = arrProfileProps[0].GetUserProfilePropertyFor || '`'+arrQueryKeys[0]+'` property does not exist in SP.UserProfiles.PeopleManager.UserProfileProperties';
+					}
+					else if ( arrProfileProps[0] && Array.isArray(arrQueryKeys) && arrQueryKeys.length > 0 ) {
 						arrQueryKeys.forEach(function(key){
-							objProfile[key] = arrProfileProps[0][key] || 'ERROR: No such property exists in SP.UserProfiles.PeopleManager';
+							// NOTE: `arrProfileProps` has top-level props ('AccountName','Email',etc.) and a `UserProfiles` array of additional props - so, we need to search both
+							if ( arrProfileProps[0][key] ) {
+								objProfile[key] = arrProfileProps[0][key];
+							}
+							else if (
+								arrProfileProps[0].UserProfileProperties && arrProfileProps[0].UserProfileProperties.results
+								&& arrProfileProps[0].UserProfileProperties.results.filter(function(prop){ return prop.Key == key}).length > 0
+							)
+							{
+								objProfile[key] = arrProfileProps[0].UserProfileProperties.results.filter(function(prop){ return prop.Key == key})[0].Value;
+							}
+							else {
+								objProfile[key] = '`'+key+'` property does not exist in SP.UserProfiles.PeopleManager or SP.UserProfiles.PeopleManager.UserProfileProperties';
+							}
 						});
 					}
 					else if ( arrProfileProps[0] ) {
