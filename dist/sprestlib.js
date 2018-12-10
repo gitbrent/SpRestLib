@@ -35,7 +35,7 @@
 (function(){
 	// APP VERSION/BUILD
 	var APP_VER = "1.9.0-beta";
-	var APP_BLD = "20181202";
+	var APP_BLD = "20181209";
 	var DEBUG = false; // (verbose mode/lots of logging)
 	// ENUMERATIONS
 	// REF: [`SP.BaseType`](https://msdn.microsoft.com/en-us/library/office/jj246925.aspx)
@@ -66,20 +66,21 @@
 	};
 	// APP OPTIONS
 	var APP_OPTS = {
-		baseUrl:         '..',
-		busySpinnerHtml: '<div class="sprlib-spinner"><div class="sprlib-bounce1"></div><div class="sprlib-bounce2"></div><div class="sprlib-bounce3"></div></div>',
-		cache:           false,
-		cleanColHtml:    true,
-		currencyChar:    '$',
-		language:        'en',
-		maxRetries:      2,
-		maxRows:         5000, /* Max rows queried - internal app limit (used when getting Lists, Users, etc) */
-		metadata:        false,
-		nodeEnabled:     false,
-		nodeCookie:      '',
-		nodeServer:      '',
-		queryLimit:      null, /* default queryLimit - allows global override of default SP "100 rows" limit */
-		retryAfter:      1000
+		baseUrl:          '..',
+		busySpinnerHtml:  '<div class="sprlib-spinner"><div class="sprlib-bounce1"></div><div class="sprlib-bounce2"></div><div class="sprlib-bounce3"></div></div>',
+		cache:            false,
+		cleanColHtml:     true,
+		currencyChar:     '$',
+		language:         'en',
+		maxRetries:       2,
+		maxRows:          5000, /* Max rows queried - internal app limit (used when getting Lists, Users, etc) */
+		metadata:         false,
+		nodeEnabled:      false,
+		nodeCookie:       '',
+		nodeServer:       '',
+		overwriteUploads: false,
+		queryLimit:       null, /* default queryLimit - allows global override of default SP "100 rows" limit */
+		retryAfter:       1000
 	};
 	// LIBRARY DEPS
 	var https = null;
@@ -601,69 +602,6 @@
 			});
 		}
 
-
-		// WIP BELOW:
-
-		// TODO: WIP: .upload({ data:arrayBuffer/FilePicker/whatev, overwrite:BOOL })
-		/**
-		* @see: https://msdn.microsoft.com/en-us/library/office/dn450841.aspx#bk_FileCollectionAdd
-		*/
-		//_newFile.upload = function() {
-		//	return new Promise(function(resolve, reject) {
-				// CASE 1: NODE.JS
-				/*
-				// TODO: _fullName -> split for vars below!
-				var strFilePath = "/sites/dev/Shared%20Documents/upload";
-				var strFileName = "sprestlib-demo.html";
-				//var _dirName = _fullName.substring(0, _fullName.lastIndexOf('/'));
-				//var _fldName = _fullName.substring(_fullName.lastIndexOf('/')+1);
-				var strUrl = "_api/web/GetFolderByServerRelativeUrl('"+strFilePath+"')/Files/add(url='"+strFileName+"',overwrite=true)";
-				// IMPORTANT: path must be escaped or "TypeError: Request path contains unescaped characters"
-
-				sprLib.rest({
-					url: strUrl,
-					type: "POST",
-					requestDigest: gStrReqDig,
-					data: new Buffer( fs.readFileSync('./'+strFileName, 'utf8') )
-				});
-				.then((arrResults) => {
-					console.log('SUCCESS: "'+ arrResults[0].Name +'" uploaded to: '+ arrResults[0].ServerRelativeUrl );
-				});
-				*/
-
-				// CASE 2: CLIENT BROWSER: ask for a FilePicker or array buffer
-				/*
-				else if ( !$('#filePicker') || !$('#filePicker')[0] || !$('#filePicker')[0].value ) {
-					alert("Please select a file with the File Picker!");
-					return;
-				}
-
-				// STEP 2: Status update
-				$('#console').append('Starting file upload... <br>');
-
-				// STEP 3: Get the local file as an array buffer
-				var reader = new FileReader();
-				reader.readAsArrayBuffer( $('#filePicker')[0].files[0] );
-				reader.onloadend = function(e){
-					var parts = $('#filePicker')[0].value.split('\\');
-					var fileName = parts[parts.length - 1];
-					var strAjaxUrl = _spPageContextInfo.siteAbsoluteUrl
-						+ "/_api/web/lists/getByTitle('"+ $('#selDestLib').val() +"')"
-						+ "/RootFolder/files/add(overwrite=true,url='"+ fileName +"')";
-
-					sprLib.rest({
-						url: strAjaxUrl,
-						type: "POST",
-						data: e.target.result
-					})
-					.then(function(arr){
-						$('#console').append('SUCCESS: "'+ arr[0].Name +'" uploaded to: '+ arr[0].ServerRelativeUrl +'<br>');
-					})
-
-				*/
-		//	});
-		//};
-
 		// LAST: Return this new File
 		return _newFile;
 	}
@@ -1071,6 +1009,40 @@
 				});
 			});
 		}
+
+		// TODO: WIP: target=1.9.0
+		/**
+		* @since: 1.9.0
+		* @see: https://msdn.microsoft.com/en-us/library/office/dn450841.aspx#bk_FileCollectionAdd
+		* @example: sprLib.folder('/sites/dev/Documents/uploads').upload({ name:'test.pptx', data:{arrayBuffer blob}, requestDigest:'ABC123', overwrite:true })
+		*/
+		_newFolder.upload = function(inOpt) {
+			return new Promise(function(resolve, reject) {
+				// A: Options setup
+				var urlBase = ( APP_OPTS.baseUrl.indexOf('http') == 0 || APP_OPTS.baseUrl.indexOf('/') == 0 ? APP_OPTS.baseUrl : ( _spPageContextInfo && _spPageContextInfo.webServerRelativeUrl ? _spPageContextInfo.webServerRelativeUrl : APP_OPTS.baseUrl ) );
+				inOpt = (inOpt ? inOpt : null);
+				// TODO: Check reqd vars!
+				inOpt.digest    = ( inOpt.requestDigest || (typeof document !== 'undefined' && document.getElementById('__REQUESTDIGEST') ? document.getElementById('__REQUESTDIGEST').value : null) );
+				inOpt.overwrite = ( typeof(inOpt.overwrite) !== 'undefined' && inOpt.overwrite != null ? inOpt.overwrite : APP_OPTS.overwriteUploads );
+
+				// NOTE: Same code is used for both cases: node or browser
+				sprLib.rest({
+					url: "_api/web/GetFolderByServerRelativeUrl('"+_fullName+"')/Files/add(url='"+inOpt.name+"',overwrite=true)",
+					type: "POST",
+					requestDigest: inOpt.digest,
+					data: inOpt.data
+					//data: new Buffer( fs.readFileSync('./'+strFileName, 'utf8') )
+				})
+				.then(function(arrResults){
+					// Return the new `File` {object}
+					// NOTE: `arrResults[0]` is the actual result, just adding these others to help future-proof
+					resolve( arrResults && arrResults[0] ? arrResults[0] : (arrResults ? arrResults : 'HELP:No File?!') );
+				})
+				.catch(function(strErr){
+					reject( strErr );
+				});
+			});
+		};
 
 		// LAST: Return this new Folder
 		return _newFolder;
