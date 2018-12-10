@@ -4,8 +4,8 @@
  * DESC: Demonstrate SpRestLib on Node.js
  * REQS: Node 4.x + `npm install sprestlib`
  * EXEC: `node nodejs-demo.js (sp-username) (sp-password) {sp-hostUrl}`
- * VER.: 1.8.0
- * REL.: 20180828
+ * VER.: 1.9.0
+ * REL.: 20181210
  * REFS: HOWTO: Authenticate to SharePoint Online (*.sharepoint.com)
  * - https://allthatjs.com/2012/03/28/remote-authentication-in-sharepoint-online/
  * - http://paulryan.com.au/2014/spo-remote-authentication-rest/
@@ -60,7 +60,7 @@ var gStrReqDig = "";
 var gStrFilePath = "/sites/dev/Shared Documents/";	// text test
 var gStrFileLoca = "./";							// text test
 var gStrFileName = "sprestlib-demo.html";			// text test
-/* TODO: binary files dont upload correctly
+/*
 var gStrFilePath = "/sites/dev/Shared Documents/";	// binary test
 var gStrFileLoca = "./img/";						// binary test
 var gStrFileName = "setup01.png";					// binary test
@@ -217,25 +217,17 @@ Promise.resolve()
 
 	console.log("\nTEST 4: sprLib.rest() - upload a local file to 'Shared Documents' Library");
 	console.log("------------------------------------------------------------");
-
-	// IMPORTANT: path must be escaped or "TypeError: Request path contains unescaped characters"
-	var strUrl = "_api/web/GetFolderByServerRelativeUrl('"+ encodeURIComponent(gStrFilePath) +"')/Files/add(url='"+gStrFileName+"',overwrite=true)";
-
-	// NOTE: Use `binary` encoding as it works for both text and binary files (TODO: binary file uploading not working as of 20180826)
-	return sprLib.rest({
-		url: strUrl,
-		type: "POST",
-		headers: { "Accept":"application/json;odata=verbose", "binaryStringResponseBody":true, "X-RequestDigest":gStrReqDig },
-		data: new Buffer( fs.readFileSync( gStrFileLoca+gStrFileName, 'binary') )
-	})
-	.catch(strErr => {
-		console.log('ERROR: '+strErr);
+	// NOTE: Do not use encoding option with `fs.readFileSync()`! (as is, returns a buffer that works for all file types)
+	// @see: https://nodejs.org/api/fs.html#fs_fs_readfilesync_path_options
+	return sprLib.folder(gStrFilePath).upload({
+		name: gStrFileName,
+		data: fs.readFileSync(gStrFileLoca+gStrFileName),
+		requestDigest: gStrReqDig,
+		overwrite: true
 	});
 })
-.then((strResult) => {
-	var results = JSON.parse(strResult);
-	var file = results.d;
-	console.log('SUCCESS: `'+ file.Name +'` uploaded to: `'+ file.ServerRelativeUrl +'`' );
+.then((objFile) => {
+	console.log('SUCCESS: `'+ objFile.Name +'` uploaded to: `'+ objFile.ServerRelativeUrl +'`' );
 
 	console.log("\nTEST 5: sprLib.file().get() - get a file from 'Shared Documents' Library");
 	console.log("------------------------------------------------------------");
