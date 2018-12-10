@@ -1,45 +1,21 @@
-<!DOCTYPE html>
-<html lang="en-us">
+<!doctype html>
+<html lang="en">
 <head>
 	<title>SpRestLib Demo :: File Upload</title>
-	<meta name="author" content="https://github.com/gitbrent">
-	<link rel="stylesheet" href="https://cdn.rawgit.com/gitbrent/SpRestLib/master/example/css/sprestlib-demo.css">
+	<meta charset="utf-8">
+	<meta name="viewport"    content="width=device-width, initial-scale=1, shrink-to-fit=no">
+	<meta name="author"      content="https://github.com/gitbrent/">
+	<meta name="website"     content="https://github.com/gitbrent/SpRestLib/">
+	<meta name="keywords"    content="SpRestLib, JavaScript, js-sharepoint, SP2013 REST, SharePoint 2013, SharePoint 2016, SharePoint Online">
+	<meta name="description" content="Content Editor Webpart: SpRestLib features and capabilities">
+	<meta name="revised"     content="20181203">
+
+	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootswatch/4.1.3/yeti/bootstrap.min.css">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.15.0/themes/prism-okaidia.min.css">
 
 	<style>
-		#contentRow {
-			padding-top: 0;
-		}
-		body {
-			font-family: "Segoe UI", "Helvetica Neue", Verdana, Arial, sans-serif;
-			font-size: 11px;
-		}
-		body > div {
-			margin-bottom: 20px;
-		}
-
-		h1 {
-			font-weight: normal;
-			color: #0088cc;
-			font-size: 28px;
-			margin-bottom: 10px;
-		}
-		h2 {
-			font-weight: normal;
-			font-size: 12px;
-			color: #999;
-			margin-bottom: 20px;
-		}
-		textarea {
-			height: 100px;
-			margin: 5px 0;
-		}
-		tt {
-			color: blue;
-		}
-
-		.subTitle {
-			display: block;
-		}
+		/* sharpeoint corev15.css vfixes */
+		#contentRow { padding-top: 0; }
 
 		/* ========== ========== */
 		#tabResults thead th {
@@ -75,11 +51,14 @@
 		}
 	</style>
 
-	<script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
-	<script src="https://cdn.rawgit.com/gitbrent/SpRestLib/master/dist/sprestlib.bundle.js"></script>
+	<script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.15.0/prism.min.js"></script>
+	<!--<script src="https://cdn.jsdelivr.net/gh/gitbrent/SpRestLib@1.8.0/dist/sprestlib.bundle.js"></script>-->
+	<script src="../SiteAssets/sprestlib/js/sprestlib.js"></script>
+
 	<script>
 		// APP
-		var APP_BLD = 20180318;
+		var APP_BLD = 20181209;
 		// CONST
 		var HTML_SPINNER = '<div class="sprlib-spinner"><div class="sprlib-bounce1"></div><div class="sprlib-bounce2"></div><div class="sprlib-bounce3"></div></div>';
 
@@ -92,19 +71,59 @@
 
 		// ==================================================================================================================
 
+		function doPopulateApp() {
+			var fileName = "";
+			try { fileName = $('#filePicker')[0].files[0]; } catch(ex){}
+
+			// STEP 1:
+			$('#sprLibCode').text(
+				'// STEP 1: Use FilePicker to read file\n'
+				+'var reader = new FileReader();\n'
+				+'reader.readAsArrayBuffer( $(\'#filePicker\')[0].files[0] );\n'
+				+'reader.onloadend = function(e){\n'
+				+'    var parts = $(\'#filePicker\')[0].value.split("\\\\");\n'
+				+'    var fileName = parts[parts.length - 1];\n'
+				+'    var foldName = $(\'#selDestLib\').val();\n'
+				+'\n'
+				+'    // STEP 2: Upload file to SharePoint\n'
+				+'    sprLib.folder( foldName ).upload({\n'
+				+'        name: fileName,\n'
+				+'        data: e.target.result,\n'
+				+'        overwrite: true\n'
+				+'    });'
+				+'});'
+			);
+			Prism.highlightElement( $('#sprLibCode')[0] );
+
+			// STEP 2:
+			sprLib.site().lists()
+			.then(function(arrLists){
+				arrLists.forEach(function(list){
+					if ( list.BaseType == 'Library' && !list.Hidden ) {
+						$('#selDestLib').append('<option value="'+ list.ServerRelativeUrl +'">'+ list.Title +'</option>');
+					}
+				});
+
+				$('#contOptions .sprlib-spinner').hide();
+			})
+			.catch(function(strErr){
+				alert(strErr);
+			});
+		}
+
 		function doUploadFile() {
-			// STEP 1: Reality Check
-			if ( !$('#selDestLib').val() ) {
-				alert("Please select a Destination Library!");
-				return;
-			}
-			else if ( !$('#filePicker') || !$('#filePicker')[0] || !$('#filePicker')[0].value ) {
-				alert("Please select a file with the File Picker!");
-				return;
+			// STEP 1: Form validation
+			{
+				$('select, input').removeClass('is-invalid');
+
+				if ( !$('#selDestLib').val() ) $('#selDestLib').addClass('is-invalid');
+				if ( !$('#filePicker') || !$('#filePicker')[0] || !$('#filePicker')[0].value ) $('#filePicker').addClass('is-invalid');
+
+				if ( $('body .is-invalid').length > 0 ) return;
 			}
 
 			// STEP 2: Status update
-			$('#console').append('Starting file upload... <br>');
+			$('#console').append('<h5 class="text-primary">Starting file upload...</h5>');
 
 			// STEP 3: Get the local file as an array buffer
 			var reader = new FileReader();
@@ -112,17 +131,21 @@
 			reader.onloadend = function(e){
 				var parts = $('#filePicker')[0].value.split('\\');
 				var fileName = parts[parts.length - 1];
-				var strAjaxUrl = _spPageContextInfo.siteAbsoluteUrl
-					+ "/_api/web/lists/getByTitle('"+ $('#selDestLib').val() +"')"
-					+ "/RootFolder/files/add(overwrite=true,url='"+ fileName +"')";
+				var foldName = $('#selDestLib').val();
 
-			 	sprLib.rest({
-					url: strAjaxUrl,
-					type: "POST",
-					data: e.target.result
+				// STEP 4: Pass buffer as `data` to upload file
+				sprLib.folder( foldName ).upload({
+				    name: fileName,
+				    data: e.target.result,
+				    overwrite: true
 				})
-				.then(function(arr){
-					$('#console').append('SUCCESS: "'+ arr[0].Name +'" uploaded to: '+ arr[0].ServerRelativeUrl +'<br>');
+				.then(function(objFile){
+					if ( objFile ) {
+						$('#console').append('<h5 class="text-success">SUCCESS! "'+ objFile.Name +'" uploaded to: '+ objFile.ServerRelativeUrl +'</h5>');
+					}
+					else {
+						$('#console').append('<h5 class="text-danger">File ojbect not returned!</h5>');
+					}
 				})
 				.catch(function(strErr){
 					console.error(strErr);
@@ -137,26 +160,17 @@
 		// ==================================================================================================================
 
 		function appStart() {
-			// STEP 1: Check for FileReader API (HTML5) support.
+			// STEP 1: Verify FileReader API (HTML5) support
 			if ( !window.FileReader ) {
 				alert('Sorry, but your browser does not support the FileReader API.');
 				return;
 			}
 
-			// STEP 2:
-			sprLib.site().lists()
-			.then(function(arrLists){
-				arrLists.forEach(function(list){
-					if ( list.BaseType == 'Library' && !list.Hidden ) {
-						$('#selDestLib').append('<option value="'+ list.Title +'">'+ list.Title +'</option>');
-					}
-				});
+			// STEP 2: Show version
+			$('#console').append('<h5 class="text-primary">FYI: sprLib.version = '+ sprLib.version +'</h5>');
 
-				$('#contOptions .sprlib-spinner, #selDestLib').toggle();
-			})
-			.catch(function(strErr){
-				alert(strErr);
-			});
+			// STEP 3: Populate
+			doPopulateApp();
 		}
 
 		// ==================================================================================================================
@@ -164,42 +178,49 @@
 	</script>
 </head>
 <body>
-	<h1 style="margin-top:0">SpRestLib File Upload Demo</h1>
+	<h1 class="text-primary mt-0">SpRestLib Demo :: Upload File to SharePoint Library</h1>
 
-	<div class="subTitle" style="cursor:pointer" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
-		<div class="arrow active"></div>File Upload
-	</div>
-	<div id="contOptions">
-		<table class="tabModern">
-			<tbody>
-				<tr>
-					<th style="width:10%; white-space:nowrap;">Destination Library</th>
-					<td style="width:90%">
-						<select id="selDestLib" style="display:none"><option value="">Select...</option></select>
-						<div class="sprlib-spinner"><div class="sprlib-bounce1"></div><div class="sprlib-bounce2"></div><div class="sprlib-bounce3"></div></div>
-					</td>
-				</tr>
-				<tr>
-					<th>File Picker</th>
-					<td style="width:90%">
-						<input id="filePicker" type="file" style="width:30%">
-					</td>
-				</tr>
-				<tr>
-					<th></th>
-					<td>
-						<button type="button" class="flatBtn flatBtn-blue" style="width:30%" onclick="doUploadFile()">Upload File</button>
-					</td>
-				</tr>
-			</tbody>
-		</table>
+	<div class="container mt-4">
+		<div class="row">
+			<div class="col">
+				<div id="appOptions" class="container">
+					<h4 class="text-primary">Upload Demo</h4>
+					<div id="contOptions" class="container bg-light border px-4 py-3 my-3">
+						<div class="row mb-4">
+							<div class="col">
+								<label for="selDestLib" class="text-muted text-uppercase">Target Library</label>
+								<select id="selDestLib" class="form-control bg-white">
+									<option value="">Select...</option>
+								</select>
+								<div class="invalid-feedback">Please select a Library</div>
+								<div class="sprlib-spinner"><div class="sprlib-bounce1"></div><div class="sprlib-bounce2"></div><div class="sprlib-bounce3"></div></div>
+							</div>
+						</div>
+						<div class="row mb-3">
+							<div class="col">
+								<label for="selDestLib" class="text-muted text-uppercase">Source File</label>
+								<input id="filePicker" type="file" class="form-control">
+								<div class="invalid-feedback">Please select a File</div>
+							</div>
+						</div>
+					</div>
+					<button type="button" class="btn btn-success w-50" onclick="doUploadFile()">Upload File</button>
+				</div>
+			</div>
+			<div class="col">
+				<div id="appCode" class="container">
+					<h4 class="text-primary">Upload Code</h4>
+					<div>
+						<pre class="my-3"><code id="sprLibCode" class="language-javascript"></code></pre>
+					</div>
+				</div>
+			</div>
+		</div>
 	</div>
 
-	<div class="subTitle" style="cursor:pointer" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
-		<div class="arrow active"></div>Output
-	</div>
-	<div id="contConsole">
-		<tt><div id="console"></div></tt>
+	<div id="appOutput" class="container mt-5">
+		<h4 class="text-primary">Output</h4>
+		<div id="console" class="p-3 my-3"></div>
 	</div>
 </body>
 </html>
