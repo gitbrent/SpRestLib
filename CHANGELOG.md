@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - New `folder` API method: `add()` ([gitbrent](https://github.com/gitbrent))
 - New `folder` API method: `delete()` ([gitbrent](https://github.com/gitbrent))
 - New `folder` API method: `recycle()` ([gitbrent](https://github.com/gitbrent))
+- New `folder` API method: `upload()` [\#18](https://github.com/gitbrent/sprestlib/issues/18) ([ra6hi9](https://github.com/ra6hi9))
 - New `options()` method: replaces `baseUrl()` and `nodeConfig()` methods ([gitbrent](https://github.com/gitbrent))
 ### Changed
 - Typescript: Modified declaration file [\#37](https://github.com/gitbrent/sprestlib/pull/37) ([kelvinbell](https://github.com/kelvinbell))
