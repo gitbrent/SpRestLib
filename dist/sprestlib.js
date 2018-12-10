@@ -1010,9 +1010,10 @@
 			});
 		}
 
-		// TODO: WIP: target=1.9.0
 		/**
+		* Upload a File (buffer) to Library
 		* @since: 1.9.0
+		*
 		* @see: https://msdn.microsoft.com/en-us/library/office/dn450841.aspx#bk_FileCollectionAdd
 		* @example: sprLib.folder('/sites/dev/Documents/uploads').upload({ name:'test.pptx', data:{arrayBuffer blob}, requestDigest:'ABC123', overwrite:true })
 		*/
@@ -1031,7 +1032,6 @@
 					type: "POST",
 					requestDigest: inOpt.digest,
 					data: inOpt.data
-					//data: new Buffer( fs.readFileSync('./'+strFileName, 'utf8') )
 				})
 				.then(function(arrResults){
 					// Return the new `File` {object}
