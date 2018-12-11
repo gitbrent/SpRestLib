@@ -36,6 +36,12 @@ reader.onloadend = function(e){
         name: fileName,
         data: e.target.result,
         overwrite: true
+    })
+    .then(function(objFile){
+        console.log('SUCCESS: `'+ objFile.Name +'` uploaded to: `'+ objFile.ServerRelativeUrl +'`' );
+    })
+    .catch(function(strErr){
+        console.error(strErr);
     });
 });
 ```
@@ -60,7 +66,7 @@ sprLib.folder(gStrFilePath).upload({
     overwrite: true
 })
 .then((objFile) => {
-	console.log('SUCCESS: `'+ objFile.Name +'` uploaded to: `'+ objFile.ServerRelativeUrl +'`' );
+    console.log('SUCCESS: `'+ objFile.Name +'` uploaded to: `'+ objFile.ServerRelativeUrl +'`' );
 })
 .catch((strErr) => {
     console.error(strErr);
