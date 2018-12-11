@@ -170,3 +170,48 @@ Returns: Boolean result
 sprLib.folder('SiteAssets/img/junk').recycle()
 .then(boolResult => console.log('folder recycled!') );
 ```
+
+## Folder Upload
+
+### Upload File to Folder
+EXAMPLE: Client web browser (using `<input id="filePicker" type="file">`)
+```javascript
+// STEP 1: Use FilePicker to read file
+var reader = new FileReader();
+reader.readAsArrayBuffer( $('#filePicker')[0].files[0] );
+reader.onloadend = function(e){
+    var parts = $('#filePicker')[0].value.split("\\");
+    var strFileName = parts[parts.length - 1];
+    var bufferData = e.target.result;
+
+    // STEP 2: Upload file to SharePoint
+    sprLib.folder('/sites/dev/Documents').upload({
+        name: strFileName,
+        data: bufferData,
+        overwrite: true
+    })
+    .then(function(objFile){
+        console.log('SUCCESS: `'+ objFile.Name +'` uploaded to: `'+ objFile.ServerRelativeUrl +'`' );
+    })
+    .catch(function(strErr){
+        console.error(strErr);
+    });
+});
+```
+
+EXAMPLE: NodeJS
+```javascript
+sprLib.folder('/sites/dev/Documents').upload({
+    name: 'jeff_teper_secret_plan.docx',
+    data: fs.readFileSync('./docs/jeff_teper_secret_plan.docx'),
+    requestDigest: gStrReqDig,
+    overwrite: true
+})
+.then((objFile) => {
+    console.log('SUCCESS: `'+ objFile.Name +'` uploaded to: `'+ objFile.ServerRelativeUrl +'`' );
+})
+.catch((strErr) => {
+    console.error(strErr);
+});
+```
+See [Uploading a file to a SharePoint library using JavaScript](/SpRestLib/blog/2018/12/10/upload-file-to-sharepoint-library.html) for a working demo.
