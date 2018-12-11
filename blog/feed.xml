@@ -4,7 +4,7 @@
         <title>SpRestLib Blog</title>
         <link>https://gitbrent.github.io/SpRestLib/blog</link>
         <description>The best place to stay up-to-date with the latest SpRestLib news and events.</description>
-        <lastBuildDate>Sat, 17 Nov 2018 06:00:00 GMT</lastBuildDate>
+        <lastBuildDate>Mon, 10 Dec 2018 06:00:00 GMT</lastBuildDate>
         <docs>http://blogs.law.harvard.edu/tech/rss</docs>
         <generator>Feed for Node.js</generator>
         <image>
@@ -13,6 +13,15 @@
             <link>https://gitbrent.github.io/SpRestLib/blog</link>
         </image>
         <copyright>Copyright © 2018 Brent Ely</copyright>
+        <item>
+            <title><![CDATA[Uploading a file to a SharePoint library using JavaScript]]></title>
+            <link>https://gitbrent.github.io/SpRestLib/blog/2018/12/10/upload-file-to-sharepoint-library.html</link>
+            <guid>https://gitbrent.github.io/SpRestLib/blog/2018/12/10/upload-file-to-sharepoint-library.html</guid>
+            <pubDate>Mon, 10 Dec 2018 06:00:00 GMT</pubDate>
+            <description><![CDATA[<p>Howto upload a file into a SharePoint Library using SpRestLib.  The <code>upload()</code> method
+accepts an ArrayBuffer from both Node.js and client browsers.</p>
+]]></description>
+        </item>
         <item>
             <title><![CDATA[Downloading a file from SharePoint library using JavaScript and REST API]]></title>
             <link>https://gitbrent.github.io/SpRestLib/blog/2018/11/17/download-sharepoint-file-using-javascript.html</link>

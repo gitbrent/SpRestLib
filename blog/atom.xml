@@ -2,12 +2,26 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://gitbrent.github.io/SpRestLib/blog</id>
     <title>SpRestLib Blog</title>
-    <updated>2018-11-17T06:00:00Z</updated>
+    <updated>2018-12-10T06:00:00Z</updated>
     <generator>Feed for Node.js</generator>
     <link rel="alternate" href="https://gitbrent.github.io/SpRestLib/blog"/>
     <subtitle>The best place to stay up-to-date with the latest SpRestLib news and events.</subtitle>
     <logo>https://gitbrent.github.io/SpRestLib/img/sprestlib.svg</logo>
     <rights>Copyright © 2018 Brent Ely</rights>
+    <entry>
+        <title type="html"><![CDATA[Uploading a file to a SharePoint library using JavaScript]]></title>
+        <id>https://gitbrent.github.io/SpRestLib/blog/2018/12/10/upload-file-to-sharepoint-library.html</id>
+        <link href="https://gitbrent.github.io/SpRestLib/blog/2018/12/10/upload-file-to-sharepoint-library.html">
+        </link>
+        <updated>2018-12-10T06:00:00Z</updated>
+        <summary type="html"><![CDATA[<p>Howto upload a file into a SharePoint Library using SpRestLib.  The <code>upload()</code> method
+accepts an ArrayBuffer from both Node.js and client browsers.</p>
+]]></summary>
+        <author>
+            <name>Brent Ely</name>
+            <uri>https://gitbrent.github.io/SpRestLib/</uri>
+        </author>
+    </entry>
     <entry>
         <title type="html"><![CDATA[Downloading a file from SharePoint library using JavaScript and REST API]]></title>
         <id>https://gitbrent.github.io/SpRestLib/blog/2018/11/17/download-sharepoint-file-using-javascript.html</id>
