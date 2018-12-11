@@ -35,7 +35,7 @@ declare namespace sprLib {
 
   interface FileCheckInOptions {
     comment?: string;
-	type?: 'major' | 'minor' | 'overwrite';
+    type?: 'major' | 'minor' | 'overwrite';
   }
   interface FileInfoOptions {
     version?: number;
@@ -51,6 +51,12 @@ declare namespace sprLib {
   }
   function file(fileName: string): IFile;
 
+  interface FolderUploadOptions {
+    name: string;
+    data: object;
+    requestDigest?: string;
+    overwrite?: boolean;
+  }
   interface IFolder {
     add(folderName: string): Promise<object>;
     delete(): Promise<boolean>;
@@ -59,6 +65,7 @@ declare namespace sprLib {
     info(): Promise<object>;
     perms(): Promise<object[]>;
     recycle(): Promise<boolean>;
+    upload(options: FolderUploadOptions): Promise<object>;
   }
   function folder(folderName: string): IFolder;
 
