@@ -8,7 +8,7 @@
 	<meta name="website"     content="https://github.com/gitbrent/SpRestLib/">
 	<meta name="keywords"    content="SpRestLib, JavaScript, js-sharepoint, SP2013 REST, SharePoint 2013, SharePoint 2016, SharePoint Online">
 	<meta name="description" content="Content Editor Webpart: SpRestLib features and capabilities">
-	<meta name="revised"     content="20181210">
+	<meta name="revised"     content="20181211">
 
 	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootswatch/4.1.3/yeti/bootstrap.min.css">
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.15.0/themes/prism-okaidia.min.css">
@@ -90,7 +90,7 @@
 				+'        name: fileName,\n'
 				+'        data: e.target.result,\n'
 				+'        overwrite: true\n'
-				+'    });'
+				+'    });\n'
 				+'});'
 			);
 			Prism.highlightElement( $('#sprLibCode')[0] );
@@ -178,9 +178,8 @@
 	</script>
 </head>
 <body>
-	<h1 class="text-primary mt-0">SpRestLib Demo :: Upload File to SharePoint Library</h1>
-
-	<div class="container mt-4">
+	<div class="container mt-0">
+		<h1 class="text-primary mb-4">SpRestLib Demo :: Upload File to SharePoint Library</h1>
 		<div class="row">
 			<div class="col">
 				<div id="appOptions" class="container">
