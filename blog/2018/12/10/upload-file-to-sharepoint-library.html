@@ -59,6 +59,12 @@ reader.onloadend = <span class="hljs-function"><span class="hljs-keyword">functi
         <span class="hljs-attr">name</span>: fileName,
         <span class="hljs-attr">data</span>: e.target.result,
         <span class="hljs-attr">overwrite</span>: <span class="hljs-literal">true</span>
+    })
+    .then(<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">objFile</span>)</span>{
+        <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'SUCCESS: `'</span>+ objFile.Name +<span class="hljs-string">'` uploaded to: `'</span>+ objFile.ServerRelativeUrl +<span class="hljs-string">'`'</span> );
+    })
+    .catch(<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">strErr</span>)</span>{
+        <span class="hljs-built_in">console</span>.error(strErr);
     });
 });
 </code></pre>
