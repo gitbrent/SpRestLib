@@ -14,27 +14,36 @@ gulp.task('default', function(){
 		if ( line.indexOf('var APP_BLD') > -1 ) APP_BLD = line.split('=')[1].trim().replace(/\"+|\;+/gi,'');
 	});
 
-    gulp.src(['lib/promise.min.js', 'dist/sprestlib.js'])
-        .pipe(concat('sprestlib.bundle.js'))
+	gulp.src(['lib/promise.min.js', 'dist/sprestlib.js', 'lib/jquery.min.js', 'dist/sprestlib-ui.js'])
+		.pipe(concat('sprestlib-ui.bundle.js'))
 		.pipe(uglify())
 		.pipe(insert.prepend('/* SpRestLib '+APP_VER+'-'+APP_BLD+' */\n'))
-        .pipe(sourcemaps.init())
-        .pipe(ignore.exclude(["**/*.map"]))
-        .pipe(sourcemaps.write('./'))
-        .pipe(gulp.dest('dist/'));
+		.pipe(sourcemaps.init())
+		.pipe(ignore.exclude(["**/*.map"]))
+		.pipe(sourcemaps.write('./'))
+		.pipe(gulp.dest('dist/'));
 
-    gulp.src(['lib/promise.min.js', 'dist/sprestlib.js', 'lib/jquery.min.js', 'dist/sprestlib-ui.js'])
-        .pipe(concat('sprestlib-ui.bundle.js'))
+	gulp.src(['dist/sprestlib.js', 'lib/jquery.min.js', 'dist/sprestlib-ui.js'])
+		.pipe(concat('sprestlib-ui.min.js'))
 		.pipe(uglify())
 		.pipe(insert.prepend('/* SpRestLib '+APP_VER+'-'+APP_BLD+' */\n'))
-        .pipe(sourcemaps.init())
-        .pipe(ignore.exclude(["**/*.map"]))
-        .pipe(sourcemaps.write('./'))
-        .pipe(gulp.dest('dist/'));
+		.pipe(sourcemaps.init())
+		.pipe(ignore.exclude(["**/*.map"]))
+		.pipe(sourcemaps.write('./'))
+		.pipe(gulp.dest('dist/'));
 
-    gulp.src(['dist/sprestlib.js'])
-        .pipe(concat('sprestlib.min.js'))
-        .pipe(uglify())
-        .pipe(insert.prepend('/* SpRestLib '+APP_VER+'-'+APP_BLD+' */\n'))
-        .pipe(gulp.dest('dist'));
+	gulp.src(['lib/promise.min.js', 'dist/sprestlib.js'])
+		.pipe(concat('sprestlib.bundle.js'))
+		.pipe(uglify())
+		.pipe(insert.prepend('/* SpRestLib '+APP_VER+'-'+APP_BLD+' */\n'))
+		.pipe(sourcemaps.init())
+		.pipe(ignore.exclude(["**/*.map"]))
+		.pipe(sourcemaps.write('./'))
+		.pipe(gulp.dest('dist/'));
+
+	gulp.src(['dist/sprestlib.js'])
+		.pipe(concat('sprestlib.min.js'))
+		.pipe(uglify())
+		.pipe(insert.prepend('/* SpRestLib '+APP_VER+'-'+APP_BLD+' */\n'))
+		.pipe(gulp.dest('dist'));
 });
