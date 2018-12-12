@@ -8,6 +8,22 @@ AngluarJS-like syntax made especially for SharePoint Web Services.
 
 Many different HTML tags can be populated by adding an `data-sprlib` property to many HTML element types.
 
+## Installation
+
+### CDN
+```javascript
+<script src="https://cdn.jsdelivr.net/gh/gitbrent/SpRestLib@1.8.0/dist/sprestlib-ui.min.js"></script>
+// Use bundle for IE11 support
+<script src="https://cdn.jsdelivr.net/gh/gitbrent/SpRestLib@1.8.0/dist/sprestlib-ui.bundle.js"></script>
+```
+
+### Download
+```javascript
+<script src="/subsite/SiteAssets/js/sprestlib-ui.min.js"></script>
+// Use bundle for IE11 support
+<script src="/subsite/SiteAssets/js/sprestlib-ui.bundle.js"></script>
+```
+
 ## Syntax
 `<tag data-sprlib='{ options }'>`
 
