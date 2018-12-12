@@ -90,7 +90,7 @@ items, execute REST calls, interact with files and folders, gather site properti
   - [SpRestLib via Console](#sprestlib-via-console)
 - [Installation](#installation)
   - [CDN](#cdn)
-  - [Local Script](#local-script)
+  - [Download](#download)
   - [npm](#npm)
   - [yarn](#yarn)
 - [Method Reference](#method-reference)
@@ -149,7 +149,7 @@ document.getElementsByTagName('head')[0].appendChild(script);
 <script src="https://cdn.jsdelivr.net/gh/gitbrent/SpRestLib@1.8.0/dist/sprestlib.bundle.js"></script>
 ```
 
-## Local Script
+## Download
 ```javascript
 <script src="/subsite/SiteAssets/js/sprestlib.min.js"></script>
 // Use bundle for IE11 support
