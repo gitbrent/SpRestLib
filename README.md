@@ -90,10 +90,9 @@ items, execute REST calls, interact with files and folders, gather site properti
   - [SpRestLib via Console](#sprestlib-via-console)
 - [Installation](#installation)
   - [Client-Side](#client-side)
-    - [Include Local Scripts](#include-local-scripts)
-    - [Include Bundle Script](#include-bundle-script)
     - [CDN](#cdn)
-    - [NPM](#npm)
+    - [Local Script](#local-script)
+    - [npm](#npm)
     - [yarn](#yarn)
 - [Method Reference](#method-reference)
   - [REST API Methods](#rest-api-methods)
@@ -146,28 +145,21 @@ document.getElementsByTagName('head')[0].appendChild(script);
 
 ## Client-Side
 
-### Include Local Scripts
-```javascript
-<script src="https://yourhost.com/subsite/SiteAssets/js/sprestlib.js"></script>
-```
-* *IE11 support requires a Promises polyfill as well (included in the `libs` folder)*
-
-### Include Bundle Script
-```javascript
-<script src="https://yourhost.com/subsite/SiteAssets/js/sprestlib.bundle.js"></script>
-```
-* *`sprestlib.bundle.js` includes all required libraries (SpRestLib + Promises)*
-```javascript
-<script src="https://yourhost.com/subsite/SiteAssets/js/sprestlib-ui.bundle.js"></script>
-```
-* *`sprestlib-ui.bundle.js` includes all required libraries plus UI (SpRestLib and SpRestLib-UI + jQuery and Promises)*
-
 ### CDN
 ```javascript
+<script src="https://cdn.jsdelivr.net/gh/gitbrent/SpRestLib@1.8.0/dist/sprestlib.min.js"></script>
+// Use bundle for IE11 support
 <script src="https://cdn.jsdelivr.net/gh/gitbrent/SpRestLib@1.8.0/dist/sprestlib.bundle.js"></script>
 ```
 
-### NPM
+### Local Script
+```javascript
+<script src="https://yourhost.com/subsite/SiteAssets/js/sprestlib.min.js"></script>
+// Use bundle for IE11 support
+<script src="https://yourhost.com/subsite/SiteAssets/js/sprestlib.bundle.js"></script>
+```
+
+### npm
 ```javascript
 npm install sprestlib
 
