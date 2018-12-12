@@ -89,11 +89,10 @@ items, execute REST calls, interact with files and folders, gather site properti
 - [Library Test Drive](#library-test-drive)
   - [SpRestLib via Console](#sprestlib-via-console)
 - [Installation](#installation)
-  - [Client-Side](#client-side)
-    - [CDN](#cdn)
-    - [Local Script](#local-script)
-    - [npm](#npm)
-    - [yarn](#yarn)
+  - [CDN](#cdn)
+  - [Local Script](#local-script)
+  - [npm](#npm)
+  - [yarn](#yarn)
 - [Method Reference](#method-reference)
   - [REST API Methods](#rest-api-methods)
   - [List/Library Methods (`SP.List`)](#listlibrary-methods-splist)
@@ -143,30 +142,28 @@ document.getElementsByTagName('head')[0].appendChild(script);
 **************************************************************************************************
 # Installation
 
-## Client-Side
-
-### CDN
+## CDN
 ```javascript
 <script src="https://cdn.jsdelivr.net/gh/gitbrent/SpRestLib@1.8.0/dist/sprestlib.min.js"></script>
 // Use bundle for IE11 support
 <script src="https://cdn.jsdelivr.net/gh/gitbrent/SpRestLib@1.8.0/dist/sprestlib.bundle.js"></script>
 ```
 
-### Local Script
+## Local Script
 ```javascript
-<script src="https://yourhost.com/subsite/SiteAssets/js/sprestlib.min.js"></script>
+<script src="/subsite/SiteAssets/js/sprestlib.min.js"></script>
 // Use bundle for IE11 support
-<script src="https://yourhost.com/subsite/SiteAssets/js/sprestlib.bundle.js"></script>
+<script src="/subsite/SiteAssets/js/sprestlib.bundle.js"></script>
 ```
 
-### npm
+## npm
 ```javascript
 npm install sprestlib
 
 var sprLib = require("sprestlib");
 ```
 
-### yarn
+## yarn
 ```javascript
 yarn install sprestlib
 ```
