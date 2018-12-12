@@ -86,8 +86,9 @@ items, execute REST calls, interact with files and folders, gather site properti
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 
 
-- [Library Test Drive](#library-test-drive)
-  - [SpRestLib via Console](#sprestlib-via-console)
+- [Library Demo](#library-demo)
+  - [Demo via Browser Console](#demo-via-browser-console)
+  - [Demo via Page Webpart](#demo-via-page-webpart)
 - [Installation](#installation)
   - [CDN](#cdn)
   - [Download](#download)
@@ -119,10 +120,11 @@ items, execute REST calls, interact with files and folders, gather site properti
 
 
 **************************************************************************************************
-# Library Test Drive
+# Library Demo
 
-## SpRestLib via Console
-You should test drive SpRestLib!  It's super easy:  
+## Demo via Browser Console
+It's really easy to test drive SpRestLib!  
+
 Just open your browser's Developer Tools window anywhere on your SharePoint site,
 then run the following code snippet which will load the SpRestLib bundle script dynamically:
 
@@ -137,6 +139,13 @@ script.onload = function(){
 }
 document.getElementsByTagName('head')[0].appendChild(script);
 ```
+![Try It Out](https://raw.githubusercontent.com/gitbrent/SpRestLib/master/example/img/readme-tryitout-console.png)
+
+## Demo via Page Webpart
+Upload the `example/sprestlib-demo.html` file to SiteAssets on your SharePoint site and add it into a Webpart for a live
+demo of all available methods.
+
+![Demo Webpart](https://raw.githubusercontent.com/gitbrent/SpRestLib/master/example/img/readme-demo-webpart.png)
 
 
 **************************************************************************************************
