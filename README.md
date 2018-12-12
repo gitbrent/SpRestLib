@@ -190,10 +190,10 @@ yarn install sprestlib
 [List/Library Methods](https://gitbrent.github.io/SpRestLib/docs/api-list.html)
 
 ## File Methods (`SP.File`)
-[Site Methods](https://gitbrent.github.io/SpRestLib/docs/api-file.html)
+[File Methods](https://gitbrent.github.io/SpRestLib/docs/api-file.html)
 
 ## Folder Methods (`SP.Folder`)
-[Site Methods](https://gitbrent.github.io/SpRestLib/docs/api-folder.html)
+[Folder Methods](https://gitbrent.github.io/SpRestLib/docs/api-folder.html)
 
 ## Site Methods (`SP.Web`)
 [Site Methods](https://gitbrent.github.io/SpRestLib/docs/api-site.html)
