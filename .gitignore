@@ -11,7 +11,6 @@ package-lock.json
 blog/
 website/
 docs/
-img/
 css/hybrid.min.css
 css/main.css
 css/style.bundle.css
