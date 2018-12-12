@@ -35,7 +35,7 @@
 (function(){
 	// APP VERSION/BUILD
 	var APP_VER = "1.9.0-beta";
-	var APP_BLD = "20181210";
+	var APP_BLD = "20181211";
 	var DEBUG = false; // (verbose mode/lots of logging)
 	// ENUMERATIONS
 	// REF: [`SP.BaseType`](https://msdn.microsoft.com/en-us/library/office/jj246925.aspx)
@@ -608,12 +608,12 @@
 
 	// API: FOLDER
 	/**
-	* @param `inOpt` (object)/(string) - required - (`name` prop reqd)
+	* SharePoint Library Folder Resource methods
 	*
+	* @param `inOpt` (object)/(string) - required - (`name` prop reqd)
 	* @example - `sprLib.folder('SiteAssets');`
 	* @example - `sprLib.folder('/sites/dev/SiteAssets/');`
 	* @example - `sprLib.folder({ 'name':'/sites/dev/SiteAssets/' });`
-	*
 	* @since 1.8.0
 	* @see: [File API](https://gitbrent.github.io/SpRestLib/docs/api-folder.html)
 	* @see: [Files and folders REST API reference](https://msdn.microsoft.com/en-us/library/office/dn450841.aspx#bk_Folder)
@@ -1050,6 +1050,8 @@
 
 	// API: LIST (CRUD, select, recycle)
 	/**
+	* SharePoint List/Library methods
+	*
 	* @param `inOpt` (string) - required - ListName or ListGUID
 	* @example - string - sprLib.list('Documents');
 	*
@@ -1902,34 +1904,27 @@
 		return _newList;
 	};
 
-	// API: REST (Runs internal AJAX ops *and* provides direct/ad-hoc interface to users)
+	// API: REST (Runs internal AJAX ops **AND** provides direct/ad-hoc interface to users)
 	/**
 	* Execute an ad-hoc REST query to one of many endpoints
+	* @since 1.0.0
 	*
 	* @example - sprLib.rest({ url:'/sites/dev/_api/web/webs', metadata:true });
 	* @example - sprLib.rest({ url:'/sites/dev/_api/web/webs', queryCols:['ID','Title'] });
 	* @example
-	sprLib.rest({
-		url: '/sites/dev/_api/web/sitegroups',
-		type: ['GET' | 'POST'],
-		queryCols: {
-			title:       { dataName:'Title' },
-			loginName:   { dataName:'LoginName' },
-			editAllowed: { dataName:'AllowMembersEditMembership' }
-		},
-		queryFilter:  "AllowMembersEditMembership eq 1",
-		queryOrderby: "Title",
-		queryLimit:   10
-	})
-	.then(function(arrayResults){ console.table(arrayResults) });
-	*
-	* @since 1.0.0
+	* sprLib.rest({
+	* 	url: '/sites/dev/_api/web/sitegroups',
+	* 	type: ['GET' | 'POST'],
+	* 	queryCols: {
+	* 		title:       { dataName:'Title' },
+	* 		loginName:   { dataName:'LoginName' },
+	* 		editAllowed: { dataName:'AllowMembersEditMembership' }
+	* 	},
+	* 	queryFilter:  "AllowMembersEditMembership eq 1",
+	* 	queryOrderby: "Title",
+	* 	queryLimit:   10
+	* });
 	*/
-	// sprLib.rest({ url:"/sites/dev/_api/web/sitegroups" }).then(function(data){ console.table(data); }); (data.d.results)
-	// sprLib.rest({ url:"/_api/web/lists/getbytitle('Employees')" }).then(function(data){ console.table(data); }); (data.d)
-	//
-	// EX: https://siteurl.sharepoint.com/sites/dev/_api/web/lists/getbytitle('Employees')/
-	// EX: https://siteurl.sharepoint.com/sites/dev/_api/web/sitegroups
 	sprLib.rest = function rest(inOpt) {
 		return new Promise(function(resolve, reject) {
 			// STEP 1: Options setup
@@ -2351,9 +2346,12 @@
 
 	// API: SITE (or WEB)
 	/**
+	* SharePoint Site/Subsite methods
+	* @since 1.3.0
+	*
 	* NOTE: `site` and `web` may be used interchangably (`/_api/site` is the top-level Web site and all its subsites)
 	* `web` is a securable web resource (aka: a SP website)
-	* https://msdn.microsoft.com/library/microsoft.sharepoint.spsite "top-level Web site and all its subsites. Each SPSite object, or site collection, is represented within an SPSiteCollection object"
+	* @see: https://msdn.microsoft.com/library/microsoft.sharepoint.spsite "top-level Web site and all its subsites. Each SPSite object, or site collection, is represented within an SPSiteCollection object"
 	*/
 	sprLib.site = function site(inUrl) {
 		// Variables
@@ -2826,6 +2824,13 @@
 	}
 
 	// API: USER (Current or Query User by Props)
+	/**
+	* SharePoint User/Group methods
+	* @since 0.11.0
+	*
+	* @param `inOpt` (object) - user query options
+	* @example - sprlib.user().info()
+	*/
 	sprLib.user = function user(inOpt) {
 		var _newUser = {};
 		var _urlBase = "_api/Web";
