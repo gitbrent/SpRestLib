@@ -131,7 +131,7 @@ then run the following code snippet which will load the SpRestLib bundle script 
 ```javascript
 // Load/Demo SpRestLib via CDN
 var script = document.createElement('script');
-script.src = "https://cdn.jsdelivr.net/gh/gitbrent/sprestlib@1.8.0/dist/sprestlib.bundle.js";
+script.src = "https://cdn.jsdelivr.net/gh/gitbrent/sprestlib@1.9.0/dist/sprestlib.bundle.js";
 script.onload = function(){
     // Demo library method - show current user info
     console.log('Current SharePoint User: ');
@@ -153,9 +153,9 @@ demo of all available methods.
 
 ## CDN
 ```javascript
-<script src="https://cdn.jsdelivr.net/gh/gitbrent/SpRestLib@1.8.0/dist/sprestlib.min.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/gitbrent/SpRestLib@1.9.0/dist/sprestlib.min.js"></script>
 // Use bundle for IE11 support
-<script src="https://cdn.jsdelivr.net/gh/gitbrent/SpRestLib@1.8.0/dist/sprestlib.bundle.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/gitbrent/SpRestLib@1.9.0/dist/sprestlib.bundle.js"></script>
 ```
 
 ## Download

@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.9.0] - 2018-12-??
+## [1.9.0] - 2018-12-12
 ### Added
 - New `file` API method: `checkin()` ([gitbrent](https://github.com/gitbrent))
 - New `file` API method: `checkout()` ([gitbrent](https://github.com/gitbrent))
@@ -20,7 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Allow single UserProfile property to be queried [\#38](https://github.com/gitbrent/sprestlib/issues/38) ([YakQin](https://github.com/YakQin))
 - The `rest()` method now includes the page's `__REQUESTDIGEST` value for POST types with custom headers that did not already include a value for `X-RequestDigest`
 ### Removed
-*DEPRECATED* `baseUrl()` and `nodeConfig` methods - use new `options()` method instead.
+*DEPRECATED* `baseUrl()` and `nodeConfig` methods - use the new `options()` method instead.
 
 
 ## [v1.8.0](https://github.com/gitbrent/sprestlib/tree/v1.8.0) (2018-08-29)
@@ -171,7 +171,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [v0.9.0](https://github.com/gitbrent/sprestlib/tree/v1.0.0) (2017-01-31)
 **Initial Release**
 
-[Unreleased]: https://github.com/gitbrent/sprestlib/compare/v1.8.0...HEAD
+[Unreleased]: https://github.com/gitbrent/sprestlib/compare/v1.9.0...HEAD
+[1.9.0]: https://github.com/gitbrent/sprestlib/compare/v1.8.0...v1.9.0
 [1.8.0]: https://github.com/gitbrent/sprestlib/compare/v1.7.0...v1.8.0
 [1.7.0]: https://github.com/gitbrent/sprestlib/compare/v1.6.0...v1.7.0
 [1.6.0]: https://github.com/gitbrent/sprestlib/compare/v1.5.0...v1.6.0
