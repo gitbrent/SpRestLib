@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.10.0] - 2010-??-??
+### Added
+### Changed
+- Updated Promise reject error message: Returned string now includes SharePoint `error.code` and no longer shows the "URL used:" string; Updated parsing code to be more robust; Now includes support for parsing Microsoft Graph REST API call errors. ([gitbrent](https://github.com/gitbrent))
+
+
 ## [1.9.0] - 2018-12-12
 ### Added
 - New `file` API method: `checkin()` ([gitbrent](https://github.com/gitbrent))
