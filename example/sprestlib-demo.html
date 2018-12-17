@@ -8,7 +8,7 @@
 	<meta name="website"     content="https://github.com/gitbrent/SpRestLib/">
 	<meta name="keywords"    content="SpRestLib, JavaScript, js-sharepoint, SP2013 REST, SharePoint 2013, SharePoint 2016, SharePoint Online">
 	<meta name="description" content="Content Editor Webpart: SpRestLib features and capabilities">
-	<meta name="revised"     content="20181203">
+	<meta name="revised"     content="20181217">
 
 	<!-- HOWTO / FAQ / SETUP -->
 	<!--
@@ -309,13 +309,13 @@
 	</style>
 
 	<script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
-	<script src="https://cdn.jsdelivr.net/gh/gitbrent/SpRestLib@1.9.0/dist/sprestlib.bundle.js"></script>
+	<script src="https://cdn.jsdelivr.net/gh/gitbrent/SpRestLib/dist/sprestlib.bundle.js"></script>
 	<script src="https://cdn.jsdelivr.net/gh/sorensen/ascii-table@0.0.9/ascii-table.min.js"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.29.0/js/jquery.tablesorter.min.js"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.15.0/prism.min.js"></script>
 
 	<script>
-		var APP_BLD = 20181203;
+		var APP_BLD = 20181217;
 		var HTML_SPINNER = '<div class="sprlib-spinner"><div class="sprlib-bounce1"></div><div class="sprlib-bounce2"></div><div class="sprlib-bounce3"></div></div>';
 		var LAYOUTS_URL = ( typeof _spPageContextInfo !== 'undefined' && _spPageContextInfo.layoutsUrl ? _spPageContextInfo.layoutsUrl : '_layouts/15' );
 
@@ -1125,7 +1125,7 @@
 				eval(user1Code);
 
 				var user2Code = "sprLib.user().groups()\n"
-					+ ".then(function(objUser){\n"
+					+ ".then(function(arrGroups){\n"
 					+ "    arrGroups.forEach(function(objGroup,idx){\n"
 					+ "        $('#user2Html table tbody').append('<tr><td>'+ objGroup.Id +'</td><td>'+ objGroup.Title +'</td></tr>');\n"
 					+ "    });\n"
