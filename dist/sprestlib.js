@@ -34,9 +34,8 @@
 
 (function(){
 	// APP VERSION/BUILD
-	var APP_VER = "1.9.0";
-	var APP_BLD = "20181212";
-	var DEBUG = false; // (verbose mode/lots of logging)
+	var APP_VER = "1.10.0-beta";
+	var APP_BLD = "20181217";
 	// ENUMERATIONS
 	// REF: [`SP.BaseType`](https://msdn.microsoft.com/en-us/library/office/jj246925.aspx)
 	var ENUM_BASETYPES = {
@@ -71,6 +70,7 @@
 		cache:            false,
 		cleanColHtml:     true,
 		currencyChar:     '$',
+		debug:            false, /* verbose mode/lots of logging; undocumented option used for development */
 		language:         'en',
 		maxRetries:       2,
 		maxRows:          5000, /* Max rows queried - internal app limit (used when getting Lists, Users, etc) */
@@ -105,27 +105,66 @@
 	* Parse XHR Response Headers for SharePoint codes/error messages and return them as a string.
 	*
 	* @private
+	* @since 0.11.0
 	* @return {string} "(404) List not found."
 	*/
 	function parseErrorMessage(jqXHR) {
-		// STEP 1:
+		// STEP 1: Variables
 		jqXHR = jqXHR || {};
+		var strXhrCode = jqXHR.status || 'UNK';
+		var strErrCode = '';
+		var strErrText = jqXHR.responseText || 'UNK';
+		var objErrResp = {};
 
-		// STEP 2:
-		var strErrText = "("+ jqXHR.status +") "+ jqXHR.responseText;
-		var strSpeCode = "";
+		// STEP 2: Parse SharePoint error properties
+		if ( jqXHR.responseText && typeof jqXHR.responseText === 'string' ) {
+			try {
+				// A: Parse string back into object
+				objErrResp = JSON.parse(jqXHR.responseText);
 
-		// STPE 3: Parse out SharePoint/IIS error code and message
-		try {
-			strSpeCode = JSON.parse(jqXHR.responseText).error['code'].split(',')[0];
-			strErrText = "(" + jqXHR.status + ") " + JSON.parse(jqXHR.responseText).error['message'].value;
+				// B: Handle 2 types of `message` (SP API -vs- Graph API)
+				if ( objErrResp.error && objErrResp.error.message && objErrResp.error.message.value ) {
+					/* [SP2016 API] EX: (SPO Dec-2018)
+						{
+						    "error": {
+						        "code": "-2147024891, System.UnauthorizedAccessException",
+						        "message": {
+						            "lang": "en-US",
+						            "value": "Access denied. You do not have permission to perform this action or access this resource."
+						        }
+						    }
+						}
+					*/
+					strErrCode = objErrResp.error.code.split(',')[0];
+					strErrText = objErrResp.error.message.value;
+				}
+				else if ( objErrResp.error && objErrResp.error.message && typeof objErrResp.error.message === 'string' ) {
+					/* [MS Graph v1.0] Dec-2018
+						{
+						  "error": {
+							"code": "Authorization_RequestDenied",
+							"message": "Insufficient privileges to complete the operation.",
+							"innerError": {
+							  "request-id": "f7455057-474a-4c7d-9b69-3d1844d05910",
+							  "date": "2018-12-16T18:34:31"
+							}
+						  }
+						}
+					*/
+					strErrCode = objErrResp.error.code;
+					strErrText = objErrResp.error.message;
+				}
+			}
+			catch (ex) {
+				if (APP_OPTS.debug) {
+					console.warn('Unable to parse jqXHR response!');
+					console.log(jqXHR.responseText);
+				}
+			}
 		}
-		catch (ex) {
-			if (DEBUG) { console.warn('Unable to parse jqXHR response:\n' + jqXHR.responseText); }
-		}
 
-		// Done!
-		return strErrText;
+		// LAST: Return parsed error message
+		return ( "("+ strXhrCode +") "+ (strErrCode ? "["+strErrCode+"] " : "") + strErrText );
 	}
 
 	/**
@@ -197,9 +236,10 @@
 	sprLib.options = function options(inOpt) {
 		// CASE 1: Act as a GETTER when no value passed
 		if ( !inOpt || typeof inOpt !== 'object' ||
-			( !inOpt.hasOwnProperty('baseUrl') && !inOpt.hasOwnProperty('queryLimit')
-				&& !inOpt.hasOwnProperty('nodeEnabled') && !inOpt.hasOwnProperty('nodeCookie')
-				&& !inOpt.hasOwnProperty('nodeServer')
+			(
+				!inOpt.hasOwnProperty('baseUrl') && !inOpt.hasOwnProperty('queryLimit')
+				&& !inOpt.hasOwnProperty('nodeEnabled') && !inOpt.hasOwnProperty('nodeCookie') && !inOpt.hasOwnProperty('nodeServer')
+				&& !inOpt.hasOwnProperty('debug')
 			)
 		) {
 			return {
@@ -227,7 +267,15 @@
 		if ( typeof inOpt.nodeEnabled === 'boolean'   ) APP_OPTS.nodeEnabled = inOpt.nodeEnabled;
 		if ( typeof inOpt.queryLimit  !== 'undefined' ) APP_OPTS.queryLimit  = inOpt.queryLimit; // allow `null` so value can be un-set
 
-		// C: Return current option values
+		// C: Undocumented options
+		if ( typeof inOpt.debug === 'boolean' ) {
+			APP_OPTS.debug = inOpt.debug;
+			return {
+				debug: APP_OPTS.debug
+			};
+		}
+
+		// LAST: Return current option values
 		return {
 			baseUrl: APP_OPTS.baseUrl,
 			nodeCookie: APP_OPTS.nodeCookie,
@@ -254,7 +302,7 @@
 		// CASE 2: Act as a SETTER
 		APP_OPTS.baseUrl = inStr.replace(/\/+$/,'');
 
-		if (DEBUG) console.log('APP_OPTS.baseUrl = '+APP_OPTS.baseUrl);
+		if (APP_OPTS.debug) console.log('APP_OPTS.baseUrl = '+APP_OPTS.baseUrl);
 	}
 
 	// DEPRECATED: TODO-2.0: Will be removed in v2.0.0 - use `options()` instead
@@ -1447,7 +1495,7 @@
 								Object.keys(arrResults[0]).forEach(function(colStr,idx){
 									// DESIGN: Dont include those first few junky fields from SP that point to FieldsAsHTML etc
 									if ( arrResults[0][colStr] && typeof arrResults[0][colStr] === 'object' && arrResults[0][colStr].__deferred ) {
-										if (DEBUG) console.log('FYI: Skipping "select all" column: '+colStr);
+										if (APP_OPTS.debug) console.log('FYI: Skipping "select all" column: '+colStr);
 									}
 									else {
 										objListCols[colStr] = { dataName:colStr };
@@ -2074,14 +2122,16 @@
 								else if ( rawData.indexOf('{"error"') > -1 && rawData.indexOf('{"code"') > -1 ) {
 									// EX: {"error":{"code":"-1, Microsoft.SharePoint.SPException","message":{"lang":"en-US","value":"The field or property 'ColDoesntExist' does not exist."}}}
 									// EX: {"error":{"code":"-1, Microsoft.SharePoint.Client.InvalidClientQueryException","message":{"lang":"en-US","value":"A node of type 'EndOfInput' was read from the JSON reader when trying to read the start of an entry. A 'StartObject' node was expected."}}}
-									reject( JSON.parse(rawData).error.message.value + "\n\nURL used: " + objAjaxQuery.url );
+									if (APP_OPTS.debug) console.error("REST ERROR!\n\n`objAjaxQuery.url`: " + objAjaxQuery.url);
+									reject( JSON.parse(rawData).error.message.value );
 								}
 								else {
 									resolve(rawData);
 								}
 							});
 							res.on('error', function(e){
-								reject( JSON.parse(rawData).error.message.value + "\n\nURL used: " + objAjaxQuery.url );
+								if (APP_OPTS.debug) console.error("REST ERROR!\n\n`objAjaxQuery.url`: " + objAjaxQuery.url);
+								reject( JSON.parse(rawData).error.message.value);
 							});
 						});
 						// POST: Data is sent to SP via `write`
@@ -2112,13 +2162,15 @@
 								}
 							}
 							else {
-								reject(parseErrorMessage(request) + "\n\nURL used: " + objAjaxQuery.url);
+								if (APP_OPTS.debug) console.error("REST ERROR!\n\n`objAjaxQuery.url`: " + objAjaxQuery.url);
+								reject(parseErrorMessage(request));
 							}
 						};
 
 						// D:
 						request.onerror = function() {
-							reject( parseErrorMessage(request) + "\n\nURL used: " + objAjaxQuery.url );
+							if (APP_OPTS.debug) console.error("REST ERROR!\n\n`objAjaxQuery.url`: " + objAjaxQuery.url);
+							reject( parseErrorMessage(request));
 						};
 
 						// E:
@@ -2329,7 +2381,7 @@
 					})
 					.then(function(){
 						var digest = (document && document.getElementById('__REQUESTDIGEST') ? document.getElementById('__REQUESTDIGEST').value : null);
-						if (DEBUG) console.log('err-403: token renewed');
+						if (APP_OPTS.debug) console.log('err-403: token renewed');
 						// Some operations (ex: CRUD) will include the token value in header. It must be refreshed as well (or the new tolem is pointless!)
 						if ( inOpt.headers && inOpt.headers['X-RequestDigest'] ) inOpt.headers['X-RequestDigest'] = digest;
 						gRetryCounter++;
@@ -3060,7 +3112,7 @@
 						objProfile = arrProfileProps[0];
 					}
 					else {
-						if (DEBUG) console.log('??? `arrProfileProps[0]` does not exist!');
+						if (APP_OPTS.debug) console.log('??? `arrProfileProps[0]` does not exist!');
 					}
 
 					// C: Clean data
