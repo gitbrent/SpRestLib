@@ -35,7 +35,7 @@
 (function(){
 	// APP VERSION/BUILD
 	var APP_VER = "1.10.0-beta";
-	var APP_BLD = "20181217";
+	var APP_BLD = "20181224";
 	// ENUMERATIONS
 	// REF: [`SP.BaseType`](https://msdn.microsoft.com/en-us/library/office/jj246925.aspx)
 	var ENUM_BASETYPES = {
@@ -1061,8 +1061,9 @@
 		/**
 		* Upload a File (buffer) to Library
 		* @since: 1.9.0
-		*
 		* @see: https://msdn.microsoft.com/en-us/library/office/dn450841.aspx#bk_FileCollectionAdd
+		*
+		* @param `inOpt` (object) - can contain `digest` and `overwrite` options
 		* @example: sprLib.folder('/sites/dev/Documents/uploads').upload({ name:'test.pptx', data:{arrayBuffer blob}, requestDigest:'ABC123', overwrite:true })
 		*/
 		_newFolder.upload = function(inOpt) {
@@ -1070,13 +1071,12 @@
 				// A: Options setup
 				var urlBase = ( APP_OPTS.baseUrl.indexOf('http') == 0 || APP_OPTS.baseUrl.indexOf('/') == 0 ? APP_OPTS.baseUrl : ( _spPageContextInfo && _spPageContextInfo.webServerRelativeUrl ? _spPageContextInfo.webServerRelativeUrl : APP_OPTS.baseUrl ) );
 				inOpt = (inOpt ? inOpt : null);
-				// TODO: Check reqd vars!
 				inOpt.digest    = ( inOpt.requestDigest || (typeof document !== 'undefined' && document.getElementById('__REQUESTDIGEST') ? document.getElementById('__REQUESTDIGEST').value : null) );
 				inOpt.overwrite = ( typeof(inOpt.overwrite) !== 'undefined' && inOpt.overwrite != null ? inOpt.overwrite : APP_OPTS.overwriteUploads );
 
 				// NOTE: Same code is used for both cases: node or browser
 				sprLib.rest({
-					url: "_api/web/GetFolderByServerRelativeUrl('"+_fullName+"')/Files/add(url='"+inOpt.name+"',overwrite=true)",
+					url: "_api/web/GetFolderByServerRelativeUrl('"+_fullName+"')/Files/add(url='"+inOpt.name+"',overwrite="+inOpt.overwrite+")",
 					type: "POST",
 					requestDigest: inOpt.digest,
 					data: inOpt.data
@@ -1326,9 +1326,6 @@
 		* |------------------|---------|-------|-------------------|----------------------|
 		* | `dataName`       | string  | no    | SP.InternalName   | 'Hire_x0020_Date'    |
 		* | `dispName`       | string  | no    | display name      | 'Hire Date'          |
-		* | `currencyFormat` | string  | no    | date format       | `INTL`, `INTLTIME` |
-		* | `dateFormat`     | string  | no    | date format       | `INTL`, `INTLTIME`  |
-		* // TODO: ^^^ lets combine to `format` and be context-sensitive (currency only works with currency etc.)
 		*
 		* listCols properties: used by Library internally
 		*
@@ -1586,13 +1583,7 @@
 									}
 
 									// B.3.2: Set value for this key
-									// If dataType is known, then convert
-									if ( col.dataType == 'DateTime' ) {
-										objRow[key] = new Date(colVal);
-									}
-									else {
-										objRow[key] = ( APP_OPTS.cleanColHtml && col.listDataType == 'string' ? colVal.replace(/<div(.|\n)*?>/gi,'').replace(/<\/div>/gi,'') : colVal );
-									}
+									objRow[key] = ( APP_OPTS.cleanColHtml && col.listDataType == 'string' ? colVal.replace(/<div(.|\n)*?>/gi,'').replace(/<\/div>/gi,'') : colVal );
 
 									// B.3.3: Handle `getVersions`
 									// Results of an append-text query is an array of Note versions in desc order
@@ -2315,10 +2306,8 @@
 											colVal = ( arrCol.length > 1 ? result[arrCol[0]][arrCol[1]] : result[arrCol[0]] );
 										}
 
-										// DESIGN: If `dataType` exists, then transform result
-										// TODO: vvv this is old right?
-										if ( col.dataType == 'DateTime' ) objRow[key] = new Date(colVal);
-										else objRow[key] = ( APP_OPTS.cleanColHtml && col.listDataType == 'string' ? colVal.replace(/<div(.|\n)*?>/gi,'').replace(/<\/div>/gi,'') : colVal );
+										// Set value
+										objRow[key] = ( APP_OPTS.cleanColHtml && col.listDataType == 'string' ? colVal.replace(/<div(.|\n)*?>/gi,'').replace(/<\/div>/gi,'') : colVal );
 									});
 								}
 							}
