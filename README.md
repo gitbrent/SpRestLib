@@ -1,16 +1,17 @@
-[![npm version](https://img.shields.io/npm/v/sprestlib.svg)](https://www.npmjs.com/package/sprestlib)  [![MIT License](https://badges.frapsoft.com/os/mit/mit.svg)](https://opensource.org/licenses/mit-license.php)  [![Known Vulnerabilities](https://snyk.io/test/npm/sprestlib/badge.svg)](https://snyk.io/test/npm/sprestlib)  [![Package Quality](http://npm.packagequality.com/shield/sprestlib.png?style=flat-square)](https://github.com/gitbrent/sprestlib)
+[![npm version](https://img.shields.io/npm/v/sprestlib.svg)](https://www.npmjs.com/package/sprestlib)  [![MIT License](https://img.shields.io/github/license/gitbrent/sprestlib.svg)](https://github.com/gitbrent/SpRestLib/blob/master/LICENSE)  [![Known Vulnerabilities](https://snyk.io/test/npm/sprestlib/badge.svg)](https://snyk.io/test/npm/sprestlib)  [![Package Quality](http://npm.packagequality.com/shield/sprestlib.png?style=flat-square)](https://github.com/gitbrent/sprestlib)  [![jsDelivr Stats](https://data.jsdelivr.com/v1/package/gh/gitbrent/sprestlib/badge)](https://www.jsdelivr.com/package/gh/gitbrent/sprestlib)
 
 # SpRestLib
 
-## SharePoint REST Web Services JavaScript Library
-Provides a concise, promise-based API that simplifies asynchronous REST interaction with SharePoint. Easily read/write List
-items, execute REST calls, interact with files and folders, gather site properties, and query user information. Enables rapid development of SharePoint Apps/Add-ins using the JavaScript SharePoint App Model.  
+## Microsoft SharePoint REST JavaScript Library
+SpRestLib is a lightweight wrapper around the SharePoint REST API that can be used in client browsers or server-side.
+
+This library is for developers who build client-side web parts (Content Editor/Script Editor), Angular/React apps, or Node.js/npm-based solutions.
 
 ### Library Features
-* Simple  - Most SharePoint web service calls are a few lines of code
+* Simple  - Clean, concise API: Get users, sites, list items, etc. in 1-3 lines of code
 * Modern  - Lightweight, pure JavaScript solution with no other dependencies
 * Elegant - Utilizes the new [ES6 Promise](http://www.datchley.name/es6-promises/) architecture for asynchronous operations
-* Robust  - Built for [SharePoint 2013 API](https://msdn.microsoft.com/en-us/library/office/jj860569.aspx) and [OData v3](http://www.odata.org/documentation/odata-version-3-0/)
+* Robust  - Handles authentication, asynchronous errors, results paging and more
 
 ### SharePoint Interfaces
 * List Methods - Create, read, update, and delete (CRUD) List/Library items, including support for paging/next
@@ -22,7 +23,7 @@ items, execute REST calls, interact with files and folders, gather site properti
 * Form Population - Populate form elements using data-bind declarative binding system like Knockout or AngluarJS
 
 ### Supported Environments
-* SharePoint 2013 (SP2013), SharePoint 2016 (SP2016), Office 365 SharePoint Online (SPO)
+* SharePoint 2013 (SP2013), SharePoint 2016 (SP2016), SharePoint 2019 (SP2019), SharePoint Online (SPO)
 
 
 **************************************************************************************************
