@@ -5,7 +5,9 @@
 ## Microsoft SharePoint REST JavaScript Library
 SpRestLib is a lightweight wrapper around the SharePoint REST API that can be used in client browsers or server-side.
 
-This library is for developers who build client-side web parts (Content Editor/Script Editor), Angular/React apps, or Node.js/npm-based solutions.
+This library is for developers who build web parts embedded into Content Editor/Script Editor, SPFx web parts, Angular/React apps,
+Node.js/npm-based solutions, etc. Using SpRestLib greatly simplifies SharePoint integration by reducing common operations to concise
+Promise-based methods.
 
 ### Library Features
 * Simple  - Clean, concise API: Get users, sites, list items, etc. in 1-3 lines of code
@@ -33,14 +35,14 @@ This library is for developers who build client-side web parts (Content Editor/S
 * `sprLib.rest(options)` - Returns the results of a given REST call to any [SharePoint REST API](https://msdn.microsoft.com/en-us/library/office/dn268594.aspx)
 
 ## List/Library
-* `sprLib.list(listName).items(options)` - Returns an array of `SP.ListItem` objects using a variety of query options
-* `sprLib.list(listName).create(item)`   - Create a new list item using JSON data
-* `sprLib.list(listName).update(item)`   - Update an existing item using JSON data
-* `sprLib.list(listName).delete(item)`   - Delete an existing item using JSON data (permanently delete)
-* `sprLib.list(listName).recycle(item)`  - Recycle an existing item using JSON data (move to Recycle Bin)
-* `sprLib.list(listName).cols()`         - Returns an array of column properties (datatype, default values, etc.)
-* `sprLib.list(listName).info()`         - Returns `SP.List` properties (last modified, number of items, etc.)
-* `sprLib.list(listName).perms()`        - Returns an array of the list's Member Role assignments
+* `sprLib.list(listName).items()`   - Returns an array of `SP.ListItem` objects using a variety of query options
+* `sprLib.list(listName).create()`  - Create a new list item using JSON data
+* `sprLib.list(listName).update()`  - Update an existing item using JSON data
+* `sprLib.list(listName).delete()`  - Delete an existing item using JSON data (permanently delete)
+* `sprLib.list(listName).recycle()` - Recycle an existing item using JSON data (move to Recycle Bin)
+* `sprLib.list(listName).cols()`    - Returns an array of column properties (datatype, default values, etc.)
+* `sprLib.list(listName).info()`    - Returns `SP.List` properties (last modified, number of items, etc.)
+* `sprLib.list(listName).perms()`   - Returns an array of the list's Member Role assignments
 
 ## File
 * `sprLib.file(fileName).get()`       - Returns a file (binary/text) as a blob which can be saved
@@ -89,7 +91,7 @@ This library is for developers who build client-side web parts (Content Editor/S
 
 - [Library Demo](#library-demo)
   - [Demo via Browser Console](#demo-via-browser-console)
-  - [Demo via Page Webpart](#demo-via-page-webpart)
+  - [Demo via Page Web Part](#demo-via-page-web-part)
 - [Installation](#installation)
   - [CDN](#cdn)
   - [Download](#download)
@@ -142,11 +144,11 @@ document.getElementsByTagName('head')[0].appendChild(script);
 ```
 ![Try It Out](https://raw.githubusercontent.com/gitbrent/SpRestLib/master/example/img/readme-tryitout-console.png)
 
-## Demo via Page Webpart
-Upload the `example/sprestlib-demo.html` file to SiteAssets on your SharePoint site and add it into a Webpart for a live
+## Demo via Page Web Part
+Upload the `example/sprestlib-demo.html` file to SiteAssets on your SharePoint site and add it into a web part for a live
 demo of all available methods.
 
-![Demo Webpart](https://raw.githubusercontent.com/gitbrent/SpRestLib/master/example/img/readme-demo-webpart.png)
+![Demo SharePoint Web Part](https://raw.githubusercontent.com/gitbrent/SpRestLib/master/example/img/readme-demo-webpart.png)
 
 
 **************************************************************************************************
