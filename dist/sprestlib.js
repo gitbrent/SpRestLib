@@ -35,7 +35,7 @@
 (function(){
 	// APP VERSION/BUILD
 	var APP_VER = "1.10.0-beta";
-	var APP_BLD = "20181224";
+	var APP_BLD = "20190101";
 	// ENUMERATIONS
 	// REF: [`SP.BaseType`](https://msdn.microsoft.com/en-us/library/office/jj246925.aspx)
 	var ENUM_BASETYPES = {
@@ -1099,6 +1099,7 @@
 	// API: LIST (CRUD, select, recycle)
 	/**
 	* SharePoint List/Library methods
+	* @since 1.0
 	*
 	* @param `inOpt` (string) - required - ListName or ListGUID
 	* @example - string - sprLib.list('Documents');
@@ -1109,7 +1110,6 @@
 	* @example - string - sprLib.list({ name:'Documents' });
 	* @example - string - sprLib.list({ name:'Documents', baseUrl:'/sites/dev/sandbox' });
 	* @example - string - sprLib.list({ name:'Documents', baseUrl:'/sites/dev/sandbox', requestDigest:'8675309,05 Dec 2017 01:23:45 -0000' });
-	* @since 1.0.0
 	*/
 	sprLib.list = function list(inOpt) {
 		// A: Options setup
@@ -1420,7 +1420,7 @@
 						var objAjaxQuery = {
 							url     : _urlBase+"/items",
 							type    : "GET",
-							cache   : (typeof inObj.cache === 'boolean' ? inObj.cache : APP_OPTS.cache),
+							cache   : (typeof inObj.cache    === 'boolean' ? inObj.cache    : APP_OPTS.cache),
 							metadata: (typeof inObj.metadata === 'boolean' ? inObj.metadata : APP_OPTS.metadata),
 							headers : { "Accept":"application/json;odata=verbose", "X-RequestDigest":_requestDigest }
 						};
@@ -1946,7 +1946,7 @@
 	// API: REST (Runs internal AJAX ops **AND** provides direct/ad-hoc interface to users)
 	/**
 	* Execute an ad-hoc REST query to one of many endpoints
-	* @since 1.0.0
+	* @since 1.0
 	*
 	* @example - sprLib.rest({ url:'/sites/dev/_api/web/webs', metadata:true });
 	* @example - sprLib.rest({ url:'/sites/dev/_api/web/webs', queryCols:['ID','Title'] });
@@ -1975,6 +1975,10 @@
 			inOpt.queryLimit = inOpt.queryLimit || APP_OPTS.queryLimit || null;
 			inOpt.type       = inOpt.restType || inOpt.type || "GET";
 			inOpt.url        = (inOpt.restUrl || inOpt.url || APP_OPTS.baseUrl).replace(/\"/g, "'");
+
+// TODO: Return *ALL* results (do all paging and concat results together)
+// getAllItems
+// https://github.com/gitbrent/SpRestLib/issues/44
 
 			// STEP 2: Setup vars
 			var arrExpands = [], strExpands = "";
