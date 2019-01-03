@@ -1,7 +1,9 @@
-/*
- * DESC: Combine/Minify CSS and take existing min JavaScript - replace head tags with content
- * WHY.: Google PageSpeed Insights scores of 99(mobile)/94(desktop) thats why!!
- */
+/*\
+|*| DESC: Combine/Minify CSS and take existing min JavaScript - replace head tags with content
+|*| WHY.: Google PageSpeed Insights scores of 99(mobile)/94(desktop) thats why!!
+\*/
+"use strict";
+
 var fs       = require('fs'),
     gulp     = require('gulp'),
     concat   = require('gulp-concat'),
@@ -20,7 +22,9 @@ gulp.task('deploy-blog', ()=>{
 });
 
 gulp.task('deploy-css', ()=>{
-	return gulp.src('./build/SpRestLib/css/*.css').pipe(gulp.dest('../css/'));
+	return gulp
+		.src('./build/SpRestLib/css/*.css')
+		.pipe(gulp.dest('../css/'));
 });
 
 gulp.task('deploy-html', ()=>{
@@ -43,7 +47,8 @@ gulp.task('deploy-sitemap', ()=>{
 	return gulp.src('./build/SpRestLib/sitemap.xml').pipe(gulp.dest('../'));
 });
 
-gulp.task('deploy', arrDeployTasks, ()=>{
+//gulp.task('deploy', arrDeployTasks, ()=>{
+gulp.task('deploy', gulp.parallel(arrDeployTasks), ()=>{
 	console.log('Deploy tasks run:'+ arrDeployTasks.length );
 	console.log('DONE!');
 });
@@ -58,7 +63,7 @@ gulp.task('min-css', function(){
 		.pipe(gulp.src('../css/style.bundle.css'));
 });
 
-gulp.task('default', ['min-css'], ()=>{
+gulp.task('default', gulp.series('min-css','deploy'), ()=>{
 	// STEP 2: Grab newly combined styles
 	var strMinCss = fs.readFileSync('../css/style.bundle.css', 'utf8');
 	var strMinJvs = fs.readFileSync('../js/highlight.min.js', 'utf8');
