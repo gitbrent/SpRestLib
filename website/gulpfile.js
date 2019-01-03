@@ -1,6 +1,6 @@
 /*\
 |*| DESC: Combine/Minify CSS and take existing min JavaScript - replace head tags with content
-|*| WHY.: Google PageSpeed Insights scores of 99(mobile)/94(desktop) thats why!!
+|*| WHY.: Google PageSpeed Insights [Lighthouse] scores of 100(mobile)/100(desktop) thats why!!
 \*/
 "use strict";
 
