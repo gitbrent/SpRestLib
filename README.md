@@ -261,6 +261,6 @@ Unfortunately, older versions cannot be supported.  The SharePoint 2007/2010 API
 **************************************************************************************************
 # License
 
-Copyright &copy; 2016-2018 [Brent Ely](https://github.com/gitbrent/SpRestLib)
+Copyright &copy; 2016-2019 [Brent Ely](https://github.com/gitbrent/SpRestLib)
 
 [MIT](https://github.com/gitbrent/SpRestLib/blob/master/LICENSE)
