@@ -260,14 +260,16 @@ const FeatureBullets = props => (
 // 3:
 const FeatureCallout = props => (
 	<Container id='FeatureCallout' padding={['bottom', 'top']} background='white'>
-		<h2>Clean and Concise SharePoint API</h2>
+		<h2>Easy Access to SharePoint</h2>
+		<p>SpRestLib is a lightweight wrapper around the SharePoint REST API that can be used in client browsers or server-side.</p>
+
+		<h2>Built for SharePoint Developers</h2>
+		<p>This library is for developers who build web parts embedded into Content Editor/Script Editor, SPFx web parts, Angular/React apps,
+		Node.js/npm-based solutions, etc.</p>
+
 		<div>
 			<img src="/SpRestLib/img/checkmark.svg" />
-			Greatly simplifies SharePoint application development with single line commands that can be chained
-		</div>
-		<div>
-			<img src="/SpRestLib/img/checkmark.svg" />
-			Enables rapid development of SharePoint Apps/Add-ins using the JavaScript SharePoint App Model
+			Greatly simplifies SharePoint integration by reducing operations to concise Promise-based methods
 		</div>
 		<div>
 			<img src="/SpRestLib/img/checkmark.svg" />
@@ -275,7 +277,7 @@ const FeatureCallout = props => (
 		</div>
 		<div>
 			<img src="/SpRestLib/img/checkmark.svg" />
-			Direct SharePoint access via REST using OData endpoints (no CSOM/JSOM or any external libraries are required)
+			Pure JavaScript with no other dependencies (not even jQuery) - easily compiled by parsers and lightning fast
 		</div>
 	</Container>
 );
