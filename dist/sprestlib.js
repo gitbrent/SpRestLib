@@ -35,7 +35,7 @@
 (function(){
 	// APP VERSION/BUILD
 	var APP_VER = "1.10.0-beta";
-	var APP_BLD = "20190101";
+	var APP_BLD = "20190107";
 	// ENUMERATIONS
 	// REF: [`SP.BaseType`](https://msdn.microsoft.com/en-us/library/office/jj246925.aspx)
 	var ENUM_BASETYPES = {
@@ -319,6 +319,8 @@
 	sprLib.renewSecurityToken = function renewSecurityToken() {
 		return doRenewDigestToken();
 	}
+
+	// TODO: Add `baseUrl` to `file()` method
 
 	// API: FILE
 	/**
@@ -653,6 +655,8 @@
 		// LAST: Return this new File
 		return _newFile;
 	}
+
+	// TODO: Add `baseUrl` to `folder()` method
 
 	// API: FOLDER
 	/**

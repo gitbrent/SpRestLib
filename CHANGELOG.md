@@ -26,7 +26,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Allow single UserProfile property to be queried [\#38](https://github.com/gitbrent/sprestlib/issues/38) ([YakQin](https://github.com/YakQin))
 - The `rest()` method now includes the page's `__REQUESTDIGEST` value for POST types with custom headers that did not already include a value for `X-RequestDigest`
 ### Removed
-*DEPRECATED* `baseUrl()` and `nodeConfig` methods - use the new `options()` method instead.
+*DEPRECATED* `baseUrl()` and `nodeConfig()` methods - use the new `options()` method instead.
 
 
 ## [v1.8.0](https://github.com/gitbrent/sprestlib/tree/v1.8.0) (2018-08-29)
