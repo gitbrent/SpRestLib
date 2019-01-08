@@ -7,7 +7,8 @@
 
 const siteConfig = {
 	title: 'SpRestLib',
-	tagline: 'JavaScript Library for SharePoint Web Services',
+	//tagline: 'JavaScript Library for SharePoint Web Services',
+	tagline: 'JavaScript SharePoint REST Library',
 	url: 'https://gitbrent.github.io',
 	baseUrl: '/SpRestLib/',
 	projectName: 'SpRestLib',
