@@ -11,8 +11,8 @@ var fs       = require('fs'),
 	cleanCSS = require('gulp-clean-css');
 
 var cssSrch1 = '<link rel="stylesheet" href="/SpRestLib/css/main.css"/>';
-var cssSrch2 = '<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.13.1/styles/hybrid.min.css"/>';
-var jvsSrch1 = /\<script src="https:\/\/cdnjs.cloudflare.com\/ajax\/libs\/highlight.*.min.js"\>\<\/script\>/;
+var cssSrch2 = '<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/hybrid.min.css"/>';
+var jvsSrch1 = /\<script type="text\/javascript" src="https:\/\/cdnjs.cloudflare.com\/ajax\/libs\/highlight.*.min.js"\>\<\/script\>/;
 
 // TASKS: Minify
 gulp.task('min-css', function(){
@@ -23,21 +23,31 @@ gulp.task('min-css', function(){
 		.pipe(gulp.dest('../css'))
 		.pipe(gulp.src('../css/style.bundle.css'));
 });
+gulp.task('min-html', function(){
+	// A: Grab newly combined styles
+	var strMinCss = fs.readFileSync('../css/style.bundle.css', 'utf8');
+	var strMinJvs = fs.readFileSync('../js/highlight.min.js', 'utf8');
+	//console.log('>> `style.bundle.css` lines = '+ strMinCss.split('\n').length);
+	//console.log('>> `highlight.min.js` lines = '+ strMinJvs.split('\n').length);
+
+	// B: Replace head tags with inline style/javascript
+	return gulp.src('build/SpRestLib/index.html')
+		.pipe(replace(cssSrch1, '', {logs:{ enabled:true }}))
+		.pipe(replace(cssSrch2, '\n<style>'+ strMinCss +'</style>\n', {logs:{ enabled:false }}))
+		.pipe(replace(jvsSrch1, '<script>'+ strMinJvs +'</script>\n', {logs:{ enabled:false }}))
+		.pipe(concat('index.perf.html'))
+		.pipe(gulp.dest('../'));
+});
 
 // TASKS: Deploy
 gulp.task('deploy-blog', ()=>{
 	return gulp.src('./build/SpRestLib/blog/**').pipe(gulp.dest('../blog/'));
 });
 gulp.task('deploy-css', ()=>{
-	return gulp
-		.src('./build/SpRestLib/css/*.css')
-		.pipe(gulp.dest('../css/'));
+	return gulp.src('./build/SpRestLib/css/*.css').pipe(gulp.dest('../css/'));
 });
 gulp.task('deploy-html', ()=>{
 	return gulp.src('./build/SpRestLib/docs/*.html').pipe(gulp.dest('../docs/'));
-});
-gulp.task('deploy-index', ()=>{
-	return gulp.src('../index.perf.html', {base:'./'}).pipe(gulp.dest('../index.html'));
 });
 gulp.task('deploy-img', ()=>{
 	return gulp.src('./build/SpRestLib/img/*.*').pipe(gulp.dest('../img/'));
@@ -50,18 +60,9 @@ gulp.task('deploy-sitemap', ()=>{
 });
 
 // Build/Deploy
-gulp.task('default', gulp.series('min-css', gulp.parallel(gulp.parallel('deploy-blog','deploy-css','deploy-help','deploy-html','deploy-img','deploy-index','deploy-sitemap'))), ()=>{
-	// A: Grab newly combined styles
-	var strMinCss = fs.readFileSync('../css/style.bundle.css', 'utf8');
-	var strMinJvs = fs.readFileSync('../js/highlight.min.js', 'utf8');
-	//console.log('>> `style.bundle.css` lines = '+ strMinCss.split('\n').length);
-	//console.log('>> `highlight.min.js` lines = '+ strMinJvs.split('\n').length);
-
-	// B: Replace head tags with inline style/javascript
-	gulp.src('build/SpRestLib/index.html')
-	.pipe(replace(cssSrch1, '', {logs:{ enabled:true }}))
-	.pipe(replace(cssSrch2, '\n<style>'+ strMinCss +'</style>\n', {logs:{ enabled:false }}))
-	.pipe(replace(jvsSrch1, '<script>'+ strMinJvs +'</script>\n', {logs:{ enabled:false }}))
-	.pipe(concat('index.perf.html'))
-	.pipe(gulp.dest('../'));
+gulp.task(
+	'default',
+	gulp.series( gulp.parallel('deploy-blog','deploy-css','deploy-help','deploy-html','deploy-img','deploy-sitemap'), 'min-css', 'min-html' ),
+	()=>{
+	console.log('Done');
 });
