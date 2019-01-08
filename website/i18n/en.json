@@ -3,7 +3,7 @@
   "localized-strings": {
     "next": "Next",
     "previous": "Previous",
-    "tagline": "JavaScript Library for SharePoint Web Services",
+    "tagline": "JavaScript SharePoint REST Library",
     "docs": {
       "api-file": {
         "title": "File Methods (SP.File)"
