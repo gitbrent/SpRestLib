@@ -8,7 +8,7 @@
 	<meta name="website"     content="https://github.com/gitbrent/SpRestLib/">
 	<meta name="keywords"    content="SpRestLib, JavaScript, js-sharepoint, SP2013 REST, SharePoint 2013, SharePoint 2016, SharePoint Online">
 	<meta name="description" content="Content Editor Webpart: SpRestLib features and capabilities">
-	<meta name="revised"     content="20181217">
+	<meta name="revised"     content="20190116">
 
 	<!-- HOWTO / FAQ / SETUP -->
 	<!--
@@ -21,7 +21,7 @@
 		*) Check the img folder for screencaps of the SharePoint setup!
 	-->
 
-	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootswatch/4.1.3/yeti/bootstrap.min.css">
+	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootswatch/4.2.1/yeti/bootstrap.min.css">
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.15.0/themes/prism-okaidia.min.css">
 	<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.5.0/css/all.css" integrity="sha384-B4dIYHKNBt8Bc12p+WXckhzcICo0wtJAoU8YZTY5qE0Id1GSseTk6S+L3BlXeVIU" crossorigin="anonymous">
 
@@ -64,8 +64,6 @@
 		}
 
 		.nowctr { white-space: nowrap !important; text-align: center !important; }
-		.text-nowrap { white-space: nowrap !important; }
-		.alert-highlight { background-color: #fffccc; }
 		/* -- brentstrap.css ---------- */
 		.text-muted { font-weight:normal; }
 		.code { white-space: pre !important; }
@@ -73,34 +71,6 @@
 			/* Chrome draws a super-annoying outline around *each line* in the <code> tag, so NOPE! */
 		    outline: none; /*-webkit-focus-ring-color auto 5px;*/
 		}
-		.itemBox {
-			display: inline-block;
-			background: #fafbfc; /* makes page scrolling too slow!: linear-gradient(#f2f9fc,#fdfeff); */
-			border: 1px #e7e7f7 solid;
-			color: #999;
-			margin: 0 6px 3px 0;
-			padding: 2px 6px;
-			border-radius: 3px;
-		}
-
-		/* ------------------------------------------------------------------------- */
-		.sprlib-spinner {
-			display: inline-block;
-			height: 32px;
-			text-align: center;
-			white-space: nowrap;
-		}
-		.sprlib-spinner > div {
-			display: inline-block;
-			width:32px; height:32px;
-			background-color: #40b0df;
-			border: 3px solid #f2f9fc;
-			border-radius: 100%;
-			animation: sprlib-sk-bouncedelay 1.4s infinite ease-in-out both;
-		}
-		.sprlib-spinner .sprlib-bounce1 { animation-delay: -0.32s; }
-		.sprlib-spinner .sprlib-bounce2 { animation-delay: -0.16s; }
-		@keyframes sprlib-sk-bouncedelay { 0%, 80%, 100% {  transform: scale(0); } 40% { transform: scale(1.0); } }
 
 		/* ------------------------------------------------------------------------- */
 		/* 2017-10 Brent SVG Images */
@@ -315,8 +285,8 @@
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.15.0/prism.min.js"></script>
 
 	<script>
-		var APP_BLD = 20181217;
-		var HTML_SPINNER = '<div class="sprlib-spinner"><div class="sprlib-bounce1"></div><div class="sprlib-bounce2"></div><div class="sprlib-bounce3"></div></div>';
+		var APP_BLD = 20190116;
+		var HTML_SPINNER = '<div class="spinner-border text-primary" role="status"><span class="sr-only">Loading...</span></div>';
 		var LAYOUTS_URL = ( typeof _spPageContextInfo !== 'undefined' && _spPageContextInfo.layoutsUrl ? _spPageContextInfo.layoutsUrl : '_layouts/15' );
 
 		// ==================================================================================================================
@@ -401,7 +371,7 @@
 					$row.append('<td>'+ perm.Member.PrincipalType +'</td>');
 					$row.append('<td/>');
 					perm.Roles.forEach(function(role){
-						if ( !role.Hidden && role.Name ) $row.find('td:last-child').append('<div class="itemBox">'+ role.Name +'<span style="display:none">; </span></div>');
+						if ( !role.Hidden && role.Name ) $row.find('td:last-child').append('<div class="badge badge-info py-1 mr-2 mb-2">'+ role.Name +'<span style="display:none">; </span></div>');
 					});
 					$('#tabListPerms tbody').append( $row );
 				});
@@ -430,7 +400,7 @@
 			if ( !$('#selFileLibs').val() ) { $('#selFileFiles').prop('disabled',true); return; }
 
 			// C: Show busy
-			$('#contFileFileSelect .sprlib-spinner').show();
+			$('#contFileFileSelect .spinner-border').show();
 			$('#contFileFileSelect select').hide();
 
 			// D: Populate <select> with file names
@@ -442,7 +412,7 @@
 					// NOTE: `/Forms` folder is special that `ListItemAllFields` will fail on!
 					if ( !obj.Hidden ) $('#selFileFiles').append('<option value="'+ obj.ServerRelativeUrl +'">'+ obj.Name +'</option>');
 				});
-				$('#contFileFileSelect .sprlib-spinner').hide();
+				$('#contFileFileSelect .spinner-border').hide();
 				$('#contFileFileSelect select').show();
 			});
 		}
@@ -498,7 +468,7 @@
 						$row.append('<td>'+ perm.Member.PrincipalType +'</td>');
 						$row.append('<td/>');
 						perm.Roles.forEach(function(role){
-							if ( !role.Hidden && role.Name ) $row.find('td:last-child').append('<div class="itemBox">'+ role.Name +'<span style="display:none">; </span></div>');
+							if ( !role.Hidden && role.Name ) $row.find('td:last-child').append('<div class="badge badge-info py-1 mr-2 mb-2">'+ role.Name +'<span style="display:none">; </span></div>');
 						});
 						$('#tabFilePerms tbody').append( $row );
 					});
@@ -584,7 +554,7 @@
 			if ( !$('#selFoldLibs').val() ) { $('#selFoldFlds').prop('disabled',true); return; }
 
 			// C: Show busy
-			$('#contFoldFldSelect .sprlib-spinner').show();
+			$('#contFoldFldSelect .spinner-border').show();
 			$('#contFoldFldSelect select').hide();
 
 			// D: Populate <select> with List names
@@ -596,7 +566,7 @@
 					// NOTE: `/Forms` folder is special that `ListItemAllFields` will fail on!
 					if ( !obj.Hidden && obj.Name != 'Forms' ) $('#selFoldFlds').append('<option value="'+ obj.ServerRelativeUrl +'">'+ obj.Name +'</option>');
 				});
-				$('#contFoldFldSelect .sprlib-spinner').hide();
+				$('#contFoldFldSelect .spinner-border').hide();
 				$('#contFoldFldSelect select').show();
 			});
 		}
@@ -637,7 +607,7 @@
 						$row.append('<td>'+ perm.Member.PrincipalType +'</td>');
 						$row.append('<td/>');
 						perm.Roles.forEach(function(role){
-							if ( !role.Hidden && role.Name ) $row.find('td:last-child').append('<div class="itemBox">'+ role.Name +'<span style="display:none">; </span></div>');
+							if ( !role.Hidden && role.Name ) $row.find('td:last-child').append('<div class="badge badge-info py-1 mr-2 mb-2">'+ role.Name +'<span style="display:none">; </span></div>');
 						});
 						$('#tabFoldPerms tbody').append( $row );
 					});
@@ -918,11 +888,11 @@
 					.forEach(function(obj,idx){
 						if ( !obj.Hidden ) $('#selSiteLists').append('<option value="'+ obj.Title +'">'+ obj.Title +'</option>');
 					});
-					$('#contListSelect .sprlib-spinner').remove();
+					$('#contListSelect .spinner-border').remove();
 					$('#contListSelect select').show();
 				})
 				.catch(function(strErr){
-					$('#contListSelect .sprlib-spinner').remove();
+					$('#contListSelect .spinner-border').remove();
 					$('#contListSelect select').after('<span class="text-danger">'+strErr+'</span>');
 				});
 			}
@@ -937,11 +907,11 @@
 					.forEach(function(obj,idx){
 						if ( !obj.Hidden && obj.BaseType == "Library" ) $('#selFileLibs').append('<option value="'+ obj.ServerRelativeUrl +'">'+ obj.Title +'</option>');
 					});
-					$('#contFileLibsSelect, #contFileFileSelect').find('.sprlib-spinner').hide();
+					$('#contFileLibsSelect, #contFileFileSelect').find('.spinner-border').hide();
 					$('#contFileLibsSelect, #contFileFileSelect').find('select').show();
 				})
 				.catch(function(strErr){
-					$('#contFileLibsSelect, #contFileFileSelect').find('.sprlib-spinner').hide();
+					$('#contFileLibsSelect, #contFileFileSelect').find('.spinner-border').hide();
 					$('#contFileLibsSelect, #contFileFileSelect').find('select').after('<span class="text-danger">'+strErr+'</span>');
 				});
 			}
@@ -956,11 +926,11 @@
 					.forEach(function(obj,idx){
 						if ( !obj.Hidden && obj.BaseType == "Library" ) $('#selFoldLibs').append('<option value="'+ obj.ServerRelativeUrl +'">'+ obj.Title +'</option>');
 					});
-					$('#contFoldLibSelect, #contFoldFldSelect').find('.sprlib-spinner').hide();
+					$('#contFoldLibSelect, #contFoldFldSelect').find('.spinner-border').hide();
 					$('#contFoldLibSelect, #contFoldFldSelect').find('select').show();
 				})
 				.catch(function(strErr){
-					$('#contFoldLibSelect, #contFoldFldSelect').find('.sprlib-spinner').hide();
+					$('#contFoldLibSelect, #contFoldFldSelect').find('.spinner-border').hide();
 					$('#contFoldLibSelect, #contFoldFldSelect').find('select').after('<span class="text-danger">'+strErr+'</span>');
 				});
 			}
@@ -1012,7 +982,7 @@
 						$row.append('<th><a href="../'+LAYOUTS_URL+'/people.aspx?MembershipGroupId='+ perm.Member.PrincipalId +'" target="_blank">'+ perm.Member.Title +'</a></th>');
 						$row.append('<td/>');
 						perm.Roles.forEach(function(role,idx){
-							if ( !role.Hidden ) $row.find('td:last-child').append('<div class="itemBox">'+ role.Name +'<span style="display:none">; </span></div>');
+							if ( !role.Hidden ) $row.find('td:last-child').append('<div class="badge badge-info py-1 mr-2 mb-2">'+ role.Name +'<span style="display:none">; </span></div>');
 						});
 						$('#tabSitePerms tbody').append( $row );
 					});
@@ -1045,8 +1015,8 @@
 								queryCols: ['Id','Email','LoginName','PrincipalType','Title']
 							})
 							.then(function(arrUsers){
-								arrUsers.forEach(function(user,idx){ $('#groupUsers'+group.Id).append('<div class="itemBox">'+ user.Title +'<span style="display:none">; </span></div>') });
-								$('#groupCount'+group.Id).text( $('#groupUsers'+group.Id+' .itemBox').length );
+								arrUsers.forEach(function(user,idx){ $('#groupUsers'+group.Id).append('<div class="badge badge-info py-1 mr-2 mb-2">'+ user.Title +'<span style="display:none">; </span></div>') });
+								$('#groupCount'+group.Id).text( $('#groupUsers'+group.Id+' .badge').length );
 							})
 							.catch(function(strErr){ $('#groupUsers'+group.Id).text(strErr||'?') });
 						}
@@ -1099,7 +1069,7 @@
 						$row.append('<td class="showUsersGrp"></td>');
 						user.Groups.forEach(function(group,idx){
 							$row.find('td:last-child').append(
-								'<div class="itemBox">'
+								'<div class="badge badge-info py-1 mr-2 mb-2">'
 								+ '<a href="../'+LAYOUTS_URL+'/people.aspx?MembershipGroupId='+ group.Id +'" target="_blank">'+ group.Title +'</a>'
 								+ '</div>'
 							);
@@ -1272,7 +1242,7 @@
 				<div class="row">
 					<div id="contFileLibsSelect" class="col-6">
 						<label for="selSiteLists" class="text-muted text-uppercase d-block">Select List/Library</label>
-						<div class="sprlib-spinner"><div class="sprlib-bounce1"></div><div class="sprlib-bounce2"></div><div class="sprlib-bounce3"></div></div>
+						<div class="spinner-border text-primary" role="status"><span class="sr-only">Loading...</span></div>
 						<select id="selSiteLists" class="form-control" onchange="handleListChange()">
 							<option value="">Select...</option>
 						</select>
@@ -1319,14 +1289,14 @@
 				<div class="row">
 					<div id="contFileLibsSelect" class="col-6">
 						<label for="selFoldLibs" class="text-muted text-uppercase d-block">Select Library</label>
-						<div class="sprlib-spinner"><div class="sprlib-bounce1"></div><div class="sprlib-bounce2"></div><div class="sprlib-bounce3"></div></div>
+						<div class="spinner-border text-primary" role="status"><span class="sr-only">Loading...</span></div>
 						<select id="selFileLibs" class="form-control" onchange="handleFileLibChange()">
 							<option value="">Select...</option>
 						</select>
 					</div>
 					<div id="contFileFileSelect" class="col-6">
 						<label for="selFileFiles" class="text-muted text-uppercase d-block">Select Library File</label>
-						<div class="sprlib-spinner"><div class="sprlib-bounce1"></div><div class="sprlib-bounce2"></div><div class="sprlib-bounce3"></div></div>
+						<div class="spinner-border text-primary" role="status"><span class="sr-only">Loading...</span></div>
 						<select id="selFileFiles" class="form-control" onchange="handleFileFileChange()" disabled>
 							<option value="">Select...</option>
 						</select>
@@ -1410,14 +1380,14 @@
 				<div class="row">
 					<div id="contFoldLibSelect" class="col-6">
 						<label for="selFoldLibs" class="text-muted text-uppercase d-block">Select Library</label>
-						<div class="sprlib-spinner"><div class="sprlib-bounce1"></div><div class="sprlib-bounce2"></div><div class="sprlib-bounce3"></div></div>
+						<div class="spinner-border text-primary" role="status"><span class="sr-only">Loading...</span></div>
 						<select id="selFoldLibs" class="form-control" onchange="handleFoldLibChange()">
 							<option value="">Select...</option>
 						</select>
 					</div>
 					<div id="contFoldFldSelect" class="col-6">
 						<label for="selFoldFlds" class="text-muted text-uppercase d-block">Select Library Folder</label>
-						<div class="sprlib-spinner"><div class="sprlib-bounce1"></div><div class="sprlib-bounce2"></div><div class="sprlib-bounce3"></div></div>
+						<div class="spinner-border text-primary" role="status"><span class="sr-only">Loading...</span></div>
 						<select id="selFoldFlds" class="form-control" onchange="handleFoldFldChange()" disabled>
 							<option value="">Select...</option>
 						</select>
