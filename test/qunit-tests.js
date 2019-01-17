@@ -2,7 +2,7 @@
  * NAME: qunit-test.js
  * DESC: tests for qunit-test.html (coded against my personal O365 Dev Site - YMMV)
  * AUTH: https://github.com/gitbrent/
- * DATE: 20181203
+ * DATE: 20190116
  *
  * HOWTO: Generate text tables for README etc.:
  * sprLib.list('Employees').items(['Id', 'Name', 'Badge_x0020_Number']).then(function(arrData){ console.log(getAsciiTableStr(arrData)) });
@@ -685,7 +685,7 @@ QUnit.module( "LIST - ITEM GET Methods", function(){
 		sprLib.list('Employees')
 		.items({
 			listCols: {
-				empName:  { dataName:'Name'          },
+				empName:  { dataName:'Name' },
 				mgrTitle: { dataName:'Manager/Title' },
 				depsArr:  { dataName:'Departments_x0020_Supported/Id' }
 			},
@@ -693,6 +693,7 @@ QUnit.module( "LIST - ITEM GET Methods", function(){
 			queryFilter: "Departments_x0020_Supported ne null"
 		})
 		.then(function(arrayResults){
+			console.log(arrayResults);
 			assert.ok( Object.keys(arrayResults[0]).filter(key=>{return key.indexOf('_')!=0}).length == 3, "arrayResults[0] (no '__meta/__next') has length == 3: "+ Object.keys(arrayResults[0]).length );
 			assert.ok( !isNaN(arrayResults[0].depsArr[0].Id), "arrayResults[0].depsArr[0].Id is a number: "+ arrayResults[0].depsArr[0].Id );
 			assert.ok( getAsciiTableStr(arrayResults), `RESULTS:\n${getAsciiTableStr(arrayResults)}`);
@@ -2045,9 +2046,8 @@ QUnit.module( "USER - Methods", function(){
 				// DONE!
 				done();
 			})
-			.catch(function(strErr){
-				assert.ok( typeof strErr === 'string', `(typeof strErr === 'string') => ${typeof strErr}` );
-				assert.ok( strErr, `catch strErr: ${strErr}` );
+			.catch(function(err){
+				assert.ok( (false), err );
 				done();
 			});
 		});
@@ -2085,6 +2085,10 @@ QUnit.module( "USER - Methods", function(){
 			*/
 			assert.ok( true, "CASE 2: --------------------------------------------------------------------" );
 			assert.ok( prof2.PersonalSpace, "`prof2.PersonalSpace` ? "+ `${prof2.PersonalSpace}` );
+			assert.ok(
+				prof2.PersonalSpace.toLowerCase().indexOf('property does not exist') == -1,
+				"`prof2.PersonalSpace` exists? "+ `${prof2.PersonalSpace.toLowerCase().indexOf('property does not exist')}`
+			);
 			assert.ok( !prof2.UserProfileProperties, "`!prof2.UserProfileProperties` ? "+ `${!prof2.UserProfileProperties}` );
 			assert.ok( Object.keys(prof2).length == 1, "Pass: Object.keys(prof2).length == 1: "+ Object.keys(prof2).length );
 			assert.ok( getAsciiTableStr(prof2), `RESULTS:\n${getAsciiTableStr(prof2)}` );
@@ -2100,6 +2104,10 @@ QUnit.module( "USER - Methods", function(){
 			*/
 			assert.ok( true, "CASE 3: --------------------------------------------------------------------" );
 			assert.ok( prof3.FirstName, "`prof3.FirstName` ? "+ `${prof3.FirstName}` );
+			assert.ok(
+				prof3.FirstName.toLowerCase().indexOf('property does not exist') == -1,
+				"`prof3.FirstName` exists? "+ `${prof3.FirstName.toLowerCase().indexOf('property does not exist')}`
+			);
 			assert.ok( prof3.PersonalSpace, "`prof3.PersonalSpace` ? "+ `${prof3.PersonalSpace}` );
 			assert.ok( Object.keys(prof3).length == 2, "Pass: Object.keys(prof3).length == 2: "+ Object.keys(prof3).length );
 			assert.ok( getAsciiTableStr(prof3), `RESULTS:\n${getAsciiTableStr(prof3)}` );
