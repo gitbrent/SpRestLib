@@ -35,7 +35,7 @@
 (function(){
 	// APP VERSION/BUILD
 	var APP_VER = "1.10.0-beta";
-	var APP_BLD = "20190107";
+	var APP_BLD = "20190116";
 	// ENUMERATIONS
 	// REF: [`SP.BaseType`](https://msdn.microsoft.com/en-us/library/office/jj246925.aspx)
 	var ENUM_BASETYPES = {
@@ -81,6 +81,10 @@
 		overwriteUploads: false,
 		queryLimit:       null, /* default queryLimit - allows global override of default SP "100 rows" limit */
 		retryAfter:       1000
+	};
+	// APP AUTHENTICATION
+	var APP_AUTH = {
+		bearer: null
 	};
 	// LIBRARY DEPS
 	var https = null;
@@ -219,8 +223,58 @@
 	this.sprLib = {};
 	sprLib.version = APP_VER+'-'+APP_BLD;
 
-	// API: AUTH
-	// TODO: sprLib.auth = function auth(){}
+	// API: Authentication
+	/**
+	* Authentication Methods / Auth token/option getters/setters
+	* @public
+	* @since 1.10.0
+	*/
+	sprLib.auth = function auth(inOpt) {
+		var _appAuth = {};
+
+		// A: Options setup
+		inOpt = inOpt || {};
+		var _pageDigest = ( typeof document !== 'undefined' && document.getElementById('__REQUESTDIGEST') ? document.getElementById('__REQUESTDIGEST').value : null );
+
+		/**
+		* Getter/Setter for a few app options in `APP_AUTH`
+		*
+		* @public
+		* @param {object} inOpt - one or more auth options to set
+		* @returns {object} Return value of a few APP_AUTH
+		* @example - get options - `sprLib.auth();`
+		* @example - set baseUrl - `sprLib.auth({ baseUrl:'/sites/devtest' });`
+		* @since 1.10.0
+		*/
+
+		_appAuth.digest = function(inOpt) {
+			if ( !inOpt ) return _pageDigest;
+
+//			var _requestDigest = ( (inOpt && inOpt.requestDigest) || (typeof document !== 'undefined' && document.getElementById('__REQUESTDIGEST') ? document.getElementById('__REQUESTDIGEST').value : null));
+
+			// TODO: how to do this??
+//			if ( !inOpt ) return _pageDigest;
+
+			_appAuth.requestDigest.renew = function renew() {
+				return doRenewDigestToken();
+			}
+
+			//return _appAuth.requestDigest;
+		}
+
+		// TODO: option to set `bearer` Graph token
+
+		// LAST: Return this new List
+		return _appAuth;
+	}
+
+	// API: UTILITY: Token
+	// TODO-2.0: will become DEPRECATED: move under a new parent: `sprLib.auth().token().renew()`
+	sprLib.renewSecurityToken = function renewSecurityToken() {
+		//return doRenewDigestToken();
+		// TODO: TEST!!
+		sprLib.auth().requestDigest().renew();
+	}
 
 	// API: OPTIONS
 	/**
@@ -314,12 +368,6 @@
 		APP_OPTS.nodeServer = inOpt.server || '';
 	}
 
-	// API: UTILITY: Token
-	// TODO-2.0: will become DEPRECATED: move under a new parent: `sprLib.auth().token().renew()`
-	sprLib.renewSecurityToken = function renewSecurityToken() {
-		return doRenewDigestToken();
-	}
-
 	// TODO: Add `baseUrl` to `file()` method
 
 	// API: FILE
@@ -400,7 +448,7 @@
 				sprLib.rest({
 					type: "POST",
 					url: "_api/web/GetFileByServerRelativeUrl('"+ _fullName +"')"
-					+ "/CheckIn(comment='"+ inOpt.comment +"',checkintype="+ inOpt.type +")"
+						+ "/CheckIn(comment='"+ inOpt.comment +"',checkintype="+ inOpt.type +")"
 				})
 				.then(function(arrData){
 					// NOTE: SharePoint fall 2018 returns: `{ CheckIn: null }`
@@ -477,7 +525,8 @@
 			return new Promise(function(resolve, reject) {
 				sprLib.rest({
 					url: "_api/web/GetFileByServerRelativeUrl('"+ _fullName +"')/$value",
-					headers: {'binaryStringResponseBody':true}
+					headers: {'binaryStringResponseBody':true},
+					metadata: false
 				})
 				.then(function(data){
 					if ( typeof Blob !== 'undefined' ) {
@@ -598,7 +647,8 @@
 			return new Promise(function(resolve, reject) {
 				sprLib.rest({
 					url: "_api/web/GetFileByServerRelativeUrl('"+ _fullName +"')/ListItemAllFields/RoleAssignments",
-					queryCols: ['PrincipalId','Member/PrincipalType','Member/Title','RoleDefinitionBindings/Name','RoleDefinitionBindings/Hidden']
+					queryCols: ['PrincipalId','Member/PrincipalType','Member/Title','RoleDefinitionBindings/Name','RoleDefinitionBindings/Hidden'],
+					metadata: false
 				})
 				.then(function(arrData){
 					// STEP 1: Transform: Results s/b 2 keys with props inside each
@@ -930,6 +980,7 @@
 						return sprLib.rest({
 							url: "_api/web/Lists(guid'"+ objFolder.ListGUID.replace(/\{|\}/g,'') +"')/rootFolder/Folders",
 							queryCols: ['ListItemAllFields/Id'],
+							metadata: false
 						});
 					}
 					else {
@@ -939,7 +990,8 @@
 				.then(function(arrResults){
 					if ( arrResults && arrResults[0] && arrResults[0].ListItemAllFields && arrResults[0].ListItemAllFields.Id ) {
 						return sprLib.rest({
-							url: "_api/web/Lists(guid'"+ objFolder.ListGUID.replace(/\{|\}/g,'') +"')/items('"+arrResults[0].ListItemAllFields.Id+"')/HasUniqueRoleAssignments"
+							url: "_api/web/Lists(guid'"+ objFolder.ListGUID.replace(/\{|\}/g,'') +"')/items('"+arrResults[0].ListItemAllFields.Id+"')/HasUniqueRoleAssignments",
+							metadata: false
 						});
 					}
 					else {
@@ -982,7 +1034,8 @@
 				// NOTE: The `vti_x005f_level` prop is useless; the value is 1 for 'SiteAssets' and 'SiteAssets/BACKUPS'!
 				sprLib.rest({
 					url: "_api/web/GetFolderByServerRelativeUrl('"+ _fullName +"')/Properties",
-					queryCols: ['vti_x005f_listtitle']
+					queryCols: ['vti_x005f_listtitle'],
+					metadata: false
 				})
 				.then(function(arrData){
 					// Is this a top-level Library (eg: 'SiteAssets')?
@@ -995,7 +1048,8 @@
 						// WORKAROUND(?): use "/sites/dev/_api/Web/Lists/GetByTitle('Site%20Assets')/rootFolder/Folders?$expand=ListItemAllFields&$filter=Name%20eq%20%27BACKUP%27" -- to transform Library into a folder...?
 						return sprLib.rest({
 							url: "_api/web/GetFolderByServerRelativeUrl('"+ _fullName +"')/ListItemAllFields/RoleAssignments",
-							queryCols: ['PrincipalId','Member/PrincipalType','Member/Title','RoleDefinitionBindings/Name','RoleDefinitionBindings/Hidden']
+							queryCols: ['PrincipalId','Member/PrincipalType','Member/Title','RoleDefinitionBindings/Name','RoleDefinitionBindings/Hidden'],
+							metadata: false
 						});
 					}
 				})
@@ -1146,7 +1200,8 @@
 		function getListItemType() {
 			return new Promise(function(resolve, reject) {
 				sprLib.rest({
-					url: _urlBase+"?$select=ListItemEntityTypeFullName"
+					url: _urlBase+"?$select=ListItemEntityTypeFullName",
+					metadata: false
 				})
 				.then(function(result){
 					if (result && Array.isArray(result) && result.length == 1) resolve( {"type":result[0].ListItemEntityTypeFullName } );
@@ -1179,7 +1234,7 @@
 					var arrColumns = [];
 
 					// STEP 1: Gather fields
-					( arrData && arrData[0] && arrData[0].Fields && arrData[0].Fields.results ? arrData[0].Fields.results : [] )
+					( arrData && arrData[0] && arrData[0].Fields ? arrData[0].Fields : [] )
 					.forEach(function(result,i){
 						// Filter: No Edit/Icon or internal cols (eg: '_ComplianceFlags')
 						if ( !result.Hidden && result.InternalName != 'Edit' && result.InternalName != 'DocIcon' && result.InternalName.indexOf('_') != 0 ) {
@@ -1194,7 +1249,7 @@
 								isUnique:     result.EnforceUniqueValues,
 								defaultValue: ( result.DefaultValue || null ),
 								maxLength:    ( result.MaxLength || null ),
-								choiceValues: ( result.Choices && result.Choices.results ? result.Choices.results : null ),
+								choiceValues: ( result.Choices && result.Choices.results ? result.Choices.results : (result.Choices ? result.Choices : null) ),
 								allowFillInChoices: ( result.FillInChoice == true || result.FillInChoice == false ? result.FillInChoice : null )
 							});
 						}
@@ -1251,7 +1306,8 @@
 			return new Promise(function(resolve, reject) {
 				sprLib.rest({
 					url: _urlBase+'/RoleAssignments?$select=',
-					queryCols: ['PrincipalId','Member/PrincipalType','Member/Title','RoleDefinitionBindings/Name','RoleDefinitionBindings/Hidden']
+					queryCols: ['PrincipalId','Member/PrincipalType','Member/Title','RoleDefinitionBindings/Name','RoleDefinitionBindings/Hidden'],
+					metadata: false
 				})
 				.then(function(arrData){
 					// STEP 1: Transform: Results s/b 2 keys with props inside each
@@ -1426,7 +1482,7 @@
 							type    : "GET",
 							cache   : (typeof inObj.cache    === 'boolean' ? inObj.cache    : APP_OPTS.cache),
 							metadata: (typeof inObj.metadata === 'boolean' ? inObj.metadata : APP_OPTS.metadata),
-							headers : { "Accept":"application/json;odata=verbose", "X-RequestDigest":_requestDigest }
+							headers : { "X-RequestDigest":_requestDigest }
 						};
 						var arrExpands = [], strExpands = "";
 
@@ -1538,9 +1594,19 @@
 									var arrCol = [];
 									var colVal = "";
 
-									// B.3.1: Get value(s) for this key
+									// NOTE: Result Difference! Using `nometadata` will leave out empty lookups - whereas `verbose` will include: `Manager:{}` when "Manager/Title" is empty!
+									/* EX:
+										0: {Name: "Wally West"}
+										1: {Name: "Clark Kent", Manager: {Title: "Brent Ely"}}
+									*/
+									// DESIGN: But we should always include an empty object as users expect is (and so users wont get exceptions trying to do `result.Manager` and having it not be present!)
+/*									if ( col.dataName && col.dataName.indexOf('/') > -1 && !result[col.dataName.split('/')[0]] ) {
+										result[col.dataName.split('/')[0]] = null;
+									}
+*/
+									// B.4.1: Get value(s) for this key
 									// Handle LookupMulti columns
-									if ( col.dataName && col.dataName.indexOf('/') > -1 && result[col.dataName.split('/')[0]].results ) {
+									if ( col.dataName && col.dataName.indexOf('/') > -1 && result[col.dataName.split('/')[0]] && result[col.dataName.split('/')[0]].results ) {
 										// A:
 										// NOTE: `listCols` can have "Dept/Id" and "Dept/Title", but SP only returns *ONE* result
 										// ....: So, skip any subsequnt listCol once results have been captured
@@ -1550,6 +1616,7 @@
 										colVal = [];
 
 										// C: Add any results
+// TODO: we can get both .results and reg array as metadata is an option!!!
 										result[col.dataName.split('/')[0]].results.forEach(function(objResult,idx){
 											// EX: {__metadata:Object, Id:2, Title:"Human Resources"}
 											if ( objResult.__metadata ) delete objResult.__metadata;
@@ -1561,15 +1628,22 @@
 									else if ( col.dataName && col.dataName.indexOf('/') > -1 ) {
 										// A: Split lookup info object/field
 										arrCol = col.dataName.split('/');
-										// B: Remove extraneous `__metadata`
-										if ( result[arrCol[0]].__metadata ) delete result[arrCol[0]].__metadata;
-										// B: Same for `__deferred`.
+
+										// B: Remove extraneous metadata
+										// B-1: Remove extraneous `__metadata`
+										if ( result[arrCol[0]] && result[arrCol[0]].__metadata ) delete result[arrCol[0]].__metadata;
+										// B-2: Same for `__deferred`.
 										// NOTE: Empty Multi-Person returns `{__deferred:{uri:'http...'}}` (ugh!)
-										if ( result[arrCol[0]].__deferred ) delete result[arrCol[0]].__deferred;
+										if ( result[arrCol[0]] && result[arrCol[0]].__deferred ) delete result[arrCol[0]].__deferred;
+
 										// C: Capture value
-										// CASE 1: `dataName` was used - in this case return the actual field user asked for
-										// Detect use of names listCols by comparing key to dataName
-										if ( key != arrCol[0] && key != col.dataName ) colVal = result[arrCol[0]][arrCol[1]];
+										// CASE 1: `dataName` was used - in this case return the actual field user queried
+										// Detect use of named `listCols` by comparing key to dataName
+										if ( key != arrCol[0] && key != col.dataName ) {
+											// CASE: Result is array of ID's. Ex: Multi-Lookup `Departments_x0020_SupportedId`: [{Id:1},{Id:2}]
+											if ( result[arrCol[0]] && Array.isArray(result[arrCol[0]]) ) colVal = result[arrCol[0]];
+											else colVal = ( result[arrCol[0]] ? result[arrCol[0]][arrCol[1]] : null );
+										}
 										// CASE 2: Other - in this case return the complete object (Ex: { Title:'Manager' })
 										// IMPORTANT: This de facto returns all the *other* fields queried. Eg: 'Manager/Id' and 'Manager/Title' were in cols
 										// We want to return a *single* object with these 2 elements, so they can be derefereced using 'Manger.Title' etc.
@@ -1690,8 +1764,7 @@
 			});
 		}
 
-		// DEPRECATED:
-		// TODO-2.0
+		// TODO: DEPRECATED: REMOVE-IN-2.0:
 		_newList.getItems = _newList.items;
 
 		// CRUD ---------------------------------------------------------------------
@@ -1737,7 +1810,7 @@
 						url     : _urlBase +"/items",
 						data    : JSON.stringify(jsonData),
 						metadata: true,
-						headers : { "Accept":"application/json;odata=verbose", "X-RequestDigest":_requestDigest }
+						headers : { "X-RequestDigest":_requestDigest }
 					})
 					.then(function(arrData){
 						if ( arrData && arrData[0] ) {
@@ -1814,7 +1887,6 @@
 						metadata: true,
 						headers : {
 							"X-HTTP-Method"  : "MERGE",
-							"Accept"         : "application/json;odata=verbose",
 							"X-RequestDigest": _requestDigest,
 							"IF-MATCH"       : ( jsonData.__metadata.etag ? jsonData.__metadata.etag : "*" )
 						}
@@ -1880,7 +1952,6 @@
 						url     : _urlBase +"/items("+ intID +")",
 						metadata: true,
 						headers : {
-							"Accept"         : "application/json;odata=verbose",
 							"X-RequestDigest": _requestDigest,
 							"X-HTTP-Method"  : "MERGE",
 							"IF-MATCH"       : ( jsonData.__metadata.etag ? jsonData.__metadata.etag : "*" )
@@ -1927,10 +1998,7 @@
 					type    : "POST",
 					url     : _urlBase +"/items("+ intID +")/recycle()",
 					metadata: true,
-					headers : {
-						"Accept"         : "application/json;odata=verbose",
-						"X-RequestDigest": _requestDigest
-					}
+					headers : { "X-RequestDigest": _requestDigest }
 				})
 				.then(function(){
 					// SP returns the item guid for Recycle operations
@@ -1951,6 +2019,7 @@
 	/**
 	* Execute an ad-hoc REST query to one of many endpoints
 	* @since 1.0
+	* @public
 	*
 	* @example - sprLib.rest({ url:'/sites/dev/_api/web/webs', metadata:true });
 	* @example - sprLib.rest({ url:'/sites/dev/_api/web/webs', queryCols:['ID','Title'] });
@@ -1975,14 +2044,26 @@
 			inOpt.spArrData  = [];
 			inOpt.cache      = (typeof inOpt.cache === 'boolean' ? inOpt.cache : APP_OPTS.cache);
 			inOpt.digest     = (inOpt.requestDigest || (typeof document !== 'undefined' && document.getElementById('__REQUESTDIGEST') ? document.getElementById('__REQUESTDIGEST').value : null));
-			inOpt.metadata   = (typeof inOpt.metadata === 'boolean' ? inOpt.metadata : APP_OPTS.metadata);
 			inOpt.queryLimit = inOpt.queryLimit || APP_OPTS.queryLimit || null;
 			inOpt.type       = inOpt.restType || inOpt.type || "GET";
 			inOpt.url        = (inOpt.restUrl || inOpt.url || APP_OPTS.baseUrl).replace(/\"/g, "'");
+			// Construct `headers`
+			// NOTE: (`odata=verbose` is no longer reqd)[https://www.microsoft.com/en-us/microsoft-365/blog/2014/08/13/json-light-support-rest-sharepoint-api-released/]
+			inOpt.headers = inOpt.headers || {};
+			if ( !inOpt.headers.Accept ) inOpt.headers.Accept = "application/json;odata=verbose"; // DEFAULT (otherwise odata style *OMITS* fields that have no value, which breaks v1.x `rest()` results!)
+			if ( inOpt.metadata == false ) inOpt.headers.Accept = "application/json;odata=nometadata";
+			else if ( inOpt.metadata || inOpt.type == 'POST' ) inOpt.headers.Accept = "application/json;odata=verbose";
+			// Add "form digest value" [MS' term] if one was provided
+			if ( inOpt.digest ) inOpt.headers["X-RequestDigest"] = inOpt.digest;
+			/* TODO Add suport for `Authorization` (MS Graph/Azure)
+			Authorization: "Bearer " + accessToken
+			if ( inOpt.digest ) inOpt.headers["Authorization"] = "Bearer " + accessToken;
+			*/
 
-// TODO: Return *ALL* results (do all paging and concat results together)
-// getAllItems
-// https://github.com/gitbrent/SpRestLib/issues/44
+			// CURRENT:
+			// TODO: Return *ALL* results (do all paging and concat results together)
+			// getAllItems
+			// https://github.com/gitbrent/SpRestLib/issues/44
 
 			// STEP 2: Setup vars
 			var arrExpands = [], strExpands = "";
@@ -1990,12 +2071,13 @@
 				url    : inOpt.url,
 				type   : inOpt.type,
 				cache  : inOpt.cache,
-				headers: inOpt.headers || { "Accept":"application/json;odata=verbose", "X-RequestDigest":inOpt.digest }
+				headers: inOpt.headers
 			};
 			// Add `data` if included
 			if ( inOpt.data ) objAjaxQuery.data = inOpt.data;
 			// Add headers for `POST` types if omitted by user
 			if ( objAjaxQuery.type == 'POST' ) {
+				// NOTE: (late 2018) MS says to use verbose for CRUD (https://docs.microsoft.com/en-us/sharepoint/dev/sp-add-ins/working-with-lists-and-list-items-with-rest)
 				// Add default `context-type` for POST if none was specified
 				if ( !objAjaxQuery.headers.contentType ) objAjaxQuery.headers['content-type'] = 'application/json;odata=verbose';
 				// POST's to SharePoint will be *REJECTED* without a digest
@@ -2186,11 +2268,25 @@
 					resolve( data );
 				}
 				else {
+					var arrObjResult = [];
+
 					// A: Parse string to JSON if needed
 					data = ( typeof data === 'string' && data.indexOf('{') == 0 ? JSON.parse(data) : data );
 
 					// B: If result is a single object, make it an array for pasing below (Ex: '_api/site/Owner/Id')
-					var arrObjResult = ( data && data.d && !data.d.results && typeof data.d === 'object' && Object.keys(data.d).length > 0 ? [data.d] : [] );
+					// NOTE: `odata=verbose` => `data.d.results` -- `odata=nometadata` => `data.value`
+					if ( data && data.d ) {
+						if ( data.d.results ) arrObjResult = data.d.results;
+						else arrObjResult = ( Array.isArray(data.d) ? data.d : [data.d] );
+					}
+					else if ( data && data.value ) {
+						arrObjResult = ( Array.isArray(data.value) ? data.value : [data.value] );
+					}
+					else if ( data && typeof data === 'object' ) {
+						// NOTE: odata/nometadata queries return the name of item queried
+						// E.g.: `_api/Web/CurrentUser?$select=Groups/Id,Groups/Title` returns: `{ data.Groups:[{},{}] }`
+						arrObjResult = data;
+					}
 
 					// C: Iterate over results
 					// NOTE: Depending upon which REST endpoint used, SP can return results in various forms (!)
@@ -2200,8 +2296,10 @@
 						// IE11: When using jQuery AJAX for AppendText/Versions/getVersions, the `data` result must be parsed directly (no conversion) using `(data).find("z:row")`
 						inOpt.spArrData.push( data );
 					}
-					else if ( arrObjResult.length > 0 || (data && data.d && data.d.results && typeof data.d.results === 'object') ) {
-						(arrObjResult.length > 0 ? arrObjResult : data.d.results).forEach(function(result){
+// TODO: is this change okay? (did qunit test pass?) then remove this
+//					else if ( arrObjResult.length > 0 || (data && data.d && data.d.results && typeof data.d.results === 'object') ) {
+					else if ( arrObjResult && Array.isArray(arrObjResult) || (data && data.d && data.d.results && Array.isArray(data.d.results)) ) {
+						(arrObjResult || data.d.results).forEach(function(result){
 							var objRow = {};
 
 							// A: Add select columns
@@ -2220,8 +2318,17 @@
 
 										// B.3.1: Get value(s) for this key
 
+										// NOTE: Result Difference! Using `nometadata` will leave out empty lookups - whereas `verbose` will include: `Manager:{}` when "Manager/Title" is empty!
+										/* EX:
+											0: {Name: "Wally West"}
+											1: {Name: "Clark Kent", Manager: {Title: "Brent Ely"}}
+										*/
+										// DESIGN: But we should always include an empty object as users expect is (and so users wont get exceptions trying to do `result.Manager` and having it not be present!)
+										if ( col.dataName && col.dataName.indexOf('/') > -1 && !result[col.dataName.split('/')[0]] ) {
+											result[col.dataName.split('/')[0]] = null;
+										}
 										// Handle Lookups that return an array of 'results' (eg: `LookupMulti`)
-										if ( col.dataName && col.dataName.indexOf('/') > -1
+										else if ( col.dataName && col.dataName.indexOf('/') > -1
 											&& result[col.dataName.split('/')[0]] && result[col.dataName.split('/')[0]].results )
 										{
 											// A:
@@ -2233,9 +2340,9 @@
 											colVal = [];
 
 											// C: Add any results
-											result[col.dataName.split('/')[0]].results.forEach(function(objResult,idx){
+											result[col.dataName.split('/')[0]].results.forEach(function(objResult){
 												// EX: {__metadata:Object, Id:2, Title:"Human Resources"}
-												if ( objResult.__metadata ) delete objResult.__metadata;
+//												if ( objResult.__metadata ) delete objResult.__metadata;
 												// Capture any-and-all columns returned (aside from removal of above)
 												colVal.push( objResult );
 											});
@@ -2319,20 +2426,24 @@
 									});
 								}
 							}
-							else {
-								Object.keys(result).forEach(function(key){
-									var val = result[key];
-									objRow[key] = val;
-								});
+							else if ( result ) {
+								// [odata] Ex: `_api/SP.UserProfiles.PeopleManager/GetUserProfilePropertyFor(accountName=@v,propertyname='PersonalSpace')?@v=%27gitbrent%27`
+								// returns: `{ value:"/personal/admin_brent_onmicrosoft_com/" }`
+								// which entered block above as a simple string value in an array: `["/some/place"]`
+								if ( typeof result === 'string' ) objRow['value'] = result;
+								else if ( typeof result === 'object' && Object.keys(result).length > 0 ) {
+									Object.keys(result).forEach(function(key){
+										var val = ( result[key] || null );
+										objRow[key] = val;
+									});
+								}
 							}
 
-							// B: Remove metadata unless the option to return it is set
-							if ( objRow.__metadata && !inOpt.metadata ) delete objRow.__metadata;
-
-							// C: Support "next" functionality
-							if ( data.d.__next ) {
+							// B: Support "next" functionality
+							// IMPORTANT: the nextLink key is odd: it can ONLY br referenced via string below. Do not alter syntax.
+							if ( (data.d && data.d.__next) || data["odata.nextLink"] ) {
 								var objSkip = { prevId:'', maxItems:'' };
-								data.d.__next.split('&').forEach(function(str,idx){
+								(data.d ? data.d.__next : data["odata.nextLink"]).split('&').forEach(function(str,idx){
 									if ( str.indexOf('p_ID%3d') > -1 ) {
 										objSkip.prevId = str.split('&')[0].split('%3d')[2];
 									}
@@ -2343,7 +2454,7 @@
 								if ( objSkip.prevId && objSkip.maxItems ) objRow.__next = objSkip;
 							}
 
-							// D: Add this row
+							// C: Add this row
 							inOpt.spArrData.push( objRow );
 						});
 					}
@@ -2357,7 +2468,11 @@
 							objRow[key] = result;
 						});
 
-						if ( objRow.__metadata && !inOpt.metadata ) delete objRow.__metadata;
+						inOpt.spArrData.push( objRow );
+					}
+					// EX..: odata/nometadata can produce a raw string (eg: UserProfile Properties)
+					else if ( data && data.value ) {
+						objRow[key] = data.value;
 						inOpt.spArrData.push( objRow );
 					}
 
@@ -2430,12 +2545,14 @@
 							'AssociatedOwnerGroup/OwnerTitle','AssociatedMemberGroup/OwnerTitle','AssociatedVisitorGroup/OwnerTitle',
 							'AssociatedOwnerGroup/Title',     'AssociatedMemberGroup/Title',     'AssociatedVisitorGroup/Title'
 						],
-						cache: false
+						cache: false,
+						metadata: false
 					}),
 					sprLib.rest({
 						url: _urlBase+'_api/site',
 						queryCols: ['Owner/Email','Owner/LoginName','Owner/Title','Owner/IsSiteAdmin'],
-						cache: false
+						cache: false,
+						metadata: false
 					})
 				])
 				.then(function(arrAllArrays){
@@ -2476,7 +2593,8 @@
 					url: _urlBase+'_api/web/lists',
 					queryCols: [
 						'Id','Title','Description','ItemCount','BaseType','BaseTemplate','Hidden','ImageUrl','ParentWebUrl','RootFolder/ServerRelativeUrl'
-					]
+					],
+					metadata: false
 				})
 				.then(function(arrData){
 					// A: Modify some values
@@ -2516,7 +2634,8 @@
 						Modified:		{ dataName:'LastItemModifiedDate'	,dispName:'Date Last Modified'	},
 						Language:		{ dataName:'Language'				,dispName:'Language'			},
 						SiteLogoUrl:	{ dataName:'SiteLogoUrl'			,dispName:'Site Logo URL'		}
-					}
+					},
+					metadata: false
 				})
 				.then(function(arrData){
 					// A: Resolve results (NOTE: empty array is the correct default result)
@@ -2548,7 +2667,8 @@
 			return new Promise(function(resolve, reject) {
 				sprLib.rest({
 					url: _urlBase+'_api/web/roleAssignments',
-					queryCols: ['PrincipalId','Member/PrincipalType','Member/Title','RoleDefinitionBindings/Name','RoleDefinitionBindings/Hidden']
+					queryCols: ['PrincipalId','Member/PrincipalType','Member/Title','RoleDefinitionBindings/Name','RoleDefinitionBindings/Hidden'],
+					metadata: false
 				})
 				.then(function(arrData){
 					// STEP 1: Transform: Results s/b 2 keys with props inside each
@@ -2588,7 +2708,8 @@
 			return new Promise(function(resolve, reject) {
 				sprLib.rest({
 					url: _urlBase+'_api/web/roleDefinitions',
-					queryCols: ['Id','Name','Description','RoleTypeKind','Hidden']
+					queryCols: ['Id','Name','Description','RoleTypeKind','Hidden'],
+					metadata: false
 				})
 				.then(function(arrData){
 					// A: Resolve results (NOTE: empty array is the correct default result)
@@ -2645,7 +2766,8 @@
 							'Member/Users/Id','Member/Users/LoginName','Member/Users/Title'
 						],
 						queryFilter: strFilter,
-						queryLimit: APP_OPTS.maxRows
+						queryLimit: APP_OPTS.maxRows,
+						metadata: false
 					})
 					.then(function(arrGroups){
 						// TODO: in `// A: Filter internal/junk groups` below, we filter and not here
@@ -2683,7 +2805,8 @@
 							'Users/Id','Users/LoginName','Users/Title'
 						],
 						queryFilter: strFilter,
-						queryLimit: APP_OPTS.maxRows
+						queryLimit: APP_OPTS.maxRows,
+						metadata: false
 					})
 					.then(function(arrData){
 						// A: Filter internal/junk groups
@@ -2738,13 +2861,15 @@
 							url: _urlBase+'_api/web/RoleAssignments',
 							queryCols: ['Member/Id','Member/Email','Member/LoginName','Member/Title','Member/IsSiteAdmin'],
 							queryFilter: 'Member/PrincipalType eq 1',
-							queryLimit: APP_OPTS.maxRows
+							queryLimit: APP_OPTS.maxRows,
+							metadata: false
 						}),
 						sprLib.rest({
 							url: _urlBase+'_api/web/RoleAssignments',
 							queryCols: ['Member/Id','Member/Title','Member/Users/Id','Member/Users/Email','Member/Users/LoginName','Member/Users/Title','Member/Users/IsSiteAdmin'],
 							queryFilter: 'Member/PrincipalType eq 8',
-							queryLimit: APP_OPTS.maxRows
+							queryLimit: APP_OPTS.maxRows,
+							metadata: false
 						})
 					])
 					.then(function(arrAllArrays){
@@ -2810,7 +2935,8 @@
 						url: _urlBase+'_api/web/SiteUsers',
 						queryCols: ['Id','Email','LoginName','Title','IsSiteAdmin','Groups/Id','Groups/Title'],
 						queryFilter: 'PrincipalType eq 1',
-						queryLimit: APP_OPTS.maxRows
+						queryLimit: APP_OPTS.maxRows,
+						metadata: false
 					})
 					.then(function(arrData){
 						var arrSiteUsers = [];
@@ -2935,9 +3061,9 @@
 			return new Promise(function(resolve, reject) {
 				sprLib.rest({
 					url    : _urlRest + "$select=Id,Title,Email,LoginName,IsSiteAdmin,PrincipalType",
-					headers: { "Accept":"application/json;odata=verbose" },
 					type   : "GET",
-					cache  : false
+					cache  : false,
+					metadata: false
 				})
 				.then(function(arrData){
 					var objUser = {};
@@ -2971,16 +3097,16 @@
 			return new Promise(function(resolve, reject) {
 				sprLib.rest({
 					url    : _urlRest + "$select=Groups/Id,Groups/Title,Groups/Description,Groups/LoginName,Groups/OwnerTitle&$expand=Groups",
-					headers: { "Accept":"application/json;odata=verbose" },
 					type   : "GET",
-					cache  : false
+					cache  : false,
+					metadata: false
 				})
 				.then(function(arrData){
 					var arrGroups = [];
 
 					// A: Gather groups
-					( arrData && arrData[0] && arrData[0].Groups && arrData[0].Groups.results ? arrData[0].Groups.results : [] )
-					.forEach(function(group,idx){
+					( arrData && arrData[0] && arrData[0].Groups && arrData[0].Groups ? arrData[0].Groups : [] )
+					.forEach(function(group){
 						arrGroups.push({
 							Id: group.Id,
 							Title: group.Title,
@@ -3023,7 +3149,8 @@
 		*     queryCols: ['PictureUrl','AccountName']
 		* })
 		*/
-		// TODO-2.0: BREAKING CHANGE: refactor to return itself and allow queries to prof-props, eg: `sprLib.user().profile().props('PictureUrl')`
+		// TODO-2.0: BREAKING CHANGE: refactor to return itself and allow queries to profile-props, eg: `sprLib.user().profile().props('PictureUrl')`
+		// OR perhaps: profile('PictureUrl'), as it mimics what we already do for user() - default to all, or use key(s) provided
 		_newUser.profile = function(arrProfileKeys) {
 			return new Promise(function(resolve, reject) {
 				var arrQueryKeys = (Array.isArray(arrProfileKeys) ? arrProfileKeys : (typeof arrProfileKeys === 'string' ? [arrProfileKeys] : null));
@@ -3079,26 +3206,26 @@
 				.then(function(arrProfileProps){
 					var objProfile = {};
 
-					// A: Cases where this fails (bad user, maybe no license?) REST returns `{'GetPropertiesFor':null}`
-					if ( arrProfileProps && arrProfileProps[0] && arrProfileProps[0].hasOwnProperty('GetPropertiesFor') ) resolve( {} );
+					// A: Handle lack of results
+					if ( !arrProfileProps || !Array.isArray(arrProfileProps) || arrProfileProps.length == 0 ) resolve( {} );
 
 					// B: Capture all cols or just the ones specified
-					if ( arrProfileProps && arrProfileProps[0] && arrQueryKeys && arrQueryKeys.length == 1 && arrProfileProps[0].hasOwnProperty('GetUserProfilePropertyFor') ) {
-						// NOTE: When using `GetUserProfilePropertyFor` result is: `{GetUserProfilePropertyFor: "Brent Ely"}` (key val being the result)
-						objProfile[arrQueryKeys[0]] = arrProfileProps[0].GetUserProfilePropertyFor || '`'+arrQueryKeys[0]+'` property does not exist in SP.UserProfiles.PeopleManager.UserProfileProperties';
+					if ( arrQueryKeys && arrQueryKeys.length == 1 && arrProfileProps[0].value ) {
+						// When querying a single propertyName (as of Jan-2019, only 1 can be queried individually - more than 1, we pull all and filter in code)
+						// Desc: `sprLib.rest()` doesnt have a "$select" or queryCols, so it returns:
+						// Result: [nometa]: {value:"whatever"}
+						objProfile[arrQueryKeys[0]] = ( arrProfileProps[0].value || '`'+arrQueryKeys[0]+'` property does not exist in SP.UserProfiles.PeopleManager.UserProfileProperties' );
 					}
-					else if ( arrProfileProps[0] && Array.isArray(arrQueryKeys) && arrQueryKeys.length > 0 ) {
+					else if ( arrQueryKeys && arrQueryKeys.length > 1 ) {
 						arrQueryKeys.forEach(function(key){
+							var objProp = arrProfileProps.filter(function(prop){ return prop.Key == key })[0];
+
+							// TODO: Issue open for vvv
+							// https://github.com/gitbrent/SpRestLib/issues/40
 							// NOTE: `arrProfileProps` has top-level props ('AccountName','Email',etc.) and a `UserProfiles` array of additional props - so, we need to search both
-							if ( arrProfileProps[0][key] ) {
-								objProfile[key] = arrProfileProps[0][key];
-							}
-							else if (
-								arrProfileProps[0].UserProfileProperties && arrProfileProps[0].UserProfileProperties.results
-								&& arrProfileProps[0].UserProfileProperties.results.filter(function(prop){ return prop.Key == key}).length > 0
-							)
-							{
-								objProfile[key] = arrProfileProps[0].UserProfileProperties.results.filter(function(prop){ return prop.Key == key})[0].Value;
+
+							if ( objProp && objProp.Value ) {
+								objProfile[key] = objProp.Value;
 							}
 							else {
 								objProfile[key] = '`'+key+'` property does not exist in SP.UserProfiles.PeopleManager or SP.UserProfiles.PeopleManager.UserProfileProperties';
@@ -3112,6 +3239,7 @@
 						if (APP_OPTS.debug) console.log('??? `arrProfileProps[0]` does not exist!');
 					}
 
+					/* FYI: `verbose` mode requires this clean-up, `nometadata` returns elevated/clean array as lookup results!
 					// C: Clean data
 					Object.keys(objProfile).forEach(function(key){
 						// B.A: Remove `__metadata` and `ValueType` from each property
@@ -3124,9 +3252,11 @@
 						// B.C: Elevate `results` to the prop value. EX: `Peers:{__metadata:{...}, results:[]}`` -> `Peers:[]`
 						if ( objProfile[key] && objProfile[key].results ) { objProfile[key] = objProfile[key].results; }
 					});
+					*/
 
-					// D: Reduce `UserProfileProperties` array of objects to prop name/value
-					// EX: [{"__metadata":{"type":"SP.KeyValue"},"Key":"UserProfile_GUID","Value":"712d9300-5d61-456b-95d1-123d29e5e0bc","ValueType":"Edm.String"},...]
+					// D: Reduce `UserProfileProperties` array of object key/val pairs, to simply {`$Key`:`$Value`} - no dereferecing needed
+					// EX: [verbose/metadata]: [{"__metadata":{"type":"SP.KeyValue"},"Key":"UserProfile_GUID","Value":"712d9300-5d61-456b-95d1-123d29e5e0bc","ValueType":"Edm.String"},...]
+					// EX: [odata/nometadata]: `{ Key:"FirstName", Value:"Brent", ValueType:"Edm.String" }`
 					if ( objProfile.UserProfileProperties ) {
 						var objProfileProps = {};
 						objProfile.UserProfileProperties.forEach(function(obj){ objProfileProps[obj.Key] = obj.Value; });
