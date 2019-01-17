@@ -2109,6 +2109,10 @@ QUnit.module( "USER - Methods", function(){
 				"`prof3.FirstName` exists? "+ `${prof3.FirstName.toLowerCase().indexOf('property does not exist')}`
 			);
 			assert.ok( prof3.PersonalSpace, "`prof3.PersonalSpace` ? "+ `${prof3.PersonalSpace}` );
+			assert.ok(
+				prof3.PersonalSpace.toLowerCase().indexOf('property does not exist') == -1,
+				"`prof3.PersonalSpace` exists? "+ `${prof3.PersonalSpace.toLowerCase().indexOf('property does not exist')}`
+			);
 			assert.ok( Object.keys(prof3).length == 2, "Pass: Object.keys(prof3).length == 2: "+ Object.keys(prof3).length );
 			assert.ok( getAsciiTableStr(prof3), `RESULTS:\n${getAsciiTableStr(prof3)}` );
 
