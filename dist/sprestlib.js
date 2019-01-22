@@ -35,7 +35,7 @@
 (function(){
 	// APP VERSION/BUILD
 	var APP_VER = "1.10.0-beta";
-	var APP_BLD = "20190116";
+	var APP_BLD = "20190121";
 	// ENUMERATIONS
 	// REF: [`SP.BaseType`](https://msdn.microsoft.com/en-us/library/office/jj246925.aspx)
 	var ENUM_BASETYPES = {
@@ -247,20 +247,18 @@
 		* @since 1.10.0
 		*/
 
+		/*
 		_appAuth.digest = function(inOpt) {
 			if ( !inOpt ) return _pageDigest;
-
-//			var _requestDigest = ( (inOpt && inOpt.requestDigest) || (typeof document !== 'undefined' && document.getElementById('__REQUESTDIGEST') ? document.getElementById('__REQUESTDIGEST').value : null));
-
-			// TODO: how to do this??
-//			if ( !inOpt ) return _pageDigest;
-
-			_appAuth.requestDigest.renew = function renew() {
+			var _requestDigest = ( (inOpt && inOpt.requestDigest) || (typeof document !== 'undefined' && document.getElementById('__REQUESTDIGEST') ? document.getElementById('__REQUESTDIGEST').value : null));
+		}
+		// doesnt work
+		_appAuth.digest.prototype = {
+			renew: function(){
 				return doRenewDigestToken();
 			}
-
-			//return _appAuth.requestDigest;
 		}
+		*/
 
 		// TODO: option to set `bearer` Graph token
 
