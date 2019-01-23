@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Updated JSON result parsing to handle more cases/styles (nometadata, verbose, MS Graph) ([gitbrent](https://github.com/gitbrent))
 - Updated construction of REST `headers` to make it more robust ([gitbrent](https://github.com/gitbrent))
 - Updated Promise reject error message: Returned string now includes SharePoint `error.code` and no longer shows the "URL used:" string; Updated parsing code to be more robust; Now includes support for parsing Microsoft Graph REST API call errors. ([gitbrent](https://github.com/gitbrent))
+- Updated `APP_OPTS.baseUrl` to use `_spPageContextInfo.siteServerRelativeUrl` [\#46](https://github.com/gitbrent/sprestlib/issues/46) ([DavidPratten](https://github.com/DavidPratten))
 
 
 ## [1.9.0] - 2018-12-12
