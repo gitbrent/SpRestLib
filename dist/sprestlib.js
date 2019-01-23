@@ -35,7 +35,7 @@
 (function(){
 	// APP VERSION/BUILD
 	var APP_VER = "1.10.0-beta";
-	var APP_BLD = "20190121";
+	var APP_BLD = "20190122";
 	// ENUMERATIONS
 	// REF: [`SP.BaseType`](https://msdn.microsoft.com/en-us/library/office/jj246925.aspx)
 	var ENUM_BASETYPES = {
@@ -65,7 +65,7 @@
 	};
 	// APP OPTIONS
 	var APP_OPTS = {
-		baseUrl:          '..',
+		baseUrl:          ( typeof _spPageContextInfo !== 'undefined' && _spPageContextInfo.siteServerRelativeUrl ? _spPageContextInfo.siteServerRelativeUrl : '..' ),
 		busySpinnerHtml:  '<div class="sprlib-spinner"><div class="sprlib-bounce1"></div><div class="sprlib-bounce2"></div><div class="sprlib-bounce3"></div></div>',
 		cache:            false,
 		cleanColHtml:     true,
