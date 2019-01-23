@@ -267,11 +267,9 @@
 	}
 
 	// API: UTILITY: Token
-	// TODO-2.0: will become DEPRECATED: move under a new parent: `sprLib.auth().token().renew()`
+	// TODO-2.0: will become DEPRECATED: move under a new parent: ~`sprLib.auth().token().renew()`
 	sprLib.renewSecurityToken = function renewSecurityToken() {
-		//return doRenewDigestToken();
-		// TODO: TEST!!
-		sprLib.auth().requestDigest().renew();
+		return doRenewDigestToken();
 	}
 
 	// API: OPTIONS
