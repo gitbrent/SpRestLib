@@ -65,7 +65,7 @@
 	};
 	// APP OPTIONS
 	var APP_OPTS = {
-		baseUrl:          ( typeof _spPageContextInfo !== 'undefined' && _spPageContextInfo.siteServerRelativeUrl ? _spPageContextInfo.siteServerRelativeUrl : '..' ),
+		baseUrl:          ( typeof _spPageContextInfo !== 'undefined' && _spPageContextInfo.webServerRelativeUrl ? _spPageContextInfo.webServerRelativeUrl : '..' ),
 		busySpinnerHtml:  '<div class="sprlib-spinner"><div class="sprlib-bounce1"></div><div class="sprlib-bounce2"></div><div class="sprlib-bounce3"></div></div>',
 		cache:            false,
 		cleanColHtml:     true,
@@ -2717,17 +2717,78 @@
 			});
 		}
 
+		// TODO: Group manipulation
+		/**
+		* @see: https://msdn.microsoft.com/en-us/library/office/dn531432.aspx#bk_Group
+		* @since 1.10.0
+		*/
+		_newSite.group = function(inOpt) {
+			// STEP 1: Options check
+			if ( inOpt && Object.keys(inOpt).length > 0 && !inOpt.hasOwnProperty('id') ) {
+				console.warn('Warning..: Check your options! Available `site().group()` options are: `id`');
+				console.warn('Result...: Invalid group option: `null` will be returned');
+				// NOTE: Treat junk filter as null (return all Groups)
+				return null;
+			}
+
+			/**
+			* @see: https://msdn.microsoft.com/en-us/library/office/dn531432.aspx#bk_UserCollectionRequestExamples
+			* @since 1.10.0
+			*/
+			_newSite.group.add = function(inOpt) {
+				return new Promise(function(resolve, reject) {
+					/*
+						method: "POST",
+					    body: "{ '__metadata': { 'type': 'SP.User' }, 'LoginName':'i:0#.w|domain\\user' }",
+					    headers: {
+					      "accept": "application/json; odata=verbose",
+					      "content-type": "application/json; odata=verbose"
+					    },
+					*/
+
+					sprLib.rest({
+						url: _urlBase+'_api/web/SiteGroups('+inOpt.id+')/users',
+						type: 'POST',
+						data: "{ '__metadata':{'type':'SP.User'}, 'LoginName':"+ inOpt.loginName +"}",
+						metadata: true
+					})
+					.then(function(objResult){
+						// TODO:
+						console.log(objResult);
+
+						// Resolve results (NOTE: empty array is the correct default result)
+						resolve( arrData || [] );
+					})
+					.catch(function(strErr){
+						reject( strErr );
+					});
+				});
+			}
+
+			// TODO: group().desc('new desc')
+			/*
+				method: "POST",
+			    body: "{ '__metadata':{ 'type': 'SP.Group' }, 'Description':'New description of the group' }",
+			    headers: {
+			      "content-type": "application/json; odata=verbose",
+			      "X-HTTP-Method": "MERGE"
+			    },
+			*/
+
+			return _newSite.group;
+		}
+
 		/**
 		* Get all Groups under the SiteCollection or the Groups under a given Subsite
 		*
 		* @example
-		* //.----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------.
-		* //| Id |             Description            |         Title          |    OwnerTitle     |  PrincipalType   | AllowMembersEditMembership |                     Users                                         |
-		* //|----|------------------------------------|------------------------|-------------------|------------------|----------------------------|-------------------------------------------------------------------|
-		* //|  8 | contribute permissions: Dev Site   | Dev Site Members       | Dev Site Owners   | SharePoint Group | true                       | []                                                                |
-		* //|  6 | full control permissions: Dev Site | Dev Site Owners        | Dev Site Owners   | SharePoint Group | false                      | [{"Id":99,"LoginName":"brent@microsoft.com","Title":"Brent Ely"}] |
-		* //|  7 | read permissions: Dev Site         | Dev Site Visitors      | Dev Site Owners   | SharePoint Group | false                      | []                                                                |
-		* //.----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------.
+		* .----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------.
+		* | Id |             Description            |         Title          |    OwnerTitle     |  PrincipalType   | AllowMembersEditMembership |                     Users                                         |
+		* |----|------------------------------------|------------------------|-------------------|------------------|----------------------------|-------------------------------------------------------------------|
+		* |  8 | contribute permissions: Dev Site   | Dev Site Members       | Dev Site Owners   | SharePoint Group | true                       | []                                                                |
+		* |  6 | full control permissions: Dev Site | Dev Site Owners        | Dev Site Owners   | SharePoint Group | false                      | [{"Id":99,"LoginName":"brent@microsoft.com","Title":"Brent Ely"}] |
+		* |  7 | read permissions: Dev Site         | Dev Site Visitors      | Dev Site Owners   | SharePoint Group | false                      | []                                                                |
+		* .----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------.
 		*
 		* @return {Promise} - return `Promise` containing Groups
 		*/
