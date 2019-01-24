@@ -32,10 +32,14 @@
 * refactor to enable use of strict mode
 */
 
+/**
+* SpRestLib
+* @see: [SP REST API Index](https://docs.microsoft.com/en-us/sharepoint/dev/sp-add-ins/sharepoint-net-server-csom-jsom-and-rest-api-index)
+*/
 (function(){
 	// APP VERSION/BUILD
 	var APP_VER = "1.10.0-beta";
-	var APP_BLD = "20190122";
+	var APP_BLD = "20190123";
 	// ENUMERATIONS
 	// REF: [`SP.BaseType`](https://msdn.microsoft.com/en-us/library/office/jj246925.aspx)
 	var ENUM_BASETYPES = {
@@ -2717,8 +2721,10 @@
 			});
 		}
 
-		// TODO: Group manipulation
 		/**
+		* Group Manipulation: Add, Delete, etc.
+		*
+		* @see: https://msdn.microsoft.com/en-us/library/dn531432.aspx?f=255&MSPPError=-2147217396#bk_GroupCollection
 		* @see: https://msdn.microsoft.com/en-us/library/office/dn531432.aspx#bk_Group
 		* @since 1.10.0
 		*/
@@ -2732,32 +2738,127 @@
 			}
 
 			/**
+			* Add new SP.User to UserCollection Group
+			*
 			* @see: https://msdn.microsoft.com/en-us/library/office/dn531432.aspx#bk_UserCollectionRequestExamples
 			* @since 1.10.0
+			* @example: `sprLib.site().group({ id:18 }).add({ id:9 })`
+			* @returns: sprestlib user object `{ id:?, email:?, login:?, title:? }`
 			*/
-			_newSite.group.add = function(inOpt) {
+			_newSite.group.add = function(inOptSub) {
 				return new Promise(function(resolve, reject) {
-					/*
-						method: "POST",
-					    body: "{ '__metadata': { 'type': 'SP.User' }, 'LoginName':'i:0#.w|domain\\user' }",
-					    headers: {
-					      "accept": "application/json; odata=verbose",
-					      "content-type": "application/json; odata=verbose"
-					    },
-					*/
+					// A: Check params (allow the same fields that can be passed to `sprLib.user()` in order to get LoginName)
+					if ( !inOptSub ) {
+						console.warn('Missing option. Usage: `site().group(99).add({ login:"i:0#.f|membership|brent@microsoft.com" })`');
+						reject( 'MISSING-OPTION' );
+						return;
+					}
+					else if ( inOptSub && Object.keys(inOptSub).length > 0
+						&& !inOptSub.hasOwnProperty('id') && !inOptSub.hasOwnProperty('email')
+						&& !inOptSub.hasOwnProperty('login') && !inOptSub.hasOwnProperty('title')
+					) {
+						console.warn('Warning: Unknown option(s) passed. Available `site().group().add()` options are: `id`,`email`,`login`,`title`');
+						reject( 'INVALID-OPTION' );
+						return;
+					}
 
-					sprLib.rest({
-						url: _urlBase+'_api/web/SiteGroups('+inOpt.id+')/users',
-						type: 'POST',
-						data: "{ '__metadata':{'type':'SP.User'}, 'LoginName':"+ inOpt.loginName +"}",
-						metadata: true
+					// B: Add new user to group
+					// NOTE: Only `LoginName` is accepted ("[-2146232832] The parameter loginName cannot be empty or bigger than 251 characters.")
+					Promise.resolve()
+					.then(function(){
+						// Per MSDN, the only way to select props is using `AccountName`, so query if not provided
+						// Get LoginName when something was passed (as opposed to `null`), but not the LoginName
+						if ( inOptSub && !inOptSub.login ) return sprLib.user(inOptSub).info();
 					})
-					.then(function(objResult){
-						// TODO:
-						console.log(objResult);
+					.then(function(objUser){
+						// A: Use LoginName if it was just queried
+						// NOTE: DO NOT encode! POSTed JSON is only accepted by SP unencoded
+						if ( objUser ) inOptSub.login = objUser.LoginName;
 
-						// Resolve results (NOTE: empty array is the correct default result)
-						resolve( arrData || [] );
+						// B: Add user
+						return sprLib.rest({
+							url: _urlBase+'_api/web/SiteGroups('+inOpt.id+')/users',
+							type: 'POST',
+							data: "{ '__metadata':{'type':'SP.User'}, 'LoginName':'"+ inOptSub.login +"' }",
+							metadata: true
+						});
+					})
+					.then(function(arrResults){
+						var objUser = {};
+
+						if ( arrResults && arrResults[0] ) {
+							objUser.id    = arrResults[0].Id || -1;
+							objUser.email = arrResults[0].Email || '';
+							objUser.login = arrResults[0].LoginName || '';
+							objUser.title = arrResults[0].Title || '';
+						}
+
+						// DESIGN: Result is SpRestLib User object
+						resolve( objUser );
+					})
+					.catch(function(strErr){
+						reject( strErr );
+					});
+				});
+			}
+
+			/**
+			* @see: https://msdn.microsoft.com/en-us/library/dn531432.aspx#bk_UserCollectionRemoveById
+			*/
+			_newSite.group.remove = function(inOptSub) {
+				return new Promise(function(resolve, reject) {
+					// A: Check params (allow the same fields that can be passed to `sprLib.user()` in order to get LoginName)
+					if ( !inOptSub ) {
+						console.warn('Missing option. Usage: `site().group(99).remove({ id:99 })`');
+						reject( 'MISSING-OPTION' );
+						return;
+					}
+					else if ( inOptSub && Object.keys(inOptSub).length > 0
+						&& !inOptSub.hasOwnProperty('id') && !inOptSub.hasOwnProperty('email')
+						&& !inOptSub.hasOwnProperty('login') && !inOptSub.hasOwnProperty('title')
+					) {
+						console.warn('Warning: Unknown option(s) passed. Available `site().group().remove()` options are: `id`,`email`,`login`,`title`');
+						reject( 'INVALID-OPTION' );
+						return;
+					}
+
+					// B: Add new user to group
+					// NOTE: Only `LoginName` is accepted ("[-2146232832] The parameter loginName cannot be empty or bigger than 251 characters.")
+					Promise.resolve()
+					.then(function(){
+						// Per MSDN, the only way to select props is using `AccountName`, so query if not provided
+						// Get LoginName when something was passed (as opposed to `null`), but not the LoginName
+						if ( inOptSub && !inOptSub.id && !inOptSub.login ) return sprLib.user(inOptSub).info();
+					})
+					.then(function(objUser){
+						// A: Use Id/LoginName if just queried
+						// NOTE: DO NOT encode! POSTed JSON is only accepted by SP unencoded
+						if ( objUser ) {
+							inOptSub.id    = objUser.Id;
+							inOptSub.login = encodeURIComponent(objUser.LoginName);
+						}
+
+						// B: Remove user
+						if ( inOptSub.id ) {
+							return sprLib.rest({
+								url: _urlBase+'_api/web/SiteGroups('+inOpt.id+')/users/removebyid('+inOptSub.id+')',
+								type: 'POST',
+								metadata: true
+							});
+						}
+						else if ( inOptSub.login ) {
+							return sprLib.rest({
+								url: _urlBase+"_api/web/SiteGroups("+inOpt.id+")/users/removebyloginname(@v)?@v='"+inOptSub.login+"'",
+								type: 'POST',
+								metadata: true
+							});
+						}
+					})
+					.then(function(objUser){
+						// SharePoint POST result: `{RemoveById:null}`
+
+						// DESIGN: Result is boolean
+						resolve( true );
 					})
 					.catch(function(strErr){
 						reject( strErr );
