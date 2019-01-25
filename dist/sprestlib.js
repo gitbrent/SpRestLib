@@ -39,7 +39,7 @@
 (function(){
 	// APP VERSION/BUILD
 	var APP_VER = "1.10.0-beta";
-	var APP_BLD = "20190123";
+	var APP_BLD = "20190124";
 	// ENUMERATIONS
 	// REF: [`SP.BaseType`](https://msdn.microsoft.com/en-us/library/office/jj246925.aspx)
 	var ENUM_BASETYPES = {
@@ -1225,6 +1225,9 @@
 			// https://msdn.microsoft.com/en-us/library/microsoft.sharepoint.client.fieldtype.aspx
 			// https://msdn.microsoft.com/en-us/library/office/jj245826.aspx#properties
 			return new Promise(function(resolve, reject) {
+				// Filter: Some internal-only fields like the additional 'Title' [link] fields, etc.
+				var arrFilterCols = ['LinkTitleNoMenu', 'LinkTitle', 'ItemChildCount', 'FolderChildCount', 'AppAuthor', 'AppEditor', 'ComplianceAssetId'];
+
 				sprLib.rest({
 					url: _urlBase+"?$select=Fields&$expand=Fields",
 					queryLimit: 5000,
@@ -1235,24 +1238,28 @@
 
 					// STEP 1: Gather fields
 					( arrData && arrData[0] && arrData[0].Fields ? arrData[0].Fields : [] )
-					.forEach(function(result,i){
-						// Filter: No Edit/Icon or internal cols (eg: '_ComplianceFlags')
-						if ( !result.Hidden && result.InternalName != 'Edit' && result.InternalName != 'DocIcon' && result.InternalName.indexOf('_') != 0 ) {
-							arrColumns.push({
-								dispName:     result.Title,
-								dataName:     result.InternalName,
-								dataType:     result.TypeAsString,
-								isAppend:     ( result.AppendOnly || false ),
-								isNumPct:     ( result.SchemaXml.toLowerCase().indexOf('percentage="true"') > -1 ),
-								isReadOnly:   result.ReadOnlyField,
-								isRequired:   result.Required,
-								isUnique:     result.EnforceUniqueValues,
-								defaultValue: ( result.DefaultValue || null ),
-								maxLength:    ( result.MaxLength || null ),
-								choiceValues: ( result.Choices && result.Choices.results ? result.Choices.results : (result.Choices ? result.Choices : null) ),
-								allowFillInChoices: ( result.FillInChoice == true || result.FillInChoice == false ? result.FillInChoice : null )
-							});
-						}
+					.filter(function(result){
+						return (
+							// Filter: No Edit/Icon or internal cols (eg: '_ComplianceFlags')
+							!result.Hidden && result.InternalName != 'Edit' && result.InternalName != 'DocIcon' && result.InternalName.indexOf('_') != 0
+							&& arrFilterCols.indexOf(result.InternalName) == -1
+						);
+					})
+					.forEach(function(result){
+						arrColumns.push({
+							dispName:     result.Title,
+							dataName:     result.InternalName,
+							dataType:     result.TypeAsString,
+							isAppend:     ( result.AppendOnly || false ),
+							isNumPct:     ( result.SchemaXml.toLowerCase().indexOf('percentage="true"') > -1 ),
+							isReadOnly:   result.ReadOnlyField,
+							isRequired:   result.Required,
+							isUnique:     result.EnforceUniqueValues,
+							defaultValue: ( result.DefaultValue || null ),
+							maxLength:    ( result.MaxLength || null ),
+							choiceValues: ( result.Choices && result.Choices.results ? result.Choices.results : (result.Choices ? result.Choices : null) ),
+							allowFillInChoices: ( result.FillInChoice == true || result.FillInChoice == false ? result.FillInChoice : null )
+						});
 					});
 
 					// STEP 2: Resolve Promise
