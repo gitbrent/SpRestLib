@@ -39,7 +39,7 @@
 (function(){
 	// APP VERSION/BUILD
 	var APP_VER = "1.10.0-beta";
-	var APP_BLD = "20190124";
+	var APP_BLD = "20190127";
 	// ENUMERATIONS
 	// REF: [`SP.BaseType`](https://msdn.microsoft.com/en-us/library/office/jj246925.aspx)
 	var ENUM_BASETYPES = {
@@ -2530,205 +2530,6 @@
 		var _urlBase = (inUrl ? (inUrl+'/').replace(/\/+$/g,'/') : ''); // Guarantee that baseUrl will end with a forward slash
 
 		/**
-		* Get Site information:
-		* Keys: (AssociatedMemberGroup, AssociatedOwnerGroup, AssociatedVisitorGroup, Created, Description, Id, Language, LastItemModifiedDate, LastItemUserModifiedDate, Owner, RequestAccessEmail, SiteLogoUrl, Title, Url, WebTemplate)
-		*
-		* @example - no args - omitting arguments means "current site"
-		* sprLib.site().info().then( objSite => console.table([objSite]) );
-		*
-		* @example - get site by ID
-		* sprLib.site({ id:'12345-abcd-12345' }).info().then(objSite => console.table([objSite]));
-		*
-		* @return {Promise} - return `Promise` containing Site info object
-		*/
-		_newSite.info = function() {
-			return new Promise(function(resolve, reject) {
-				Promise.all([
-					sprLib.rest({
-						url: _urlBase+'_api/web',
-						queryCols: ['Id','Title','Description','Language','Created',
-							'LastItemModifiedDate','LastItemUserModifiedDate','RequestAccessEmail','SiteLogoUrl','Url','WebTemplate',
-							'AssociatedOwnerGroup/Id',        'AssociatedMemberGroup/Id',        'AssociatedVisitorGroup/Id',
-							'AssociatedOwnerGroup/OwnerTitle','AssociatedMemberGroup/OwnerTitle','AssociatedVisitorGroup/OwnerTitle',
-							'AssociatedOwnerGroup/Title',     'AssociatedMemberGroup/Title',     'AssociatedVisitorGroup/Title'
-						],
-						cache: false,
-						metadata: false
-					}),
-					sprLib.rest({
-						url: _urlBase+'_api/site',
-						queryCols: ['Owner/Email','Owner/LoginName','Owner/Title','Owner/IsSiteAdmin'],
-						cache: false,
-						metadata: false
-					})
-				])
-				.then(function(arrAllArrays){
-					// A: Combine results into one object
-					var objSite = arrAllArrays[0][0];
-					objSite.Owner = arrAllArrays[1][0].Owner;
-
-					// B: Remove junky metadata
-					delete objSite.Owner.__metadata;
-					delete objSite.AssociatedMemberGroup.__metadata;
-					delete objSite.AssociatedOwnerGroup.__metadata;
-					delete objSite.AssociatedVisitorGroup.__metadata;
-
-					// C: Remove columns that may not be present
-					// `LastItemUserModifiedDate` exists in SP2016/SharePoint-Online, but not in SP2013 on-prem
-					if ( objSite.hasOwnProperty('LastItemUserModifiedDate') && !objSite.LastItemUserModifiedDate ) delete objSite.LastItemUserModifiedDate;
-
-					// D: Resolve results (NOTE: if site was not found, an empty object is the correct result)
-					resolve( objSite );
-				})
-				.catch(function(strErr){
-					reject( strErr );
-				});
-			});
-		}
-
-		/**
-		* Get Site Lists/Libraries (name and about 12 other fields)
-		*
-		* @example
-		* sprLib.site().lists().then( function(arr){ console.table(arr) } );
-		*
-		* @return {Promise} - Return `Promise` containing Site Lists/Libraries
-		*/
-		_newSite.lists = function() {
-			return new Promise(function(resolve, reject) {
-				sprLib.rest({
-					url: _urlBase+'_api/web/lists',
-					queryCols: [
-						'Id','Title','Description','ItemCount','BaseType','BaseTemplate','Hidden','ImageUrl','ParentWebUrl','RootFolder/ServerRelativeUrl'
-					],
-					metadata: false
-				})
-				.then(function(arrData){
-					// A: Modify some values
-					arrData.forEach(function(item,idx){
-						// A: Flatten/Elevate `ServerRelativeUrl` value
-						item.ServerRelativeUrl = (item.RootFolder && item.RootFolder.ServerRelativeUrl ? item.RootFolder.ServerRelativeUrl : null);
-						if ( item.RootFolder ) delete item.RootFolder;
-
-						// B: Decode type
-						item.BaseType = ENUM_BASETYPES[item.BaseType] || item.BaseType;
-					});
-
-					// B: Resolve results (NOTE: empty array is the correct default result)
-					resolve( arrData || [] );
-				})
-				.catch(function(strErr){
-					reject( strErr );
-				});
-			});
-		}
-
-		/**
-		* Get Subsites
-		*
-		* @return {Promise} - return `Promise` containing Subsites
-		*/
-		_newSite.subsites = function() {
-			return new Promise(function(resolve, reject) {
-				sprLib.rest({
-					url: _urlBase+'_api/web/webs',
-					queryCols: {
-						Id:				{ dataName:'Id'						,dispName:'Id'					},
-						Name:			{ dataName:'Title'					,dispName:'Subsite Name'		},
-						UrlAbs:			{ dataName:'Url'					,dispName:'Absolute URL'		},
-						UrlRel:			{ dataName:'ServerRelativeUrl'      ,dispName:'Relative URL'		},
-						Created:		{ dataName:'Created'				,dispName:'Date Created'		},
-						Modified:		{ dataName:'LastItemModifiedDate'	,dispName:'Date Last Modified'	},
-						Language:		{ dataName:'Language'				,dispName:'Language'			},
-						SiteLogoUrl:	{ dataName:'SiteLogoUrl'			,dispName:'Site Logo URL'		}
-					},
-					metadata: false
-				})
-				.then(function(arrData){
-					// A: Resolve results (NOTE: empty array is the correct default result)
-					resolve( arrData || [] );
-				})
-				.catch(function(strErr){
-					reject( strErr );
-				});
-			});
-		}
-
-		/**
-		* Get Site base permissions
-		* Returns array of objects with `Member` and `Roles` properties
-		*
-		* @example - sprLib.site().perms().then( arr => console.table(arr) );
-		* //.--------------------------------------------------------------------------------------------------------------------------------------------------.
-		* //|                                    Member                                    |                               Roles                               |
-		* //|------------------------------------------------------------------------------|-------------------------------------------------------------------|
-		* //| {"Title":"Brent Ely",   "PrincipalType":"User",            "PrincipalId":9}  | [{"Hidden":false,"Name":"Design"},{"Hidden":false,"Name":"Edit"}] |
-		* //| {"Title":"Dev Owners",  "PrincipalType":"SharePoint Group","PrincipalId":14} | [{"Hidden":false,"Name":"Full Control"}]                          |
-		* //| {"Title":"Dev Members", "PrincipalType":"SharePoint Group","PrincipalId":15} | [{"Hidden":false,"Name":"Edit"}]                                  |
-		* //| {"Title":"Dev Visitors","PrincipalType":"SharePoint Group","PrincipalId":16} | [{"Hidden":false,"Name":"Read"}]                                  |
-		* //'--------------------------------------------------------------------------------------------------------------------------------------------------'
-		*
-		* @return {Promise} - return `Promise` containing Site Permission object { Member:{}, Roles:[] }
-		*/
-		_newSite.perms = function() {
-			return new Promise(function(resolve, reject) {
-				sprLib.rest({
-					url: _urlBase+'_api/web/roleAssignments',
-					queryCols: ['PrincipalId','Member/PrincipalType','Member/Title','RoleDefinitionBindings/Name','RoleDefinitionBindings/Hidden'],
-					metadata: false
-				})
-				.then(function(arrData){
-					// STEP 1: Transform: Results s/b 2 keys with props inside each
-					arrData.forEach(function(objItem,idx){
-						// A: "Rename" the `RoleDefinitionBindings` key to be user-friendly
-						Object.defineProperty(objItem, 'Roles', Object.getOwnPropertyDescriptor(objItem, 'RoleDefinitionBindings'));
-						delete objItem.RoleDefinitionBindings;
-
-						// B: Move `PrincipalId` inside {Member}
-						objItem.Member.PrincipalId = objItem.PrincipalId;
-						delete objItem.PrincipalId;
-
-						// C: Decode PrincipalType into text
-						objItem.Member.PrincipalType = ENUM_PRINCIPALTYPES[objItem.Member.PrincipalType] || objItem.Member.PrincipalType;
-					});
-
-					// TODO?: OPTION: "Show Group Members", then do lookups below, otherwise, just show users/group names
-					// TODO?: use PrincipalType to find groups and query for thier users, then the full picture is done!
-					//.then(arrOwnerId => { return sprLib.rest({ url:site.UrlAbs+'/_api/web/SiteGroups/GetById('+ arrOwnerId[0].Id +')/Users', queryCols:['Title','Email'] }) })
-					//.then(arrUsers   => arrUsers.forEach((user,idx) => site.OwnersGroupUsers += ('<div class="itemBox">'+ user.Title +'<span style="display:none">; </span></div>') ))
-
-					// STEP 2: Resolve results (NOTE: empty array is the correct default result)
-					resolve( arrData || [] );
-				})
-				.catch(function(strErr){
-					reject( strErr );
-				});
-			});
-		}
-
-		/**
-		* Get SiteCollection Roles
-		*
-		* @return {Promise} - return `Promise` containing Roles
-		*/
-		_newSite.roles = function() {
-			return new Promise(function(resolve, reject) {
-				sprLib.rest({
-					url: _urlBase+'_api/web/roleDefinitions',
-					queryCols: ['Id','Name','Description','RoleTypeKind','Hidden'],
-					metadata: false
-				})
-				.then(function(arrData){
-					// A: Resolve results (NOTE: empty array is the correct default result)
-					resolve( arrData || [] );
-				})
-				.catch(function(strErr){
-					reject( strErr );
-				});
-			});
-		}
-
-		/**
 		* Group Manipulation: Add, Delete, etc.
 		*
 		* @see: https://msdn.microsoft.com/en-us/library/dn531432.aspx?f=255&MSPPError=-2147217396#bk_GroupCollection
@@ -2736,25 +2537,122 @@
 		* @since 1.10.0
 		*/
 		_newSite.group = function(inOpt) {
-			// STEP 1: Options check
-			if ( inOpt && Object.keys(inOpt).length > 0 && !inOpt.hasOwnProperty('id') ) {
-				console.warn('Warning..: Check your options! Available `site().group()` options are: `id`');
-				console.warn('Result...: Invalid group option: `null` will be returned');
-				// NOTE: Treat junk filter as null (return all Groups)
-				return null;
+			// METHODS: Create/Remove Group
+
+			/**
+			* Create an SP.Group [UserCollection]
+			*
+			* @see: https://msdn.microsoft.com/en-us/library/office/dn531432.aspx#bk_GroupCollectionRequestExamples
+			* @since 1.10.0
+			* @example: `sprLib.site().group().create({ Title:'DevTeam1' })`
+			* @example: `sprLib.site().group().create({ Title:'DevTeam1', Description:'Dev Team One' })`
+			* @returns: The new SP.Group object
+			*/
+			_newSite.group.create = function(inOptSub) {
+				return new Promise(function(resolve, reject) {
+					var objData = inOptSub || {};
+					objData.__metadata = {'type':'SP.Group'};
+
+					// A: Options check
+					if ( !objData || !objData.Title ) {
+						console.warn('`Title` is required. Usage: `site().group().create({ Title:"Dev Users" })`');
+						reject( 'MISSING-OPTION' );
+					}
+
+					// B: Create Group
+				 	// NOTE: https://social.technet.microsoft.com/Forums/lync/en-US/2dcf6e49-cff8-403b-b52e-04d240bef16d/set-group-owner-using-rest-api?forum=sharepointdevelopment
+					// ,,,,: Says we cannot set Owner during create - it's ignored no matter what form its provided, the REST API just does not support that function
+					sprLib.rest({
+						url: _urlBase+'_api/web/SiteGroups',
+						type: 'POST',
+						data: JSON.stringify(objData),
+						metadata: true
+					})
+					.then(function(arrResults){
+						/* SP Returns:
+							AllowMembersEditMembership: null
+							AllowRequestToJoinLeave: null
+							AutoAcceptRequestToJoinLeave: null
+							Description: null
+							Id: 19
+							IsHiddenInUI: null
+							LoginName: "Dev Users"
+							OnlyAllowMembersViewMembership: true
+							Owner: {__deferred:{..}}
+							OwnerTitle: "Brent Ely"
+							PrincipalType: 8
+							RequestToJoinLeaveEmailSetting: null
+							Title: "Dev Users"
+							Users: {__deferred:{..}}
+						*/
+
+						// DESIGN: Result is SpRestLib User object
+						resolve( arrResults && arrResults.length > 0 ? arrResults[0] : {} );
+					})
+					.catch(function(strErr){
+						reject( strErr );
+					});
+				});
 			}
 
 			/**
-			* Add new SP.User to UserCollection Group
+			* Delete an SP.Group [UserCollection]
+			*
+			* @see: https://msdn.microsoft.com/en-us/library/dn531432.aspx#bk_UserCollectionRemoveById
+			* @since 1.10.0
+			* @example: `sprLib.site().group({ id:18 }).delete({ id:9 })`
+			* @returns: sprestlib user object `{ id:?, email:?, login:?, title:? }`
+			*/
+			_newSite.group.delete = function(inOptSub) {
+				return new Promise(function(resolve, reject) {
+					// A: Options check
+					if ( inOpt && Object.keys(inOpt).length > 0 && !inOpt.hasOwnProperty('id') ) {
+						console.warn('Warning..: Check your options! Available `site().group()` options are: `id`');
+						console.warn('Result...: Invalid group option: `null` will be returned');
+						reject('MISSING-OPTION');
+						return;
+					}
+
+					// B: Remove group
+					// NOTE: There is also a `RemoveByLoginName('Dev Team')` REST API method, but it's not utilized for simplicity (only `id` is passed to `group()`)
+					sprLib.rest({
+						url: _urlBase+'_api/web/sitegroups/removebyid('+inOpt.id+')',
+						type: 'POST',
+						metadata: true
+					})
+					.then(function(objGroup){
+						// SharePoint POST result: `{RemoveById:null}`
+
+						// DESIGN: Result is boolean
+						resolve( true );
+					})
+					.catch(function(strErr){
+						reject( strErr );
+					});
+				});
+			}
+
+			// METHODS: Modify Members
+
+			/**
+			* Add a SP.User to a SP.Group [UserCollection]
 			*
 			* @see: https://msdn.microsoft.com/en-us/library/office/dn531432.aspx#bk_UserCollectionRequestExamples
 			* @since 1.10.0
-			* @example: `sprLib.site().group({ id:18 }).add({ id:9 })`
+			* @example: `sprLib.site().group({ id:18 }).addUser({ id:9 })`
 			* @returns: sprestlib user object `{ id:?, email:?, login:?, title:? }`
 			*/
-			_newSite.group.add = function(inOptSub) {
+			_newSite.group.addUser = function(inOptSub) {
 				return new Promise(function(resolve, reject) {
-					// A: Check params (allow the same fields that can be passed to `sprLib.user()` in order to get LoginName)
+					// A: Options check
+					if ( inOpt && Object.keys(inOpt).length > 0 && !inOpt.hasOwnProperty('id') ) {
+						console.warn('Warning..: Check your options! Available `site().group()` options are: `id`');
+						console.warn('Result...: Invalid group option: `null` will be returned');
+						reject('MISSING-OPTION');
+						return;
+					}
+
+					// B: Check params (allow the same fields that can be passed to `sprLib.user()` in order to get LoginName)
 					if ( !inOptSub ) {
 						console.warn('Missing option. Usage: `site().group(99).add({ login:"i:0#.f|membership|brent@microsoft.com" })`');
 						reject( 'MISSING-OPTION' );
@@ -2769,7 +2667,7 @@
 						return;
 					}
 
-					// B: Add new user to group
+					// C: Add new user to group
 					// NOTE: Only `LoginName` is accepted ("[-2146232832] The parameter loginName cannot be empty or bigger than 251 characters.")
 					Promise.resolve()
 					.then(function(){
@@ -2810,11 +2708,24 @@
 			}
 
 			/**
+			* Delete a SP.User from a SP.Group [UserCollection]
+			*
 			* @see: https://msdn.microsoft.com/en-us/library/dn531432.aspx#bk_UserCollectionRemoveById
+			* @since 1.10.0
+			* @example: `sprLib.site().group({ id:18 }).removeUser({ id:9 })`
+			* @returns: sprestlib user object `{ id:?, email:?, login:?, title:? }`
 			*/
-			_newSite.group.remove = function(inOptSub) {
+			_newSite.group.removeUser = function(inOptSub) {
 				return new Promise(function(resolve, reject) {
-					// A: Check params (allow the same fields that can be passed to `sprLib.user()` in order to get LoginName)
+					// A: Options check
+					if ( inOpt && Object.keys(inOpt).length > 0 && !inOpt.hasOwnProperty('id') ) {
+						console.warn('Warning..: Check your options! Available `site().group()` options are: `id`');
+						console.warn('Result...: Invalid group option: `null` will be returned');
+						reject('MISSING-OPTION');
+						return;
+					}
+
+					// B: Check params (allow the same fields that can be passed to `sprLib.user()` in order to get LoginName)
 					if ( !inOptSub ) {
 						console.warn('Missing option. Usage: `site().group(99).remove({ id:99 })`');
 						reject( 'MISSING-OPTION' );
@@ -2829,8 +2740,7 @@
 						return;
 					}
 
-					// B: Add new user to group
-					// NOTE: Only `LoginName` is accepted ("[-2146232832] The parameter loginName cannot be empty or bigger than 251 characters.")
+					// C: Remove user
 					Promise.resolve()
 					.then(function(){
 						// Per MSDN, the only way to select props is using `AccountName`, so query if not provided
@@ -2873,15 +2783,29 @@
 				});
 			}
 
-			// TODO: group().desc('new desc')
-			/*
+			// FUTURE FEATURES:
+			{
+				// TODO: Owner changes
+				/*
+				return sprLib.rest({
+					url: _urlBase+'_api/web/SiteGroups('+inOpt.id+')/owner',
+					type: 'POST',
+					//data: "{ '__metadata':{'type':'SP.User'}, 'LoginName':'"+ inOptSub.login +"' }",
+					data: "{ '__metadata':{'type':'SP.User'}, 'Id':'"+ "9" +"' }",
+					metadata: true
+				});
+				*/
+
+				// FUTURE: group().prop({ desc:'new desc' })
+				/*
 				method: "POST",
-			    body: "{ '__metadata':{ 'type': 'SP.Group' }, 'Description':'New description of the group' }",
-			    headers: {
-			      "content-type": "application/json; odata=verbose",
-			      "X-HTTP-Method": "MERGE"
-			    },
-			*/
+				body: "{ '__metadata':{ 'type': 'SP.Group' }, 'Description':'New description of the group' }",
+				headers: {
+					"content-type": "application/json; odata=verbose",
+					"X-HTTP-Method": "MERGE"
+				},
+				*/
+			}
 
 			return _newSite.group;
 		}
@@ -2989,6 +2913,205 @@
 						reject( strErr );
 					});
 				}
+			});
+		}
+
+		/**
+		* Get Site information:
+		* Keys: (AssociatedMemberGroup, AssociatedOwnerGroup, AssociatedVisitorGroup, Created, Description, Id, Language, LastItemModifiedDate, LastItemUserModifiedDate, Owner, RequestAccessEmail, SiteLogoUrl, Title, Url, WebTemplate)
+		*
+		* @example - no args - omitting arguments means "current site"
+		* sprLib.site().info().then( objSite => console.table([objSite]) );
+		*
+		* @example - get site by ID
+		* sprLib.site({ id:'12345-abcd-12345' }).info().then(objSite => console.table([objSite]));
+		*
+		* @return {Promise} - return `Promise` containing Site info object
+		*/
+		_newSite.info = function() {
+			return new Promise(function(resolve, reject) {
+				Promise.all([
+					sprLib.rest({
+						url: _urlBase+'_api/web',
+						queryCols: ['Id','Title','Description','Language','Created',
+							'LastItemModifiedDate','LastItemUserModifiedDate','RequestAccessEmail','SiteLogoUrl','Url','WebTemplate',
+							'AssociatedOwnerGroup/Id',        'AssociatedMemberGroup/Id',        'AssociatedVisitorGroup/Id',
+							'AssociatedOwnerGroup/OwnerTitle','AssociatedMemberGroup/OwnerTitle','AssociatedVisitorGroup/OwnerTitle',
+							'AssociatedOwnerGroup/Title',     'AssociatedMemberGroup/Title',     'AssociatedVisitorGroup/Title'
+						],
+						cache: false,
+						metadata: false
+					}),
+					sprLib.rest({
+						url: _urlBase+'_api/site',
+						queryCols: ['Owner/Email','Owner/LoginName','Owner/Title','Owner/IsSiteAdmin'],
+						cache: false,
+						metadata: false
+					})
+				])
+				.then(function(arrAllArrays){
+					// A: Combine results into one object
+					var objSite = arrAllArrays[0][0];
+					objSite.Owner = arrAllArrays[1][0].Owner;
+
+					// B: Remove junky metadata
+					delete objSite.Owner.__metadata;
+					delete objSite.AssociatedMemberGroup.__metadata;
+					delete objSite.AssociatedOwnerGroup.__metadata;
+					delete objSite.AssociatedVisitorGroup.__metadata;
+
+					// C: Remove columns that may not be present
+					// `LastItemUserModifiedDate` exists in SP2016/SharePoint-Online, but not in SP2013 on-prem
+					if ( objSite.hasOwnProperty('LastItemUserModifiedDate') && !objSite.LastItemUserModifiedDate ) delete objSite.LastItemUserModifiedDate;
+
+					// D: Resolve results (NOTE: if site was not found, an empty object is the correct result)
+					resolve( objSite );
+				})
+				.catch(function(strErr){
+					reject( strErr );
+				});
+			});
+		}
+
+		/**
+		* Get Site Lists/Libraries (name and about 12 other fields)
+		*
+		* @example
+		* sprLib.site().lists().then( function(arr){ console.table(arr) } );
+		*
+		* @return {Promise} - Return `Promise` containing Site Lists/Libraries
+		*/
+		_newSite.lists = function() {
+			return new Promise(function(resolve, reject) {
+				sprLib.rest({
+					url: _urlBase+'_api/web/lists',
+					queryCols: [
+						'Id','Title','Description','ItemCount','BaseType','BaseTemplate','Hidden','ImageUrl','ParentWebUrl','RootFolder/ServerRelativeUrl'
+					],
+					metadata: false
+				})
+				.then(function(arrData){
+					// A: Modify some values
+					arrData.forEach(function(item,idx){
+						// A: Flatten/Elevate `ServerRelativeUrl` value
+						item.ServerRelativeUrl = (item.RootFolder && item.RootFolder.ServerRelativeUrl ? item.RootFolder.ServerRelativeUrl : null);
+						if ( item.RootFolder ) delete item.RootFolder;
+
+						// B: Decode type
+						item.BaseType = ENUM_BASETYPES[item.BaseType] || item.BaseType;
+					});
+
+					// B: Resolve results (NOTE: empty array is the correct default result)
+					resolve( arrData || [] );
+				})
+				.catch(function(strErr){
+					reject( strErr );
+				});
+			});
+		}
+
+		/**
+		* Get Site base permissions
+		* Returns array of objects with `Member` and `Roles` properties
+		*
+		* @example - sprLib.site().perms().then( arr => console.table(arr) );
+		* //.--------------------------------------------------------------------------------------------------------------------------------------------------.
+		* //|                                    Member                                    |                               Roles                               |
+		* //|------------------------------------------------------------------------------|-------------------------------------------------------------------|
+		* //| {"Title":"Brent Ely",   "PrincipalType":"User",            "PrincipalId":9}  | [{"Hidden":false,"Name":"Design"},{"Hidden":false,"Name":"Edit"}] |
+		* //| {"Title":"Dev Owners",  "PrincipalType":"SharePoint Group","PrincipalId":14} | [{"Hidden":false,"Name":"Full Control"}]                          |
+		* //| {"Title":"Dev Members", "PrincipalType":"SharePoint Group","PrincipalId":15} | [{"Hidden":false,"Name":"Edit"}]                                  |
+		* //| {"Title":"Dev Visitors","PrincipalType":"SharePoint Group","PrincipalId":16} | [{"Hidden":false,"Name":"Read"}]                                  |
+		* //'--------------------------------------------------------------------------------------------------------------------------------------------------'
+		*
+		* @return {Promise} - return `Promise` containing Site Permission object { Member:{}, Roles:[] }
+		*/
+		_newSite.perms = function() {
+			return new Promise(function(resolve, reject) {
+				sprLib.rest({
+					url: _urlBase+'_api/web/roleAssignments',
+					queryCols: ['PrincipalId','Member/PrincipalType','Member/Title','RoleDefinitionBindings/Name','RoleDefinitionBindings/Hidden'],
+					metadata: false
+				})
+				.then(function(arrData){
+					// STEP 1: Transform: Results s/b 2 keys with props inside each
+					arrData.forEach(function(objItem,idx){
+						// A: "Rename" the `RoleDefinitionBindings` key to be user-friendly
+						Object.defineProperty(objItem, 'Roles', Object.getOwnPropertyDescriptor(objItem, 'RoleDefinitionBindings'));
+						delete objItem.RoleDefinitionBindings;
+
+						// B: Move `PrincipalId` inside {Member}
+						objItem.Member.PrincipalId = objItem.PrincipalId;
+						delete objItem.PrincipalId;
+
+						// C: Decode PrincipalType into text
+						objItem.Member.PrincipalType = ENUM_PRINCIPALTYPES[objItem.Member.PrincipalType] || objItem.Member.PrincipalType;
+					});
+
+					// TODO?: OPTION: "Show Group Members", then do lookups below, otherwise, just show users/group names
+					// TODO?: use PrincipalType to find groups and query for thier users, then the full picture is done!
+					//.then(arrOwnerId => { return sprLib.rest({ url:site.UrlAbs+'/_api/web/SiteGroups/GetById('+ arrOwnerId[0].Id +')/Users', queryCols:['Title','Email'] }) })
+					//.then(arrUsers   => arrUsers.forEach((user,idx) => site.OwnersGroupUsers += ('<div class="itemBox">'+ user.Title +'<span style="display:none">; </span></div>') ))
+
+					// STEP 2: Resolve results (NOTE: empty array is the correct default result)
+					resolve( arrData || [] );
+				})
+				.catch(function(strErr){
+					reject( strErr );
+				});
+			});
+		}
+
+		/**
+		* Get SiteCollection Roles
+		*
+		* @return {Promise} - return `Promise` containing Roles
+		*/
+		_newSite.roles = function() {
+			return new Promise(function(resolve, reject) {
+				sprLib.rest({
+					url: _urlBase+'_api/web/roleDefinitions',
+					queryCols: ['Id','Name','Description','RoleTypeKind','Hidden'],
+					metadata: false
+				})
+				.then(function(arrData){
+					// A: Resolve results (NOTE: empty array is the correct default result)
+					resolve( arrData || [] );
+				})
+				.catch(function(strErr){
+					reject( strErr );
+				});
+			});
+		}
+
+		/**
+		* Get Subsites
+		*
+		* @return {Promise} - return `Promise` containing Subsites
+		*/
+		_newSite.subsites = function() {
+			return new Promise(function(resolve, reject) {
+				sprLib.rest({
+					url: _urlBase+'_api/web/webs',
+					queryCols: {
+						Id:				{ dataName:'Id'						,dispName:'Id'					},
+						Name:			{ dataName:'Title'					,dispName:'Subsite Name'		},
+						UrlAbs:			{ dataName:'Url'					,dispName:'Absolute URL'		},
+						UrlRel:			{ dataName:'ServerRelativeUrl'      ,dispName:'Relative URL'		},
+						Created:		{ dataName:'Created'				,dispName:'Date Created'		},
+						Modified:		{ dataName:'LastItemModifiedDate'	,dispName:'Date Last Modified'	},
+						Language:		{ dataName:'Language'				,dispName:'Language'			},
+						SiteLogoUrl:	{ dataName:'SiteLogoUrl'			,dispName:'Site Logo URL'		}
+					},
+					metadata: false
+				})
+				.then(function(arrData){
+					// A: Resolve results (NOTE: empty array is the correct default result)
+					resolve( arrData || [] );
+				})
+				.catch(function(strErr){
+					reject( strErr );
+				});
 			});
 		}
 
@@ -3128,36 +3251,39 @@
 			});
 		}
 
-		// TODO: FUTURE: contentTypes & Features
-		/*
-			_newSite.contentTypes = function() {
-				// ContentTypes: https://contoso.sharepoint.com/sites/dev/_api/web/ContentTypes
-			}
-			_newSite.features = function() {
-				// Features: https://contoso.sharepoint.com/sites/dev/_api/site/Features
-			}
-		*/
+		// FUTURE FEATURES:
+		{
+			// FUTURE: contentTypes & Features
+			/*
+				_newSite.contentTypes = function() {
+					// ContentTypes: https://contoso.sharepoint.com/sites/dev/_api/web/ContentTypes
+				}
+				_newSite.features = function() {
+					// Features: https://contoso.sharepoint.com/sites/dev/_api/site/Features
+				}
+			*/
 
-		// TODO: FUTURE: Usage
-		/*
-			FYI:
-			/sites/dev/_api/site/Usage
-			/sites/dev/sandbox/_api/site/Usage
-			^^^ same result (Storage is whole site collection - not individual webs!)
+			// FUTURE: Usage
+			/*
+				FYI:
+				/sites/dev/_api/site/Usage
+				/sites/dev/sandbox/_api/site/Usage
+				^^^ same result (Storage is whole site collection - not individual webs!)
 
-			sprLib.rest({
-				url: '_api/site/usage',
-				queryCols: ['Usage/Storage','Usage/StoragePercentageUsed']
-			})
-			<d:Usage xmlns:d="http://schemas.microsoft.com/ado/2007/08/dataservices" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" xmlns:georss="http://www.georss.org/georss" xmlns:gml="http://www.opengis.net/gml" m:type="SP.UsageInfo">
+				sprLib.rest({
+					url: '_api/site/usage',
+					queryCols: ['Usage/Storage','Usage/StoragePercentageUsed']
+				})
+				<d:Usage xmlns:d="http://schemas.microsoft.com/ado/2007/08/dataservices" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" xmlns:georss="http://www.georss.org/georss" xmlns:gml="http://www.opengis.net/gml" m:type="SP.UsageInfo">
 				<d:Bandwidth m:type="Edm.Int64">0</d:Bandwidth>
 				<d:DiscussionStorage m:type="Edm.Int64">0</d:DiscussionStorage>
 				<d:Hits m:type="Edm.Int64">0</d:Hits>
 				<d:Storage m:type="Edm.Int64">512050423</d:Storage>
 				<d:StoragePercentageUsed m:type="Edm.Double">1.8628285870363472E-05</d:StoragePercentageUsed>
 				<d:Visits m:type="Edm.Int64">0</d:Visits>
-			</d:Usage>
-		*/
+				</d:Usage>
+			*/
+		}
 
 		// LAST: Return this List to enable chaining
 		return _newSite;
