@@ -2,7 +2,7 @@
  * NAME: qunit-test.js
  * DESC: tests for qunit-test.html (coded against my personal O365 Dev Site - YMMV)
  * AUTH: https://github.com/gitbrent/
- * DATE: 20190116
+ * DATE: 20190127
  *
  * HOWTO: Generate text tables for README etc.:
  * sprLib.list('Employees').items(['Id', 'Name', 'Badge_x0020_Number']).then(function(arrData){ console.log(getAsciiTableStr(arrData)) });
@@ -20,6 +20,7 @@ const SITEURL2  = 'sandbox/child1';
 const SITEURL3  = '/sites/dev/sandbox/';
 const FOLDPERMUNQ = '/sites/dev/Shared Documents/BreakPerms';
 //
+const TEST_GROUP_NAME = 'QUNIT TEST GROUP';
 const ARR_NAMES_FIRST = ['Jack','Mark','CutiePie','Steve','Barry','Clark','Diana','Star','Luke','Captain'];
 const ARR_NAMES_LAST  = ['Septiceye','Iplier','Martzia','Rodgers','Allen','Kent','Prince','Lord','Skywalker','Marvel'];
 //
@@ -1625,84 +1626,60 @@ QUnit.module( "REST - Methods", function(){
 QUnit.module( "SITE - Methods", function(){
 	var arrTestUrls = [ null, SITEURL1, SITEURL2 ];
 
-	// DESC: info()
-	QUnit.test("sprLib.site().info() - using `arrTestUrls`", function(assert){
-		arrTestUrls.forEach((ARG_SITE,idx)=>{
-			var done = assert.async();
-			// TEST:
-			sprLib.site(ARG_SITE).info()
-			.then(function(objSite){
-				assert.ok( Object.keys(objSite).length == 15, "Object.keys(objSite).length == 15: "+ Object.keys(objSite).length );
-				assert.ok( (objSite.Id),    "objSite.Id    exists: '"+ objSite.Id    +"'");
-				assert.ok( (objSite.Title), "objSite.Title exists: '"+ objSite.Title +"'");
-				assert.ok( objSite.AssociatedOwnerGroup.Id && objSite.AssociatedOwnerGroup.Title && objSite.AssociatedOwnerGroup.OwnerTitle, "objSite.AssociatedOwnerGroup has 3 props: "+ JSON.stringify(objSite.AssociatedOwnerGroup) );
-				assert.ok( objSite.AssociatedMemberGroup.Id && objSite.AssociatedMemberGroup.Title && objSite.AssociatedMemberGroup.OwnerTitle, "objSite.AssociatedMemberGroup has 3 props: "+ JSON.stringify(objSite.AssociatedMemberGroup) );
-				assert.ok( objSite.AssociatedVisitorGroup.Id && objSite.AssociatedVisitorGroup.Title && objSite.AssociatedVisitorGroup.OwnerTitle, "objSite.AssociatedVisitorGroup has 3 props: "+ JSON.stringify(objSite.AssociatedVisitorGroup) );
-				assert.ok( objSite.Owner.LoginName && objSite.Owner.Title && objSite.Owner.Email && objSite.Owner.IsSiteAdmin, "objSite.Owner has 4 props: "+ JSON.stringify(objSite.Owner,' ',4) );
-				assert.ok( getAsciiTableStr(objSite), `RESULTS:\n${getAsciiTableStr(objSite)}` );
-				assert.ok( true, `\n************************************************************\n`);
-				done();
-			})
-			.catch(function(err){
-				assert.ok( (false), err );
-				done();
-			});
-		});
-	});
+	// DESC: group()
+	QUnit.test("sprLib.site().group().create() and `delete()`", function(assert){
+		var done = assert.async();
 
-	// DESC: lists()
-	QUnit.test("sprLib.site().lists() - using both `()` and `(SITEURL1)`", function(assert){
-		arrTestUrls.forEach((ARG_SITE,idx)=>{
-			var done = assert.async();
-			// TEST:
-			sprLib.site(ARG_SITE).lists()
-			.then(function(arrResults){
-				var objItem = arrResults[0];
-				//
-				assert.ok( Object.keys(objItem).length == 10, "Object.keys(objItem).length == 10: "+ Object.keys(objItem).length );
-				assert.ok( (objItem.Title != null),     "objItem.Title exists..........: '"+ objItem.Title +"'");
-				assert.ok( (objItem.Id    != null),     "objItem.Id    exists..........: '"+ objItem.Id    +"'");
-				assert.ok( gRegexGUID.test(objItem.Id), "gRegexGUID.test(objItem.Id)...: '"+ objItem.Id    +"'");
-				assert.ok( !isNaN(objItem.ItemCount),   "objItem.ItemCount is a Number.: "+ objItem.ItemCount +"");
-				assert.ok( (objItem.ImageUrl          && objItem.ImageUrl.indexOf('/') == 0),          "objItem.ImageUrl          starts with '/': '"+ objItem.ImageUrl +"'");
-				assert.ok( (objItem.ParentWebUrl      && objItem.ParentWebUrl.indexOf('/') == 0),      "objItem.ParentWebUrl      starts with '/': '"+ objItem.ParentWebUrl +"'");
-				assert.ok( (objItem.ServerRelativeUrl && objItem.ServerRelativeUrl.indexOf('/') == 0), "objItem.ServerRelativeUrl starts with '/': '"+ objItem.ServerRelativeUrl +"'");
-				assert.ok( getAsciiTableStr(objItem), `RESULTS:\n${getAsciiTableStr(objItem)}` );
-				assert.ok( getAsciiTableStr(arrResults), `RESULTS:\n${getAsciiTableStr(arrResults)}` );
-				//
-				assert.ok( true, `\n************************************************************\n`);
-				done();
-			})
-			.catch(function(err){
-				assert.ok( (false), err );
-				done();
-			});
-		});
-	});
+		// CREATE GROUP
+		sprLib.site().groups()
+		.then((arrCurrGroups)=>{
+			var arrCheck = arrCurrGroups.filter((grp)=>{ return grp.Title == TEST_GROUP_NAME });
 
-	// DESC: perms()
-	QUnit.test("sprLib.site().perms() - using both `()` and `(SITEURL1)`", function(assert){
-		arrTestUrls.forEach((ARG_SITE,idx)=>{
-			var done = assert.async();
-			// TEST:
-			sprLib.site(ARG_SITE).perms()
-			.then(function(arrResults){
-				var objItem = arrResults[0];
-				//
-				assert.ok( Object.keys(objItem).length == 2, "Object.keys(objItem).length == 2: "+ Object.keys(objItem).length );
-				assert.ok( objItem.Member, "objItem.Member exists: '"+ JSON.stringify(objItem.Member) +"'");
-				assert.ok( objItem.Member.PrincipalId && objItem.Member.PrincipalType && objItem.Member.Title, "objItem.Member has 3 props: "+ JSON.stringify(objItem.Member) );
-				assert.ok( objItem.Roles && Array.isArray(objItem.Roles), "objItem.Roles exists and is an array: '"+ JSON.stringify(objItem.Roles) +"'");
-				assert.ok( Object.keys(objItem.Roles[0]).length == 2, "Object.keys(objItem.Roles[0]).length == 2: "+ JSON.stringify(objItem.Roles[0]) );
-				assert.ok( getAsciiTableStr(objItem), `RESULTS:\n${getAsciiTableStr(objItem)}` );
-				//
-				assert.ok( true, `\n************************************************************\n`);
-				done();
-			})
-			.catch(function(err){
-				assert.ok( (false), err );
-				done();
-			});
+			// FIRST: Remove test group if left over found
+			if ( arrCheck && arrCheck.length > 0 ) {
+				assert.ok( true, `NOTE: Test group found at start of test - removing it now\n`);
+				return sprLib.site().group({ id:arrCheck[0].Id }).delete();
+			}
+		})
+		.then((cleanUpDone)=>{
+			return sprLib.site().groups();
+		})
+		.then((arrCurrGroups)=>{
+			var arrCheck = arrCurrGroups.filter((grp)=>{ return grp.Title == TEST_GROUP_NAME });
+
+			assert.ok( !arrCheck || arrCheck.length == 0, "TEST_GROUP_NAME does not exist yet: "+arrCheck.length );
+
+			return sprLib.site().group().create(
+				{ 'Title':TEST_GROUP_NAME, 'Description':'qunit test for '+ new Date().toLocaleDateString() }
+			);
+		})
+		.then(function(newGroupCreated){
+			return sprLib.site().groups();
+		})
+		.then(function(arrCurrGroups){
+			var arrCheck = arrCurrGroups.filter((grp)=>{ return grp.Title == TEST_GROUP_NAME });
+			//
+			assert.ok( arrCheck && arrCheck.length == 1, "TEST_GROUP_NAME exists. arrCheck = "+arrCheck.join(',') );
+			assert.ok( getAsciiTableStr(arrCheck), `RESULTS:\n${getAsciiTableStr(arrCheck)}` );
+			//
+			assert.ok( true, `\nEND TEST CREATE: ************************************************************\n`);
+
+			return sprLib.site().group({ id:arrCheck[0].Id }).delete();
+		})
+		.then(function(newGroupDeleted){
+			return sprLib.site().groups();
+		})
+		.then(function(arrCurrGroups){
+			var arrCheck = arrCurrGroups.filter((grp)=>{ return grp.Title == TEST_GROUP_NAME });
+			//
+			assert.ok( !arrCheck || arrCheck.length == 0, "arrCheck: TEST_GROUP_NAME deleted! arrCheck.length="+arrCheck.length );
+			//
+			assert.ok( true, `\nEND TEST DELETE: ************************************************************\n`);
+			done();
+		})
+		.catch(function(err){
+			assert.ok( (false), err );
+			done();
 		});
 	});
 
@@ -1779,6 +1756,87 @@ QUnit.module( "SITE - Methods", function(){
 				assert.ok( getAsciiTableStr(arrGroups), `RESULTS:\n${getAsciiTableStr(arrGroups)}` );
 				//
 				assert.ok( true, `\nEND TEST 4: ************************************************************\n`);
+				done();
+			})
+			.catch(function(err){
+				assert.ok( (false), err );
+				done();
+			});
+		});
+	});
+
+	// DESC: info()
+	QUnit.test("sprLib.site().info() - using `arrTestUrls`", function(assert){
+		arrTestUrls.forEach((ARG_SITE,idx)=>{
+			var done = assert.async();
+			// TEST:
+			sprLib.site(ARG_SITE).info()
+			.then(function(objSite){
+				assert.ok( Object.keys(objSite).length == 15, "Object.keys(objSite).length == 15: "+ Object.keys(objSite).length );
+				assert.ok( (objSite.Id),    "objSite.Id    exists: '"+ objSite.Id    +"'");
+				assert.ok( (objSite.Title), "objSite.Title exists: '"+ objSite.Title +"'");
+				assert.ok( objSite.AssociatedOwnerGroup.Id && objSite.AssociatedOwnerGroup.Title && objSite.AssociatedOwnerGroup.OwnerTitle, "objSite.AssociatedOwnerGroup has 3 props: "+ JSON.stringify(objSite.AssociatedOwnerGroup) );
+				assert.ok( objSite.AssociatedMemberGroup.Id && objSite.AssociatedMemberGroup.Title && objSite.AssociatedMemberGroup.OwnerTitle, "objSite.AssociatedMemberGroup has 3 props: "+ JSON.stringify(objSite.AssociatedMemberGroup) );
+				assert.ok( objSite.AssociatedVisitorGroup.Id && objSite.AssociatedVisitorGroup.Title && objSite.AssociatedVisitorGroup.OwnerTitle, "objSite.AssociatedVisitorGroup has 3 props: "+ JSON.stringify(objSite.AssociatedVisitorGroup) );
+				assert.ok( objSite.Owner.LoginName && objSite.Owner.Title && objSite.Owner.Email && objSite.Owner.IsSiteAdmin, "objSite.Owner has 4 props: "+ JSON.stringify(objSite.Owner,' ',4) );
+				assert.ok( getAsciiTableStr(objSite), `RESULTS:\n${getAsciiTableStr(objSite)}` );
+				assert.ok( true, `\n************************************************************\n`);
+				done();
+			})
+			.catch(function(err){
+				assert.ok( (false), err );
+				done();
+			});
+		});
+	});
+
+	// DESC: lists()
+	QUnit.test("sprLib.site().lists() - using both `()` and `(SITEURL1)`", function(assert){
+		arrTestUrls.forEach((ARG_SITE,idx)=>{
+			var done = assert.async();
+			// TEST:
+			sprLib.site(ARG_SITE).lists()
+			.then(function(arrResults){
+				var objItem = arrResults[0];
+				//
+				assert.ok( Object.keys(objItem).length == 10, "Object.keys(objItem).length == 10: "+ Object.keys(objItem).length );
+				assert.ok( (objItem.Title != null),     "objItem.Title exists..........: '"+ objItem.Title +"'");
+				assert.ok( (objItem.Id    != null),     "objItem.Id    exists..........: '"+ objItem.Id    +"'");
+				assert.ok( gRegexGUID.test(objItem.Id), "gRegexGUID.test(objItem.Id)...: '"+ objItem.Id    +"'");
+				assert.ok( !isNaN(objItem.ItemCount),   "objItem.ItemCount is a Number.: "+ objItem.ItemCount +"");
+				assert.ok( (objItem.ImageUrl          && objItem.ImageUrl.indexOf('/') == 0),          "objItem.ImageUrl          starts with '/': '"+ objItem.ImageUrl +"'");
+				assert.ok( (objItem.ParentWebUrl      && objItem.ParentWebUrl.indexOf('/') == 0),      "objItem.ParentWebUrl      starts with '/': '"+ objItem.ParentWebUrl +"'");
+				assert.ok( (objItem.ServerRelativeUrl && objItem.ServerRelativeUrl.indexOf('/') == 0), "objItem.ServerRelativeUrl starts with '/': '"+ objItem.ServerRelativeUrl +"'");
+				assert.ok( getAsciiTableStr(objItem), `RESULTS:\n${getAsciiTableStr(objItem)}` );
+				assert.ok( getAsciiTableStr(arrResults), `RESULTS:\n${getAsciiTableStr(arrResults)}` );
+				//
+				assert.ok( true, `\n************************************************************\n`);
+				done();
+			})
+			.catch(function(err){
+				assert.ok( (false), err );
+				done();
+			});
+		});
+	});
+
+	// DESC: perms()
+	QUnit.test("sprLib.site().perms() - using both `()` and `(SITEURL1)`", function(assert){
+		arrTestUrls.forEach((ARG_SITE,idx)=>{
+			var done = assert.async();
+			// TEST:
+			sprLib.site(ARG_SITE).perms()
+			.then(function(arrResults){
+				var objItem = arrResults[0];
+				//
+				assert.ok( Object.keys(objItem).length == 2, "Object.keys(objItem).length == 2: "+ Object.keys(objItem).length );
+				assert.ok( objItem.Member, "objItem.Member exists: '"+ JSON.stringify(objItem.Member) +"'");
+				assert.ok( objItem.Member.PrincipalId && objItem.Member.PrincipalType && objItem.Member.Title, "objItem.Member has 3 props: "+ JSON.stringify(objItem.Member) );
+				assert.ok( objItem.Roles && Array.isArray(objItem.Roles), "objItem.Roles exists and is an array: '"+ JSON.stringify(objItem.Roles) +"'");
+				assert.ok( Object.keys(objItem.Roles[0]).length == 2, "Object.keys(objItem.Roles[0]).length == 2: "+ JSON.stringify(objItem.Roles[0]) );
+				assert.ok( getAsciiTableStr(objItem), `RESULTS:\n${getAsciiTableStr(objItem)}` );
+				//
+				assert.ok( true, `\n************************************************************\n`);
 				done();
 			})
 			.catch(function(err){
