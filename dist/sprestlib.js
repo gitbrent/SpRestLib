@@ -39,7 +39,7 @@
 (function(){
 	// APP VERSION/BUILD
 	var APP_VER = "1.10.0-beta";
-	var APP_BLD = "20190127";
+	var APP_BLD = "20190203";
 	// ENUMERATIONS
 	// REF: [`SP.BaseType`](https://msdn.microsoft.com/en-us/library/office/jj246925.aspx)
 	var ENUM_BASETYPES = {
@@ -3487,7 +3487,7 @@
 					}
 					else {
 						// NOTE: Encode "#" to "%23" or query fails!
-						// NOTE: Per MSDN we can only query with `accountName`
+						// NOTE: Per MSDN: `GetPropertiesFor` only accepts "accountName" as a query field
 						return sprLib.rest({
 							url: _urlProf+"/SP.UserProfiles.PeopleManager/GetPropertiesFor(accountName=@v)?@v='"+userAcctName+"'",
 							metadata: false
@@ -3510,10 +3510,6 @@
 					else if ( arrQueryKeys && arrQueryKeys.length > 1 ) {
 						arrQueryKeys.forEach(function(key){
 							var objProp = arrProfileProps.filter(function(prop){ return prop.Key == key })[0];
-
-							// TODO: Issue open for vvv
-							// https://github.com/gitbrent/SpRestLib/issues/40
-							// NOTE: `arrProfileProps` has top-level props ('AccountName','Email',etc.) and a `UserProfiles` array of additional props - so, we need to search both
 
 							if ( objProp && objProp.Value ) {
 								objProfile[key] = objProp.Value;
