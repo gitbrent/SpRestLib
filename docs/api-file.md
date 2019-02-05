@@ -57,12 +57,14 @@ sprLib.file('SiteAssets/img/sprestlib.png').get()
 ```
 ![Example](/SpRestLib/docs/assets/file-download-example.png)
 
+
+
 ### Delete File
 `sprLib.file("filename").delete()`  
 
 Bypasses Recycle Bin (permanently deletes the file)
 
-Returns: Boolean result
+Returns: True on success
 
 #### Delete File Sample Code
 ```javascript
@@ -72,9 +74,9 @@ sprLib.file('SiteAssets/img/junk.png').delete()
 
 
 ### Recycle File
-`sprLib.file("filename").delete()`  
+`sprLib.file("filename").recycle()`  
 
-Sends file to the site Recycle Bin
+Sends file to the site Recycle Bin (recoverable)
 
 Returns: True on success
 
