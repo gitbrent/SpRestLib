@@ -2,7 +2,7 @@
  * NAME: qunit-test.js
  * DESC: tests for qunit-test.html (coded against my personal O365 Dev Site - YMMV)
  * AUTH: https://github.com/gitbrent/
- * DATE: 20190127
+ * DATE: 20190212
  *
  * HOWTO: Generate text tables for README etc.:
  * sprLib.list('Employees').items(['Id', 'Name', 'Badge_x0020_Number']).then(function(arrData){ console.log(getAsciiTableStr(arrData)) });
@@ -1675,6 +1675,152 @@ QUnit.module( "SITE - Methods", function(){
 			assert.ok( !arrCheck || arrCheck.length == 0, "arrCheck: TEST_GROUP_NAME deleted! arrCheck.length="+arrCheck.length );
 			//
 			assert.ok( true, `\nEND TEST DELETE: ************************************************************\n`);
+			done();
+		})
+		.catch(function(err){
+			assert.ok( (false), err );
+			done();
+		});
+	});
+
+	// DESC: group().addUser()
+	QUnit.test("sprLib.site().group(TEST_GROUP_NAME).addUser() - using `id` and `login`", function(assert){
+		var done = assert.async();
+		var grpId = -1;
+
+		// CREATE GROUP
+		Promise.all([
+			sprLib.user().info(),
+			sprLib.site().groups(),
+		])
+		.then((arrResults)=>{
+			gObjCurrUser = arrResults[0];
+			var arrCurrGroups = arrResults[1];
+			var arrCheck = arrCurrGroups.filter((grp)=>{ return grp.Title == TEST_GROUP_NAME })[0];
+
+			// FIRST: Remove test group if left over found
+			if ( !arrCheck ) {
+				assert.ok( true, `NOTE: Test group not found at start of test - creating it now\n`);
+				return sprLib.site().group().create(
+					{ 'Title':TEST_GROUP_NAME, 'Description':'qunit test for '+ new Date().toLocaleDateString() }
+				);
+			}
+		})
+		.then(function(){
+			return sprLib.site().groups({ title:TEST_GROUP_NAME });
+		})
+		.then(function(arrGroups){
+			grpId = arrGroups[0].Id
+			// NOTE: This wont fail - if the users doesnt exist, its fine
+			return sprLib.site().group({ id:grpId }).removeUser({ login:gObjCurrUser.LoginName });
+		})
+		.then(function(){
+			return sprLib.site().groups({ title:TEST_GROUP_NAME });
+		})
+		.then(function(arrGroups){
+			assert.ok( arrGroups && arrGroups.length == 1, "arrGroups[0].Title = "+ arrGroups[0].Title );
+			assert.ok( arrGroups && arrGroups[0].Users.length == 0, "arrGroups[0].Users.length == 0 -> "+ arrGroups[0].Users.length );
+			assert.ok( getAsciiTableStr(arrGroups), `RESULTS:\n${getAsciiTableStr(arrGroups)}` );
+
+			// TEST: Add new user to Group
+			return sprLib.site().group({ id:grpId }).addUser({ id:gObjCurrUser.Id });
+		})
+		.then(function(objGrpUser){
+			assert.ok( objGrpUser && objGrpUser.id == gObjCurrUser.Id, "objGrpUser.id == gObjCurrUser.Id -> "+ objGrpUser.id +" == "+ gObjCurrUser.Id );
+			assert.ok( getAsciiTableStr(objGrpUser), `RESULTS:\n${getAsciiTableStr(objGrpUser)}` );
+			assert.ok( true, `\nEND TEST "id": ************************************************************\n`);
+
+			// Clean-up
+			return sprLib.site().group({ id:grpId }).removeUser({ login:gObjCurrUser.LoginName });
+		})
+		.then(function(){
+			// TEST: Add new user to Group
+			return sprLib.site().group({ id:grpId }).addUser({ login:gObjCurrUser.LoginName });
+		})
+		.then(function(objGrpUser){
+			assert.ok( objGrpUser && objGrpUser.id == gObjCurrUser.Id, "objGrpUser.id == gObjCurrUser.Id -> "+ objGrpUser.id +" == "+ gObjCurrUser.Id );
+			assert.ok( getAsciiTableStr(objGrpUser), `RESULTS:\n${getAsciiTableStr(objGrpUser)}` );
+			assert.ok( true, `\nEND TEST "login": ************************************************************\n`);
+		})
+		.then(function(DONE){
+			done();
+		})
+		.catch(function(err){
+			assert.ok( (false), err );
+			done();
+		});
+	});
+
+	// DESC: group().removeUser()
+	QUnit.test("sprLib.site().group(TEST_GROUP_NAME).removeUser() - using `id` and `login`", function(assert){
+		var done = assert.async();
+		var grpId = -1;
+
+		// CREATE GROUP
+		Promise.all([
+			sprLib.user().info(),
+			sprLib.site().groups(),
+		])
+		.then((arrResults)=>{
+			gObjCurrUser = arrResults[0];
+			var arrCurrGroups = arrResults[1];
+			var arrCheck = arrCurrGroups.filter((grp)=>{ return grp.Title == TEST_GROUP_NAME })[0];
+
+			// FIRST: Remove test group if left over found
+			if ( !arrCheck ) {
+				assert.ok( true, `NOTE: Test group not found at start of test - creating it now\n`);
+				return sprLib.site().group().create(
+					{ 'Title':TEST_GROUP_NAME, 'Description':'qunit test for '+ new Date().toLocaleDateString() }
+				);
+			}
+		})
+		.then(function(){
+			return sprLib.site().groups({ title:TEST_GROUP_NAME });
+		})
+		.then(function(arrGroups){
+			grpId = arrGroups[0].Id
+			// NOTE: This wont fail
+			return sprLib.site().group({ id:grpId }).addUser({ login:gObjCurrUser.LoginName });
+		})
+		.then(function(){
+			return sprLib.site().groups({ title:TEST_GROUP_NAME });
+		})
+		.then(function(arrGroups){
+			assert.ok( arrGroups && arrGroups.length == 1, "arrGroups[0].Title = "+ arrGroups[0].Title );
+			assert.ok( arrGroups && arrGroups[0].Users.length == 1, "arrGroups[0].Users.length == 1 -> "+ arrGroups[0].Users.length );
+			assert.ok( getAsciiTableStr(arrGroups), `RESULTS:\n${getAsciiTableStr(arrGroups)}` );
+
+			// TEST: Remove user to Group
+			return sprLib.site().group({ id:grpId }).removeUser({ id:gObjCurrUser.Id });
+		})
+		.then(function(boolResult){
+			assert.ok( boolResult, "boolResult -> "+ boolResult );
+
+			return sprLib.site().groups({ title:TEST_GROUP_NAME });
+		})
+		.then(function(arrGroups){
+			assert.ok( arrGroups && arrGroups[0].Users.length == 0, "arrGroups[0].Users.length == 0 -> "+ arrGroups[0].Users.length );
+			assert.ok( getAsciiTableStr(arrGroups), `RESULTS:\n${getAsciiTableStr(arrGroups)}` );
+			assert.ok( true, `\nEND TEST "id": ************************************************************\n`);
+
+			// Clean-up
+			return sprLib.site().group({ id:grpId }).addUser({ login:gObjCurrUser.LoginName });
+		})
+		.then(function(){
+			// TEST: Remove user to Group
+			return sprLib.site().group({ id:grpId }).removeUser({ login:gObjCurrUser.LoginName });
+		})
+		.then(function(boolResult){
+			assert.ok( boolResult, "boolResult -> "+ boolResult );
+
+			return sprLib.site().groups({ title:TEST_GROUP_NAME });
+		})
+		.then(function(arrGroups){
+			assert.ok( arrGroups && arrGroups[0].Users.length == 0, "arrGroups[0].Users.length == 0 -> "+ arrGroups[0].Users.length );
+			assert.ok( getAsciiTableStr(arrGroups), `RESULTS:\n${getAsciiTableStr(arrGroups)}` );
+			assert.ok( true, `\nEND TEST "login": ************************************************************\n`);
+		})
+		.then(function(DONE){
 			done();
 		})
 		.catch(function(err){
