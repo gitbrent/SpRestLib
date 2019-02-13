@@ -39,7 +39,7 @@
 (function(){
 	// APP VERSION/BUILD
 	var APP_VER = "1.10.0-beta";
-	var APP_BLD = "20190203";
+	var APP_BLD = "20190212";
 	// ENUMERATIONS
 	// REF: [`SP.BaseType`](https://msdn.microsoft.com/en-us/library/office/jj246925.aspx)
 	var ENUM_BASETYPES = {
@@ -368,7 +368,7 @@
 		APP_OPTS.nodeServer = inOpt.server || '';
 	}
 
-	// TODO: Add `baseUrl` to `file()` method
+	// TODO: TARGET-1.11.0: Add `baseUrl` to `file()` method
 
 	// API: FILE
 	/**
@@ -706,7 +706,7 @@
 		return _newFile;
 	}
 
-	// TODO: Add `baseUrl` to `folder()` method
+	// TODO: TARGET-1.11.0: Add `baseUrl` to `folder()` method
 
 	// API: FOLDER
 	/**
@@ -726,6 +726,10 @@
 		var _newFolder = {};
 		var _fullName = "";
 		// TODO: store `listGUID` and `listName` on _newFolder, then check/use them in subsequent ops
+
+		// TODO: TARGET: 1.11.0
+		// Add `baseUrl` to `folder()` method
+		// elevate `urlBase` up here and use in all methods below - most are just "./" now (d'oh)
 
 		// B: Options check/set
 		if ( inOpt && typeof inOpt === 'string' ) {
@@ -759,6 +763,7 @@
 			return new Promise(function(resolve, reject) {
 				// A: Options setup
 				var strFullName = "";
+				// TODO: the logic below could be written better - if we really cant use `baseUrl` unless it begins with "/" or "http", then check above and return error up front
 				var urlBase = ( APP_OPTS.baseUrl.indexOf('http') == 0 || APP_OPTS.baseUrl.indexOf('/') == 0 ? APP_OPTS.baseUrl : ( _spPageContextInfo && _spPageContextInfo.webServerRelativeUrl ? _spPageContextInfo.webServerRelativeUrl : APP_OPTS.baseUrl ) );
 				inOpt = (inOpt ? inOpt : null);
 				if ( !inOpt || typeof inOpt !== 'string' ) {
@@ -2586,7 +2591,7 @@
 							Users: {__deferred:{..}}
 						*/
 
-						// DESIGN: Result is SpRestLib User object
+						// DESIGN: Result is an SP.Group
 						resolve( arrResults && arrResults.length > 0 ? arrResults[0] : {} );
 					})
 					.catch(function(strErr){
@@ -2713,6 +2718,7 @@
 			* @see: https://msdn.microsoft.com/en-us/library/dn531432.aspx#bk_UserCollectionRemoveById
 			* @since 1.10.0
 			* @example: `sprLib.site().group({ id:18 }).removeUser({ id:9 })`
+			* @example: `sprLib.site().group({ id:18 }).removeUser({ login:'brent@microsoft.com' })`
 			* @returns: sprestlib user object `{ id:?, email:?, login:?, title:? }`
 			*/
 			_newSite.group.removeUser = function(inOptSub) {
@@ -2741,6 +2747,7 @@
 					}
 
 					// C: Remove user
+					// NOTE: Calling remove endpoint on a non-existant or prev-removed user produces the same result
 					Promise.resolve()
 					.then(function(){
 						// Per MSDN, the only way to select props is using `AccountName`, so query if not provided
@@ -2764,8 +2771,9 @@
 							});
 						}
 						else if ( inOptSub.login ) {
+							// NOTE: Enocde "#" or SP will error
 							return sprLib.rest({
-								url: _urlBase+"_api/web/SiteGroups("+inOpt.id+")/users/removebyloginname(@v)?@v='"+inOptSub.login+"'",
+								url: _urlBase+"_api/web/SiteGroups("+inOpt.id+")/users/removebyloginname(@v)?@v='"+ inOptSub.login.replace(/#/g,'%23') +"'",
 								type: 'POST',
 								metadata: true
 							});
@@ -2785,7 +2793,7 @@
 
 			// FUTURE FEATURES:
 			{
-				// TODO: Owner changes
+				// FUTURE: group().owner({ login:'1#0f.login.id' })
 				/*
 				return sprLib.rest({
 					url: _urlBase+'_api/web/SiteGroups('+inOpt.id+')/owner',
