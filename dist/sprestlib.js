@@ -39,7 +39,7 @@
 (function(){
 	// APP VERSION/BUILD
 	var APP_VER = "1.10.0-beta";
-	var APP_BLD = "20190212";
+	var APP_BLD = "20190214";
 	// ENUMERATIONS
 	// REF: [`SP.BaseType`](https://msdn.microsoft.com/en-us/library/office/jj246925.aspx)
 	var ENUM_BASETYPES = {
@@ -2542,6 +2542,52 @@
 		* @since 1.10.0
 		*/
 		_newSite.group = function(inOpt) {
+			// METHODS: Group Properties
+
+			/**
+			* Get SP.Group properties
+			*
+			* @see: https://docs.microsoft.com/en-us/previous-versions/office/developer/sharepoint-rest-reference/dn531432%28v%3doffice.15%29#group-resource
+			* @since 1.10.0
+			* @example: `sprLib.site().group({ id:8 }).info()`
+			* @return {Promise} - return `Promise` containing info object
+			*/
+			_newSite.group.info = function() {
+				return new Promise(function(resolve, reject) {
+					sprLib.rest({
+						url: _urlBase+'_api/web/SiteGroups('+inOpt.id+')',
+						type: 'GET',
+						metadata: false
+					})
+					.then(function(arrResults){
+						/* RESULTS:
+						.-------------------------------------------------------------------------------------------------------------------------.
+						|           Prop Name            |                                       Prop Value                                       |
+						|--------------------------------|----------------------------------------------------------------------------------------|
+						| Id                             | 8                                                                                      |
+						| IsHiddenInUI                   | (null/undef)                                                                           |
+						| LoginName                      | Dev Site Members                                                                       |
+						| Title                          | Dev Site Members                                                                       |
+						| PrincipalType                  | 8                                                                                      |
+						| AllowMembersEditMembership     | true                                                                                   |
+						| AllowRequestToJoinLeave        | (null/undef)                                                                           |
+						| AutoAcceptRequestToJoinLeave   | (null/undef)                                                                           |
+						| Description                    | Use this group to grant people contribute permissions to the SharePoint site: Dev Site |
+						| OnlyAllowMembersViewMembership | (null/undef)                                                                           |
+						| OwnerTitle                     | Dev Site Owners                                                                        |
+						| RequestToJoinLeaveEmailSetting | (null/undef)                                                                           |
+						'-------------------------------------------------------------------------------------------------------------------------'
+						*/
+
+						// LAST:
+						resolve( arrResults && arrResults[0] ? arrResults[0] : {} );
+					})
+					.catch(function(strErr){
+						reject( strErr );
+					});
+				});
+			}
+
 			// METHODS: Create/Remove Group
 
 			/**
@@ -2640,7 +2686,7 @@
 			// METHODS: Modify Members
 
 			/**
-			* Add a SP.User to a SP.Group [UserCollection]
+			* Add SP.User to SP.Group [UserCollection]
 			*
 			* @see: https://msdn.microsoft.com/en-us/library/office/dn531432.aspx#bk_UserCollectionRequestExamples
 			* @since 1.10.0
@@ -2713,7 +2759,7 @@
 			}
 
 			/**
-			* Delete a SP.User from a SP.Group [UserCollection]
+			* Remove SP.User from SP.Group [UserCollection]
 			*
 			* @see: https://msdn.microsoft.com/en-us/library/dn531432.aspx#bk_UserCollectionRemoveById
 			* @since 1.10.0
@@ -2804,7 +2850,8 @@
 				});
 				*/
 
-				// FUTURE: group().prop({ desc:'new desc' })
+				// FUTURE: GET: group().prop('Description')
+				// FUTURE: SET: group().prop('Description', 'new description!')
 				/*
 				method: "POST",
 				body: "{ '__metadata':{ 'type': 'SP.Group' }, 'Description':'New description of the group' }",
@@ -2813,6 +2860,7 @@
 					"X-HTTP-Method": "MERGE"
 				},
 				*/
+
 			}
 
 			return _newSite.group;
