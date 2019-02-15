@@ -27,6 +27,7 @@ const ARR_NAMES_LAST  = ['Septiceye','Iplier','Martzia','Rodgers','Allen','Kent'
 const LIST_GUID2 = '23846527-218a-43a2-b5c1-7b55b6feb1a3';
 //
 const gRegexGUID = /^[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}$/i;
+var gTestGroupId = 8;
 var gTestUserId = 9;
 var gObjCurrUser = {};
 
@@ -1625,6 +1626,26 @@ QUnit.module( "REST - Methods", function(){
 
 QUnit.module( "SITE - Methods", function(){
 	var arrTestUrls = [ null, SITEURL1, SITEURL2 ];
+
+	// DESC: group()
+	QUnit.test("sprLib.site().group().info()", function(assert){
+		var done = assert.async();
+
+		sprLib.site().group({ id:gTestGroupId }).info()
+		.then(function(objGroup){
+			assert.ok( Object.keys(objGroup).length >= 12, "Object.keys(objGroup).length >= 12: "+ Object.keys(objGroup).length );
+			assert.ok( (objGroup.Id),    "objGroup.Id    exists: '"+ objGroup.Id    +"'");
+			assert.ok( (objGroup.Title), "objGroup.Title exists: '"+ objGroup.Title +"'");
+			assert.ok( getAsciiTableStr(objGroup), `RESULTS:\n${getAsciiTableStr([objGroup])}` );
+
+			// DONE
+			done();
+		})
+		.catch(function(err){
+			assert.ok( (false), err );
+			done();
+		});
+	});
 
 	// DESC: group()
 	QUnit.test("sprLib.site().group().create() and `delete()`", function(assert){
