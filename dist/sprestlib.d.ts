@@ -1,4 +1,4 @@
-// Type definitions for sprestlib 1.9.0
+// Type definitions for sprestlib 1.10.0
 // Project: https://gitbrent.github.io/SpRestLib/
 // Definitions by: Brent Ely <https://github.com/gitbrent/>
 //                 Jandos <https://github.com/Wireliner>
@@ -113,13 +113,24 @@ declare namespace sprLib {
   }
   function rest(options: RestOptions): Promise<object[]>;
 
-  interface ISite {
+  interface SiteGroupOptions {
+    id: number;
+  }
+  interface IGroup {
     info(): Promise<object>;
-    lists(): Promise<object[]>;
-    subsites(): Promise<object[]>;
-    perms(): Promise<object[]>;
-    roles(): Promise<object[]>;
+    create(): Promise<object>;
+    delete(): Promise<boolean>;
+	addUser(): Promise<object>;
+    removeUser(): Promise<boolean>;
+  }
+  interface ISite {
+    group(options: SiteGroupOptions): IGroup;
     groups(): Promise<object[]>;
+	info(): Promise<object>;
+	lists(): Promise<object[]>;
+	perms(): Promise<object[]>;
+	roles(): Promise<object[]>;
+	subsites(): Promise<object[]>;
     users(): Promise<object[]>;
   }
   function site(siteUrl?: string): ISite;
@@ -131,7 +142,6 @@ declare namespace sprLib {
     login?: string;
     title?: string;
   }
-
   interface IUser {
     info(): Promise<object>;
     groups(): Promise<object[]>;
