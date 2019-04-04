@@ -246,8 +246,8 @@
 		* @public
 		* @param {object} inOpt - one or more auth options to set
 		* @returns {object} Return value of a few APP_AUTH
-		* @example - get options - `sprLib.auth();`
-		* @example - set baseUrl - `sprLib.auth({ baseUrl:'/sites/devtest' });`
+		* @example - get options - `sprLib.auth()`
+		* @example - set baseUrl - `sprLib.auth({ pageDigest:'ABC123' })`
 		* @since 1.10.0
 		*/
 
@@ -2554,6 +2554,15 @@
 			*/
 			_newSite.group.info = function() {
 				return new Promise(function(resolve, reject) {
+					// A: Options check
+					if ( inOpt && Object.keys(inOpt).length > 0 && !inOpt.hasOwnProperty('id') ) {
+						console.warn('Warning..: Check your options! Available `site().group()` options are: `id`');
+						console.warn('Result...: Invalid group option: `null` will be returned');
+						reject('MISSING-OPTION');
+						return;
+					}
+
+					// B: Query properties
 					sprLib.rest({
 						url: _urlBase+'_api/web/SiteGroups('+inOpt.id+')',
 						type: 'GET',
